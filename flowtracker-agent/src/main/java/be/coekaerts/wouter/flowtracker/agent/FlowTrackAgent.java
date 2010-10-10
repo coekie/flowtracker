@@ -40,7 +40,7 @@ public class FlowTrackAgent {
 		ClassLoader classLoader = new URLClassLoader(new URL[]{
 //				new URL("file:///home/coekie/.m2/repository/be/coekaerts/wouter/flowtracker/flowtracker-weaver/0.0.1-SNAPSHOT/flowtracker-weaver-0.0.1-SNAPSHOT.jar"),
 				new URL("file://" + getPath("weaver")),
-				new URL("file:///home/coekie/.m2/repository/asm/asm-all/3.2/asm-all-3.2.jar")
+				new URL("file:///home/coekie/.m2/repository/asm/asm-debug-all/3.3/asm-debug-all-3.3.jar")
 		});
 		Class<?> transformerClass = classLoader.loadClass("be.coekaerts.wouter.flowtracker.weaver.AsmTransformer");
 		return (ClassFileTransformer) transformerClass.newInstance();

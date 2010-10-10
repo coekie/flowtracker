@@ -7,8 +7,8 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import be.coekaerts.wouter.flowtracker.history.ConcatOrigin;
+import be.coekaerts.wouter.flowtracker.history.Origin;
 import be.coekaerts.wouter.flowtracker.history.StringHistory;
-import be.coekaerts.wouter.flowtracker.history.StringOrigin;
 import be.coekaerts.wouter.flowtracker.history.SubstringOrigin;
 
 public class StringTest {
@@ -78,8 +78,8 @@ public class StringTest {
 		Assert.assertEquals(6, barOrigin.getEndIndex());
 	}
 	
-	private <T extends StringOrigin> T getOrigin(String o, Class<? extends T> expectedClazz) {
-		StringOrigin origin = StringHistory.getHistory(o).getOrigin();
+	private <T extends Origin> T getOrigin(String o, Class<? extends T> expectedClazz) {
+		Origin origin = StringHistory.getHistory(o).getOrigin();
 		Assert.assertNotNull(origin);
 		Assert.assertTrue(expectedClazz.isInstance(origin));
 		return expectedClazz.cast(origin);

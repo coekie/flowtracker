@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.history;
 
-public class SubstringOrigin implements StringOrigin {
+public class SubstringOrigin implements Origin {
 	private final String source;
 	private final int beginIndex;
 	private final int endIndex;

@@ -1,5 +1,5 @@
 package be.coekaerts.wouter.flowtracker.history;
 
-public interface StringOrigin {
+public interface Origin {
 
 }

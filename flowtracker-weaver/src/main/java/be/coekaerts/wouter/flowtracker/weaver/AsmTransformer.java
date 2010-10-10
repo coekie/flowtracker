@@ -3,13 +3,29 @@ package be.coekaerts.wouter.flowtracker.weaver;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Type;
+
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
 
 public class AsmTransformer implements ClassFileTransformer {
+	private final Map<String, ClassHookSpec> specs = new HashMap<String, ClassHookSpec>();
+//	private final ClassHookSpec stringSpec;	
 	
 	public AsmTransformer() {
+		ClassHookSpec stringSpec = new ClassHookSpec(Type.getType("Ljava/lang/String;"), StringHook.class);
+		stringSpec.addMethodHookSpec("String concat(String)", "String afterConcat(String,String,String)",
+				HookSpec.THIS, HookSpec.ARG0);
+		stringSpec.addMethodHookSpec("String substring(int,int)", "String afterSubstring(String,String,int,int)",
+				HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
+		specs.put("java/lang/String", stringSpec);
+		
+		
 	}
 	
 	public byte[] transform(ClassLoader loader, String className,
@@ -22,22 +38,18 @@ public class AsmTransformer implements ClassFileTransformer {
 		}
 		
 		try {
-			if (className.equals("java/lang/String")) {
+			ClassHookSpec spec = specs.get(className);
+			if (spec == null) {
+				return null;
+			} else {
 				ClassReader reader = new ClassReader(classfileBuffer);
 				ClassWriter writer = new ClassWriter(0);
-				StringAdapter adapter = new StringAdapter(writer);
+				ClassVisitor adapter = spec.createClassAdapter(writer);
 				reader.accept(adapter, 0);
 				byte[] result = writer.toByteArray();
 		
-				if (result.length != classfileBuffer.length) { // fast but dirty: assume every change changes the length
-					System.out.println("AsmTransformer: Transformed " + className);
-					return result;
-				} else {
-					System.out.println("AsmTransformer: No changes " + className);
-					return null;
-				}
-			} else {
-				return null;
+				System.out.println("AsmTransformer: Transformed " + className);
+				return result;
 			}
 		} catch (Throwable t) {
 			// TODO better logging

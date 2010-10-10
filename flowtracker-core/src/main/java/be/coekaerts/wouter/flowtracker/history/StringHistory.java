@@ -1,39 +1,24 @@
 package be.coekaerts.wouter.flowtracker.history;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-
-public class StringHistory {
-	private static final Map<String, StringHistory> stringToHistory
-		= new IdentityHashMap<String, StringHistory>();
-	
+public class StringHistory extends History {
 	public static final StringHistory UNKNOWN = new StringHistory(null);
 	
-	private StringOrigin origin;
+	private static final HistoryKeeper<String, StringHistory> KEEPER =
+		new HistoryKeeper<String, StringHistory>(UNKNOWN) {
+		protected StringHistory doCreateHistory(Origin origin) {
+			return new StringHistory(origin);
+		};
+	};
 	
 	public static StringHistory getHistory(String str) {
-		if (stringToHistory.containsKey(str)) {
-			return stringToHistory.get(str);
-		} else {
-			return UNKNOWN;
-		}
+		return KEEPER.getHistory(str);
 	}
 	
-	public static StringHistory createHistory(String str, StringOrigin origin) {
-		if (stringToHistory.containsKey(str)) {
-			throw new IllegalStateException("A history already exists for that String");
-		} else {
-			StringHistory tracker = new StringHistory(origin);
-			stringToHistory.put(str, tracker);
-			return tracker;
-		}
+	public static StringHistory createHistory(String str, Origin origin) {
+		return KEEPER.createHistory(str, origin);
 	}
 	
-	private StringHistory(StringOrigin origin) {
-		this.origin = origin;
-	}
-	
-	public StringOrigin getOrigin() {
-		return origin;
+	private StringHistory(Origin origin) {
+		super(origin);
 	}
 }
