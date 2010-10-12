@@ -17,10 +17,9 @@ public class StringHook {
 		return result;
 	}
 	
-	public static String afterSubstring(String result, String target, int beginIndex, int endIndex) {
+	public static void afterSubstring(String result, String target, int beginIndex, int endIndex) {
 		if (result != target) { // if it's not the whole String
 			StringHistory.createHistory(result, new SubstringOrigin(target, beginIndex, endIndex));
 		}
-		return result;
 	}
 }

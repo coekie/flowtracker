@@ -24,6 +24,7 @@ public class ClassHookSpec {
 			Method method = new Method(name, desc);
 			HookSpec hookSpec = methodHookSpecs.get(method);
 			if (hookSpec != null) {
+				System.out.println("ClassHookSpec: Transforming " + targetClass.getClassName() + "." + name + desc);
 				return hookSpec.createMethodAdapter(mv, access, name, desc);
 			} else {
 				return mv;

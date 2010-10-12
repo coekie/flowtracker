@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.agent;
 
+import java.io.InputStreamReader;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.net.MalformedURLException;
@@ -26,9 +27,10 @@ public class FlowTrackAgent {
 			inst.appendToSystemClassLoaderSearch(aspectJar);
 			
 			inst.addTransformer(createTransformer(), true);
-			inst.retransformClasses(String.class);
 			
-			System.out.println("foo".concat("bar"));
+			// TODO avoid hardcoding of list of classes to retransform here
+			inst.retransformClasses(String.class);
+			inst.retransformClasses(InputStreamReader.class);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -50,7 +52,7 @@ public class FlowTrackAgent {
 		if (agentArgs == null) {
 			throw new RuntimeException("You must provide arguments to the agent");
 		}
-		System.err.println("FlowTrackAgent: agentArgs: " + agentArgs);
+//		System.err.println("FlowTrackAgent: agentArgs: " + agentArgs);
 		for (String arg : agentArgs.split(";")) {
 			String[] keyAndValue = arg.split("=", 2);
 			config.put(keyAndValue[0], keyAndValue[1]);

@@ -53,7 +53,9 @@ public class HookSpec {
 		
 		@Override
 		protected void onMethodExit(int opcode) {
-			if (opcode == ARETURN) {
+			if (opcode != ATHROW) {
+				// TODO only copy result if our hook doesn't override it
+				dup(); // copy result
 				for (HookArgument argument : hookArguments) {
 					argument.load(this);
 				}
