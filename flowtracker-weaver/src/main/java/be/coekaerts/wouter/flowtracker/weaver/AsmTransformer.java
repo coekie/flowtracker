@@ -39,24 +39,29 @@ public class AsmTransformer implements ClassFileTransformer {
 			byte[] classfileBuffer) throws IllegalClassFormatException {
 
 		// don't transform our own classes
-		if (className.startsWith("be/coekaerts/wouter/flowtracker")) {
+		if (className.startsWith("be/coekaerts/wouter/flowtracker")
+				&& ! className.startsWith("be/coekaerts/wouter/flowtracker/test")) {
 			return null;
 		}
 		
 		try {
-			ClassHookSpec spec = specs.get(className);
-			if (spec == null) {
-				return null;
+			ClassAdapterFactory adapterFactory;
+			if (className.equals("be/coekaerts/wouter/flowtracker/test/CharArrayTest")) {
+				adapterFactory = new CharArrayClassTransformer();
+			} else if (specs.containsKey(className)) {
+				adapterFactory = specs.get(className);
 			} else {
-				ClassReader reader = new ClassReader(classfileBuffer);
-				ClassWriter writer = new ClassWriter(0);
-				ClassVisitor adapter = spec.createClassAdapter(writer);
-				reader.accept(adapter, 0);
-				byte[] result = writer.toByteArray();
-		
-				System.out.println("AsmTransformer: Transformed " + className);
-				return result;
+				return null;
 			}
+				
+			ClassReader reader = new ClassReader(classfileBuffer);
+			ClassWriter writer = new ClassWriter(0);
+			ClassVisitor adapter = adapterFactory.createClassAdapter(writer);
+			reader.accept(adapter, 0);
+			byte[] result = writer.toByteArray();
+	
+			System.out.println("AsmTransformer: Transformed " + className);
+			return result;
 		} catch (Throwable t) {
 			// TODO better logging
 			t.printStackTrace(); // make sure the exception isn't silently ignored

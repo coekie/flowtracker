@@ -11,7 +11,7 @@ import org.objectweb.asm.commons.Method;
 
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 
-public class ClassHookSpec {
+public class ClassHookSpec implements ClassAdapterFactory {
 	private class HookClassAdapter extends ClassAdapter {
 		private HookClassAdapter(ClassVisitor cv) {
 			super(cv);
