@@ -16,4 +16,9 @@ public class OriginTracker extends Tracker {
 	public Entry<Integer, TrackPart> getEntryAt(int index) {
 		return null;
 	}
+	
+	@Override
+	public int getEntryCount() {
+		return 0;
+	}
 }

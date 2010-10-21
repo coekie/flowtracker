@@ -9,6 +9,8 @@ public abstract class Tracker {
 	
 	abstract void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex);
 	
+	public abstract int getEntryCount();
+	
 	/**
 	 * Returns the entry in the tracker for the given index.
 	 * 

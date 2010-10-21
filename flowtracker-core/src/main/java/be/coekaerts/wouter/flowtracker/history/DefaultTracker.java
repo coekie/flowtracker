@@ -8,8 +8,6 @@ public class DefaultTracker extends Tracker {
 	private NavigableMap<Integer, TrackPart> map = new TreeMap<Integer, TrackPart>();
 	
 	public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
-		// TODO check if can be merged with entry before it
-		// TODO check if can be merged with entry after it
 		boolean stored = false;
 		
 		// extend the entry right before it, if it matches
@@ -60,5 +58,10 @@ public class DefaultTracker extends Tracker {
 				return floorEntry;
 			}
 		}
+	}
+	
+	@Override
+	public int getEntryCount() {
+		return map.size();
 	}
 }

@@ -28,6 +28,8 @@ public class TrackerTest {
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
 		Assert.assertNotNull(targetTracker);
+		Assert.assertEquals(1, targetTracker.getEntryCount());
+		
 		
 		// check the right entry is at position 5,6 and 7
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
@@ -48,6 +50,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 9, 2, source, 14); // setting 9,10, leaving a gap at 8
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(2, targetTracker.getEntryCount());
 		
 		// entry at 5 is still there
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
@@ -59,6 +62,7 @@ public class TrackerTest {
 		// but not in between and after
 		Assert.assertNull(targetTracker.getEntryAt(8));
 		Assert.assertNull(targetTracker.getEntryAt(11));
+		
 	}
 	
 	/**
@@ -70,6 +74,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 2, 2, source, 8); // setting 2,3, leaving a gap at 4
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(2, targetTracker.getEntryCount());
 		
 		// entry at 5 is still there
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
@@ -81,6 +86,7 @@ public class TrackerTest {
 		// but not in between and before
 		Assert.assertNull(targetTracker.getEntryAt(1));
 		Assert.assertNull(targetTracker.getEntryAt(4));
+		
 	}
 	
 	/**
@@ -92,6 +98,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 8, 2, source, 14); // setting 8,9 to 14,15
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(1, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
 		assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(9));
@@ -106,6 +113,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 8, 2, source, 15); // setting 8,9 to 15,16 (skipping 14) 
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(2, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
 		assertEntryEquals(8, 2, sourceTracker, 15, targetTracker.getEntryAt(9));
@@ -120,6 +128,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 3, 2, source, 9); // setting 3,4 to 9,10
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(1, targetTracker.getEntryCount());
 		
 		assertEntryEquals(3, 5, sourceTracker, 11, targetTracker.getEntryAt(3));
 		assertEntryEquals(3, 5, sourceTracker, 11, targetTracker.getEntryAt(7));
@@ -134,6 +143,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 3, 2, source, 8); // setting 3,4 to 8, 9 
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(2, targetTracker.getEntryCount());
 		
 		assertEntryEquals(3, 2, sourceTracker, 8, targetTracker.getEntryAt(3));
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
@@ -148,6 +158,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 8, 2, source2, 14); // setting 8,9 to 14,15
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(2, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
 		assertEntryEquals(8, 2, sourceTracker2, 14, targetTracker.getEntryAt(8));
@@ -164,9 +175,31 @@ public class TrackerTest {
 		Tracker.setSource(target, 8, 2, source, 14); // setting 8,9 to 14,15
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(1, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 7, sourceTracker, 11, targetTracker.getEntryAt(5));
 	}
+	
+	@Test
+	@Ignore("not implemented")
+	public void testOverlapMergeAfter() {
+		Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
+		Tracker.setSource(target, 6, 4, source, 11); // setting 6,7,8,9 to 12,13,14,15
+		
+		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(1, targetTracker.getEntryCount());
+		
+		assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
+	}
+	
+	// TODO testOverlapMergeBefore
+	// TODO testOverlapOutsideMerge
+	// TODO testOverlapInsideMerge
+	
+	// TODO testCutBefore
+	// TODO testCutAfter
+	// TODO testCutInside
+	// TODO testMultiCut
 	
 	private void assertEntryEquals(int expectedEntryIndex, int expectedLength,
 			Tracker expectedTracker, int expectedPartIndex, Entry<Integer, TrackPart> entry) {
