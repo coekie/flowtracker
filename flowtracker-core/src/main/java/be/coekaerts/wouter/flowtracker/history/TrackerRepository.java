@@ -25,6 +25,15 @@ public class TrackerRepository {
 		}
 	}
 	
+	public static ContentTracker getOrCreateContentTracker(Object obj) {
+		ContentTracker tracker = (ContentTracker) getTracker(obj);
+		if (tracker == null) {
+			tracker = new ContentTracker();
+			setTracker(obj, tracker);
+		}
+		return tracker;
+	}
+	
 	public static void setTracker(Object obj, Tracker tracker) {
 		if (obj == null) {
 			throw new NullPointerException("Can't track null");
