@@ -1,8 +1,10 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
@@ -67,43 +69,21 @@ public class CharArrayClassTransformer implements ClassAdapterFactory {
 			
 //			Frame[] frames = analyzer.getFrames();
 			
-			for (Map.Entry<MethodInsnNode, ExtractedCharValue> entry : interpreter.trackedReturnValues.entrySet()) {
-				MethodInsnNode mInsn = entry.getKey();
-				ExtractedCharValue value = entry.getValue();
-				
-				value.setOriginLocals(this.maxLocals);
-				
-				// on the stack:  String target, int index
-				int targetStringLocal = this.maxLocals++;
-				int indexLocal = this.maxLocals++;
-				
-				InsnList toInsert = new InsnList();
-				
-				// we could avoid some local-to-stack copying by dupping
-//				toInsert.add(new InsnNode(Opcodes.DUP2));
-				
-				toInsert.add(new VarInsnNode(Opcodes.ISTORE, indexLocal));
-				toInsert.add(new VarInsnNode(Opcodes.ASTORE, targetStringLocal));
-				
-				toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
-				toInsert.add(new VarInsnNode(Opcodes.ILOAD, indexLocal));
-				
-				instructions.insertBefore(mInsn, toInsert);
+			for (TrackableValue value : interpreter.trackedValues) {
+				value.insertTrackStatements(this);
 			}
 			
-			for (Map.Entry<InsnNode, ExtractedCharValue> entry : interpreter.trackedCharArrayStores.entrySet()) {
+			for (Map.Entry<InsnNode, TrackableValue> entry : interpreter.trackedCharArrayStores.entrySet()) {
 				InsnNode storeInsn = entry.getKey();
-				ExtractedCharValue value = entry.getValue();
+				TrackableValue value = entry.getValue();
 				
 				// on the stack: char[] target, int index, char toStore
 				
 				InsnList toInsert = new InsnList();
 				
 				if (value != null) {
-					int targetStringLocal = value.getOriginLocals();
-					int indexLocal = targetStringLocal + 1;
-					toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
-					toInsert.add(new VarInsnNode(Opcodes.ILOAD, indexLocal));
+					value.loadSourceObject(toInsert);
+					value.loadSourceIndex(toInsert);
 				} else {
 					toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
 					toInsert.add(new InsnNode(Opcodes.ICONST_0));
@@ -118,24 +98,21 @@ public class CharArrayClassTransformer implements ClassAdapterFactory {
 				instructions.remove(storeInsn); // our hook takes care of the storing
 			}
 			
-			
 			this.accept(mv); // send the result to the next MethodVisitor
-			
 		}
 	}
 	
 	private static class CharArrayInterpreter extends BasicInterpreter {
 		/**
-		 * For every method call for which we want to keep track of its return value,
-		 * maps that method call to its return value.
+		 * {@link TrackableValue}s that we actually want to track.
 		 */
-		private final Map<MethodInsnNode, ExtractedCharValue> trackedReturnValues = new IdentityHashMap<MethodInsnNode, ExtractedCharValue>();
+		private final Set<TrackableValue> trackedValues = Collections.newSetFromMap(new IdentityHashMap<TrackableValue, Boolean>());
 		
 		/**
-		 * For every array store in a char[], maps that store instruction to its origin ExtractedCharValue,
+		 * For every array store in a char[], maps that store instruction to its origin CharAtValue,
 		 * or to null if the origin is unknown.
 		 */
-		private final Map<InsnNode, ExtractedCharValue> trackedCharArrayStores = new IdentityHashMap<InsnNode, ExtractedCharValue>();
+		private final Map<InsnNode, TrackableValue> trackedCharArrayStores = new IdentityHashMap<InsnNode, TrackableValue>();
 		
 		@Override
 		public Value newValue(Type type) {
@@ -147,12 +124,13 @@ public class CharArrayClassTransformer implements ClassAdapterFactory {
 			return super.newValue(type);
 		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
 		public Value naryOperation(AbstractInsnNode insn, List values) throws AnalyzerException {
 			if (insn instanceof MethodInsnNode) {
 				MethodInsnNode mInsn = (MethodInsnNode) insn;
 				if ("java/lang/String".equals(mInsn.owner) && "charAt".equals(mInsn.name) && "(I)C".equals(mInsn.desc)) {
-					return new ExtractedCharValue(mInsn);
+					return new CharAtValue(mInsn);
 				}
 			}
 			return super.naryOperation(insn, values);
@@ -169,11 +147,11 @@ public class CharArrayClassTransformer implements ClassAdapterFactory {
 					throw new AnalyzerException(insn, "CASTORE but not in a char array");
 				}
 				
-				ExtractedCharValue charValue;
+				CharAtValue charValue;
 				
-				if (value3 instanceof ExtractedCharValue) { // if we know where the value we are storing came from
-					charValue = (ExtractedCharValue) value3;
-					trackedReturnValues.put(charValue.getmInsn(), charValue);
+				if (value3 instanceof CharAtValue) { // if we know where the value we are storing came from
+					charValue = (CharAtValue) value3;
+					trackedValues.add(charValue);
 				} else {
 					charValue = null; // unknown
 				}
@@ -185,45 +163,84 @@ public class CharArrayClassTransformer implements ClassAdapterFactory {
 	}
 	
 	/**
-	 * A char of which we know where it came from
+	 * A value of which we can track where it came from
 	 */
-	private static class CharValue extends BasicValue {
-		private CharValue() {
-			super(Type.CHAR_TYPE);
+	private static abstract class TrackableValue extends BasicValue {
+		private TrackableValue(Type type) {
+			super(type);
 		}
+		
+		/**
+		 * Insert the statements needed to keep track of the origin of this value.
+		 * 
+		 * @param methodNode method to add the statements in, at the right place
+		 */
+		abstract void insertTrackStatements(MethodNode methodNode);
+		
+		/**
+		 * Add the object from which this value came on top of the stack
+		 * 
+		 * @param toInsert list of instructions where the needed statements are added to at the end
+		 */
+		abstract void loadSourceObject(InsnList toInsert);
+
+		/**
+		 * Add the index from which this value came on top of the stack
+		 * 
+		 * @param toInsert list of instructions where the needed statements are added to at the end
+		 */
+		abstract void loadSourceIndex(InsnList toInsert);
 	}
 	
 	/**
-	 * A char received from a method call (on an object that might be tracked...) 
+	 * A char received from a {@link String#charAt(int)} call. 
 	 */
-	private static class ExtractedCharValue extends CharValue {
+	private static class CharAtValue extends TrackableValue {
+		/** The charAt() call */
 		private final MethodInsnNode mInsn;
 		
-		/**
-		 * Index of the first local used to store the origin of this value.
-		 */
-		private int originLocals;
+		/** Index of the local variable storing the target String */
+		private int targetStringLocal;
+		/** Index of the local variable storing the index */
+		private int indexLocal;
 		
-		private ExtractedCharValue(MethodInsnNode mInsn) {
-			super();
+		private CharAtValue(MethodInsnNode mInsn) {
+			super(Type.CHAR_TYPE);
 			this.mInsn = mInsn;
 			// Note: when it can return something else than char, we get type with Type.getReturnType(mInsn.desc)
 		}
 		
-		MethodInsnNode getmInsn() {
-			return mInsn;
+		@Override
+		void insertTrackStatements(MethodNode methodNode) {
+			// on the stack before the charAt call: String target, int index
+			
+			targetStringLocal = methodNode.maxLocals++;
+			indexLocal = methodNode.maxLocals++;
+			
+			InsnList toInsert = new InsnList();
+			
+			// we could avoid some local-to-stack copying by dupping
+//			toInsert.add(new InsnNode(Opcodes.DUP2));
+			
+			toInsert.add(new VarInsnNode(Opcodes.ISTORE, indexLocal));
+			toInsert.add(new VarInsnNode(Opcodes.ASTORE, targetStringLocal));
+			
+			toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
+			toInsert.add(new VarInsnNode(Opcodes.ILOAD, indexLocal));
+			
+			methodNode.instructions.insertBefore(mInsn, toInsert);
 		}
 		
-		void setOriginLocals(int originLocals) {
-			this.originLocals = originLocals;
+		@Override
+		void loadSourceObject(InsnList toInsert) {
+			toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
 		}
 		
-		public int getOriginLocals() {
-			return originLocals;
+		@Override
+		void loadSourceIndex(InsnList toInsert) {
+			toInsert.add(new VarInsnNode(Opcodes.ILOAD, indexLocal));
 		}
 	}
-	
-	
 	
 	private static final Type CHAR_ARRAY_TYPE = Type.getType("[C"); 
 	
