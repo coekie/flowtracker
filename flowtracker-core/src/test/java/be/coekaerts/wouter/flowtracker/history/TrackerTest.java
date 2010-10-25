@@ -8,6 +8,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import be.coekaerts.wouter.flowtracker.tracker.TrackPart;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+
 public class TrackerTest {
 	private Object source, source2;
 	private Tracker sourceTracker, sourceTracker2;

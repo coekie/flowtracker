@@ -7,7 +7,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import be.coekaerts.wouter.flowtracker.history.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 public class StringTest {
 	@Test

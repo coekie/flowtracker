@@ -12,8 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import be.coekaerts.wouter.flowtracker.history.ContentTracker;
-import be.coekaerts.wouter.flowtracker.history.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 public class InputStreamReaderTest {
 	private final String testFileName = '/' + InputStreamReaderTest.class.getName().replace('.', '/') + ".txt";

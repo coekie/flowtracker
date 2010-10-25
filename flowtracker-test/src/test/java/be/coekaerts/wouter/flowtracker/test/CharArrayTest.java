@@ -7,7 +7,7 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import org.junit.Assert;
 import org.junit.Test;
 
-import be.coekaerts.wouter.flowtracker.history.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 public class CharArrayTest {
 	@Test

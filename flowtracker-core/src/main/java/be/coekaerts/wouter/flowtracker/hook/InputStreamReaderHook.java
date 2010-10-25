@@ -2,8 +2,8 @@ package be.coekaerts.wouter.flowtracker.hook;
 
 import java.io.InputStreamReader;
 
-import be.coekaerts.wouter.flowtracker.history.ContentTracker;
-import be.coekaerts.wouter.flowtracker.history.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 public class InputStreamReaderHook {
 	
