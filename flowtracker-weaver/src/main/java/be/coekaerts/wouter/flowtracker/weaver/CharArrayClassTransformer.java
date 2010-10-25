@@ -20,7 +20,6 @@ import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicInterpreter;
 import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.Value;
 
 public class CharArrayClassTransformer implements ClassAdapterFactory {
@@ -66,13 +65,7 @@ public class CharArrayClassTransformer implements ClassAdapterFactory {
 				throw new RuntimeException(e);
 			}
 			
-			Frame[] frames = analyzer.getFrames();
-			
-			// TODO look at the instructions to instrument in interpreter.tracked*
-			
-//			Iterator j = instructions.iterator();
-//			while (j.hasNext()) {
-//				AbstractInsnNode in = (AbstractInsnNode) j.next()
+//			Frame[] frames = analyzer.getFrames();
 			
 			for (Map.Entry<MethodInsnNode, ExtractedCharValue> entry : interpreter.trackedReturnValues.entrySet()) {
 				MethodInsnNode mInsn = entry.getKey();
