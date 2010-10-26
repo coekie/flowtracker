@@ -1,17 +1,13 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
-import java.util.Collections;
-import java.util.IdentityHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -22,6 +18,7 @@ import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicInterpreter;
 import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.Value;
 
 public class CharArrayClassTransformer implements ClassAdapterFactory {
@@ -67,35 +64,21 @@ public class CharArrayClassTransformer implements ClassAdapterFactory {
 				throw new RuntimeException(e);
 			}
 			
-//			Frame[] frames = analyzer.getFrames();
+			Frame[] frames = analyzer.getFrames();
 			
-			for (TrackableValue value : interpreter.trackedValues) {
-				value.insertTrackStatements(this);
+			List<Store> stores = new ArrayList<Store>();
+			
+			for (int i = 0; i < instructions.size(); i++) {
+				AbstractInsnNode insn = instructions.get(i);
+				Frame frame = frames[i];
+				if (insn.getOpcode() == Opcodes.CASTORE) {
+					stores.add(new CaStore((InsnNode)insn, frame));
+					// TODO shouldn't need to create an instance for that
+				}
 			}
 			
-			for (Map.Entry<InsnNode, TrackableValue> entry : interpreter.trackedCharArrayStores.entrySet()) {
-				InsnNode storeInsn = entry.getKey();
-				TrackableValue value = entry.getValue();
-				
-				// on the stack: char[] target, int index, char toStore
-				
-				InsnList toInsert = new InsnList();
-				
-				if (value != null) {
-					value.loadSourceObject(toInsert);
-					value.loadSourceIndex(toInsert);
-				} else {
-					toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
-					toInsert.add(new InsnNode(Opcodes.ICONST_0));
-				}
-				maxStack += 2;
-				
-				Method hook = Method.getMethod("void setCharWithOrigin(char[],int,char,Object,int)");
-				
-				toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "be/coekaerts/wouter/flowtracker/hook/CharArrayHook", hook.getName(), hook.getDescriptor()));
-				
-				instructions.insert(storeInsn, toInsert);
-				instructions.remove(storeInsn); // our hook takes care of the storing
+			for (Store store : stores) {
+				store.insertTrackStatements(this);
 			}
 			
 			this.accept(mv); // send the result to the next MethodVisitor
@@ -103,17 +86,7 @@ public class CharArrayClassTransformer implements ClassAdapterFactory {
 	}
 	
 	private static class CharArrayInterpreter extends BasicInterpreter {
-		/**
-		 * {@link TrackableValue}s that we actually want to track.
-		 */
-		private final Set<TrackableValue> trackedValues = Collections.newSetFromMap(new IdentityHashMap<TrackableValue, Boolean>());
-		
-		/**
-		 * For every array store in a char[], maps that store instruction to its origin CharAtValue,
-		 * or to null if the origin is unknown.
-		 */
-		private final Map<InsnNode, TrackableValue> trackedCharArrayStores = new IdentityHashMap<InsnNode, TrackableValue>();
-		
+
 		@Override
 		public Value newValue(Type type) {
 			// for char[], remember the exact type
@@ -135,43 +108,30 @@ public class CharArrayClassTransformer implements ClassAdapterFactory {
 			}
 			return super.naryOperation(insn, values);
 		}
-		
-		@Override
-		public Value ternaryOperation(AbstractInsnNode insn, Value value1, Value value2, Value value3)
-				throws AnalyzerException {
-			if (insn.getOpcode() == CASTORE) {
-				InsnNode storeInsn = (InsnNode) insn;
-				BasicValue charArrayValue = (BasicValue)value1;
-				
-				if (! CHAR_ARRAY_TYPE.equals(charArrayValue.getType())) {
-					throw new AnalyzerException(insn, "CASTORE but not in a char array");
-				}
-				
-				CharAtValue charValue;
-				
-				if (value3 instanceof CharAtValue) { // if we know where the value we are storing came from
-					charValue = (CharAtValue) value3;
-					trackedValues.add(charValue);
-				} else {
-					charValue = null; // unknown
-				}
-				
-				trackedCharArrayStores.put(storeInsn, charValue);
-			}
-			return super.ternaryOperation(insn, value1, value2, value3);
-		}
 	}
 	
 	/**
 	 * A value of which we can track where it came from
 	 */
-	private static abstract class TrackableValue extends BasicValue {
+	static abstract class TrackableValue extends BasicValue {
+		private boolean tracked;
+		
 		private TrackableValue(Type type) {
 			super(type);
 		}
 		
+		void ensureTracked(MethodNode methodNode) {
+			if (! tracked) {
+				insertTrackStatements(methodNode);
+				tracked = true;
+			}
+		}
+		
 		/**
 		 * Insert the statements needed to keep track of the origin of this value.
+		 * 
+		 * This method should not be called directly, instead {@link #ensureTracked(MethodNode)} should be
+		 * used, to ensure statements are inserted more than once.
 		 * 
 		 * @param methodNode method to add the statements in, at the right place
 		 */
