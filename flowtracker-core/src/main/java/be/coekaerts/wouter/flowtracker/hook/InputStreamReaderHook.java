@@ -14,9 +14,10 @@ public class InputStreamReaderHook {
 		}
 	}
 	
-	public static void afterReadCharArray(int read, InputStreamReader target, char[] cbuf) {
-		afterReadCharArrayOffset(read, target, cbuf, 0);
-	}
+	// SHORTCUT: assume Reader.read(char[]) delegates to read(cbuf, 0, cbuf.length) 
+//	public static void afterReadCharArray(int read, InputStreamReader target, char[] cbuf) {
+//		afterReadCharArrayOffset(read, target, cbuf, 0);
+//	}
 	
 	public static void afterReadCharArrayOffset(int read, InputStreamReader target, char[] cbuf, int offset) {
 		if (read >= 0) {

@@ -13,6 +13,7 @@ import org.objectweb.asm.Type;
 
 import be.coekaerts.wouter.flowtracker.hook.InputStreamReaderHook;
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
 
 public class AsmTransformer implements ClassFileTransformer {
 	private final Map<String, ClassHookSpec> specs = new HashMap<String, ClassHookSpec>();
@@ -46,8 +47,8 @@ public class AsmTransformer implements ClassFileTransformer {
 		
 		try {
 			ClassAdapterFactory adapterFactory;
-			if (className.equals("be/coekaerts/wouter/flowtracker/test/CharArrayTest")) {
-				adapterFactory = new CharArrayClassTransformer();
+			if (className.equals("be/coekaerts/wouter/flowtracker/test/CharFlowAnalysisTest")) {
+				adapterFactory = new FlowAnalyzingTransformer();
 			} else if (specs.containsKey(className)) {
 				adapterFactory = specs.get(className);
 			} else {

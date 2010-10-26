@@ -1,4 +1,4 @@
-package be.coekaerts.wouter.flowtracker.weaver;
+package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -10,7 +10,6 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
-import be.coekaerts.wouter.flowtracker.weaver.CharArrayClassTransformer.TrackableValue;
 
 /**
  * The storing of a char in a char[].

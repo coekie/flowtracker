@@ -1,4 +1,4 @@
-package be.coekaerts.wouter.flowtracker.weaver;
+package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodNode;

@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
-public class CharArrayTest {
+public class CharFlowAnalysisTest {
 	@Test
 	public void charAt() {
 		String abc = trackCopy("abc");
