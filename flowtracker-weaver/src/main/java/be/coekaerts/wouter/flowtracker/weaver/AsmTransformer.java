@@ -47,10 +47,11 @@ public class AsmTransformer implements ClassFileTransformer {
 		
 		try {
 			ClassAdapterFactory adapterFactory;
-			if (className.equals("be/coekaerts/wouter/flowtracker/test/CharFlowAnalysisTest")) {
-				adapterFactory = new FlowAnalyzingTransformer();
-			} else if (specs.containsKey(className)) {
+			if (specs.containsKey(className)) {
 				adapterFactory = specs.get(className);
+			} else if (className.startsWith("be/coekaerts/wouter/flowtracker/test/")
+					|| className.equals("java/util/Arrays")) {
+				adapterFactory = new FlowAnalyzingTransformer();
 			} else {
 				return null;
 			}

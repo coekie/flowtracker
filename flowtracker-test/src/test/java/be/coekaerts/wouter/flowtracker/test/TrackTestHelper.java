@@ -12,10 +12,23 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
  */
 public class TrackTestHelper {
 	
+	/**
+	 * Returns a copy of the given String, which will be tracked.
+	 * 
+	 * We create a copy to avoid interference from other usage of the same (interned) String.
+	 */
 	public static String trackCopy(String str) {
 		str = new String(str);
 		TrackerRepository.createTracker(str);
 		return str;
+	}
+	
+	/**
+	 * Adds a tracker on the given object and returns it.
+	 */
+	public static <T> T track(T obj) {
+		TrackerRepository.createTracker(obj);
+		return obj;
 	}
 
 	public static TrackPart part(String str) {

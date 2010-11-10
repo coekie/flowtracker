@@ -25,6 +25,7 @@ public abstract class Tracker {
 		Tracker sourceTracker = TrackerRepository.getTracker(source);
 		if (sourceTracker == null) {
 			// if we're not tracking the source, we don't care where its content goes to
+			// TODO if targetTracker already has info for that range, erase it!
 			return;
 		}
 		

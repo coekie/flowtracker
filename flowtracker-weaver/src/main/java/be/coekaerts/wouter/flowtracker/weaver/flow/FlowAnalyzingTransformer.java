@@ -73,7 +73,17 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 				Frame frame = frames[i];
 				if (insn.getOpcode() == Opcodes.CASTORE) {
 					stores.add(new CaStore((InsnNode)insn, frame));
-					// TODO shouldn't need to create an instance for that
+				} else if (insn.getOpcode() == Opcodes.INVOKESTATIC) {
+					MethodInsnNode mInsn = (MethodInsnNode) insn;
+					if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
+							&& "(Ljava/lang/Object;ILjava/lang/Object;II)V".equals(mInsn.desc)) {
+						// if it is a copy from char[] to char[]
+						if (((BasicValue)frame.getStack(frame.getStackSize() - 5)).getType().equals(Types.CHAR_ARRAY_TYPE)
+								&& ((BasicValue)frame.getStack(frame.getStackSize() - 3)).getType().equals(Types.CHAR_ARRAY_TYPE)) {
+							// replace it with a call to our hook instead
+							mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/SystemHook";
+						}
+					}
 				}
 			}
 			

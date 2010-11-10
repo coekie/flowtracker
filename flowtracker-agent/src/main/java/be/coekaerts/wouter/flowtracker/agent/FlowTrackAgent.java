@@ -6,6 +6,7 @@ import java.lang.instrument.Instrumentation;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.JarFile;
@@ -31,6 +32,7 @@ public class FlowTrackAgent {
 			// TODO avoid hardcoding of list of classes to retransform here
 			inst.retransformClasses(String.class);
 			inst.retransformClasses(InputStreamReader.class);
+			inst.retransformClasses(Arrays.class);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			System.exit(1);
