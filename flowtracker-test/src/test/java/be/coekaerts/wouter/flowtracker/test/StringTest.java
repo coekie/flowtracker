@@ -1,12 +1,17 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertPartsCompleteEqual;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertTrackerPartsCompleteEqual;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.part;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import junit.framework.Assert;
 
 import org.junit.Test;
 
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
+import be.coekaerts.wouter.flowtracker.tracker.TrackPart;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 public class StringTest {
@@ -42,5 +47,35 @@ public class StringTest {
 		Assert.assertEquals("bar", bar);
 		
 		assertPartsCompleteEqual(bar, part(foobar, 3, 3));
+	}
+	
+	@Test
+	public void stringTrackTest() {
+		char[] chars = track(new char[]{'a', 'b', 'c', 'd'});
+		String str = new String(chars, 1, 2); // create String "bc"
+		Assert.assertEquals("bc", str);
+		
+		// stringTrack points to the String.value char[]
+		TrackPart stringTrack = StringHook.getStringTrack(str);
+		Assert.assertNotNull(stringTrack);
+		Assert.assertEquals(0, stringTrack.getIndex());
+		Assert.assertEquals(2, stringTrack.getLength());
+		
+		// String.value is copy of part of our chars
+		Tracker stringValueTracker = stringTrack.getTracker();
+		Assert.assertNotNull(stringValueTracker);
+		assertTrackerPartsCompleteEqual(stringValueTracker, part(chars, 1, 2));
+	}
+	
+	/**
+	 * Test that we didn't break the normal functioning of contentEquals.
+	 */
+	@Test
+	public void contentEqualsTest() {
+		String str = "abcd";
+		StringBuilder sb = new StringBuilder();
+		sb.append("ab").append("cd");
+		Assert.assertTrue(str.contentEquals(sb));
+		Assert.assertFalse(str.contentEquals("foo"));
 	}
 }

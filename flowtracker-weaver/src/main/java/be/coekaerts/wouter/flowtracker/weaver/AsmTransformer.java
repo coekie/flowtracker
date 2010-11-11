@@ -59,6 +59,9 @@ public class AsmTransformer implements ClassFileTransformer {
 			ClassReader reader = new ClassReader(classfileBuffer);
 			ClassWriter writer = new ClassWriter(0);
 			ClassVisitor adapter = adapterFactory.createClassAdapter(writer);
+			if (className.equals("java/lang/String")) {
+				adapter = new StringAdapter(adapter);
+			}
 			reader.accept(adapter, 0);
 			byte[] result = writer.toByteArray();
 	

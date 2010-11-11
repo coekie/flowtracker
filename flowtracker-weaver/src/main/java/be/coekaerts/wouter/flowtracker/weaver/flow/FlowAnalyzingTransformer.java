@@ -20,6 +20,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.Value;
 
 import be.coekaerts.wouter.flowtracker.weaver.ClassAdapterFactory;
+import be.coekaerts.wouter.flowtracker.weaver.Types;
 
 public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 	private static class FlowClassAdapter extends ClassAdapter {
@@ -78,8 +79,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 					if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
 							&& "(Ljava/lang/Object;ILjava/lang/Object;II)V".equals(mInsn.desc)) {
 						// if it is a copy from char[] to char[]
-						if (((BasicValue)frame.getStack(frame.getStackSize() - 5)).getType().equals(Types.CHAR_ARRAY_TYPE)
-								&& ((BasicValue)frame.getStack(frame.getStackSize() - 3)).getType().equals(Types.CHAR_ARRAY_TYPE)) {
+						if (((BasicValue)frame.getStack(frame.getStackSize() - 5)).getType().equals(Types.CHAR_ARRAY)
+								&& ((BasicValue)frame.getStack(frame.getStackSize() - 3)).getType().equals(Types.CHAR_ARRAY)) {
 							// replace it with a call to our hook instead
 							mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/SystemHook";
 						}

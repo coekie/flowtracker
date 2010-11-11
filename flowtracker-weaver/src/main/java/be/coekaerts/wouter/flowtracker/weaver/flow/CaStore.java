@@ -9,6 +9,8 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
+import be.coekaerts.wouter.flowtracker.weaver.Types;
+
 /**
  * The storing of a char in a char[].
  */
@@ -20,7 +22,7 @@ class CaStore extends Store {
 		super(storeInsn, frame);
 		this.storeInsn = storeInsn;
 		
-		assert Types.CHAR_ARRAY_TYPE.equals(getStackFromTop(2).getType());
+		assert Types.CHAR_ARRAY.equals(getStackFromTop(2).getType());
 	}
 	
 	void insertTrackStatements(MethodNode methodNode) {

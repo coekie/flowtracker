@@ -42,14 +42,21 @@ public class TrackTestHelper {
 	}
 	
 	/**
-	 * Asserts that the tracker consist of the given parts, starting at index 0 without holes.
+	 * Asserts that the tracker of the given target consist of the given parts, starting at index 0 without holes.
 	 */
 	public static void assertPartsCompleteEqual(Object target, TrackPart... expectedParts) {
-		int partNr = 0;
 		Assert.assertNotNull(target);
-		Tracker tracker = TrackerRepository.getTracker(target);
+		assertTrackerPartsCompleteEqual(TrackerRepository.getTracker(target), expectedParts);
+	}
+	
+	/**
+	 * Asserts that the tracker consist of the given parts, starting at index 0 without holes.
+	 */
+	public static void assertTrackerPartsCompleteEqual(Tracker tracker, TrackPart... expectedParts) {
 		Assert.assertNotNull(tracker);
 		Assert.assertEquals(tracker.getEntryCount(), expectedParts.length);
+		
+		int partNr = 0;
 		int index = 0;
 		for (TrackPart expectedPart : expectedParts) {
 			assertEntryEquals("Part " + partNr, index, expectedPart.getLength(), expectedPart.getTracker(),
