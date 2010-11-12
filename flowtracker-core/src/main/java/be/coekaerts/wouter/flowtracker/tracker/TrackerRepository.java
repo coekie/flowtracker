@@ -10,6 +10,12 @@ public class TrackerRepository {
 		return objectToTracker.get(obj);
 	}
 	
+	public static Tracker createFixedOriginTracker(Object obj, int length) {
+		Tracker tracker = new FixedOriginTracker(length);
+		setTracker(obj, tracker);
+		return tracker;
+	}
+	
 	public static Tracker createTracker(Object obj) {
 		Tracker tracker = new DefaultTracker();
 		setTracker(obj, tracker);

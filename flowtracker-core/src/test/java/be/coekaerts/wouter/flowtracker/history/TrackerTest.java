@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import be.coekaerts.wouter.flowtracker.tracker.TrackPart;
+import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
@@ -16,14 +16,16 @@ public class TrackerTest {
 	private Object source, source2;
 	private Tracker sourceTracker, sourceTracker2;
 	private Object target;
+	private Object middleman;
 	
 	@Before
 	public void setupSource() {
 		source = new Object();
-		sourceTracker = TrackerRepository.createTracker(source);
+		sourceTracker = TrackerRepository.createFixedOriginTracker(source, 100);
 		source2 = new Object();
-		sourceTracker2 = TrackerRepository.createTracker(source2);
+		sourceTracker2 = TrackerRepository.createFixedOriginTracker(source2, 100);
 		target = new Object();
+		middleman = new Object();
 	}
 	
 	@Test
@@ -205,12 +207,107 @@ public class TrackerTest {
 	// TODO testCutInside
 	// TODO testMultiCut
 	
+	/** Use the source of the source if the direct source is mutable */
+	@Test
+	public void testMutableMiddleman() {
+		Tracker.setSource(middleman, 0, 10, source, 0);
+		Tracker.setSource(target, 0, 10, middleman, 0);
+		
+		Tracker targetTracker = TrackerRepository.getTracker(target);
+		assertEntryEquals(0, 10, sourceTracker, 0, targetTracker.getEntryAt(0));
+		
+		// Even after changing middleman to another source,
+		Tracker.setSource(middleman, 0, 10, source2, 0);
+		// target still knows it came from first source.
+		assertEntryEquals(0, 10, sourceTracker, 0, targetTracker.getEntryAt(0));
+		
+		Assert.assertEquals(1, targetTracker.getEntryCount());
+	}
+	
+	/**
+	 * Get the source of the source composed of two parts,
+	 * but only partly: dropping the begin and ending 
+	 */
+	@Test
+	public void testTransitiveCombinePartParts() {
+		// set middleman to 100,101,102,103,104,200,201,202,203
+		Tracker.setSource(middleman, 0, 5, source, 100);
+		Tracker.setSource(middleman, 5, 4, source2, 200);
+		// set target to 101,102,103,104,200,201,202
+		Tracker.setSource(target, 0, 7, middleman, 1);
+		
+		Tracker targetTracker = TrackerRepository.getTracker(target);
+		
+		Assert.assertEquals(2, targetTracker.getEntryCount());
+		assertEntryEquals(0, 4, sourceTracker, 101, targetTracker.getEntryAt(0));
+		assertEntryEquals(4, 3, sourceTracker2, 200, targetTracker.getEntryAt(4));
+	}
+	
+	@Test
+	public void testTransitiveEndUnknown() {
+		// set middleman to 100,101,102
+		Tracker.setSource(middleman, 0, 3, source, 100);
+		// set target to unknown,100,101,102,unknown,unknown
+		Tracker.setSource(target, 1, 5, middleman, 0);
+		
+		Tracker targetTracker = TrackerRepository.getTracker(target);
+		
+		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEntryEquals(1, 3, sourceTracker, 100, targetTracker.getEntryAt(1));
+	}
+	
+	@Test
+	public void testTransitiveStartUnknown() {
+		// set middleman to unknown,unknown,100,101,102
+		Tracker.setSource(middleman, 2, 3, source, 100);
+		// set target to unknown,unknown,unknown,100,101
+		Tracker.setSource(target, 1, 4, middleman, 0);
+		
+		Tracker targetTracker = TrackerRepository.getTracker(target);
+		
+		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEntryEquals(3, 2, sourceTracker, 100, targetTracker.getEntryAt(3));
+	}
+	
+	/** Take only a part of a part of the source of the source */
+	@Test
+	public void testTransitiveSinglePartlyPart() {
+		// set middleman to 100,101,102,103,104,105,106,107,108,109,110,111,112
+		Tracker.setSource(middleman, 0, 12, source, 100);
+		// set target to 102,103,104,105
+		Tracker.setSource(target, 1000, 4, middleman, 2);
+		
+		Tracker targetTracker = TrackerRepository.getTracker(target);
+		
+		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEntryEquals(1000, 4, sourceTracker, 102, targetTracker.getEntryAt(1000));
+	}
+	
+	/** Make sure entries existing before and after the one involved don't break things */
+	@Test
+	public void testTransitiveIgnoreBeforeAndAfter() {
+		Tracker.setSource(middleman, 0, 1, source, 100);
+		Tracker.setSource(middleman, 1, 1, source, 200);
+		Tracker.setSource(middleman, 2, 1, source, 300);
+		Tracker.setSource(middleman, 3, 1, source, 400);
+		Tracker.setSource(middleman, 4, 1, source, 500);
+		
+		//set target to 200,300,400
+		Tracker.setSource(target, 1000, 3, middleman, 1);
+		
+		Tracker targetTracker = TrackerRepository.getTracker(target);
+		Assert.assertEquals(3, targetTracker.getEntryCount());
+		assertEntryEquals(1000, 1, sourceTracker, 200, targetTracker.getEntryAt(1000));
+		assertEntryEquals(1001, 1, sourceTracker, 300, targetTracker.getEntryAt(1001));
+		assertEntryEquals(1002, 1, sourceTracker, 400, targetTracker.getEntryAt(1002));
+	}
+	
 	private void assertEntryEquals(int expectedEntryIndex, int expectedLength,
-			Tracker expectedTracker, int expectedPartIndex, Entry<Integer, TrackPart> entry) {
+			Tracker expectedTracker, int expectedPartIndex, Entry<Integer, PartTracker> entry) {
 		Assert.assertNotNull(entry);
 		Assert.assertEquals((Integer)expectedEntryIndex, entry.getKey());
 		
-		TrackPart part = entry.getValue();
+		PartTracker part = entry.getValue();
 		Assert.assertNotNull(part);
 		Assert.assertEquals(expectedLength, part.getLength());
 		Assert.assertSame(expectedTracker, part.getTracker());

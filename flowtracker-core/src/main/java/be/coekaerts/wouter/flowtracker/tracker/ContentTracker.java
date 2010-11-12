@@ -14,4 +14,9 @@ public class ContentTracker extends OriginTracker {
 	public CharSequence getContent() {
 		return content;
 	}
+	
+	@Override
+	public int getLength() {
+		return content.length();
+	}
 }

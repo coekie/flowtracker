@@ -10,7 +10,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
-import be.coekaerts.wouter.flowtracker.tracker.TrackPart;
+import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
@@ -56,7 +56,7 @@ public class StringTest {
 		Assert.assertEquals("bc", str);
 		
 		// stringTrack points to the String.value char[]
-		TrackPart stringTrack = StringHook.getStringTrack(str);
+		PartTracker stringTrack = StringHook.getStringTrack(str);
 		Assert.assertNotNull(stringTrack);
 		Assert.assertEquals(0, stringTrack.getIndex());
 		Assert.assertEquals(2, stringTrack.getLength());

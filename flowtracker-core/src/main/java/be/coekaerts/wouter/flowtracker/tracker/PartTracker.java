@@ -3,12 +3,12 @@ package be.coekaerts.wouter.flowtracker.tracker;
 /**
  * Description of the source of a part of a {@link Tracker}. 
  */
-public class TrackPart {
+public class PartTracker extends Tracker {
 	private final Tracker tracker;
 	private int index;
 	private int length;
 	
-	public TrackPart(Tracker tracker, int index, int length) {
+	public PartTracker(Tracker tracker, int index, int length) {
 		this.tracker = tracker;
 		this.index = index;
 		this.length = length;
@@ -43,6 +43,21 @@ public class TrackPart {
 
 	void setLength(int length) {
 		this.length = length;
+	}
+
+	@Override
+	void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getEntryCount() {
+		return 1;
+	}
+	
+	@Override
+	public void pushContentToTracker(int sourceIndex, int length, Tracker targetTracker, int targetIndex) {
+		targetTracker.setSourceFromTracker(targetIndex, length, tracker, index + sourceIndex);
 	}
 
 }

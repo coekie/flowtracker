@@ -5,15 +5,63 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 public class DefaultTracker extends Tracker {
-	private NavigableMap<Integer, TrackPart> map = new TreeMap<Integer, TrackPart>();
+	private NavigableMap<Integer, PartTracker> map = new TreeMap<Integer, PartTracker>();
+	
+	private final boolean immutableEntriesOnly = true;
 	
 	public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
+		if (immutableEntriesOnly && sourceTracker.isContentMutable()) {
+			sourceTracker.pushContentToTracker(sourceIndex, length, this, index);
+		} else {
+			doSetSourceFromTracker(index, length, sourceTracker, sourceIndex);
+		}
+	}
+	
+	@Override
+	public void pushContentToTracker(int sourceIndex, int length, Tracker targetTracker, int targetIndex) {
+		// we start at the part that contains sourceIndex
+		int startIndex = getStartIndexAt(sourceIndex);
+		// or, if there's no such part, at what comes after
+		if (startIndex == -1)
+			startIndex = sourceIndex;
+		
+		for (Entry<Integer, PartTracker> entry : map.tailMap(startIndex).entrySet()) {
+			int partIndex = entry.getKey();
+			PartTracker part = entry.getValue();
+			
+			// if we're at a part that's after the range we want to copy, stop
+			if (partIndex >= sourceIndex + length) {
+				break;
+			}
+			
+			// if the beginning of this part is cut off (because this it the first part, and sourceIndex is halfway a part),
+			// the size of the cut-off.
+			// In other words, the offset in the part of where we want to start pushing.
+			int pushingPartOffset = partIndex < sourceIndex ? sourceIndex - partIndex : 0;
+			
+			// the difference between what we'll start pushing and the start of the range
+			int pushingOffset = (partIndex + pushingPartOffset) - sourceIndex;
+			
+			// index in the target of where we start pushing to
+			int pushTargetIndex = targetIndex + pushingOffset;
+			
+			// The length of what we're pushing. This is limited by two things:
+			// * the length given in arguments
+			// * the available size of the part we're handling
+			int pushLength = Math.min(length - pushingOffset, part.getLength() - pushingPartOffset);
+			
+			// push it!
+			targetTracker.setSourceFromTracker(pushTargetIndex, pushLength,	part, pushingPartOffset);
+		}
+	}
+	
+	private void doSetSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
 		boolean stored = false;
 		
 		// extend the entry right before it, if it matches
-		Entry<Integer, TrackPart> entryBefore = getEntryAt(index - 1);
+		Entry<Integer, PartTracker> entryBefore = getEntryAt(index - 1);
 		if (entryBefore != null) {
-			TrackPart partBefore = entryBefore.getValue();
+			PartTracker partBefore = entryBefore.getValue();
 			if (partBefore.getTracker() == sourceTracker &&
 					(index - entryBefore.getKey() == sourceIndex - partBefore.getIndex())) {
 				partBefore.setLength(partBefore.getLength() + length); // TODO this is wrong if they are overlapping
@@ -22,9 +70,9 @@ public class DefaultTracker extends Tracker {
 		}
 		
 		// extend the entry right after it (backwards), if it matches
-		Entry<Integer, TrackPart> entryAfter = getEntryAt(index + length);
+		Entry<Integer, PartTracker> entryAfter = getEntryAt(index + length);
 		if (entryAfter != null) {
-			TrackPart partAfter = entryAfter.getValue();
+			PartTracker partAfter = entryAfter.getValue();
 			if (partAfter.getTracker() == sourceTracker &&
 					(index - entryAfter.getKey() == sourceIndex - partAfter.getIndex())) {
 				map.remove(entryAfter.getKey());
@@ -37,14 +85,14 @@ public class DefaultTracker extends Tracker {
 		// TODO remove/adjust overlapping parts
 		
 		if (!stored) {
-			TrackPart entry = new TrackPart(sourceTracker, sourceIndex, length);
+			PartTracker entry = new PartTracker(sourceTracker, sourceIndex, length);
 			map.put(index, entry);
 		}
 	}
 	
 	@Override
-	public Entry<Integer, TrackPart> getEntryAt(int index) {
-		Entry<Integer, TrackPart> floorEntry = map.floorEntry(index);
+	public Entry<Integer, PartTracker> getEntryAt(int index) {
+		Entry<Integer, PartTracker> floorEntry = map.floorEntry(index);
 		if (floorEntry == null) {
 			// there is no entry at or before index
 			return null;
@@ -61,7 +109,19 @@ public class DefaultTracker extends Tracker {
 	}
 	
 	@Override
+	public int getStartIndexAt(int index) {
+		Entry<Integer, PartTracker> entry = getEntryAt(index);
+		return entry == null ? -1 : entry.getKey();
+	}
+	
+	@Override
 	public int getEntryCount() {
 		return map.size();
+	}
+	
+	@Override
+	public int getLength() {
+		// TODO getLength
+		throw new RuntimeException("not implemented");
 	}
 }
