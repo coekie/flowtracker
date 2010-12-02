@@ -33,6 +33,7 @@ public class FlowTrackAgent {
 			inst.retransformClasses(String.class);
 			inst.retransformClasses(InputStreamReader.class);
 			inst.retransformClasses(Arrays.class);
+			inst.retransformClasses(StringBuilder.class.getSuperclass()); // AbstractStringBuilder is not public
 		} catch (Throwable e) {
 			e.printStackTrace();
 			System.exit(1);

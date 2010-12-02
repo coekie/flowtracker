@@ -68,7 +68,7 @@ public class TrackTestHelper {
 	 */
 	public static void assertTrackerPartsCompleteEqual(Tracker tracker, PartTracker... expectedParts) {
 		Assert.assertNotNull(tracker);
-		Assert.assertEquals(tracker.getEntryCount(), expectedParts.length);
+		Assert.assertEquals(expectedParts.length, tracker.getEntryCount());
 		
 		int partNr = 0;
 		int index = 0;
