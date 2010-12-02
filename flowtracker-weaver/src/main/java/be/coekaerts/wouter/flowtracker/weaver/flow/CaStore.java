@@ -34,7 +34,7 @@ class CaStore extends Store {
 			TrackableValue trackedStored = (TrackableValue) stored;
 			trackedStored.ensureTracked(methodNode);
 			
-			trackedStored.loadSourceObject(toInsert);
+			trackedStored.loadSourceTracker(toInsert);
 			trackedStored.loadSourceIndex(toInsert);
 		} else {
 			toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
@@ -43,7 +43,7 @@ class CaStore extends Store {
 		
 		methodNode.maxStack += 2; // TODO using the frame info we could optimize this
 		
-		Method hook = Method.getMethod("void setCharWithOrigin(char[],int,char,Object,int)");
+		Method hook = Method.getMethod("void setCharWithOrigin(char[],int,char,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
 		
 		toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "be/coekaerts/wouter/flowtracker/hook/CharArrayHook", hook.getName(), hook.getDescriptor()));
 		

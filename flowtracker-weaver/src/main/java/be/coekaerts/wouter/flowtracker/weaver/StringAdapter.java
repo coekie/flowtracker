@@ -72,7 +72,7 @@ public class StringAdapter extends ClassAdapter {
 		
 		@Override
 		public void visitMaxs(int maxStack, int maxLocals) {
-			// the part we insert in visiCode() maxStack 3,
+			// the part we insert in visitCode() has maxStack 3,
 			// and doesn't leave anything behind on the stack
 			super.visitMaxs(Math.max(3, maxStack), maxLocals);
 		}

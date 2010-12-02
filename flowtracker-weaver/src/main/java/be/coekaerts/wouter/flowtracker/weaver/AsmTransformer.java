@@ -12,20 +12,12 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
 
 import be.coekaerts.wouter.flowtracker.hook.InputStreamReaderHook;
-import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
 
 public class AsmTransformer implements ClassFileTransformer {
 	private final Map<String, ClassHookSpec> specs = new HashMap<String, ClassHookSpec>();
 	
 	public AsmTransformer() {
-		ClassHookSpec stringSpec = new ClassHookSpec(Type.getType("Ljava/lang/String;"), StringHook.class);
-		stringSpec.addMethodHookSpec("String concat(String)", "String afterConcat(String,String,String)",
-				HookSpec.THIS, HookSpec.ARG0);
-		stringSpec.addMethodHookSpec("String substring(int,int)", "void afterSubstring(String,String,int,int)",
-				HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
-		specs.put("java/lang/String", stringSpec);
-		
 		ClassHookSpec inputStreamReaderSpec = new ClassHookSpec(Type.getType("Ljava/io/InputStreamReader;"), InputStreamReaderHook.class);
 		inputStreamReaderSpec.addMethodHookSpec("int read()", "void afterRead1(int,java.io.InputStreamReader)", HookSpec.THIS);
 //		inputStreamReaderSpec.addMethodHookSpec("int read(char[])", "void afterReadCharArray(int,java.io.InputStreamReader,char[])",
@@ -50,7 +42,8 @@ public class AsmTransformer implements ClassFileTransformer {
 			if (specs.containsKey(className)) {
 				adapterFactory = specs.get(className);
 			} else if (className.startsWith("be/coekaerts/wouter/flowtracker/test/")
-					|| className.equals("java/util/Arrays")) {
+					|| className.equals("java/util/Arrays")
+					|| className.equals("java/lang/String")) {
 				adapterFactory = new FlowAnalyzingTransformer();
 			} else {
 				return null;

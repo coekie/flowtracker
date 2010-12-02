@@ -89,7 +89,10 @@ public abstract class Tracker {
 	}
 	
 	public static void setSource(Object target, int targetIndex, int length, Object source, int sourceIndex) {
-		Tracker sourceTracker = TrackerRepository.getTracker(source);
+		setSourceTracker(target, targetIndex, length, TrackerRepository.getTracker(source), sourceIndex);
+	}
+	
+	public static void setSourceTracker(Object target, int targetIndex, int length, Tracker sourceTracker, int sourceIndex) {
 		if (sourceTracker == null) {
 			// if we're not tracking the source, we don't care where its content goes to
 			// TODO if targetTracker already has info for that range, erase it!

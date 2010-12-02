@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -47,8 +48,11 @@ class CharAtValue extends TrackableValue {
 	}
 
 	@Override
-	void loadSourceObject(InsnList toInsert) {
+	void loadSourceTracker(InsnList toInsert) {
+		// insert code for: StringHook.getStringTrack(targetString);
 		toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
+		Method getStringTrack = Method.getMethod("be.coekaerts.wouter.flowtracker.tracker.PartTracker getStringTrack(String)");
+		toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "be/coekaerts/wouter/flowtracker/hook/StringHook", getStringTrack.getName(), getStringTrack.getDescriptor()));
 	}
 
 	@Override

@@ -3,8 +3,11 @@ package be.coekaerts.wouter.flowtracker.test;
 import java.util.Map.Entry;
 
 import junit.framework.Assert;
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
+import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerDepth;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 /**
@@ -18,8 +21,8 @@ public class TrackTestHelper {
 	 * We create a copy to avoid interference from other usage of the same (interned) String.
 	 */
 	public static String trackCopy(String str) {
-		str = new String(str);
-		TrackerRepository.createFixedOriginTracker(str, str.length());
+		str = new String(str.toCharArray());
+		StringHook.createFixedOriginTracker(str);
 		return str;
 	}
 	
@@ -31,14 +34,25 @@ public class TrackTestHelper {
 		return chars;
 	}
 
-	public static PartTracker part(String str) {
-		return part(str, 0, str.length());
+	public static PartTracker strPart(String str) {
+		return StringHook.getStringTrack(str);
+	}
+	
+	public static PartTracker strPart(String str, int index, int length) {
+		PartTracker fullPart = StringHook.getStringTrack(str);
+		return new PartTracker(fullPart.getTracker(), fullPart.getIndex() + index, length);
 	}
 	
 	public static PartTracker part(Object obj, int index, int length) {
 		Tracker tracker = TrackerRepository.getTracker(obj);
 		Assert.assertNotNull(tracker);
 		return new PartTracker(tracker, index, length);
+	}
+	
+	public static void assertStringOriginPartsCompleteEqual(String target, PartTracker... expectedParts) {
+		assertTrackerPartsCompleteEqual(
+				DefaultTracker.copyOf(StringHook.getStringTrack(target), TrackerDepth.ORIGIN),
+				expectedParts);
 	}
 	
 	/**

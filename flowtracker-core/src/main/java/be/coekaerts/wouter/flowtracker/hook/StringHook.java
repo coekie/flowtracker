@@ -5,30 +5,9 @@ import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 public class StringHook {
-	/**
-	 * Injected into String.concat. Registers the results origin.
-	 */
-	public static String afterConcat(String result, String target, String other) {
-		Tracker.setSource(result, 0, target.length(), target, 0);
-		Tracker.setSource(result, target.length(), other.length(), other, 0);
-		
-		return result;
-	}
-	
-	/**
-	 * Injected into String.substring. Registers the results origin.
-	 */
-	public static void afterSubstring(String result, String target, int beginIndex, int endIndex) {
-		if (result != target) { // if it's not the whole String
-			Tracker.setSource(result, 0, endIndex - beginIndex, target, beginIndex);
-		}
-	}
 	
 	public static PartTracker getStringTrack(String str) {
-		StringContentExtractor extractor = new StringContentExtractor();
-		
-		// contentEquals has been instrumented to deal with this extractor.
-		str.contentEquals(extractor); 
+		StringContentExtractor extractor = new StringContentExtractor(str);
 		
 		Tracker valueTracker = TrackerRepository.getTracker(extractor.value);
 		if (valueTracker == null) {
@@ -36,6 +15,12 @@ public class StringHook {
 		} else {
 			return new PartTracker(valueTracker, extractor.offset, str.length());
 		}
+	}
+	
+	public static void createFixedOriginTracker(String str) {
+		StringContentExtractor extractor = new StringContentExtractor(str);
+		
+		TrackerRepository.createFixedOriginTracker(extractor.value, str.length());
 	}
 	
 	/**
@@ -48,7 +33,9 @@ public class StringHook {
 		private char[] value;
 		private int offset;
 		
-		private StringContentExtractor() {
+		private StringContentExtractor(String str) {
+			// contentEquals has been instrumented to deal with this extractor.
+			str.contentEquals(this);
 		}
 		
 		/**

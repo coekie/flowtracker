@@ -1,7 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertPartsCompleteEqual;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.part;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.strPart;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 
 import org.junit.Assert;
@@ -19,7 +19,7 @@ public class CharFlowAnalysisTest {
 		array[1] = abc.charAt(0);
 		array[2] = abc.charAt(2);
 		
-		assertPartsCompleteEqual(array, part(abc, 1, 1), part(abc, 0, 1), part(abc, 2, 1));
+		assertPartsCompleteEqual(array, strPart(abc, 1, 1), strPart(abc, 0, 1), strPart(abc, 2, 1));
 	}
 	
 	// This one is hard.

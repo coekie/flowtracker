@@ -33,11 +33,12 @@ abstract class TrackableValue extends BasicValue {
 	abstract void insertTrackStatements(MethodNode methodNode);
 	
 	/**
-	 * Add the object from which this value came on top of the stack
+	 * Add the tracker from which this value came on top of the stack.
+	 * The instructions inserted should use maximum 2 stack entries. 
 	 * 
 	 * @param toInsert list of instructions where the needed statements are added to at the end
 	 */
-	abstract void loadSourceObject(InsnList toInsert);
+	abstract void loadSourceTracker(InsnList toInsert);
 
 	/**
 	 * Add the index from which this value came on top of the stack

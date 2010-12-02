@@ -1,8 +1,9 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertPartsCompleteEqual;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertStringOriginPartsCompleteEqual;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertTrackerPartsCompleteEqual;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.part;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.strPart;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import junit.framework.Assert;
@@ -19,6 +20,7 @@ public class StringTest {
 	public void unkownTest() {
 		String a = "unkownTest";
 		Assert.assertNull(TrackerRepository.getTracker(a));
+		Assert.assertNull(StringHook.getStringTrack(a));
 	}
 	
 	@Test
@@ -28,7 +30,7 @@ public class StringTest {
 		String ab = a.concat(b);
 		Assert.assertEquals("concatTest1concatTest2", ab);
 		
-		assertPartsCompleteEqual(ab, part(a), part(b));
+		assertStringOriginPartsCompleteEqual(ab, strPart(a), strPart(b));
 	}
 	
 	@Test
@@ -37,7 +39,7 @@ public class StringTest {
 		String foo = foobar.substring(0, 3);
 		Assert.assertEquals("foo", foo);
 		
-		assertPartsCompleteEqual(foo, part(foobar, 0, 3));
+		assertStringOriginPartsCompleteEqual(foo, strPart(foobar, 0, 3));
 	}
 	
 	@Test
@@ -46,7 +48,7 @@ public class StringTest {
 		String bar = foobar.substring(3);
 		Assert.assertEquals("bar", bar);
 		
-		assertPartsCompleteEqual(bar, part(foobar, 3, 3));
+		assertStringOriginPartsCompleteEqual(bar, strPart(foobar, 3, 3));
 	}
 	
 	@Test

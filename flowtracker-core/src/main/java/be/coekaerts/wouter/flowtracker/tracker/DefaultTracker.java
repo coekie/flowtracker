@@ -1,19 +1,42 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 public class DefaultTracker extends Tracker {
-	private NavigableMap<Integer, PartTracker> map = new TreeMap<Integer, PartTracker>();
+	private final NavigableMap<Integer, PartTracker> map = new TreeMap<Integer, PartTracker>();
+	private final TrackerDepth depth;
 	
-	private final boolean immutableEntriesOnly = true;
+	/**
+	 * Create a tracker whose content is a copy of the given tracker, with the specified depth.  
+	 */
+	public static DefaultTracker copyOf(Tracker tracker, TrackerDepth depth) {
+		DefaultTracker result = new DefaultTracker(depth);
+		tracker.pushContentToTracker(0, tracker.getLength(), result, 0);
+		return result;
+	}
 	
+	public DefaultTracker() {
+		this(TrackerDepth.CONTENT_IMMUTABLE);
+	}
+	
+	public DefaultTracker(TrackerDepth depth) {
+		super();
+		this.depth = depth;
+	}
+	
+	@Override
 	public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
-		if (immutableEntriesOnly && sourceTracker.isContentMutable()) {
-			sourceTracker.pushContentToTracker(sourceIndex, length, this, index);
+		if (depth.isAcceptableContent(sourceTracker)) {
+			if (sourceTracker.isContentMutable()) {
+				// we should make a copy here, because if it changes, it won't be correct anymore.
+				throw new UnsupportedOperationException("Adding mutable tracker as source is not supported");
+			} else {
+				doSetSourceFromTracker(index, length, sourceTracker, sourceIndex);
+			}
 		} else {
-			doSetSourceFromTracker(index, length, sourceTracker, sourceIndex);
+			sourceTracker.pushContentToTracker(sourceIndex, length, this, index);
 		}
 	}
 	
