@@ -36,6 +36,7 @@ public class TrackerRepository {
 		if (tracker == null) {
 			tracker = new ContentTracker();
 			setTracker(obj, tracker);
+			InterestRepository.contentTrackerCreated(obj, tracker);
 		}
 		return tracker;
 	}

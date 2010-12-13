@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
+import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 public class InputStreamReaderTest {
@@ -129,6 +130,12 @@ public class InputStreamReaderTest {
 		
 		Assert.assertEquals(-1, reader.read(buffer));
 		assertContentEquals("abcdef");
+	}
+	
+	@Test
+	public void interest() throws IOException {
+		reader.read();
+		Assert.assertTrue(InterestRepository.getContentTrackers().contains(TrackerRepository.getTracker(reader)));
 	}
 	
 }
