@@ -16,7 +16,7 @@ public class HookSpec {
 		@Override
 		void load(GeneratorAdapter generator) {
 			generator.loadThis();
-		};
+		}
 		
 		@Override
 		Type getType(HookSpec hookSpec) {
@@ -44,8 +44,7 @@ public class HookSpec {
 	
 	public static HookArgument ARG0 = new ArgHookArgument(0);
 	public static HookArgument ARG1 = new ArgHookArgument(1);
-	public static HookArgument ARG2 = new ArgHookArgument(2);
-	
+
 	private class HookMethodAdapter extends AdviceAdapter {
 		private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
 			super(mv, access, name, desc);
@@ -77,12 +76,6 @@ public class HookSpec {
 	private final Method hookMethod;
 	
 	private final Type[] cacheTargetMethodArgumentTypes;
-	
-	public HookSpec(Class<?> targetClass, String targetMethodDesc,
-			Class<?> hookClass, String hookMethodDesc, HookArgument... hookArguments) {
-		this(Type.getType(targetClass), Method.getMethod(targetMethodDesc),
-				hookClass, Method.getMethod(hookMethodDesc), hookArguments);
-	}
 	
 	public HookSpec(Type targetClass, Method targetMethod,
 			Class<?> hookClass, Method hookMethod, HookArgument... hookArguments) {

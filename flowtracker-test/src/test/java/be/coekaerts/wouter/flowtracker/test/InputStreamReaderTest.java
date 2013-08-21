@@ -63,7 +63,8 @@ public class InputStreamReaderTest {
 	
 	@Test
 	public void readCharArrayOffset() throws IOException {
-		// we assume in this test that it can always directly read the asked amount
+		// we assume in this test that it can always immediately read the asked amount;
+		// i.e. no incomplete read except that the end of the file
 		
 		char buffer[] = new char[5];
 		
@@ -111,7 +112,8 @@ public class InputStreamReaderTest {
 		Assert.assertEquals(-1, reader.read(buffer2));
 		assertContentEquals("abcdef");
 	}
-	
+
+	@Test
 	public void readCharBuffer() throws IOException {
 		CharBuffer buffer = CharBuffer.allocate(3);
 		

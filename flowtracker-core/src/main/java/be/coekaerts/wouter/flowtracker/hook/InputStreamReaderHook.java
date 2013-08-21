@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
+@SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class InputStreamReaderHook {
 	
 	public static void afterRead1(int result, InputStreamReader target) {

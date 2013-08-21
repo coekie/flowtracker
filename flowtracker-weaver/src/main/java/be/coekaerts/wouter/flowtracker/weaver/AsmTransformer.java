@@ -14,6 +14,7 @@ import org.objectweb.asm.Type;
 import be.coekaerts.wouter.flowtracker.hook.InputStreamReaderHook;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
 
+@SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
 public class AsmTransformer implements ClassFileTransformer {
 	private final Map<String, ClassHookSpec> specs = new HashMap<String, ClassHookSpec>();
 	

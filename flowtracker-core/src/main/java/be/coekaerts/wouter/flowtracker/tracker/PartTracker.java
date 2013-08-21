@@ -29,10 +29,6 @@ public class PartTracker extends Tracker {
 	public int getIndex() {
 		return index;
 	}
-
-	void setIndex(int index) {
-		this.index = index;
-	}
 	
 	/**
 	 * The length of this part

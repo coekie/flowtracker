@@ -33,6 +33,7 @@ public class StringHook {
 		private char[] value;
 		private int offset;
 		
+		@SuppressWarnings("ResultOfMethodCallIgnored")
 		private StringContentExtractor(String str) {
 			// contentEquals has been instrumented to deal with this extractor.
 			str.contentEquals(this);
@@ -41,6 +42,7 @@ public class StringHook {
 		/**
 		 * Called by {@link String#contentEquals(CharSequence)}, to expose the String content.
 		 */
+		@SuppressWarnings("UnusedDeclaration")
 		public void setContent(char[] value, int offset) {
 			this.value = value;
 			this.offset = offset;
@@ -48,7 +50,8 @@ public class StringHook {
 		
 		@Override
 		public int length() {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("This is not supposed to get called. "
+					+ "Hint: was String.contentEquals was not instrumented because the agent is not loaded?");
 		}
 
 		@Override
