@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>be.coekaerts.wouter.flowtracker</groupId>
 			<artifactId>flowtracker-core</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>asm</groupId>
