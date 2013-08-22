@@ -18,7 +18,7 @@ import be.coekaerts.wouter.flowtracker.weaver.Types;
 class CaStore extends Store {
 	private final InsnNode storeInsn;
 	
-	CaStore(InsnNode storeInsn, Frame frame) {
+	CaStore(InsnNode storeInsn, Frame<BasicValue> frame) {
 		super(storeInsn, frame);
 		this.storeInsn = storeInsn;
 		

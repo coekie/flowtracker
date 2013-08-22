@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
-import org.objectweb.asm.ClassAdapter;
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -10,15 +10,13 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import be.coekaerts.wouter.flowtracker.hook.StringHook;
-
 /**
  * Instrumentation for {@link String}.
  * 
  * Adds a hack to make it possible for {@link StringHook} to get the tracker based on the
  * String.value and String.offset.
  */
-public class StringAdapter extends ClassAdapter {
+public class StringAdapter extends ClassVisitor {
 	private static final Type CONTENT_EXTRACTOR_TYPE =
 		Type.getType("Lbe/coekaerts/wouter/flowtracker/hook/StringHook$StringContentExtractor;");
 
@@ -26,7 +24,7 @@ public class StringAdapter extends ClassAdapter {
 	private boolean hasOffsetField;
 
 	public StringAdapter(ClassVisitor cv) {
-		super(cv);
+		super(Opcodes.ASM4, cv);
 	}
 
 	@Override public FieldVisitor visitField(int access, String name, String desc, String signature,

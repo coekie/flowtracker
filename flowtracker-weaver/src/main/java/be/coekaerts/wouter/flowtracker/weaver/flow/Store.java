@@ -11,20 +11,16 @@ import org.objectweb.asm.tree.analysis.Frame;
  */
 abstract class Store {
 //	private final AbstractInsnNode storeInsn;
-	private final Frame frame;
+	private final Frame<BasicValue> frame;
 	
-	protected Store(AbstractInsnNode storeInsn, Frame frame) {
+	protected Store(AbstractInsnNode storeInsn, Frame<BasicValue> frame) {
 //		this.storeInsn = storeInsn;
 		this.frame = frame;
 	}
 	
 	abstract void insertTrackStatements(MethodNode methodNode);
 	
-	protected Frame getFrame() {
-		return frame;
-	}
-	
 	protected BasicValue getStackFromTop(int indexFromTop) {
-		return (BasicValue) frame.getStack(frame.getStackSize() - indexFromTop - 1);
+		return frame.getStack(frame.getStackSize() - indexFromTop - 1);
 	}
 }

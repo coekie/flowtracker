@@ -31,7 +31,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<forkMode>pertest</forkMode>
-					<argLine>-javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/0.0.1-SNAPSHOT/flowtracker-agent-0.0.1-SNAPSHOT.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/0.0.1-SNAPSHOT/flowtracker-core-0.0.1-SNAPSHOT.jar;weaver=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/0.0.1-SNAPSHOT/flowtracker-weaver-0.0.1-SNAPSHOT.jar;asm=${settings.localRepository}/asm/asm-debug-all/${asm.version}/asm-debug-all-${asm.version}.jar</argLine>
+					<argLine>-javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/0.0.1-SNAPSHOT/flowtracker-agent-0.0.1-SNAPSHOT.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/0.0.1-SNAPSHOT/flowtracker-core-0.0.1-SNAPSHOT.jar;weaver=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/0.0.1-SNAPSHOT/flowtracker-weaver-0.0.1-SNAPSHOT.jar;asm=${settings.localRepository}/org/ow2/asm/asm-debug-all/${asm.version}/asm-debug-all-${asm.version}.jar</argLine>
 				</configuration>
 			</plugin>
 		</plugins>

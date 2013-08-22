@@ -11,19 +11,9 @@
 	<name>flowtracker</name>
 	<url>http://wouter.coekaerts.be/</url>
 
-	<repositories>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>ow2</id>
-			<url>http://maven.ow2.org/maven2/</url>
-		</repository>
-	</repositories>
-
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<asm.version>3.3</asm.version>
+		<asm.version>4.1</asm.version>
     <java.version>1.6</java.version>
 	</properties>
 	<modules>

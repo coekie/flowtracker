@@ -1,20 +1,18 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
-import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
-
 public class ClassHookSpec implements ClassAdapterFactory {
-	private class HookClassAdapter extends ClassAdapter {
+	private class HookClassAdapter extends ClassVisitor {
 		private HookClassAdapter(ClassVisitor cv) {
-			super(cv);
+			super(Opcodes.ASM4, cv);
 		}
 		
 		@Override

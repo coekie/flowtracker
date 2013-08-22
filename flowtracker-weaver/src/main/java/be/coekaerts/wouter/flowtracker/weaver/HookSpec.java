@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -47,7 +48,7 @@ public class HookSpec {
 
 	private class HookMethodAdapter extends AdviceAdapter {
 		private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
-			super(mv, access, name, desc);
+			super(Opcodes.ASM4, mv, access, name, desc);
 		}
 		
 		@Override
