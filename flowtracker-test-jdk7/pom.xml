@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>flowtracker</artifactId>
+		<groupId>be.coekaerts.wouter.flowtracker</groupId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>flowtracker-test-jdk7</artifactId>
+	<name>flowtracker-test-jdk7</name>
+  <properties>
+    <java.version>1.7</java.version>
+  </properties>
+	<dependencies>
+		<dependency>
+			<groupId>be.coekaerts.wouter.flowtracker</groupId>
+			<artifactId>flowtracker-core</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+    <testSourceDirectory>../flowtracker-test/src/test/java</testSourceDirectory>
+    <testResources><testResource><directory>../flowtracker-test/src/test/resources</directory></testResource></testResources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<forkMode>pertest</forkMode>
+					<argLine>-javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/0.0.1-SNAPSHOT/flowtracker-agent-0.0.1-SNAPSHOT.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/0.0.1-SNAPSHOT/flowtracker-core-0.0.1-SNAPSHOT.jar;weaver=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/0.0.1-SNAPSHOT/flowtracker-weaver-0.0.1-SNAPSHOT.jar;asm=${settings.localRepository}/asm/asm-debug-all/${asm.version}/asm-debug-all-${asm.version}.jar</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

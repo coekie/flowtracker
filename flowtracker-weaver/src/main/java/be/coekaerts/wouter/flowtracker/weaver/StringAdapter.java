@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.weaver;
 
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -20,11 +21,20 @@ import be.coekaerts.wouter.flowtracker.hook.StringHook;
 public class StringAdapter extends ClassAdapter {
 	private static final Type CONTENT_EXTRACTOR_TYPE =
 		Type.getType("Lbe/coekaerts/wouter/flowtracker/hook/StringHook$StringContentExtractor;");
-	
+
+	/** true if we've seen the field named "offset". JDK6 has this, JDK7 does not. */
+	private boolean hasOffsetField;
+
 	public StringAdapter(ClassVisitor cv) {
 		super(cv);
 	}
-	
+
+	@Override public FieldVisitor visitField(int access, String name, String desc, String signature,
+			Object value) {
+		if (name.equals("offset")) hasOffsetField = true;
+		return super.visitField(access, name, desc, signature, value);
+	}
+
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
@@ -38,7 +48,7 @@ public class StringAdapter extends ClassAdapter {
 	/**
 	 * Adapter for {@link String#contentEquals(CharSequence)}.
 	 */
-	private static class StringContainsAdapter extends GeneratorAdapter {
+	private class StringContainsAdapter extends GeneratorAdapter {
 
 		public StringContainsAdapter(MethodVisitor mv, int access, String name, String desc) {
 			super(mv, access, name, desc);
@@ -62,8 +72,14 @@ public class StringAdapter extends ClassAdapter {
 			checkCast(CONTENT_EXTRACTOR_TYPE);
 			loadThis();
 			getField(Types.STRING, "value", Types.CHAR_ARRAY);
-			loadThis();
-			getField(Types.STRING, "offset", Type.INT_TYPE);
+
+			if (hasOffsetField) {
+				loadThis();
+				getField(Types.STRING, "offset", Type.INT_TYPE);
+			} else {
+				push(0);
+			}
+
 			invokeVirtual(CONTENT_EXTRACTOR_TYPE, Method.getMethod("void setContent(char[],int)"));
 			visitInsn(Opcodes.ICONST_0);
 			returnValue();
