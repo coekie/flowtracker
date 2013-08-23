@@ -20,6 +20,7 @@
 		<module>flowtracker-agent</module>
 		<module>flowtracker-core</module>
 		<module>flowtracker-weaver</module>
+		<module>flowtracker-web</module>
 		<module>flowtracker-test</module>
 		<module>flowtracker-test-jdk7</module>
 	</modules>
