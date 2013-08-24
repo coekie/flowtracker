@@ -25,6 +25,10 @@ public class FlowTrackAgent {
       // make the instrumented JDK classes find the hook class
 			inst.appendToBootstrapClassLoaderSearch(new JarFile(getConfig("core")));
 
+      // do not track our own initialization
+      Class.forName("be.coekaerts.wouter.flowtracker.tracker.Trackers")
+          .getMethod("suspendOnCurrentThread").invoke(null);
+
       ClassLoader classLoader = createSpiderClassLoader();
 			inst.addTransformer(createTransformer(classLoader), true);
 
@@ -35,6 +39,10 @@ public class FlowTrackAgent {
 			inst.retransformClasses(StringBuilder.class.getSuperclass()); // AbstractStringBuilder is not public
 
       initWeb(classLoader);
+
+      // initialization done, unsuspend tracking
+      Class.forName("be.coekaerts.wouter.flowtracker.tracker.Trackers")
+          .getMethod("unsuspendOnCurrentThread").invoke(null);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			System.exit(1);

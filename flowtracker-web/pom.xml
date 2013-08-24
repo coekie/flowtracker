@@ -11,6 +11,11 @@
 	<artifactId>flowtracker-web</artifactId>
 	<name>flowtracker-web</name>
 	<dependencies>
+    <dependency>
+      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <artifactId>flowtracker-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.aggregate</groupId>
 			<artifactId>jetty-all</artifactId>

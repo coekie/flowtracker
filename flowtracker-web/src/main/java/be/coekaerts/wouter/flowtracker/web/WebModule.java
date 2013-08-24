@@ -1,25 +1,23 @@
 package be.coekaerts.wouter.flowtracker.web;
 
-import java.io.IOException;
+import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.net.InetSocketAddress;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 @SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
 public class WebModule {
   public WebModule() throws Exception {
     // Setup server and servlet context
     Server server = new Server(new InetSocketAddress("127.0.0.1", 8080));
+    server.setThreadPool(new TrackerSuspendingThreadPool());
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath("/");
     context.setClassLoader(WebModule.class.getClassLoader());
@@ -43,14 +41,18 @@ public class WebModule {
     server.start();
   }
 
-  public static class HelloServlet extends HttpServlet {
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws
-        ServletException, IOException {
-      response.setContentType("text/html");
-      response.setStatus(HttpServletResponse.SC_OK);
-      response.getWriter().println("<h1>Hello SimpleServlet</h1>");
+  /**
+   * ThreadPool that creates threads that have tracking disabled, because we do not want to track
+   * our own web server
+   */
+  private static class TrackerSuspendingThreadPool extends QueuedThreadPool {
+    @Override protected Thread newThread(final Runnable runnable) {
+      return super.newThread(new Runnable() {
+        @Override public void run() {
+          Trackers.suspendOnCurrentThread();
+          runnable.run();
+        }
+      });
     }
   }
 
