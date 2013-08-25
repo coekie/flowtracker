@@ -20,11 +20,20 @@ public class AsmTransformer implements ClassFileTransformer {
 	
 	public AsmTransformer() {
 		ClassHookSpec inputStreamReaderSpec = new ClassHookSpec(Type.getType("Ljava/io/InputStreamReader;"), InputStreamReaderHook.class);
+
+    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
+        HookSpec.THIS, HookSpec.ARG0);
+    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.lang.String)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
+        HookSpec.THIS, HookSpec.ARG0);
+    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.nio.charset.Charset)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
+        HookSpec.THIS, HookSpec.ARG0);
+    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.nio.charset.CharsetDecoder)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
+        HookSpec.THIS, HookSpec.ARG0);
+
 		inputStreamReaderSpec.addMethodHookSpec("int read()", "void afterRead1(int,java.io.InputStreamReader)", HookSpec.THIS);
-//		inputStreamReaderSpec.addMethodHookSpec("int read(char[])", "void afterReadCharArray(int,java.io.InputStreamReader,char[])",
-//				HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
 		inputStreamReaderSpec.addMethodHookSpec("int read(char[],int,int)", "void afterReadCharArrayOffset(int,java.io.InputStreamReader,char[],int)",
 				HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
+    // we assume the other methods ultimately delegate to the ones we hooked
 		specs.put("java/io/InputStreamReader", inputStreamReaderSpec);
 	}
 	

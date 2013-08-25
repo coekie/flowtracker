@@ -30,15 +30,23 @@ public class TrackerRepository {
 			return tracker;
 		}
 	}
-	
-	public static ContentTracker getOrCreateContentTracker(Object obj) {
-		ContentTracker tracker = (ContentTracker) getTracker(obj);
-		if (tracker == null) {
-			tracker = new ContentTracker();
-			setTracker(obj, tracker);
-			InterestRepository.contentTrackerCreated(obj, tracker);
-		}
-		return tracker;
+
+  public static ContentTracker createContentTracker(Object obj, String descriptor,
+      Object descriptorObj) {
+    ContentTracker tracker = createContentTracker(obj, descriptor, getTracker(descriptorObj));
+    InterestRepository.contentTrackerCreated(obj, tracker);
+    return tracker;
+  }
+
+  public static ContentTracker createContentTracker(Object obj, String descriptor,
+      Tracker descriptorTracker) {
+    ContentTracker tracker = new ContentTracker(descriptor, descriptorTracker);
+    setTracker(obj, tracker);
+    return tracker;
+  }
+
+	public static ContentTracker getContentTracker(Object obj) {
+		return (ContentTracker) getTracker(obj);
 	}
 	
 	public static void setTracker(Object obj, Tracker tracker) {
