@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import be.coekaerts.wouter.flowtracker.hook.URLHook;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
@@ -35,6 +36,11 @@ public class AsmTransformer implements ClassFileTransformer {
 				HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
     // we assume the other methods ultimately delegate to the ones we hooked
 		specs.put("java/io/InputStreamReader", inputStreamReaderSpec);
+
+    ClassHookSpec urlSpec = new ClassHookSpec(Type.getType("Ljava/net/URL;"), URLHook.class);
+    urlSpec.addMethodHookSpec("java.io.InputStream openStream()",
+        "void afterOpenStream(java.io.InputStream, java.net.URL)", HookSpec.THIS);
+    specs.put("java/net/URL", urlSpec);
 	}
 	
 	public byte[] transform(ClassLoader loader, String className,

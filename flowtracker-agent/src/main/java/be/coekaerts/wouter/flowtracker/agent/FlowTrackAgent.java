@@ -35,6 +35,7 @@ public class FlowTrackAgent {
 			// TODO avoid hardcoding of list of classes to retransform here
 			inst.retransformClasses(String.class);
 			inst.retransformClasses(InputStreamReader.class);
+			inst.retransformClasses(URL.class);
 			inst.retransformClasses(Arrays.class);
 			inst.retransformClasses(StringBuilder.class.getSuperclass()); // AbstractStringBuilder is not public
 

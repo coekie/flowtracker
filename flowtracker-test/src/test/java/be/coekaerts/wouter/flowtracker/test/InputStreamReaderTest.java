@@ -26,7 +26,6 @@ public class InputStreamReaderTest {
 	@Before
 	public void setupReader() {
 		stream = InputStreamReaderTest.class.getResourceAsStream(testFileName);
-    TrackerRepository.createTracker(stream); // TODO should be automatic
 		Assert.assertNotNull(stream);
 		reader = new InputStreamReader(stream);
 	}

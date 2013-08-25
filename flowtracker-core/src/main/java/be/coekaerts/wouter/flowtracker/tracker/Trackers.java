@@ -1,5 +1,3 @@
-// Copyright 2013, Square, Inc.
-
 package be.coekaerts.wouter.flowtracker.tracker;
 
 public class Trackers {
