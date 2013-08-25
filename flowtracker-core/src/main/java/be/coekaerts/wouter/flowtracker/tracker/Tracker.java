@@ -3,6 +3,8 @@ package be.coekaerts.wouter.flowtracker.tracker;
 import java.util.Map;
 
 public abstract class Tracker {
+  private String descriptor;
+  private Tracker descriptorTracker;
 
 	Tracker() {
 	}
@@ -87,8 +89,34 @@ public abstract class Tracker {
 	public void pushContentToTracker(int sourceIndex, int length, Tracker targetTracker, int targetIndex) {
 		throw new UnsupportedOperationException();
 	}
-	
-	public static void setSource(Object target, int targetIndex, int length, Object source, int sourceIndex) {
+
+  public void initDescriptor(String descriptor, Object descriptorObj) {
+    initDescriptor(descriptor, TrackerRepository.getTracker(descriptorObj));
+  }
+
+  /** Initializes {@link #getDescriptor()} and {@link #getDescriptorTracker()} */
+  public void initDescriptor(String descriptor, Tracker descriptorTracker) {
+    if (this.descriptor != null) {
+      throw new IllegalStateException("Descriptor already initialized: " + this.descriptor);
+    }
+    this.descriptor = descriptor;
+    this.descriptorTracker = descriptorTracker;
+  }
+
+  /** Description of what kind of object is being tracked and/or where it got created from */
+  public String getDescriptor() {
+    return descriptor;
+  }
+
+  /**
+   * Tracker of object used to created the target of this tracker. E.g. if this is a tracker for
+   * an InputStreamReader, the tracker for the InputStream is returned
+   */
+  public Tracker getDescriptorTracker() {
+    return descriptorTracker;
+  }
+
+  public static void setSource(Object target, int targetIndex, int length, Object source, int sourceIndex) {
 		setSourceTracker(target, targetIndex, length, TrackerRepository.getTracker(source), sourceIndex);
 	}
 

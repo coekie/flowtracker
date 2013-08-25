@@ -11,7 +11,7 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 public class InputStreamReaderHook {
 
   public static void afterInit(InputStreamReader target, InputStream source) {
-    TrackerRepository.createContentTracker(target, "InputStreamReader", source);
+    TrackerRepository.createContentTracker(target).initDescriptor("InputStreamReader", source);
   }
 
 	public static void afterRead1(int result, InputStreamReader target) {

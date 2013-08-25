@@ -31,17 +31,10 @@ public class TrackerRepository {
 		}
 	}
 
-  public static ContentTracker createContentTracker(Object obj, String descriptor,
-      Object descriptorObj) {
-    ContentTracker tracker = createContentTracker(obj, descriptor, getTracker(descriptorObj));
-    InterestRepository.contentTrackerCreated(obj, tracker);
-    return tracker;
-  }
-
-  public static ContentTracker createContentTracker(Object obj, String descriptor,
-      Tracker descriptorTracker) {
-    ContentTracker tracker = new ContentTracker(descriptor, descriptorTracker);
+  public static ContentTracker createContentTracker(Object obj) {
+    ContentTracker tracker = new ContentTracker();
     setTracker(obj, tracker);
+    InterestRepository.contentTrackerCreated(obj, tracker);
     return tracker;
   }
 
