@@ -2,10 +2,10 @@ package be.coekaerts.wouter.flowtracker.tracker;
 
 import java.util.Map.Entry;
 import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class DefaultTracker extends Tracker {
-	private final NavigableMap<Integer, PartTracker> map = new TreeMap<Integer, PartTracker>();
+	private final NavigableMap<Integer, PartTracker> map = new ConcurrentSkipListMap<Integer, PartTracker>();
 	private final TrackerDepth depth;
 	
 	/**
