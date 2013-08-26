@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.web;
 
 import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import java.util.ArrayList;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
@@ -15,9 +16,15 @@ public class HomePage extends WebPage {
 
     add(new ListView<ContentTracker>("tracker", new ArrayList<ContentTracker>(InterestRepository.getContentTrackers())) {
       @Override protected void populateItem(ListItem<ContentTracker> item) {
-        item.add(new Label("content", item.getModelObject().getContent().toString()));
+        ContentTracker tracker = item.getModelObject();
+        item.add(new Label("description", getRecursiveDescription(tracker)));
       }
     });
+  }
 
+  private String getRecursiveDescription(Tracker tracker) {
+    return tracker.getDescriptorTracker() == null ? tracker.getDescriptor()
+        : tracker.getDescriptor() + " from "
+            + getRecursiveDescription(tracker.getDescriptorTracker());
   }
 }
