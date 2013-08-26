@@ -1,10 +1,13 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class TrackerRepository {
-	private static final Map<Object, Tracker> objectToTracker = new IdentityHashMap<Object, Tracker>();
+  // TODO concurrent weak identity hash map? Use Guava's MapMaker (without pollution classpath)?
+	private static final Map<Object, Tracker> objectToTracker = Collections.synchronizedMap(
+      new IdentityHashMap<Object, Tracker>());
 	
 	public static Tracker getTracker(Object obj) {
     if (!Trackers.isActive()) return null;
