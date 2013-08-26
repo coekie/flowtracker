@@ -7,6 +7,7 @@ public class TrackerRepository {
 	private static final Map<Object, Tracker> objectToTracker = new IdentityHashMap<Object, Tracker>();
 	
 	public static Tracker getTracker(Object obj) {
+    if (!Trackers.isActive()) return null;
 		return objectToTracker.get(obj);
 	}
 	

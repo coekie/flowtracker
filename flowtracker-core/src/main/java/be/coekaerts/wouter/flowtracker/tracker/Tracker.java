@@ -121,8 +121,6 @@ public abstract class Tracker {
 	}
 
 	public static void setSourceTracker(Object target, int targetIndex, int length, Tracker sourceTracker, int sourceIndex) {
-    if (!Trackers.isActive()) return;
-
 		if (sourceTracker == null) {
 			// if we're not tracking the source, we don't care where its content goes to
 			// TODO if targetTracker already has info for that range, erase it!

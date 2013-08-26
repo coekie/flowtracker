@@ -3,8 +3,13 @@ package be.coekaerts.wouter.flowtracker.tracker;
 public class Trackers {
   private static ThreadLocal<Integer> suspended = new ThreadLocal<Integer>();
 
+  //private static long startTime = System.currentTimeMillis();
+
   /** Checks if tracking is currently active on this thread */
   public static boolean isActive() {
+    // uncommentable hack to fix debugging after a while if tracking completely breaks things
+    //if (System.currentTimeMillis() - startTime > 3000) return false;
+
     return suspended.get() == null;
   }
 

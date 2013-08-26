@@ -11,11 +11,13 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 public class InputStreamReaderHook {
 
   public static void afterInit(InputStreamReader target, InputStream source) {
-    TrackerRepository.createContentTracker(target).initDescriptor("InputStreamReader", source);
+    if (Trackers.isActive()) {
+      TrackerRepository.createContentTracker(target).initDescriptor("InputStreamReader", source);
+    }
   }
 
 	public static void afterRead1(int result, InputStreamReader target) {
-		if (Trackers.isActive() && result > 0) {
+		if (result > 0) {
 			ContentTracker tracker = TrackerRepository.getContentTracker(target);
       if (tracker != null) {
 			  tracker.append((char) result);
@@ -24,7 +26,7 @@ public class InputStreamReaderHook {
 	}
 	
 	public static void afterReadCharArrayOffset(int read, InputStreamReader target, char[] cbuf, int offset) {
-		if (Trackers.isActive() && read >= 0) {
+		if (read >= 0) {
 			ContentTracker tracker = TrackerRepository.getContentTracker(target);
       if (tracker != null) {
 			  tracker.append(cbuf, offset, read);
