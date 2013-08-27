@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import be.coekaerts.wouter.flowtracker.weaver.Types;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.InsnList;
@@ -9,8 +10,6 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
-import be.coekaerts.wouter.flowtracker.weaver.Types;
-
 /**
  * The storing of a char in a char[].
  */
@@ -19,7 +18,7 @@ class CaStore extends Store {
 	private final InsnNode storeInsn;
 	
 	CaStore(InsnNode storeInsn, Frame<BasicValue> frame) {
-		super(storeInsn, frame);
+		super(frame);
 		this.storeInsn = storeInsn;
 		
 		assert Types.CHAR_ARRAY.equals(getStackFromTop(2).getType());
@@ -40,8 +39,8 @@ class CaStore extends Store {
 			toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
 			toInsert.add(new InsnNode(Opcodes.ICONST_0));
 		}
-		
-		methodNode.maxStack += 2; // TODO using the frame info we could optimize this
+
+    methodNode.maxStack = Math.max(frame.getStackSize() + 2, methodNode.maxStack);
 		
 		Method hook = Method.getMethod("void setCharWithOrigin(char[],int,char,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
 		
