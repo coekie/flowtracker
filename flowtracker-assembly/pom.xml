@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>flowtracker</artifactId>
+    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>flowtracker-assembly</artifactId>
+  <name>flowtracker-assembly</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <artifactId>flowtracker-weaver</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <artifactId>flowtracker-web</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <artifactId>flowtracker-agent</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <descriptor>src/main/assembly/agent-and-deps.xml</descriptor>
+          <!-- Make the assembly the main artifact -->
+          <appendAssemblyId>false</appendAssemblyId>
+          <archive>
+            <manifestEntries>
+              <Premain-Class>be.coekaerts.wouter.flowtracker.agent.FlowTrackAgent</Premain-Class>
+              <Agent-Class>be.coekaerts.wouter.flowtracker.agent.FlowTrackAgent</Agent-Class>
+              <Can-Redefine-Classes>true</Can-Redefine-Classes>
+              <Can-Retransform-Classes>true</Can-Retransform-Classes>
+            </manifestEntries>
+          </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attached</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- don't execute tests during test phase -->
+          <excludes>
+            <exclude>**/*.java</exclude>
+          </excludes>
+        </configuration>
+        <!-- execute them at the integration-test phase -->
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <excludes>
+                <exclude>none</exclude>
+              </excludes>
+              <!-- exclude everything except test our test dependencies -->
+              <classpathDependencyScopeExclude>runtime</classpathDependencyScopeExclude>
+              <!-- add the assembly to the classpath -->
+              <!-- TODO this should just be an agent, not on the classpath -->
+              <additionalClasspathElements>
+                <additionalClasspathElement>
+                  ${project.build.directory}/${project.build.finalName}.jar
+                </additionalClasspathElement>
+              </additionalClasspathElements>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

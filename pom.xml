@@ -23,6 +23,7 @@
 		<module>flowtracker-web</module>
 		<module>flowtracker-test</module>
 		<module>flowtracker-test-jdk7</module>
+		<module>flowtracker-assembly</module>
 	</modules>
 
 	<build>
