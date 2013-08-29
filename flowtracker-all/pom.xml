@@ -8,8 +8,8 @@
     <groupId>be.coekaerts.wouter.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>flowtracker-assembly</artifactId>
-  <name>flowtracker-assembly</name>
+  <artifactId>flowtracker-all</artifactId>
+  <name>flowtracker-all</name>
 
   <dependencies>
     <dependency>

@@ -74,6 +74,7 @@ public class FlowTrackAgent {
     List<URL> spiderClasspath = new ArrayList<URL>();
 
     if (! config.containsKey("core")) { // paths not explicitly configured
+      // assume we're running from flowtracker-all jar with nested jars in it
       File expandDir = createExpandDir();
       JarFile jar = getThisJar();
       for (JarEntry entry : Collections.list(jar.entries())) {

@@ -19,10 +19,10 @@ public class AssemblyTest {
   @Test
   public void testSetupSanity() {
     // The point of this test class is to ensure the assembly works.
-    // To properly test that, we must not have anything else than the assembly (and junit) on the
+    // To properly test that, we must not have anything else than flowtracker-all and junit on the
     // classpath.
     for (String classpathPart : System.getProperty("java.class.path").split(":")) {
-      if (!classpathPart.contains("assembly") && !classpathPart.contains("junit")) {
+      if (!classpathPart.contains("flowtracker-all") && !classpathPart.contains("junit")) {
         fail("Unexpected classpath in test: " + classpathPart);
       }
     }
