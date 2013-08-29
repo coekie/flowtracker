@@ -6,6 +6,7 @@ import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.util.Arrays;
 import org.junit.Test;
+import org.objectweb.asm.ClassReader;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
@@ -17,7 +18,7 @@ import static org.junit.Assert.fail;
 public class AssemblyTest {
 
   @Test
-  public void testSetupSanity() {
+  public void setupSanity() {
     // The point of this test class is to ensure the assembly works.
     // To properly test that, we must not have anything else than flowtracker-all and junit on the
     // classpath.
@@ -26,6 +27,11 @@ public class AssemblyTest {
         fail("Unexpected classpath in test: " + classpathPart);
       }
     }
+  }
+
+  @Test(expected = NoClassDefFoundError.class)
+  public void dependenciesNotInAppClasspath() {
+    ClassReader.class.getMethods();
   }
 
   @Test
