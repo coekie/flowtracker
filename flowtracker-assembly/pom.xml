@@ -14,6 +14,11 @@
   <dependencies>
     <dependency>
       <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <artifactId>flowtracker-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>be.coekaerts.wouter.flowtracker</groupId>
       <artifactId>flowtracker-weaver</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -85,20 +90,14 @@
               <excludes>
                 <exclude>none</exclude>
               </excludes>
-              <!-- exclude everything except test our test dependencies -->
+              <!-- exclude everything except our test dependencies -->
               <classpathDependencyScopeExclude>runtime</classpathDependencyScopeExclude>
-              <!-- add the assembly to the classpath -->
-              <!-- TODO this should just be an agent, not on the classpath -->
-              <additionalClasspathElements>
-                <additionalClasspathElement>
-                  ${project.build.directory}/${project.build.finalName}.jar
-                </additionalClasspathElement>
-              </additionalClasspathElements>
+              <!-- activate the agent, without giving any options to it -->
+              <argLine>-javaagent:${project.build.directory}/${project.build.finalName}.jar</argLine>
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
-
 </project>

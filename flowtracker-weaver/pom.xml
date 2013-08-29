@@ -15,12 +15,12 @@
 			<groupId>be.coekaerts.wouter.flowtracker</groupId>
 			<artifactId>flowtracker-core</artifactId>
 			<version>${project.version}</version>
+      <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-debug-all</artifactId>
 			<version>${asm.version}</version>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>
