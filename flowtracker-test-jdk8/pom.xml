@@ -8,10 +8,10 @@
 		<groupId>be.coekaerts.wouter.flowtracker</groupId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>flowtracker-test-jdk7</artifactId>
-	<name>flowtracker-test-jdk7</name>
+	<artifactId>flowtracker-test-jdk8</artifactId>
+	<name>flowtracker-test-jdk8</name>
   <properties>
-    <java.version>1.7</java.version>
+    <java.version>1.8</java.version>
   </properties>
 	<dependencies>
 		<dependency>
