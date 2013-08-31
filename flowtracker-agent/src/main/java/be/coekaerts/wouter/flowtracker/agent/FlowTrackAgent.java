@@ -50,6 +50,8 @@ public class FlowTrackAgent {
       // AbstractStringBuilder is not public
 			inst.retransformClasses(StringBuilder.class.getSuperclass());
 
+      initShutdownHook();
+
       initWeb(spiderClassLoader);
 
       // initialization done, unsuspend tracking
@@ -182,5 +184,11 @@ public class FlowTrackAgent {
     } finally {
       in.close();
     }
+  }
+
+  private static void initShutdownHook() throws Exception {
+    Class.forName("be.coekaerts.wouter.flowtracker.util.ShutdownSuspender")
+        .getMethod("initShutdownHook", boolean.class)
+        .invoke(null, "true".equals(config.get("suspendShutdown")));
   }
 }
