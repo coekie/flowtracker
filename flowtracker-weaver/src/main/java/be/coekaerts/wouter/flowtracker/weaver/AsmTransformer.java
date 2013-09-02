@@ -1,19 +1,17 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
-import be.coekaerts.wouter.flowtracker.hook.URLHook;
+import be.coekaerts.wouter.flowtracker.hook.InputStreamReaderHook;
+import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
-
-import be.coekaerts.wouter.flowtracker.hook.InputStreamReaderHook;
-import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
 
 @SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
 public class AsmTransformer implements ClassFileTransformer {
@@ -36,12 +34,22 @@ public class AsmTransformer implements ClassFileTransformer {
 				HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
     // we assume the other methods ultimately delegate to the ones we hooked
 		specs.put("java/io/InputStreamReader", inputStreamReaderSpec);
-
-    ClassHookSpec urlSpec = new ClassHookSpec(Type.getType("Ljava/net/URL;"), URLHook.class);
-    urlSpec.addMethodHookSpec("java.io.InputStream openStream()",
-        "void afterOpenStream(java.io.InputStream, java.net.URL)", HookSpec.THIS);
-    specs.put("java/net/URL", urlSpec);
 	}
+
+  private ClassHookSpec getSpec(String className) {
+    if (className.endsWith("URLConnection")) {
+      return urlConnectionHook(className);
+    }
+    return specs.get(className);
+  }
+
+  private ClassHookSpec urlConnectionHook(String urlConnectionSubclass) {
+    ClassHookSpec spec = new ClassHookSpec(
+        Type.getType('L' + urlConnectionSubclass.replace('.', '/') + ';'), URLConnectionHook.class);
+    spec.addMethodHookSpec("java.io.InputStream getInputStream()",
+        "void afterGetInputStream(java.io.InputStream,java.net.URLConnection)", HookSpec.THIS);
+    return spec;
+  }
 	
 	public byte[] transform(ClassLoader loader, String className,
 			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
@@ -55,8 +63,9 @@ public class AsmTransformer implements ClassFileTransformer {
 		
 		try {
 			ClassAdapterFactory adapterFactory;
-			if (specs.containsKey(className)) {
-				adapterFactory = specs.get(className);
+      ClassHookSpec spec = getSpec(className);
+      if (spec != null) {
+				adapterFactory = spec;
 			} else if (className.startsWith("be/coekaerts/wouter/flowtracker/test/")
 					|| className.equals("java/util/Arrays")
 					|| className.equals("java/lang/String")
@@ -72,7 +81,7 @@ public class AsmTransformer implements ClassFileTransformer {
 			if (className.equals("java/lang/String")) {
 				adapter = new StringAdapter(adapter);
 			}
-			reader.accept(adapter, 0);
+			reader.accept(adapter, ClassReader.EXPAND_FRAMES);
 			byte[] result = writer.toByteArray();
 	
 			System.out.println("AsmTransformer: Transformed " + className);

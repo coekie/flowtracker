@@ -9,6 +9,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import sun.net.www.protocol.file.FileURLConnection;
 
 public class FlowTrackAgent {
 	/** Configuration passed to the agent */
@@ -45,7 +47,8 @@ public class FlowTrackAgent {
 			// TODO avoid hardcoding of list of classes to retransform here
 			inst.retransformClasses(String.class);
 			inst.retransformClasses(InputStreamReader.class);
-			inst.retransformClasses(URL.class);
+      inst.retransformClasses(URLConnection.class);
+      inst.retransformClasses(FileURLConnection.class);
 			inst.retransformClasses(Arrays.class);
       // AbstractStringBuilder is not public
 			inst.retransformClasses(StringBuilder.class.getSuperclass());
