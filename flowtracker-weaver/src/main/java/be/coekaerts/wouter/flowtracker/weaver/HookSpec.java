@@ -48,16 +48,19 @@ public class HookSpec {
 	public static HookArgument ARG2 = new ArgHookArgument(2);
 
 	private class HookMethodAdapter extends AdviceAdapter {
+    private boolean hasReturnType;
+
 		private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
 			super(Opcodes.ASM4, mv, access, name, desc);
+      hasReturnType = desc.charAt(desc.indexOf(')') + 1) != 'V';
 		}
 		
 		@Override
 		protected void onMethodExit(int opcode) {
 			if (opcode != ATHROW) {
-				// TODO don't copy result if method is void (e.g. constructor);
-				// definitely not when the stack is empty
-				dup(); // copy result
+        if (hasReturnType) {
+          dup(); // copy result; one for the hook, one to return
+        }
 				for (HookArgument argument : hookArguments) {
 					argument.load(this);
 				}
@@ -67,8 +70,8 @@ public class HookSpec {
 		
 		@Override
 		public void visitMaxs(int maxStack, int maxLocals) {
-			// pessimistic upper limit: we push hookArguments on the stack
-			super.visitMaxs(maxStack + hookArguments.length, maxLocals);
+			// pessimistic upper limit: we push hookArguments on the stack + optionally dup return value
+			super.visitMaxs(maxStack + hookArguments.length + (hasReturnType ? 1 : 0), maxLocals);
 		}
 	}
 	

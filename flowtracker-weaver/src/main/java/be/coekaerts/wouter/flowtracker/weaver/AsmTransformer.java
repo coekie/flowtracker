@@ -13,6 +13,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.util.CheckClassAdapter;
 
 @SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
 public class AsmTransformer implements ClassFileTransformer {
@@ -104,8 +105,9 @@ public class AsmTransformer implements ClassFileTransformer {
 				
 			ClassReader reader = new ClassReader(classfileBuffer);
 			ClassWriter writer = new ClassWriter(0);
-      // TODO CheckClassAdapter checkAdapter = new CheckClassAdapter(writer);
-      ClassVisitor adapter = adapterFactory.createClassAdapter(writer);
+      // NICE make checkAdapter optional; for development only
+      CheckClassAdapter checkAdapter = new CheckClassAdapter(writer);
+      ClassVisitor adapter = adapterFactory.createClassAdapter(checkAdapter);
 			if (className.equals("java/lang/String")) {
 				adapter = new StringAdapter(adapter);
 			}
