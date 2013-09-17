@@ -1,14 +1,15 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import java.util.Map.Entry;
-
-import junit.framework.Assert;
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
+import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
+import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerDepth;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import java.util.Map.Entry;
+import junit.framework.Assert;
 
 /**
  * Helper methods for testing Trackers
@@ -97,4 +98,16 @@ public class TrackTestHelper {
 		Assert.assertSame(prefix + "tracker", expectedTracker, part.getTracker());
 		Assert.assertEquals(prefix + "part index", expectedPartIndex, part.getIndex());
 	}
+
+  /**
+   * Assert that the given object is in the InterestRepository and has a descriptor with the given
+   * message and object
+   */
+  static void assertInterestAndDescriptor(Object sut, String expectedDescriptor, Object expectedDescriptorObj) {
+    ContentTracker tracker = TrackerRepository.getContentTracker(sut);
+    Assert.assertNotNull(tracker);
+    Assert.assertTrue(InterestRepository.getContentTrackers().contains(tracker));
+    Assert.assertEquals(expectedDescriptor, tracker.getDescriptor());
+    Assert.assertSame(TrackerRepository.getTracker(expectedDescriptorObj), tracker.getDescriptorTracker());
+  }
 }

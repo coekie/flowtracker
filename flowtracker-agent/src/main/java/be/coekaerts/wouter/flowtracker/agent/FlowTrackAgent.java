@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.net.URL;
@@ -47,6 +48,7 @@ public class FlowTrackAgent {
 			// TODO avoid hardcoding of list of classes to retransform here
 			inst.retransformClasses(String.class);
 			inst.retransformClasses(InputStreamReader.class);
+			inst.retransformClasses(OutputStreamWriter.class);
       inst.retransformClasses(URLConnection.class);
       inst.retransformClasses(FileURLConnection.class);
 			inst.retransformClasses(Arrays.class);

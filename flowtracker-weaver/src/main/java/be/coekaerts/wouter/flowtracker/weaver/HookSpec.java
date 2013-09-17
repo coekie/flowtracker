@@ -45,6 +45,7 @@ public class HookSpec {
 	
 	public static HookArgument ARG0 = new ArgHookArgument(0);
 	public static HookArgument ARG1 = new ArgHookArgument(1);
+	public static HookArgument ARG2 = new ArgHookArgument(2);
 
 	private class HookMethodAdapter extends AdviceAdapter {
 		private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
@@ -54,7 +55,8 @@ public class HookSpec {
 		@Override
 		protected void onMethodExit(int opcode) {
 			if (opcode != ATHROW) {
-				// TODO only copy result if our hook doesn't override it
+				// TODO don't copy result if method is void (e.g. constructor);
+				// definitely not when the stack is empty
 				dup(); // copy result
 				for (HookArgument argument : hookArguments) {
 					argument.load(this);

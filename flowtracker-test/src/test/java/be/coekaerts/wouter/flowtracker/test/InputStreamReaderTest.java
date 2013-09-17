@@ -1,7 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
-import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +45,7 @@ public class InputStreamReaderTest {
 	}
 	
 	@Test
-	public void readStuff() throws IOException {
+	public void readSingleChar() throws IOException {
 		Assert.assertEquals('a', reader.read());
 		assertContentEquals("a");
 		Assert.assertEquals('b', reader.read());
@@ -148,11 +147,9 @@ public class InputStreamReaderTest {
 	}
 
   private void assertInterestAndDescriptor(InputStreamReader reader) {
-    ContentTracker tracker = TrackerRepository.getContentTracker(reader);
-    Assert.assertNotNull(tracker);
-    Assert.assertTrue(InterestRepository.getContentTrackers().contains(tracker));
-    Assert.assertEquals("InputStreamReader", tracker.getDescriptor());
-    Assert.assertSame(TrackerRepository.getTracker(stream), tracker.getDescriptorTracker());
+    TrackTestHelper.assertInterestAndDescriptor(reader, "InputStreamReader", stream);
   }
+
+
 	
 }
