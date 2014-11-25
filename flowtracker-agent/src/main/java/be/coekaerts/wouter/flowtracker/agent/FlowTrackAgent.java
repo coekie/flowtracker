@@ -31,6 +31,9 @@ public class FlowTrackAgent {
 
 		try {
 			initProperties(agentArgs);
+      // system property to override agent args. Useful in IntelliJ which picks up the agent from
+      // the maven surefire settings but makes it impossible to change the arguments passed to it.
+      initProperties(System.getProperty("flowtracker.agentArgs"));
 
       /**
        * Classloader used to load the weaver and the web interface.
