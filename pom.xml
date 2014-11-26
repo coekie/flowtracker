@@ -22,8 +22,7 @@
 		<module>flowtracker-weaver</module>
 		<module>flowtracker-web</module>
 		<module>flowtracker-test</module>
-		<!-- not working on jdk8 yet; first step: upgrade asm
-    <module>flowtracker-test-jdk8</module>-->
+    <module>flowtracker-test-jdk8</module>
 		<module>flowtracker-all</module>
 	</modules>
 
