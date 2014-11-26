@@ -24,7 +24,7 @@ public class StringAdapter extends ClassVisitor {
 	private boolean hasOffsetField;
 
 	public StringAdapter(ClassVisitor cv) {
-		super(Opcodes.ASM4, cv);
+		super(Opcodes.ASM5, cv);
 	}
 
 	@Override public FieldVisitor visitField(int access, String name, String desc, String signature,
@@ -49,7 +49,7 @@ public class StringAdapter extends ClassVisitor {
 	private class StringContainsAdapter extends GeneratorAdapter {
 
 		public StringContainsAdapter(MethodVisitor mv, int access, String name, String desc) {
-			super(mv, access, name, desc);
+			super(Opcodes.ASM5, mv, access, name, desc);
 		}
 		
 		@Override

@@ -23,7 +23,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 		private String name;
 
 		public FlowClassAdapter(ClassVisitor cv) {
-			super(Opcodes.ASM4, cv);
+			super(Opcodes.ASM5, cv);
 		}
 		
 		@Override
@@ -44,7 +44,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 		private final MethodVisitor mv;
 		
 		public FlowMethodAdapter(MethodVisitor mv, String owner, int access, String name, String desc, String signature, String[] exceptions) {
-			super(access, name, desc, signature, exceptions);
+			super(Opcodes.ASM5, access, name, desc, signature, exceptions);
 			this.owner = owner;
 			this.mv = mv;
 		}
