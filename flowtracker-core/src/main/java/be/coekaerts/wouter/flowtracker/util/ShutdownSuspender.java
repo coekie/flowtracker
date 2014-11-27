@@ -14,7 +14,6 @@ public class ShutdownSuspender {
     ShutdownSuspender.class.notifyAll();
   }
 
-  @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
   public static void initShutdownHook(boolean initialSuspendShutdown) {
     suspendShutdown = initialSuspendShutdown;
     Runtime.getRuntime().addShutdownHook(new Thread() {
