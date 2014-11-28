@@ -8,8 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Keeps track of the trackers we're really interested in
  */
 public class InterestRepository {
-	private static final Collection<ContentTracker> contentTrackers = Collections.newSetFromMap(new ConcurrentHashMap<ContentTracker, Boolean>());
-	
+  private static final ConcurrentHashMap<Long, ContentTracker> contentTrackers =
+      new ConcurrentHashMap<>();
+
 	/**
 	 * Called when a ContentTracker has been created.
 	 * 
@@ -18,10 +19,14 @@ public class InterestRepository {
 	 * @param tracker The new tracker
 	 */
 	static void contentTrackerCreated(Object obj, ContentTracker tracker) {
-		contentTrackers.add(tracker);
+		contentTrackers.put(tracker.getTrackerId(), tracker);
 	}
 	
 	public static Collection<ContentTracker> getContentTrackers() {
-		return Collections.unmodifiableCollection(contentTrackers);
+		return Collections.unmodifiableCollection(contentTrackers.values());
 	}
+
+  public static ContentTracker getContentTracker(long contentTrackerId) {
+    return contentTrackers.get(contentTrackerId);
+  }
 }
