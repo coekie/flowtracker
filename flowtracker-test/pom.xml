@@ -29,8 +29,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<forkMode>pertest</forkMode>
-					<argLine>-javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/0.0.1-SNAPSHOT/flowtracker-agent-0.0.1-SNAPSHOT.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/0.0.1-SNAPSHOT/flowtracker-core-0.0.1-SNAPSHOT.jar;spiderClasspath=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/0.0.1-SNAPSHOT/flowtracker-weaver-0.0.1-SNAPSHOT.jar,${settings.localRepository}/org/ow2/asm/asm-debug-all/${asm.version}/asm-debug-all-${asm.version}.jar</argLine>
+          <!-- For cleaner debugging environment, but slower: -->
+          <!--<reuseForks>false</reuseForks>-->
+					<argLine>-javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/${project.version}/flowtracker-agent-${project.version}.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/${project.version}/flowtracker-core-${project.version}.jar;spiderClasspath=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/${project.version}/flowtracker-weaver-${project.version}.jar,${settings.localRepository}/org/ow2/asm/asm-debug-all/${asm.version}/asm-debug-all-${asm.version}.jar</argLine>
 				</configuration>
 			</plugin>
 		</plugins>
