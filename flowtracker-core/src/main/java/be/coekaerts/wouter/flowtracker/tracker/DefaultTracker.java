@@ -5,7 +5,7 @@ import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class DefaultTracker extends Tracker {
-	private final NavigableMap<Integer, PartTracker> map = new ConcurrentSkipListMap<Integer, PartTracker>();
+	private final NavigableMap<Integer, PartTracker> map = new ConcurrentSkipListMap<>();
 	private final TrackerDepth depth;
 	
 	/**

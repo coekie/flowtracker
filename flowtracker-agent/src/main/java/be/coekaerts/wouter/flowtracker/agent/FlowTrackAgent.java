@@ -81,7 +81,7 @@ public class FlowTrackAgent {
     // flowtracker-core jar, to be added to the bootstrap classpath
     JarFile coreJar = null;
     // all other flowtracker and dependencies jars
-    List<URL> spiderClasspath = new ArrayList<URL>();
+    List<URL> spiderClasspath = new ArrayList<>();
 
     if (! config.containsKey("core")) { // paths not explicitly configured
       // assume we're running from flowtracker-all jar with nested jars in it
@@ -176,8 +176,7 @@ public class FlowTrackAgent {
 
   private static void copy(InputStream in, File outFile) throws IOException {
     try {
-      FileOutputStream out = new FileOutputStream(outFile);
-      try {
+      try (FileOutputStream out = new FileOutputStream(outFile)) {
         byte[] buf = new byte[1024];
         while (true) {
           int r = in.read(buf);
@@ -186,8 +185,6 @@ public class FlowTrackAgent {
           }
           out.write(buf, 0, r);
         }
-      } finally {
-        out.close();
       }
     } finally {
       in.close();
