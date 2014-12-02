@@ -1,26 +1,29 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
+import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import org.junit.Test;
+
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertStringOriginPartsCompleteEqual;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertTrackerPartsCompleteEqual;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.part;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.strPart;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
-import junit.framework.Assert;
-
-import org.junit.Test;
-
-import be.coekaerts.wouter.flowtracker.hook.StringHook;
-import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
-import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class StringTest {
 	@Test
 	public void unkownTest() {
 		String a = "unkownTest";
-		Assert.assertNull(TrackerRepository.getTracker(a));
-		Assert.assertNull(StringHook.getStringTrack(a));
+		assertNull(TrackerRepository.getTracker(a));
+		assertNull(StringHook.getStringTrack(a));
 	}
 	
 	@Test
@@ -28,7 +31,7 @@ public class StringTest {
 		String a = trackCopy("concatTest1");
 		String b = trackCopy("concatTest2");
 		String ab = a.concat(b);
-		Assert.assertEquals("concatTest1concatTest2", ab);
+		assertEquals("concatTest1concatTest2", ab);
 		
 		assertStringOriginPartsCompleteEqual(ab, strPart(a), strPart(b));
 	}
@@ -37,7 +40,7 @@ public class StringTest {
 	public void substringBeginTest()  {
 		String foobar = trackCopy("foobar");
 		String foo = foobar.substring(0, 3);
-		Assert.assertEquals("foo", foo);
+		assertEquals("foo", foo);
 		
 		assertStringOriginPartsCompleteEqual(foo, strPart(foobar, 0, 3));
 	}
@@ -46,7 +49,7 @@ public class StringTest {
 	public void substringEndTest()  {
 		String foobar = trackCopy("foobar");
 		String bar = foobar.substring(3);
-		Assert.assertEquals("bar", bar);
+		assertEquals("bar", bar);
 		
 		assertStringOriginPartsCompleteEqual(bar, strPart(foobar, 3, 3));
 	}
@@ -55,17 +58,17 @@ public class StringTest {
 	public void stringTrackTest() {
 		char[] chars = track(new char[]{'a', 'b', 'c', 'd'});
 		String str = new String(chars, 1, 2); // create String "bc"
-		Assert.assertEquals("bc", str);
+		assertEquals("bc", str);
 		
 		// stringTrack points to the String.value char[]
 		PartTracker stringTrack = StringHook.getStringTrack(str);
-		Assert.assertNotNull(stringTrack);
-		Assert.assertEquals(0, stringTrack.getIndex());
-		Assert.assertEquals(2, stringTrack.getLength());
+		assertNotNull(stringTrack);
+		assertEquals(0, stringTrack.getIndex());
+		assertEquals(2, stringTrack.getLength());
 		
 		// String.value is copy of part of our chars
 		Tracker stringValueTracker = stringTrack.getTracker();
-		Assert.assertNotNull(stringValueTracker);
+		assertNotNull(stringValueTracker);
 		assertTrackerPartsCompleteEqual(stringValueTracker, part(chars, 1, 2));
 	}
 	
@@ -77,7 +80,7 @@ public class StringTest {
 		String str = "abcd";
 		StringBuilder sb = new StringBuilder();
 		sb.append("ab").append("cd");
-		Assert.assertTrue(str.contentEquals(sb));
-		Assert.assertFalse(str.contentEquals("foo"));
+		assertTrue(str.contentEquals(sb));
+		assertFalse(str.contentEquals("foo"));
 	}
 }

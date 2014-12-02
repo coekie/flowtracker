@@ -13,7 +13,7 @@ public class HookSpec {
 		abstract Type getType(HookSpec hookSpec);
 	}
 	
-	public static HookArgument THIS = new HookArgument() {
+	public static final HookArgument THIS = new HookArgument() {
 		@Override
 		void load(GeneratorAdapter generator) {
 			generator.loadThis();
@@ -43,12 +43,12 @@ public class HookSpec {
 		}		
 	}
 	
-	public static HookArgument ARG0 = new ArgHookArgument(0);
-	public static HookArgument ARG1 = new ArgHookArgument(1);
-	public static HookArgument ARG2 = new ArgHookArgument(2);
+	public static final HookArgument ARG0 = new ArgHookArgument(0);
+	public static final HookArgument ARG1 = new ArgHookArgument(1);
+	public static final HookArgument ARG2 = new ArgHookArgument(2);
 
 	private class HookMethodAdapter extends AdviceAdapter {
-    private boolean hasReturnType;
+    private final boolean hasReturnType;
 
 		private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
 			super(Opcodes.ASM5, mv, access, name, desc);

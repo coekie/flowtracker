@@ -17,7 +17,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 @SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
 public class AsmTransformer implements ClassFileTransformer {
-	private final Map<String, ClassHookSpec> specs = new HashMap<String, ClassHookSpec>();
+	private final Map<String, ClassHookSpec> specs = new HashMap<>();
 	
 	public AsmTransformer() {
 		ClassHookSpec inputStreamReaderSpec = new ClassHookSpec(Type.getType("Ljava/io/InputStreamReader;"), InputStreamReaderHook.class);

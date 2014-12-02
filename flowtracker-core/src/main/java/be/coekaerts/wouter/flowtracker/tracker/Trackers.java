@@ -1,7 +1,7 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
 public class Trackers {
-  private static ThreadLocal<Integer> suspended = new ThreadLocal<Integer>();
+  private static final ThreadLocal<Integer> suspended = new ThreadLocal<>();
 
   //private static long startTime = System.currentTimeMillis();
 

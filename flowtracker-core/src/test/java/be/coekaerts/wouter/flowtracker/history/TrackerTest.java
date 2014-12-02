@@ -1,16 +1,17 @@
 package be.coekaerts.wouter.flowtracker.history;
 
+import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.util.Map.Entry;
-
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
-import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertSame;
 
 public class TrackerTest {
 	private Object source, source2;
@@ -33,8 +34,8 @@ public class TrackerTest {
 		Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertNotNull(targetTracker);
-		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertNotNull(targetTracker);
+		assertEquals(1, targetTracker.getEntryCount());
 		
 		
 		// check the right entry is at position 5,6 and 7
@@ -43,8 +44,8 @@ public class TrackerTest {
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(7));
 		
 		// check that the ones before and after are null
-		Assert.assertNull(targetTracker.getEntryAt(4));
-		Assert.assertNull(targetTracker.getEntryAt(8));
+		assertNull(targetTracker.getEntryAt(4));
+		assertNull(targetTracker.getEntryAt(8));
 	}
 	
 	/**
@@ -56,7 +57,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 9, 2, source, 14); // setting 9,10, leaving a gap at 8
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(2, targetTracker.getEntryCount());
+		assertEquals(2, targetTracker.getEntryCount());
 		
 		// entry at 5 is still there
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
@@ -66,8 +67,8 @@ public class TrackerTest {
 		assertEntryEquals(9, 2, sourceTracker, 14, targetTracker.getEntryAt(10));
 		
 		// but not in between and after
-		Assert.assertNull(targetTracker.getEntryAt(8));
-		Assert.assertNull(targetTracker.getEntryAt(11));
+		assertNull(targetTracker.getEntryAt(8));
+		assertNull(targetTracker.getEntryAt(11));
 		
 	}
 	
@@ -80,7 +81,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 2, 2, source, 8); // setting 2,3, leaving a gap at 4
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(2, targetTracker.getEntryCount());
+		assertEquals(2, targetTracker.getEntryCount());
 		
 		// entry at 5 is still there
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
@@ -90,8 +91,8 @@ public class TrackerTest {
 		assertEntryEquals(2, 2, sourceTracker, 8, targetTracker.getEntryAt(3));
 		
 		// but not in between and before
-		Assert.assertNull(targetTracker.getEntryAt(1));
-		Assert.assertNull(targetTracker.getEntryAt(4));
+		assertNull(targetTracker.getEntryAt(1));
+		assertNull(targetTracker.getEntryAt(4));
 		
 	}
 	
@@ -104,7 +105,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 8, 2, source, 14); // setting 8,9 to 14,15
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEquals(1, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
 		assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(9));
@@ -119,7 +120,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 8, 2, source, 15); // setting 8,9 to 15,16 (skipping 14) 
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(2, targetTracker.getEntryCount());
+		assertEquals(2, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
 		assertEntryEquals(8, 2, sourceTracker, 15, targetTracker.getEntryAt(9));
@@ -134,7 +135,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 3, 2, source, 9); // setting 3,4 to 9,10
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEquals(1, targetTracker.getEntryCount());
 		
 		assertEntryEquals(3, 5, sourceTracker, 11, targetTracker.getEntryAt(3));
 		assertEntryEquals(3, 5, sourceTracker, 11, targetTracker.getEntryAt(7));
@@ -149,7 +150,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 3, 2, source, 8); // setting 3,4 to 8, 9 
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(2, targetTracker.getEntryCount());
+		assertEquals(2, targetTracker.getEntryCount());
 		
 		assertEntryEquals(3, 2, sourceTracker, 8, targetTracker.getEntryAt(3));
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
@@ -164,7 +165,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 8, 2, source2, 14); // setting 8,9 to 14,15
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(2, targetTracker.getEntryCount());
+		assertEquals(2, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 3, sourceTracker, 11, targetTracker.getEntryAt(5));
 		assertEntryEquals(8, 2, sourceTracker2, 14, targetTracker.getEntryAt(8));
@@ -181,7 +182,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 8, 2, source, 14); // setting 8,9 to 14,15
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEquals(1, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 7, sourceTracker, 11, targetTracker.getEntryAt(5));
 	}
@@ -193,7 +194,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 6, 4, source, 11); // setting 6,7,8,9 to 12,13,14,15
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEquals(1, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
 	}
@@ -221,7 +222,7 @@ public class TrackerTest {
 		// target still knows it came from first source.
 		assertEntryEquals(0, 10, sourceTracker, 0, targetTracker.getEntryAt(0));
 		
-		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEquals(1, targetTracker.getEntryCount());
 	}
 	
 	/**
@@ -238,7 +239,7 @@ public class TrackerTest {
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
 		
-		Assert.assertEquals(2, targetTracker.getEntryCount());
+		assertEquals(2, targetTracker.getEntryCount());
 		assertEntryEquals(0, 4, sourceTracker, 101, targetTracker.getEntryAt(0));
 		assertEntryEquals(4, 3, sourceTracker2, 200, targetTracker.getEntryAt(4));
 	}
@@ -252,7 +253,7 @@ public class TrackerTest {
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
 		
-		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEquals(1, targetTracker.getEntryCount());
 		assertEntryEquals(1, 3, sourceTracker, 100, targetTracker.getEntryAt(1));
 	}
 	
@@ -265,7 +266,7 @@ public class TrackerTest {
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
 		
-		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEquals(1, targetTracker.getEntryCount());
 		assertEntryEquals(3, 2, sourceTracker, 100, targetTracker.getEntryAt(3));
 	}
 	
@@ -279,7 +280,7 @@ public class TrackerTest {
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
 		
-		Assert.assertEquals(1, targetTracker.getEntryCount());
+		assertEquals(1, targetTracker.getEntryCount());
 		assertEntryEquals(1000, 4, sourceTracker, 102, targetTracker.getEntryAt(1000));
 	}
 	
@@ -296,7 +297,7 @@ public class TrackerTest {
 		Tracker.setSource(target, 1000, 3, middleman, 1);
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
-		Assert.assertEquals(3, targetTracker.getEntryCount());
+		assertEquals(3, targetTracker.getEntryCount());
 		assertEntryEquals(1000, 1, sourceTracker, 200, targetTracker.getEntryAt(1000));
 		assertEntryEquals(1001, 1, sourceTracker, 300, targetTracker.getEntryAt(1001));
 		assertEntryEquals(1002, 1, sourceTracker, 400, targetTracker.getEntryAt(1002));
@@ -304,13 +305,13 @@ public class TrackerTest {
 	
 	private void assertEntryEquals(int expectedEntryIndex, int expectedLength,
 			Tracker expectedTracker, int expectedPartIndex, Entry<Integer, PartTracker> entry) {
-		Assert.assertNotNull(entry);
-		Assert.assertEquals((Integer)expectedEntryIndex, entry.getKey());
+		assertNotNull(entry);
+		assertEquals((Integer) expectedEntryIndex, entry.getKey());
 		
 		PartTracker part = entry.getValue();
-		Assert.assertNotNull(part);
-		Assert.assertEquals(expectedLength, part.getLength());
-		Assert.assertSame(expectedTracker, part.getTracker());
-		Assert.assertEquals(expectedPartIndex, part.getIndex());
+		assertNotNull(part);
+		assertEquals(expectedLength, part.getLength());
+		assertSame(expectedTracker, part.getTracker());
+		assertEquals(expectedPartIndex, part.getIndex());
 	}
 }

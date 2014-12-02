@@ -1,5 +1,3 @@
-// Copyright 2013, Square, Inc.
-
 package be.coekaerts.wouter.flowtracker.test;
 
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;

@@ -33,7 +33,7 @@ public class ClassHookSpec implements ClassAdapterFactory {
 	private final Type targetClass;
 	private final Class<?> hookClass;
 	
-	private Map<Method, HookSpec> methodHookSpecs = new HashMap<Method, HookSpec>();
+	private final Map<Method, HookSpec> methodHookSpecs = new HashMap<>();
 	
 	public ClassHookSpec(Type targetClass, Class<?> hookClass) {
 		this.targetClass = targetClass;

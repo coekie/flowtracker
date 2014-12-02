@@ -1,8 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 public class EnvironmentTest {
 	
@@ -10,7 +10,7 @@ public class EnvironmentTest {
 	public void noAsm() {
 		try {
 			EnvironmentTest.class.getClassLoader().loadClass("org.objectweb.asm.ClassReader");
-			Assert.fail("Asm should not be in the app classpath");
+			fail("Asm should not be in the app classpath");
 		} catch (ClassNotFoundException expected) {
 		}
 	}

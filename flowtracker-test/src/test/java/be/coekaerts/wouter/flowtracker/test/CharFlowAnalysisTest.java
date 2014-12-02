@@ -1,13 +1,12 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import org.junit.Test;
+
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertPartsCompleteEqual;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.strPart;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import static org.junit.Assert.assertNull;
 
 public class CharFlowAnalysisTest {
 	@Test
@@ -44,7 +43,7 @@ public class CharFlowAnalysisTest {
 		array[0] = x;
 		array[1] = y;
 		
-		Assert.assertNull(TrackerRepository.getTracker(array));
+		assertNull(TrackerRepository.getTracker(array));
 		// or, it would be nicer if: assertPartsCompleteEqual(array, part(abc, 0, 2));
 	}
 	
@@ -65,6 +64,6 @@ public class CharFlowAnalysisTest {
 		array[0] = x;
 		
 		// we notice that it's not an easy case, so we don't track it
-		Assert.assertNull(TrackerRepository.getTracker(array));
+		assertNull(TrackerRepository.getTracker(array));
 	}
 }

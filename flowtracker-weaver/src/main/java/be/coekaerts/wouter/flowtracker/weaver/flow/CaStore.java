@@ -44,7 +44,7 @@ class CaStore extends Store {
 		
 		Method hook = Method.getMethod("void setCharWithOrigin(char[],int,char,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
 		
-		toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "be/coekaerts/wouter/flowtracker/hook/CharArrayHook", hook.getName(), hook.getDescriptor()));
+		toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "be/coekaerts/wouter/flowtracker/hook/CharArrayHook", hook.getName(), hook.getDescriptor(), false));
 		
 		methodNode.instructions.insert(storeInsn, toInsert);
 		methodNode.instructions.remove(storeInsn); // our hook takes care of the storing

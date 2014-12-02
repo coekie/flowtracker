@@ -52,7 +52,7 @@ class CharAtValue extends TrackableValue {
 		// insert code for: StringHook.getStringTrack(targetString);
 		toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
 		Method getStringTrack = Method.getMethod("be.coekaerts.wouter.flowtracker.tracker.PartTracker getStringTrack(String)");
-		toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "be/coekaerts/wouter/flowtracker/hook/StringHook", getStringTrack.getName(), getStringTrack.getDescriptor()));
+		toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "be/coekaerts/wouter/flowtracker/hook/StringHook", getStringTrack.getName(), getStringTrack.getDescriptor(), false));
 	}
 
 	@Override

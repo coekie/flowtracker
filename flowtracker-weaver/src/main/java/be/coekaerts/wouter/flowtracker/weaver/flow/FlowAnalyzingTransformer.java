@@ -53,7 +53,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 		public void visitEnd() {
 			super.visitEnd();
 			FlowInterpreter interpreter = new FlowInterpreter();
-			Analyzer<BasicValue> analyzer = new Analyzer<BasicValue>(interpreter);
+			Analyzer<BasicValue> analyzer = new Analyzer<>(interpreter);
 			try {
 				analyzer.analyze(owner, this);
 			} catch (AnalyzerException e) {
@@ -62,7 +62,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 			
 			Frame<BasicValue>[] frames = analyzer.getFrames();
 			
-			List<Store> stores = new ArrayList<Store>();
+			List<Store> stores = new ArrayList<>();
 			
 			for (int i = 0; i < instructions.size(); i++) {
 				AbstractInsnNode insn = instructions.get(i);

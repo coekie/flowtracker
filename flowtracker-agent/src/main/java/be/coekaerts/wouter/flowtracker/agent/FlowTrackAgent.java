@@ -24,7 +24,7 @@ import sun.net.www.protocol.file.FileURLConnection;
 
 public class FlowTrackAgent {
 	/** Configuration passed to the agent */
-  private static final Map<String, String> config = new HashMap<String, String>();
+  private static final Map<String, String> config = new HashMap<>();
 
 	public static void premain(String agentArgs, Instrumentation inst) {
 		System.out.println("FlowTrackAgent.premain");

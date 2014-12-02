@@ -6,7 +6,7 @@ public class ContentTracker extends OriginTracker {
   private static final AtomicLong idGenerator = new AtomicLong();
 
   private final long trackerId = idGenerator.getAndIncrement();
-	private StringBuilder content = new StringBuilder();
+	private final StringBuilder content = new StringBuilder();
 
   public void append(char c) {
 		content.append(c);
