@@ -36,7 +36,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -45,7 +44,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4</version>
+        <version>2.5.2</version>
         <configuration>
           <descriptor>src/main/assembly/agent-and-deps.xml</descriptor>
           <!-- Make the assembly the main artifact -->

@@ -23,7 +23,8 @@ public class AssemblyTest {
     // To properly test that, we must not have anything else than flowtracker-all and junit on the
     // classpath.
     for (String classpathPart : System.getProperty("java.class.path").split(":")) {
-      if (!classpathPart.contains("flowtracker-all") && !classpathPart.contains("junit")) {
+      if (!classpathPart.contains("flowtracker-all") && !classpathPart.contains("junit")
+          && !classpathPart.contains("hamcrest-core")) {
         fail("Unexpected classpath in test: " + classpathPart);
       }
     }
