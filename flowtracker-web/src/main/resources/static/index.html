@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<body ng-app="flowtracker">
+
+<div ng-controller="TrackersController as trackers">
+<b>Trackers:</b>
+<ul>
+  <li ng-repeat="tracker in trackers.trackerData.list track by tracker.id">{{tracker.description}}</li>
+</ul>
+</div>
+
+<div ng-controller="SettingsController as settings" ng-show="settings.settings">
+  <b>Settings:</b>
+  <form>
+    <label><input type="checkbox" ng-model="settings.settings.suspendShutdown">Suspend shutdown</label>
+    <button ng-click="settings.save()">Save</button>
+  </form>
+</div>
+
+<script src="angular.js"></script>
+<script src="flowtracker.js"></script>
+</body>
+</html>

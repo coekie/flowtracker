@@ -24,6 +24,7 @@
 		<module>flowtracker-test</module>
     <module>flowtracker-test-jdk8</module>
 		<module>flowtracker-all</module>
+    <module>flowtracker-all-dependencies</module>
 	</modules>
 
 	<build>
