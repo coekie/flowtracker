@@ -1,20 +1,64 @@
 <!doctype html>
 <html>
+<head>
+  <style>
+    .toplevel {
+      position: fixed;
+      height: 100%;
+      width: 100%;
+    }
+    .trackersWrapper {
+      position: absolute;
+      top: 0;
+      bottom: 50px;
+      width: 100%;
+    }
+    .trackerList {
+      float: left;
+      width: 50%;
+      height: 100%;
+      overflow-y: auto;
+    }
+    .trackerDetail {
+      float: right;
+      width: 50%;
+    }
+    .trackerListItem {
+      border: 1px solid gray;
+    }
+    .trackerListItemSelected {
+      background-color: lightblue;
+    }
+    .settingsWrapper {
+      position: absolute;
+      bottom: 0;
+      height: 50px;
+    }
+  </style>
+</head>
 <body ng-app="flowtracker">
-
-<div ng-controller="TrackersController as trackers">
-<b>Trackers:</b>
-<ul>
-  <li ng-repeat="tracker in trackers.trackerData.list track by tracker.id">{{tracker.description}}</li>
-</ul>
+<div class="toplevel">
+<div class="trackersWrapper" ng-controller="TrackersController as trackers">
+  <div class="trackerList">
+  <ul>
+    <li ng-repeat="tracker in trackers.trackerData.list track by tracker.id"
+        ng-click="trackers.select(tracker)"
+        ng-class="{trackerListItem: true, trackerListItemSelected: tracker == selectedTracker}">
+      {{tracker.description}}
+    </li>
+  </ul>
+  </div>
+  <div class="trackerDetail">{{selectedTracker.description}}</div>
 </div>
 
-<div ng-controller="SettingsController as settings" ng-show="settings.settings">
+<div class="settingsWrapper" ng-controller="SettingsController as settings" ng-show="settings.settings">
   <b>Settings:</b>
   <form>
     <label><input type="checkbox" ng-model="settings.settings.suspendShutdown">Suspend shutdown</label>
     <button ng-click="settings.save()">Save</button>
   </form>
+</div>
+
 </div>
 
 <script src="angular.js"></script>
