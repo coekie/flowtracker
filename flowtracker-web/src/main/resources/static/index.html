@@ -38,15 +38,14 @@
 </head>
 <body ng-app="flowtracker">
 <div class="toplevel">
+
 <div class="trackersWrapper" ng-controller="TrackersController as trackers">
   <div class="trackerList">
-  <ul>
-    <li ng-repeat="tracker in trackers.trackerData.list track by tracker.id"
+    <div ng-repeat="tracker in trackers.trackerData.list track by tracker.id"
         ng-click="trackers.select(tracker)"
         ng-class="{trackerListItem: true, trackerListItemSelected: tracker == selectedTracker}">
       {{tracker.description}}
-    </li>
-  </ul>
+    </div>
   </div>
   <div class="trackerDetail">{{selectedTracker.description}}</div>
 </div>
@@ -60,7 +59,6 @@
 </div>
 
 </div>
-
 <script src="angular.js"></script>
 <script src="flowtracker.js"></script>
 </body>
