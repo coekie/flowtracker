@@ -2,14 +2,21 @@
 
 'use strict';
 angular.module('flowtracker', [])
-    .controller('TrackersController', ['trackerLoader', '$scope', function(trackerLoader, $scope) {
-      this.trackerData = trackerLoader.trackerData;
-      $scope.selectedTracker = null;
-      this.select = function(tracker) {
-        console.log("selected: ", tracker);
-        $scope.selectedTracker = tracker;
-      }
-    }])
+    .controller('TrackersController', ['trackerLoader', '$scope', '$http',
+      function(trackerLoader, $scope, $http) {
+        this.trackerData = trackerLoader.trackerData;
+        $scope.selectedTracker = null;
+        this.select = function (tracker) {
+          console.log("selected: ", tracker);
+          $http.get('tracker/' + tracker.id).success(function(data) {
+            if (tracker == $scope.selectedTracker) { // ignore outdated response
+              $scope.selectedTrackerDetail = data;
+            }
+          });
+          $scope.selectedTracker = tracker;
+          $scope.selectedTrackerDetail = null;
+        }
+      }])
     .factory('trackerLoader', ['$http', function($http) {
       var trackerData = {list: []};
 

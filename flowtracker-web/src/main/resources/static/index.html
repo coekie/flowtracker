@@ -22,6 +22,8 @@
     .trackerDetail {
       float: right;
       width: 50%;
+      height: 100%;
+      overflow-y: auto;
     }
     .trackerListItem {
       border: 1px solid gray;
@@ -47,7 +49,7 @@
       {{tracker.description}}
     </div>
   </div>
-  <div class="trackerDetail">{{selectedTracker.description}}</div>
+  <div class="trackerDetail">{{selectedTrackerDetail.content}}</div>
 </div>
 
 <div class="settingsWrapper" ng-controller="SettingsController as settings" ng-show="settings.settings">

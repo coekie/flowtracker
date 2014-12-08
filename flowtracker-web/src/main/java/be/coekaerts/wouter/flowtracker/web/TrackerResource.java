@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -22,6 +23,14 @@ public class TrackerResource {
       result.add(new TrackerResponse(tracker));
     }
     return result;
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("{id}")
+  public TrackerDetailResponse get(@PathParam("id") long id) {
+    ContentTracker tracker = InterestRepository.getContentTracker(id);
+    return new TrackerDetailResponse(tracker.getContent().toString());
   }
 
   public static class TrackerResponse {
@@ -46,5 +55,17 @@ public class TrackerResource {
     return tracker.getDescriptorTracker() == null ? tracker.getDescriptor()
         : tracker.getDescriptor() + " from "
             + getRecursiveDescription(tracker.getDescriptorTracker());
+  }
+
+  public static class TrackerDetailResponse {
+    private final String content;
+
+    public TrackerDetailResponse(String content) {
+      this.content = content;
+    }
+
+    public String getContent() {
+      return content;
+    }
   }
 }
