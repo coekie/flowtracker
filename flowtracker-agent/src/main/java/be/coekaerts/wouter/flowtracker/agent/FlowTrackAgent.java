@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.agent;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -52,6 +53,7 @@ public class FlowTrackAgent {
 			inst.retransformClasses(String.class);
 			inst.retransformClasses(InputStreamReader.class);
 			inst.retransformClasses(OutputStreamWriter.class);
+      inst.retransformClasses(FilterInputStream.class);
       inst.retransformClasses(URLConnection.class);
       inst.retransformClasses(FileURLConnection.class);
 			inst.retransformClasses(Arrays.class);

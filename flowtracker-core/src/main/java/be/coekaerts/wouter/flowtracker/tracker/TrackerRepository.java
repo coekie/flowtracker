@@ -50,7 +50,8 @@ public class TrackerRepository {
 		if (obj == null) {
 			throw new NullPointerException("Can't track null");
 		} else if (getTracker(obj) != null) {
-			throw new IllegalStateException("Object already has a tracker: " + obj);
+			throw new IllegalStateException("Object already has a tracker: " + obj
+          + " has " + getTracker(obj));
 		} else {
 			objectToTracker.put(obj, tracker);
 		}
