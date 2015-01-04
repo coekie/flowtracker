@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import be.coekaerts.wouter.flowtracker.hook.FileInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.InputStreamReaderHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
@@ -21,7 +22,6 @@ public class AsmTransformer implements ClassFileTransformer {
 	
 	public AsmTransformer() {
 		ClassHookSpec inputStreamReaderSpec = new ClassHookSpec(Type.getType("Ljava/io/InputStreamReader;"), InputStreamReaderHook.class);
-
     inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
         HookSpec.THIS, HookSpec.ARG0);
     inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.lang.String)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
@@ -30,7 +30,6 @@ public class AsmTransformer implements ClassFileTransformer {
         HookSpec.THIS, HookSpec.ARG0);
     inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.nio.charset.CharsetDecoder)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
         HookSpec.THIS, HookSpec.ARG0);
-
 		inputStreamReaderSpec.addMethodHookSpec("int read()", "void afterRead1(int,java.io.InputStreamReader)", HookSpec.THIS);
 		inputStreamReaderSpec.addMethodHookSpec("int read(char[],int,int)", "void afterReadCharArrayOffset(int,java.io.InputStreamReader,char[],int)",
 				HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
@@ -62,6 +61,12 @@ public class AsmTransformer implements ClassFileTransformer {
         "void afterWriteStringOffset(java.io.OutputStreamWriter,java.lang.String,int,int)",
         HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
     specs.put("java/io/OutputStreamWriter", outputStreamWriterSpec);
+
+    ClassHookSpec fileInputStreamSpec = new ClassHookSpec(Type.getType("Ljava/io/FileInputStream;"),
+        FileInputStreamHook.class);
+    fileInputStreamSpec.addMethodHookSpec("void <init>(java.io.File)",
+        "void afterInit(java.io.FileInputStream,java.io.File)", HookSpec.THIS, HookSpec.ARG0);
+    specs.put("java/io/FileInputStream", fileInputStreamSpec);
 	}
 
   private ClassHookSpec getSpec(String className) {

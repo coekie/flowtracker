@@ -6,7 +6,7 @@ import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 
-class InputStreamHook {
+public class InputStreamHook {
   private static final Field filterInputStreamIn;
 
   static {
@@ -19,7 +19,7 @@ class InputStreamHook {
   }
 
   /** Returns the tracker of an input stream, ignoring wrapping FilterInputStreams */
-  static Tracker getInputStreamTracker(InputStream stream) {
+  public static Tracker getInputStreamTracker(InputStream stream) {
     Tracker tracker = TrackerRepository.getTracker(stream);
     if (tracker != null) {
       return tracker;

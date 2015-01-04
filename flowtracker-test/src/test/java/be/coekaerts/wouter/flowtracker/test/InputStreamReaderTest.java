@@ -150,8 +150,8 @@ public class InputStreamReaderTest {
     }));
 	}
 
-  @Test public void descriptorForFilteredInputStream() throws IOException {
-    // BufferedInputStream is a concrete subclass of FilterInputStream
+  /** Test if stuff in InputStreamHook is applied here */
+  @Test public void descriptorForOtherStreams() throws IOException {
     InputStreamReader reader = new InputStreamReader(new BufferedInputStream(stream));
     TrackTestHelper.assertInterestAndDescriptor(reader, "InputStreamReader", stream);
   }
