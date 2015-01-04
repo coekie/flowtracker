@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -149,10 +150,13 @@ public class InputStreamReaderTest {
     }));
 	}
 
-  private void assertInterestAndDescriptor(InputStreamReader reader) {
+  @Test public void descriptorForFilteredInputStream() throws IOException {
+    // BufferedInputStream is a concrete subclass of FilterInputStream
+    InputStreamReader reader = new InputStreamReader(new BufferedInputStream(stream));
     TrackTestHelper.assertInterestAndDescriptor(reader, "InputStreamReader", stream);
   }
 
-
-	
+  private void assertInterestAndDescriptor(InputStreamReader reader) {
+    TrackTestHelper.assertInterestAndDescriptor(reader, "InputStreamReader", stream);
+  }
 }

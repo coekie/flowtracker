@@ -1,18 +1,18 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
+import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class InputStreamReaderHook {
 
   public static void afterInit(InputStreamReader target, InputStream source) {
     if (Trackers.isActive()) {
-      TrackerRepository.createContentTracker(target).initDescriptor("InputStreamReader", source);
+      TrackerRepository.createContentTracker(target).initDescriptor("InputStreamReader",
+          InputStreamHook.getInputStreamTracker(source));
     }
   }
 

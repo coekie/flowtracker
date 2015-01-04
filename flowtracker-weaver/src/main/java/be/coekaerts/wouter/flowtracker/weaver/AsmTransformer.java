@@ -1,6 +1,5 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
-import be.coekaerts.wouter.flowtracker.hook.FilterInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.InputStreamReaderHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
@@ -63,13 +62,6 @@ public class AsmTransformer implements ClassFileTransformer {
         "void afterWriteStringOffset(java.io.OutputStreamWriter,java.lang.String,int,int)",
         HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
     specs.put("java/io/OutputStreamWriter", outputStreamWriterSpec);
-
-    ClassHookSpec filterInputStreamSpec = new ClassHookSpec(Type.getType("Ljava/io/FilterInputStream;"), FilterInputStreamHook.class);
-    filterInputStreamSpec.addMethodHookSpec("void <init>(java.io.InputStream)",
-        "void afterInit(java.io.FilterInputStream,java.io.InputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
-    specs.put("java/io/FilterInputStream", filterInputStreamSpec);
-
 	}
 
   private ClassHookSpec getSpec(String className) {
