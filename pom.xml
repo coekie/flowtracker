@@ -15,6 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<asm.version>5.0.3</asm.version>
     <java.version>1.7</java.version>
+    <flowtracker.extraAgentArgs/>
 	</properties>
 	<modules>
 		<module>flowtracker-agent</module>

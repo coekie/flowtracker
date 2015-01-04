@@ -19,8 +19,11 @@ import org.objectweb.asm.util.CheckClassAdapter;
 @SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
 public class AsmTransformer implements ClassFileTransformer {
 	private final Map<String, ClassHookSpec> specs = new HashMap<>();
-	
-	public AsmTransformer() {
+  private final String[] packagesToInstrument;
+
+	public AsmTransformer(Map<String, String> config) {
+    this.packagesToInstrument = config.containsKey("packages") ? config.get("packages").split(",")
+        : new String[0];
 		ClassHookSpec inputStreamReaderSpec = new ClassHookSpec(Type.getType("Ljava/io/InputStreamReader;"), InputStreamReaderHook.class);
     inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
         HookSpec.THIS, HookSpec.ARG0);
@@ -88,7 +91,7 @@ public class AsmTransformer implements ClassFileTransformer {
 			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
 			byte[] classfileBuffer) throws IllegalClassFormatException {
 
-		// don't transform our own classes
+		// never transform our own classes
 		if (className.startsWith("be/coekaerts/wouter/flowtracker")
 				&& ! className.startsWith("be/coekaerts/wouter/flowtracker/test")) {
 			return null;
@@ -99,10 +102,7 @@ public class AsmTransformer implements ClassFileTransformer {
       ClassHookSpec spec = getSpec(className);
       if (spec != null) {
 				adapterFactory = spec;
-			} else if (className.startsWith("be/coekaerts/wouter/flowtracker/test/")
-					|| className.equals("java/util/Arrays")
-					|| className.equals("java/lang/String")
-					|| className.equals("java/lang/AbstractStringBuilder")) {
+			} else if (shouldInstrument(className)) {
 				adapterFactory = new FlowAnalyzingTransformer();
 			} else {
 				return null;
@@ -123,9 +123,25 @@ public class AsmTransformer implements ClassFileTransformer {
 			return result;
 		} catch (Throwable t) {
 			// TODO better logging
+      System.err.println("Exception transforming " + className);
 			t.printStackTrace(); // make sure the exception isn't silently ignored
 			throw new RuntimeException("Exception while transforming class", t);
 		}
 	}
+
+  private boolean shouldInstrument(String className) {
+    if (className.equals("java/util/Arrays")
+        || className.equals("java/lang/String")
+        || className.equals("java/lang/AbstractStringBuilder")) {
+      return true;
+    }
+
+    for (String packageToInstrument : packagesToInstrument) {
+      if (className.startsWith(packageToInstrument)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
 }

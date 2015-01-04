@@ -121,7 +121,7 @@ public class FlowTrackAgent {
 	private static ClassFileTransformer createTransformer(ClassLoader classLoader) throws Exception {
 		Class<?> transformerClass = classLoader
         .loadClass("be.coekaerts.wouter.flowtracker.weaver.AsmTransformer");
-		return (ClassFileTransformer) transformerClass.newInstance();
+		return (ClassFileTransformer) transformerClass.getConstructor(Map.class).newInstance(config);
 	}
 
   // NICE: generic plugin system would be cleaner

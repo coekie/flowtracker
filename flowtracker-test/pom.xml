@@ -31,7 +31,7 @@
 				<configuration>
           <!-- For cleaner debugging environment, but slower: -->
           <!--<reuseForks>false</reuseForks>-->
-					<argLine>-javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/${project.version}/flowtracker-agent-${project.version}.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/${project.version}/flowtracker-core-${project.version}.jar;spiderClasspath=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/${project.version}/flowtracker-weaver-${project.version}.jar,${settings.localRepository}/org/ow2/asm/asm-debug-all/${asm.version}/asm-debug-all-${asm.version}.jar</argLine>
+					<argLine>-javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/${project.version}/flowtracker-agent-${project.version}.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/${project.version}/flowtracker-core-${project.version}.jar;spiderClasspath=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/${project.version}/flowtracker-weaver-${project.version}.jar,${settings.localRepository}/org/ow2/asm/asm-debug-all/${asm.version}/asm-debug-all-${asm.version}.jar;packages=be/coekaerts/wouter/flowtracker/test/;${flowtracker.extraAgentArgs}</argLine>
 				</configuration>
 			</plugin>
 		</plugins>
