@@ -74,8 +74,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 					if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
 							&& "(Ljava/lang/Object;ILjava/lang/Object;II)V".equals(mInsn.desc)) {
 						// if it is a copy from char[] to char[]
-						if ((frame.getStack(frame.getStackSize() - 5)).getType().equals(Types.CHAR_ARRAY)
-								&& (frame.getStack(frame.getStackSize() - 3)).getType().equals(Types.CHAR_ARRAY)) {
+						if (Types.CHAR_ARRAY.equals(frame.getStack(frame.getStackSize() - 5).getType())
+								&& Types.CHAR_ARRAY.equals((frame.getStack(frame.getStackSize() - 3)).getType())) {
 							// replace it with a call to our hook instead
 							mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/SystemHook";
 						}
