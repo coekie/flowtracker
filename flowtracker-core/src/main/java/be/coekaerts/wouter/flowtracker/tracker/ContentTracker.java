@@ -12,10 +12,6 @@ public class ContentTracker extends OriginTracker {
 		content.append(cbuf, offset, len);
 	}
 
-  public void append(String str, int offset, int len) {
-    content.append(str, offset, offset + len);
-  }
-	
 	@Override public CharSequence getContent() {
 		return content;
 	}

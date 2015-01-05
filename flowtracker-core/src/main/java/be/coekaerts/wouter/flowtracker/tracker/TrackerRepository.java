@@ -35,6 +35,11 @@ public class TrackerRepository {
 		}
 	}
 
+  public static void setInterestTracker(Object obj, Tracker tracker) {
+    setTracker(obj, tracker);
+    InterestRepository.interestTrackerCreated(tracker);
+  }
+
   public static ContentTracker createContentTracker(Object obj) {
     ContentTracker tracker = new ContentTracker();
     setTracker(obj, tracker);

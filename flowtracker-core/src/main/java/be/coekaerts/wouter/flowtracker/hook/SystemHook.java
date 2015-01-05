@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.hook;
 
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 
@@ -29,7 +30,8 @@ public class SystemHook {
     try {
       Field charOutField = PrintStream.class.getDeclaredField("charOut");
       charOutField.setAccessible(true);
-      TrackerRepository.createContentTracker(charOutField.get(printStream))
+      OutputStreamWriterHook.createOutputStreamWriterTracker(
+          (OutputStreamWriter) charOutField.get(printStream))
           .initDescriptor(name + ".charOut", null);
     } catch (NoSuchFieldException | IllegalAccessException e) {
       System.err.println("Cannot access PrintStream.charOut. Cannot hook System.out/err:");
