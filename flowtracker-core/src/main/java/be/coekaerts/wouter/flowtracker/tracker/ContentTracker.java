@@ -16,7 +16,7 @@ public class ContentTracker extends OriginTracker {
     content.append(str, offset, offset + len);
   }
 	
-	public CharSequence getContent() {
+	@Override public CharSequence getContent() {
 		return content;
 	}
 

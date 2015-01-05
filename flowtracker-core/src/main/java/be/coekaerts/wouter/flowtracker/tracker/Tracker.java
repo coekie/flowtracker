@@ -80,7 +80,7 @@ public abstract class Tracker {
 	/**
 	 * Returns the length of the content of the object this Tracker is tracking.
 	 * Note that this is not necessarily equal to the last known index in this tracker,
-	 * because there may be unkown content at the end (which is included in this length).
+	 * because there may be unknown content at the end (which is included in this length).
 	 */
 	public abstract int getLength();
 	
@@ -122,6 +122,10 @@ public abstract class Tracker {
    */
   public Tracker getDescriptorTracker() {
     return descriptorTracker;
+  }
+
+  public CharSequence getContent() {
+    throw new UnsupportedOperationException();
   }
 
   public static void setSource(Object target, int targetIndex, int length, Object source, int sourceIndex) {

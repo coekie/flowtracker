@@ -1,7 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
-import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
@@ -103,9 +102,9 @@ public class TrackTestHelper {
    * message and object
    */
   static void assertInterestAndDescriptor(Object sut, String expectedDescriptor, Object expectedDescriptorObj) {
-    ContentTracker tracker = TrackerRepository.getContentTracker(sut);
+    Tracker tracker = TrackerRepository.getTracker(sut);
     assertNotNull(tracker);
-    assertTrue(InterestRepository.getContentTrackers().contains(tracker));
+    assertTrue(InterestRepository.getTrackers().contains(tracker));
     assertEquals(expectedDescriptor, tracker.getDescriptor());
     assertSame(TrackerRepository.getTracker(expectedDescriptorObj), tracker.getDescriptorTracker());
   }

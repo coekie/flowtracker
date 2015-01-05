@@ -1,6 +1,5 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,8 +40,7 @@ public class OutputStreamWriterTest {
   }
 
   private void assertContentEquals(String expected) {
-    assertEquals(expected,
-        ((ContentTracker) TrackerRepository.getTracker(writer)).getContent().toString());
+    assertEquals(expected, TrackerRepository.getTracker(writer).getContent().toString());
   }
 
   @Test
