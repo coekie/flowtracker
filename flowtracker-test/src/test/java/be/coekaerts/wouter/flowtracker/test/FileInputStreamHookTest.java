@@ -23,11 +23,9 @@ public class FileInputStreamHookTest {
 
   @Test public void descriptor() throws IOException {
     FileInputStream fisFromFile = new FileInputStream(file);
-    TrackTestHelper.assertInterestAndDescriptor(fisFromFile,
-        "FileInputStream for " + file.getPath(), null);
+    TrackTestHelper.assertDescriptor(fisFromFile, "FileInputStream for " + file.getPath(), null);
 
     FileInputStream fisFromName = new FileInputStream(file.getPath());
-    TrackTestHelper.assertInterestAndDescriptor(fisFromName,
-        "FileInputStream for " + file.getPath(), null);
+    TrackTestHelper.assertDescriptor(fisFromName, "FileInputStream for " + file.getPath(), null);
   }
 }
