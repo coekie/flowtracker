@@ -1,11 +1,7 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public class ContentTracker extends OriginTracker {
-  private static final AtomicLong idGenerator = new AtomicLong();
 
-  private final long trackerId = idGenerator.getAndIncrement();
 	private final StringBuilder content = new StringBuilder();
 
   public void append(char c) {
@@ -28,8 +24,4 @@ public class ContentTracker extends OriginTracker {
 	public int getLength() {
 		return content.length();
 	}
-
-  public long getTrackerId() {
-    return trackerId;
-  }
 }

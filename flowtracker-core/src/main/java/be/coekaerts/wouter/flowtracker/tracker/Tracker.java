@@ -1,13 +1,21 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Tracker {
+  private static final AtomicLong idGenerator = new AtomicLong();
+  private final long trackerId = idGenerator.getAndIncrement();
+
   private String descriptor;
   private Tracker descriptorTracker;
 
 	Tracker() {
 	}
+
+  public long getTrackerId() {
+    return trackerId;
+  }
 	
 	/**
 	 * Set a range of the source of this tracker to the given tracker.
