@@ -16,10 +16,9 @@ public class InterestRepository {
    *
    * This kind of acts as a listener on TrackerRepository.
    *
-   * @param obj The object the tracker was created for
    * @param tracker The new tracker
    */
-  static void interestTrackerCreated(Object obj, Tracker tracker) {
+  static void interestTrackerCreated(Tracker tracker) {
     trackers.put(tracker.getTrackerId(), tracker);
   }
 

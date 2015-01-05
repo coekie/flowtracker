@@ -38,7 +38,7 @@ public class TrackerRepository {
   public static ContentTracker createContentTracker(Object obj) {
     ContentTracker tracker = new ContentTracker();
     setTracker(obj, tracker);
-    InterestRepository.interestTrackerCreated(obj, tracker);
+    InterestRepository.interestTrackerCreated(tracker);
     return tracker;
   }
 
