@@ -1,7 +1,6 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
@@ -15,11 +14,6 @@ public class SystemHook {
 	}
 
   public static void initialize() {
-    // not really used
-    TrackerRepository.createContentTracker(System.out).initDescriptor("System.out", null);
-    TrackerRepository.createContentTracker(System.err).initDescriptor("System.err", null);
-    TrackerRepository.createContentTracker(System.in).initDescriptor("System.in", null);
-
     // we have to add trackers to the existing streams, because they were created before flowtracker
     // was initialized.
     addSystemOutErrTracker(System.out, "System.out");
