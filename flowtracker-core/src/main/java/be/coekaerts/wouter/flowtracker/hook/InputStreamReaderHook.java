@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
 import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.InputStream;
@@ -11,25 +12,26 @@ public class InputStreamReaderHook {
 
   public static void afterInit(InputStreamReader target, InputStream source) {
     if (Trackers.isActive()) {
-      TrackerRepository.createContentTracker(target).initDescriptor("InputStreamReader",
-          InputStreamHook.getInputStreamTracker(source));
+      ContentTracker tracker = new ContentTracker();
+      tracker.initDescriptor("InputStreamReader", InputStreamHook.getInputStreamTracker(source));
+      TrackerRepository.setInterestTracker(target, tracker);
     }
   }
 
 	public static void afterRead1(int result, InputStreamReader target) {
 		if (result > 0) {
-			ContentTracker tracker = TrackerRepository.getContentTracker(target);
+			Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
-			  tracker.append((char) result);
+        ((ContentTracker) tracker).append((char) result);
       }
 		}
 	}
 	
 	public static void afterReadCharArrayOffset(int read, InputStreamReader target, char[] cbuf, int offset) {
 		if (read >= 0) {
-			ContentTracker tracker = TrackerRepository.getContentTracker(target);
+			Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
-			  tracker.append(cbuf, offset, read);
+        ((ContentTracker) tracker).append(cbuf, offset, read);
       }
 		}
 	}
