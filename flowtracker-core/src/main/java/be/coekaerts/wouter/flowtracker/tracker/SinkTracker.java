@@ -7,6 +7,10 @@ public class SinkTracker extends DefaultTracker {
     return content;
   }
 
+  @Override public int getLength() {
+    return content.length();
+  }
+
   public void append(char c) {
     content.append(c);
   }

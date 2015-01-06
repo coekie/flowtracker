@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -52,6 +53,10 @@ public class TrackTestHelper {
 		assertNotNull(tracker);
 		return new PartTracker(tracker, index, length);
 	}
+
+  public static PartTracker gap(int length) {
+    return new PartTracker(null, 0, length);
+  }
 	
 	public static void assertStringOriginPartsCompleteEqual(String target, PartTracker... expectedParts) {
 		assertTrackerPartsCompleteEqual(
@@ -72,19 +77,25 @@ public class TrackTestHelper {
 	 */
 	public static void assertTrackerPartsCompleteEqual(Tracker tracker, PartTracker... expectedParts) {
 		assertNotNull(tracker);
-		assertEquals(expectedParts.length, tracker.getEntryCount());
-		
+
 		int partNr = 0;
 		int index = 0;
 		for (PartTracker expectedPart : expectedParts) {
-			assertEntryEquals("Part " + partNr, index, expectedPart.getLength(), expectedPart.getTracker(),
-					expectedPart.getIndex(), tracker.getEntryAt(index));
-			index += expectedPart.getLength();
-			partNr++;
-		}
+      if (expectedPart.getTracker() == null) { // a gap
+        assertNull(tracker.getEntryAt(index));
+      } else {
+        assertEntryEquals("Part " + partNr, index, expectedPart.getLength(),
+            expectedPart.getTracker(),
+            expectedPart.getIndex(), tracker.getEntryAt(index));
+        partNr++;
+      }
+      index += expectedPart.getLength();
+    }
+
+    assertEquals(partNr, tracker.getEntryCount());
 	}
 
-	public static void assertEntryEquals(String message, int expectedEntryIndex, int expectedLength,
+	private static void assertEntryEquals(String message, int expectedEntryIndex, int expectedLength,
 				Tracker expectedTracker, int expectedPartIndex, Entry<Integer, PartTracker> entry) {
 		String prefix = message + ": ";
 		assertNotNull(prefix + "entry", entry);

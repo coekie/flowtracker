@@ -29,7 +29,8 @@ public abstract class Tracker {
 	 * @param sourceTracker Tracker to use as source
 	 * @param sourceIndex Index into <tt>sourceTracker</tt>
 	 */
-	abstract void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex);
+	public abstract void setSourceFromTracker(int index, int length, Tracker sourceTracker,
+      int sourceIndex);
 	
 	public abstract int getEntryCount();
 	

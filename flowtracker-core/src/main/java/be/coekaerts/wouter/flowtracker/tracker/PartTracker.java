@@ -42,7 +42,7 @@ public class PartTracker extends Tracker {
 	}
 
 	@Override
-	void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
+	public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
 		throw new UnsupportedOperationException();
 	}
 

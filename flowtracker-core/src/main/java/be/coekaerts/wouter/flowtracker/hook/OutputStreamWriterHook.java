@@ -26,6 +26,7 @@ public class OutputStreamWriterHook {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
       ((SinkTracker) tracker).append((char) c);
+      // TODO tracking of source of single character writes
     }
   }
 
@@ -33,6 +34,10 @@ public class OutputStreamWriterHook {
       int len) {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
+      Tracker sourceTracker = TrackerRepository.getTracker(cbuf);
+      if (sourceTracker != null) {
+        tracker.setSourceFromTracker(tracker.getLength(), len, sourceTracker, off);
+      }
       ((SinkTracker) tracker).append(cbuf, off, len);
     }
   }
@@ -41,6 +46,10 @@ public class OutputStreamWriterHook {
       int len) {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
+      Tracker sourceTracker = StringHook.getStringTrack(str);
+      if (sourceTracker != null) {
+        tracker.setSourceFromTracker(tracker.getLength(), len, sourceTracker, off);
+      }
       ((SinkTracker) tracker).append(str, off, len);
     }
   }

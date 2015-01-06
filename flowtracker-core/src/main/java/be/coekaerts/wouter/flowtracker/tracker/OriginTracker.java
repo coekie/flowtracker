@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 public abstract class OriginTracker extends Tracker {
 
 	@Override
-	void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
+	public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
 		throw new UnsupportedOperationException();
 	}
 
