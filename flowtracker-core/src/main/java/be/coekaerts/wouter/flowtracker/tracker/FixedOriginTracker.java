@@ -14,9 +14,4 @@ public class FixedOriginTracker extends OriginTracker {
 	public int getLength() {
 		return length;
 	}
-	
-	@Override
-	public boolean canGrow() {
-		return false;
-	}
 }

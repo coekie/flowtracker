@@ -47,24 +47,6 @@ public abstract class Tracker {
 		throw new UnsupportedOperationException();
 	}
 	
-	public int getStartIndexAt(int index) {
-		throw new UnsupportedOperationException();
-	}
-	
-	/**
-	 * A tracker is mutable if {@link #isContentMutable()} or {@link #canGrow()}.
-	 */
-	public final boolean isMutable() {
-		return isContentMutable() || canGrow();
-	}
-	
-	/**
-	 * Returns if the length of this tracker can become bigger.
-	 */
-	public boolean canGrow() {
-		return true;
-	}
-	
 	/**
 	 * Returns if the existing content of this tracker can be changed.
 	 * Extra content added at the end does not count.

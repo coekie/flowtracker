@@ -43,11 +43,10 @@ public class DefaultTracker extends Tracker {
 	@Override
 	public void pushContentToTracker(int sourceIndex, int length, Tracker targetTracker, int targetIndex) {
 		// we start at the part that contains sourceIndex
-		int startIndex = getStartIndexAt(sourceIndex);
-		// or, if there's no such part, at what comes after
-		if (startIndex == -1)
-			startIndex = sourceIndex;
-		
+    // or, if there's no such part, at what comes after
+    Entry<Integer, PartTracker> startEntry = getEntryAt(sourceIndex);
+    int startIndex = startEntry == null ? sourceIndex : startEntry.getKey();
+
 		for (Entry<Integer, PartTracker> entry : map.tailMap(startIndex).entrySet()) {
 			int partIndex = entry.getKey();
 			PartTracker part = entry.getValue();
@@ -130,14 +129,8 @@ public class DefaultTracker extends Tracker {
 			}
 		}
 	}
-	
-	@Override
-	public int getStartIndexAt(int index) {
-		Entry<Integer, PartTracker> entry = getEntryAt(index);
-		return entry == null ? -1 : entry.getKey();
-	}
-	
-	@Override
+
+  @Override
 	public int getEntryCount() {
 		return map.size();
 	}
