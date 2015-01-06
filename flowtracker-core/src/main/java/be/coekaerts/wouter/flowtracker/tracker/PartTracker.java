@@ -42,11 +42,6 @@ public class PartTracker extends Tracker {
 	}
 
 	@Override
-	public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public int getEntryCount() {
 		return 1;
 	}

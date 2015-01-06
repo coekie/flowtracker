@@ -29,8 +29,9 @@ public abstract class Tracker {
 	 * @param sourceTracker Tracker to use as source
 	 * @param sourceIndex Index into <tt>sourceTracker</tt>
 	 */
-	public abstract void setSourceFromTracker(int index, int length, Tracker sourceTracker,
-      int sourceIndex);
+	public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
+    throw new UnsupportedOperationException();
+  }
 	
 	public abstract int getEntryCount();
 	

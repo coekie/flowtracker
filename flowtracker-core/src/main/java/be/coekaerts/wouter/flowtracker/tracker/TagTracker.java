@@ -11,11 +11,6 @@ public class TagTracker extends Tracker {
     initDescriptor(descriptor, null);
   }
 
-  @Override public void setSourceFromTracker(int index, int length, Tracker sourceTracker,
-      int sourceIndex) {
-    throw new UnsupportedOperationException();
-  }
-
   @Override public int getEntryCount() {
     throw new UnsupportedOperationException();
   }
