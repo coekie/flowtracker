@@ -25,6 +25,16 @@
       height: 100%;
       overflow-y: auto;
     }
+    .trackerDetailPart {
+      /* draw a vertical line after each part, without influencing size */
+      margin-right: -1px;
+      border-right: 1px solid gray;
+    }
+    .trackerDetailPart:last-child {
+      /* undo border */
+      margin-right: 0px;
+      border-right: 0px;
+    }
     .trackerListItem {
       border: 1px solid gray;
     }
@@ -36,6 +46,7 @@
       bottom: 0;
       height: 50px;
     }
+
   </style>
 </head>
 <body ng-app="flowtracker">
@@ -49,7 +60,7 @@
       {{tracker.description}}
     </div>
   </div>
-  <div class="trackerDetail">{{selectedTrackerDetail.content}}</div>
+  <pre class="trackerDetail"><span class="trackerDetailPart" ng-repeat="part in selectedTrackerDetail.parts">{{part.content}}</span></div>
 </div>
 
 <div class="settingsWrapper" ng-controller="SettingsController as settings" ng-show="settings.settings">
