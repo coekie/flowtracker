@@ -98,7 +98,7 @@ public class TrackTestHelper {
 	private static void assertEntryEquals(String message, int expectedEntryIndex, int expectedLength,
 				Tracker expectedTracker, int expectedPartIndex, Entry<Integer, PartTracker> entry) {
 		String prefix = message + ": ";
-		assertNotNull(prefix + "entry", entry);
+		assertNotNull(prefix + "entry exists", entry);
 		assertEquals(prefix + "entry index", (Integer) expectedEntryIndex, entry.getKey());
 		
 		PartTracker part = entry.getValue();

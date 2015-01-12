@@ -132,7 +132,8 @@ public class AsmTransformer implements ClassFileTransformer {
   private boolean shouldInstrument(String className) {
     if (className.equals("java/util/Arrays")
         || className.equals("java/lang/String")
-        || className.equals("java/lang/AbstractStringBuilder")) {
+        || className.equals("java/lang/AbstractStringBuilder")
+        || className.equals("java/io/BufferedWriter")) {
       return true;
     }
 
