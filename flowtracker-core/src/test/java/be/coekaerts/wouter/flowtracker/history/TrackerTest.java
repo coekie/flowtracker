@@ -100,7 +100,7 @@ public class TrackerTest {
 	 * Merge an entry if it comes after an existing one that matches
 	 */
 	@Test
-	public void testMergeAfter() {
+	public void testTouchMergeWithPrevious() {
 		Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
 		Tracker.setSource(target, 8, 2, source, 14); // setting 8,9 to 14,15
 		
@@ -115,7 +115,7 @@ public class TrackerTest {
 	 * Don't merge an entry if it comes right after one, but the indices don't match
 	 */
 	@Test
-	public void testDontMergeAfterSkipped() {
+	public void testTouchDontMergeWithPreviousWhenSkipped() {
 		Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
 		Tracker.setSource(target, 8, 2, source, 15); // setting 8,9 to 15,16 (skipping 14) 
 		
@@ -130,22 +130,22 @@ public class TrackerTest {
 	 * Merge an entry if it comes before an existing one that matches
 	 */
 	@Test
-	public void testMergeBefore() {
+	public void testTouchMergeWithNext() {
 		Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
 		Tracker.setSource(target, 3, 2, source, 9); // setting 3,4 to 9,10
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
 		assertEquals(1, targetTracker.getEntryCount());
 		
-		assertEntryEquals(3, 5, sourceTracker, 11, targetTracker.getEntryAt(3));
-		assertEntryEquals(3, 5, sourceTracker, 11, targetTracker.getEntryAt(7));
+		assertEntryEquals(3, 5, sourceTracker, 9, targetTracker.getEntryAt(3));
+		assertEntryEquals(3, 5, sourceTracker, 9, targetTracker.getEntryAt(7));
 	}
 	
 	/**
 	 * Don't merge an entry if it comes right before one, but the indices don't match
 	 */
 	@Test
-	public void testDontMergeBeforeSkipped() {
+	public void testTouchDontMergeWithNextWhenSkipped() {
 		Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
 		Tracker.setSource(target, 3, 2, source, 8); // setting 3,4 to 8, 9 
 		
@@ -176,7 +176,7 @@ public class TrackerTest {
 	 */
 	@Test
 	@Ignore("not implemented")
-	public void testMergeMiddle() {
+	public void testTouchMergeWithPreviousAndNext() {
 		Tracker.setSource(target, 10, 2, source, 16); // setting 10,11 to 16,17
 		Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
 		Tracker.setSource(target, 8, 2, source, 14); // setting 8,9 to 14,15
@@ -188,26 +188,48 @@ public class TrackerTest {
 	}
 	
 	@Test
-	@Ignore("not implemented")
-	public void testOverlapMergeAfter() {
+	public void testOverlapMergeWithPrevious() {
 		Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
-		Tracker.setSource(target, 6, 4, source, 11); // setting 6,7,8,9 to 12,13,14,15
+		Tracker.setSource(target, 6, 4, source, 12); // setting 6,7,8,9 to 12,13,14,15
 		
 		Tracker targetTracker = TrackerRepository.getTracker(target);
 		assertEquals(1, targetTracker.getEntryCount());
 		
 		assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
 	}
-	
-	// TODO testOverlapMergeBefore
-	// TODO testOverlapOutsideMerge
-	// TODO testOverlapInsideMerge
-	
-	// TODO testCutBefore
-	// TODO testCutAfter
-	// TODO testCutInside
-	// TODO testMultiCut
-	
+
+  @Test
+  public void testOverlapMergeWithNext() {
+    Tracker.setSource(target, 6, 4, source, 12); // setting 6,7,8,9 to 12,13,14,15
+    Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(1, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
+  }
+
+  // TODO testOverlapMergeWithPreviousAndNext
+  // TODO testOverlapIgnoreWhenSame (1234, write 23 over 23)
+
+  @Test
+  @Ignore("not implemented")
+  public void testOverlapOverwritePrevious() {
+    Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
+    Tracker.setSource(target, 6, 4, source, 100); // setting 6,7,8,9 to 100,101,102,103
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(2, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 1, sourceTracker, 11, targetTracker.getEntryAt(5));
+    assertEntryEquals(6, 4, sourceTracker, 100, targetTracker.getEntryAt(6));
+  }
+
+	// TODO testOverlapOverwriteNext
+  // TODO testOverlapOverwriteCompletely
+  // TODO testOverlapOverwriteMultiple (combine testOverlapOverwritePrevious+Next+Completely*2)
+  // TODO testOverlapOverwriteMiddle
+
 	/** Use the source of the source if the direct source is mutable */
 	@Test
 	public void testMutableMiddleman() {

@@ -86,7 +86,7 @@ public class DefaultTracker extends Tracker {
 			PartTracker partBefore = entryBefore.getValue();
 			if (partBefore.getTracker() == sourceTracker &&
 					(index - entryBefore.getKey() == sourceIndex - partBefore.getIndex())) {
-				partBefore.setLength(partBefore.getLength() + length); // TODO this is wrong if they are overlapping
+				partBefore.setLength(index + length - entryBefore.getKey());
 				stored = true;
 			}
 		}
@@ -97,8 +97,9 @@ public class DefaultTracker extends Tracker {
 			PartTracker partAfter = entryAfter.getValue();
 			if (partAfter.getTracker() == sourceTracker &&
 					(index - entryAfter.getKey() == sourceIndex - partAfter.getIndex())) {
-				map.remove(entryAfter.getKey());
-				partAfter.setLength(partAfter.getLength() + length); // TODO this is wrong if they are overlapping
+        partAfter.setLength(entryAfter.getKey() + partAfter.getLength() - index);
+        partAfter.setIndex(sourceIndex);
+        map.remove(entryAfter.getKey());
 				map.put(index, partAfter);
 				stored = true;
 			}
