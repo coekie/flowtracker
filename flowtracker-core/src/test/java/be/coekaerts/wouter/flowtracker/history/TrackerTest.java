@@ -207,9 +207,6 @@ public class TrackerTest {
     assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
   }
 
-  // TODO testOverlapMergeWithPreviousAndNext
-  // TODO testOverlapIgnoreWhenSame (1234, write 23 over 23)
-
   @Test
   public void testOverlapOverwritePrevious() {
     Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
@@ -256,8 +253,23 @@ public class TrackerTest {
     assertEntryEquals(5, 3, sourceTracker, 100, targetTracker.getEntryAt(5));
   }
 
-  // TODO testOverlapOverwriteMultiple (combine testOverlapOverwritePrevious+Next+Completely*2)
+  @Test public void testOverlapOverwriteMultiple() {
+    Tracker.setSource(target, 5, 3, source, 10);
+    Tracker.setSource(target, 8, 3, source, 20);
+    Tracker.setSource(target, 11, 3, source, 30);
+    Tracker.setSource(target, 14, 3, source, 40);
+    Tracker.setSource(target, 6, 10, source, 100);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(3, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 1, sourceTracker, 10, targetTracker.getEntryAt(5));
+    assertEntryEquals(6, 10, sourceTracker, 100, targetTracker.getEntryAt(6));
+    assertEntryEquals(16, 1, sourceTracker, 42, targetTracker.getEntryAt(16));
+  }
+
   // TODO testOverlapOverwriteMiddle
+  // TODO testOverlapIgnoreWhenSame (1234, write 23 over 23)
 
 	/** Use the source of the source if the direct source is mutable */
 	@Test
