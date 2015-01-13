@@ -131,19 +131,12 @@ public class DefaultTracker extends Tracker {
 	@Override
 	public Entry<Integer, PartTracker> getEntryAt(int index) {
 		Entry<Integer, PartTracker> floorEntry = map.floorEntry(index);
-		if (floorEntry == null) {
-			// there is no entry at or before index
-			return null;
-		} else {
-			int partPosition = floorEntry.getKey();
-			if (partPosition + floorEntry.getValue().getLength() <= index) {
-				// the entry before this index is not long enough to cover this one
-				return null;
-			} else {
-				// we have match
-				return floorEntry;
-			}
-		}
+    // if the entry that starts at or before (floor) also extends (key + length) up to index
+    if (floorEntry != null && floorEntry.getKey() + floorEntry.getValue().getLength() > index) {
+      return floorEntry;
+    } else {
+      return null;
+    }
 	}
 
   public NavigableMap<Integer, PartTracker> getMap() {
