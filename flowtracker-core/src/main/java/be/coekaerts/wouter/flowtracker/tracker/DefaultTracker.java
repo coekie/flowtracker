@@ -122,12 +122,14 @@ public class DefaultTracker extends Tracker {
       if (e.getKey() + overlappedPart.getLength() < index + length) {
         map.remove(e.getKey());
       } else {
-        throw new Error("TODO cut off start of overlapped");
+        // cut start off of next part if this overwrites it
+        overlappedPart.setLength(e.getKey() + overlappedPart.getLength() - index - length);
+        overlappedPart.setIndex(overlappedPart.getIndex() + index + length - e.getKey());
+        map.remove(e.getKey());
+        map.put(index + length, overlappedPart);
       }
     }
 
-		// TODO remove/adjust overlapping parts
-		
 		if (!stored) {
 			PartTracker entry = new PartTracker(sourceTracker, sourceIndex, length);
 			map.put(index, entry);
