@@ -106,10 +106,7 @@ public class DefaultTracker extends Tracker {
 			PartTracker nextPart = nextEntry.getValue();
 			if (nextPart.getTracker() == sourceTracker &&
 					(index - nextEntry.getKey() == sourceIndex - nextPart.getIndex())) {
-        nextPart.setLength(nextEntry.getKey() + nextPart.getLength() - index);
-        nextPart.setIndex(sourceIndex);
-        map.remove(nextEntry.getKey());
-				map.put(index, nextPart);
+        updatePartStart(nextEntry.getKey(), index, nextPart);
 				stored = true;
 			}
 		}
@@ -123,10 +120,7 @@ public class DefaultTracker extends Tracker {
         map.remove(e.getKey());
       } else {
         // cut start off of next part if this overwrites it
-        overlappedPart.setLength(e.getKey() + overlappedPart.getLength() - index - length);
-        overlappedPart.setIndex(overlappedPart.getIndex() + index + length - e.getKey());
-        map.remove(e.getKey());
-        map.put(index + length, overlappedPart);
+        updatePartStart(e.getKey(), index + length, overlappedPart);
       }
     }
 
@@ -135,6 +129,15 @@ public class DefaultTracker extends Tracker {
 			map.put(index, entry);
 		}
 	}
+
+  /** Update the start index of a part, cutting of the start, or extending it backward */
+  private void updatePartStart(int oldStart, int newStart, PartTracker part) {
+    int delta = newStart - oldStart;
+    part.setLength(part.getLength() - delta);
+    part.setIndex(part.getIndex() + delta);
+    map.remove(oldStart);
+    map.put(newStart, part);
+  }
 	
 	@Override
 	public Entry<Integer, PartTracker> getEntryAt(int index) {
