@@ -79,34 +79,37 @@ public class DefaultTracker extends Tracker {
 	
 	private void doSetSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
 		boolean stored = false;
-		
+
 		// extend the entry right before it, if it matches
-		Entry<Integer, PartTracker> entryBefore = getEntryAt(index - 1);
-		if (entryBefore != null) {
-			PartTracker partBefore = entryBefore.getValue();
-			if (partBefore.getTracker() == sourceTracker && // same source
+		Entry<Integer, PartTracker> previousEntry = getEntryAt(index - 1);
+		if (previousEntry != null) {
+			PartTracker previousPart = previousEntry.getValue();
+			if (previousPart.getTracker() == sourceTracker && // same source
           // and relative index is the same (no gaps or skipping in the source)
-					(index - entryBefore.getKey() == sourceIndex - partBefore.getIndex())) {
+					(index - previousEntry.getKey() == sourceIndex - previousPart.getIndex())) {
         // update length, index and sourceIndex variables so the check below for merging with the
         // next entry works too
-        length = index + length - entryBefore.getKey();
-        index = entryBefore.getKey();
-        sourceIndex = partBefore.getIndex();
-        partBefore.setLength(length);
+        length = index + length - previousEntry.getKey();
+        index = previousEntry.getKey();
+        sourceIndex = previousPart.getIndex();
+        previousPart.setLength(length);
         stored = true;
-			}
+			} else if (previousEntry.getKey() + previousPart.getLength() > index) {
+        // cut end off of previous part if this overwrites it
+        previousPart.setLength(index - previousEntry.getKey());
+      }
 		}
 		
 		// extend the entry right after it (backwards), if it matches
-		Entry<Integer, PartTracker> entryAfter = getEntryAt(index + length);
-		if (entryAfter != null) {
-			PartTracker partAfter = entryAfter.getValue();
-			if (partAfter.getTracker() == sourceTracker &&
-					(index - entryAfter.getKey() == sourceIndex - partAfter.getIndex())) {
-        partAfter.setLength(entryAfter.getKey() + partAfter.getLength() - index);
-        partAfter.setIndex(sourceIndex);
-        map.remove(entryAfter.getKey());
-				map.put(index, partAfter);
+		Entry<Integer, PartTracker> nextEntry = getEntryAt(index + length);
+		if (nextEntry != null) {
+			PartTracker nextPart = nextEntry.getValue();
+			if (nextPart.getTracker() == sourceTracker &&
+					(index - nextEntry.getKey() == sourceIndex - nextPart.getIndex())) {
+        nextPart.setLength(nextEntry.getKey() + nextPart.getLength() - index);
+        nextPart.setIndex(sourceIndex);
+        map.remove(nextEntry.getKey());
+				map.put(index, nextPart);
 				stored = true;
 			}
 		}

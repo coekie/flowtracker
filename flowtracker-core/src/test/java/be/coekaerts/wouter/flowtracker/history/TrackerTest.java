@@ -5,7 +5,6 @@ import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.util.Map.Entry;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
@@ -212,7 +211,6 @@ public class TrackerTest {
   // TODO testOverlapIgnoreWhenSame (1234, write 23 over 23)
 
   @Test
-  @Ignore("not implemented")
   public void testOverlapOverwritePrevious() {
     Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
     Tracker.setSource(target, 6, 4, source, 100); // setting 6,7,8,9 to 100,101,102,103
