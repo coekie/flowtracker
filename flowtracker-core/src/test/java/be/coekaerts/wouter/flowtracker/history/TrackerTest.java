@@ -292,6 +292,9 @@ public class TrackerTest {
     assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
   }
 
+  // TODO testOverwriteWithGap e.g. abcd -> a??d
+  // TODO testOverwriteWithPartialGap e.g. abcd -> axyd, where y itself is a gap in its source
+
 	/** Use the source of the source if the direct source is mutable */
 	@Test
 	public void testMutableMiddleman() {
