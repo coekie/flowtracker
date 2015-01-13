@@ -78,67 +78,56 @@ public class DefaultTracker extends Tracker {
 	}
 	
 	private void doSetSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
-		boolean stored = false;
+    // check the entry right after the new one
+    Entry<Integer, PartTracker> nextEntry = getEntryAt(index + length);
+    if (nextEntry != null) {
+      PartTracker nextPart = nextEntry.getValue();
+      if (nextPart.getTracker() == sourceTracker && // same source
+          // and relative index is the same (no gaps or skipping in the source)
+          (index - nextEntry.getKey() == sourceIndex - nextPart.getIndex())) {
+        // if it aligns with the new one, merge two parts together by extending length
+        // note: old nextEntry itself will be removed below
+        length = nextEntry.getKey() + nextPart.getLength() - index;
+      } else if (nextEntry.getKey() != index + length) {
+        // else if it overlaps (so its start or middle will be overwritten),
+        // then add the remaining part of nextEntry (cut start off its beginning),
+        // starting where the new one ends
+        // note: old nextEntry itself will be removed below
+        int oldStart = nextEntry.getKey();
+        int newStart = index + length;
+        int delta = newStart - oldStart;
+        map.put(newStart, new PartTracker(nextPart.getTracker(),
+            nextPart.getIndex() + delta,
+            nextPart.getLength() - delta));
+      }
+    }
 
-		// extend the entry right before it, if it matches
+    // remove parts that start within the new part, they are overwritten
+    if (length > 1) {
+      map.subMap(index + 1, index + length - 1).clear();
+    }
+
+		// check the entry before the new one
 		Entry<Integer, PartTracker> previousEntry = getEntryAt(index - 1);
 		if (previousEntry != null) {
 			PartTracker previousPart = previousEntry.getValue();
 			if (previousPart.getTracker() == sourceTracker && // same source
           // and relative index is the same (no gaps or skipping in the source)
 					(index - previousEntry.getKey() == sourceIndex - previousPart.getIndex())) {
-        // update length, index and sourceIndex variables so the check below for merging with the
-        // next entry works too
-        length = index + length - previousEntry.getKey();
-        index = previousEntry.getKey();
-        sourceIndex = previousPart.getIndex();
-        previousPart.setLength(length);
-        stored = true;
+        // then extend the entry before it by extending its length
+        previousPart.setLength(index + length - previousEntry.getKey());
+        return; // no need to add the entry anymore
 			} else if (previousEntry.getKey() + previousPart.getLength() > index) {
         // cut end off of previous part if this overwrites it
         previousPart.setLength(index - previousEntry.getKey());
       }
 		}
-		
-		// extend the entry right after it (backwards), if it matches
-		Entry<Integer, PartTracker> nextEntry = getEntryAt(index + length);
-		if (nextEntry != null) {
-			PartTracker nextPart = nextEntry.getValue();
-			if (nextPart.getTracker() == sourceTracker &&
-					(index - nextEntry.getKey() == sourceIndex - nextPart.getIndex())) {
-        updatePartStart(nextEntry.getKey(), index, nextPart);
-				stored = true;
-			}
-		}
-		
-		// other overlapping parts: remove or reduce them
-    for (Entry<Integer, PartTracker> e = map.higherEntry(index);
-        e != null && e.getKey() < index + length;
-        e = map.higherEntry(e.getKey())) {
-      PartTracker overlappedPart = e.getValue();
-      if (e.getKey() + overlappedPart.getLength() < index + length) {
-        map.remove(e.getKey());
-      } else {
-        // cut start off of next part if this overwrites it
-        updatePartStart(e.getKey(), index + length, overlappedPart);
-      }
-    }
 
-		if (!stored) {
-			PartTracker entry = new PartTracker(sourceTracker, sourceIndex, length);
-			map.put(index, entry);
-		}
+    // add the new entry
+    PartTracker entry = new PartTracker(sourceTracker, sourceIndex, length);
+    map.put(index, entry);
 	}
 
-  /** Update the start index of a part, cutting of the start, or extending it backward */
-  private void updatePartStart(int oldStart, int newStart, PartTracker part) {
-    int delta = newStart - oldStart;
-    part.setLength(part.getLength() - delta);
-    part.setIndex(part.getIndex() + delta);
-    map.remove(oldStart);
-    map.put(newStart, part);
-  }
-	
 	@Override
 	public Entry<Integer, PartTracker> getEntryAt(int index) {
 		Entry<Integer, PartTracker> floorEntry = map.floorEntry(index);

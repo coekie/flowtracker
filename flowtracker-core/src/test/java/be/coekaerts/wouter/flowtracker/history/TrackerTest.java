@@ -268,7 +268,19 @@ public class TrackerTest {
     assertEntryEquals(16, 1, sourceTracker, 42, targetTracker.getEntryAt(16));
   }
 
-  // TODO testOverlapOverwriteMiddle
+  @Test
+  public void testOverwriteMiddle() {
+    Tracker.setSource(target, 5, 5, source, 11); // setting 5,6,7,8,9 to 11,12,13,14,15
+    Tracker.setSource(target, 6, 2, source, 100); // setting 6,7 to 100,101
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(3, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 1, sourceTracker, 11, targetTracker.getEntryAt(5));
+    assertEntryEquals(6, 2, sourceTracker, 100, targetTracker.getEntryAt(6));
+    assertEntryEquals(8, 2, sourceTracker, 14, targetTracker.getEntryAt(8));
+  }
+
   // TODO testOverlapIgnoreWhenSame (1234, write 23 over 23)
 
 	/** Use the source of the source if the direct source is mutable */

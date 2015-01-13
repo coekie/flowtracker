@@ -5,7 +5,7 @@ package be.coekaerts.wouter.flowtracker.tracker;
  */
 public class PartTracker extends Tracker {
 	private final Tracker tracker;
-	private int index;
+	private final int index;
 	private int length;
 	
 	public PartTracker(Tracker tracker, int index, int length) {
@@ -29,10 +29,6 @@ public class PartTracker extends Tracker {
 	public int getIndex() {
 		return index;
 	}
-
-  void setIndex(int index) {
-    this.index = index;
-  }
 
   /**
 	 * The length of this part
