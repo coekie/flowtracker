@@ -84,10 +84,16 @@ public class DefaultTracker extends Tracker {
 		Entry<Integer, PartTracker> entryBefore = getEntryAt(index - 1);
 		if (entryBefore != null) {
 			PartTracker partBefore = entryBefore.getValue();
-			if (partBefore.getTracker() == sourceTracker &&
+			if (partBefore.getTracker() == sourceTracker && // same source
+          // and relative index is the same (no gaps or skipping in the source)
 					(index - entryBefore.getKey() == sourceIndex - partBefore.getIndex())) {
-				partBefore.setLength(index + length - entryBefore.getKey());
-				stored = true;
+        // update length, index and sourceIndex variables so the check below for merging with the
+        // next entry works too
+        length = index + length - entryBefore.getKey();
+        index = entryBefore.getKey();
+        sourceIndex = partBefore.getIndex();
+        partBefore.setLength(length);
+        stored = true;
 			}
 		}
 		

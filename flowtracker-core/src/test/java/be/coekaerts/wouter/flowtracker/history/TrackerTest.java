@@ -175,7 +175,6 @@ public class TrackerTest {
 	 * Insert the missing part in between two entries with a hole, expect the three to merge
 	 */
 	@Test
-	@Ignore("not implemented")
 	public void testTouchMergeWithPreviousAndNext() {
 		Tracker.setSource(target, 10, 2, source, 16); // setting 10,11 to 16,17
 		Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
