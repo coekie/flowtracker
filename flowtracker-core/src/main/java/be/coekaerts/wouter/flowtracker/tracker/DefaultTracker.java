@@ -114,6 +114,18 @@ public class DefaultTracker extends Tracker {
 			}
 		}
 		
+		// other overlapping parts: remove or reduce them
+    for (Entry<Integer, PartTracker> e = map.higherEntry(index);
+        e != null && e.getKey() < index + length;
+        e = map.higherEntry(e.getKey())) {
+      PartTracker overlappedPart = e.getValue();
+      if (e.getKey() + overlappedPart.getLength() < index + length) {
+        map.remove(e.getKey());
+      } else {
+        throw new Error("TODO cut off start of overlapped");
+      }
+    }
+
 		// TODO remove/adjust overlapping parts
 		
 		if (!stored) {

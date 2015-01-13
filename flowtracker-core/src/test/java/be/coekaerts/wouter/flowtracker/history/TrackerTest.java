@@ -223,7 +223,29 @@ public class TrackerTest {
   }
 
 	// TODO testOverlapOverwriteNext
-  // TODO testOverlapOverwriteCompletely
+
+  @Test
+  public void testOverlapOverwriteCompletely() {
+    Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
+    Tracker.setSource(target, 4, 5, source, 100); // setting 4,5,6,7,8 to 100,...
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(1, targetTracker.getEntryCount());
+
+    assertEntryEquals(4, 5, sourceTracker, 100, targetTracker.getEntryAt(4));
+  }
+
+  @Test
+  public void testOverwriteExactSame() {
+    Tracker.setSource(target, 5, 3, source, 11); // setting 5,6,7 to 11,12,13
+    Tracker.setSource(target, 5, 3, source, 100); // setting 5,6,7 to 100,101,102
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(1, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 3, sourceTracker, 100, targetTracker.getEntryAt(5));
+  }
+
   // TODO testOverlapOverwriteMultiple (combine testOverlapOverwritePrevious+Next+Completely*2)
   // TODO testOverlapOverwriteMiddle
 
