@@ -18,24 +18,33 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 @SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
 public class AsmTransformer implements ClassFileTransformer {
-	private final Map<String, ClassHookSpec> specs = new HashMap<>();
+  private final Map<String, ClassHookSpec> specs = new HashMap<>();
   private final String[] packagesToInstrument;
 
-	public AsmTransformer(Map<String, String> config) {
+  public AsmTransformer(Map<String, String> config) {
     this.packagesToInstrument = config.containsKey("packages") ? config.get("packages").split(",")
         : new String[0];
-		ClassHookSpec inputStreamReaderSpec = new ClassHookSpec(Type.getType("Ljava/io/InputStreamReader;"), InputStreamReaderHook.class);
-    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
+    ClassHookSpec inputStreamReaderSpec =
+        new ClassHookSpec(Type.getType("Ljava/io/InputStreamReader;"), InputStreamReaderHook.class);
+    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream)",
+        "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
         HookSpec.THIS, HookSpec.ARG0);
-    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.lang.String)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
+    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.lang.String)",
+        "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
         HookSpec.THIS, HookSpec.ARG0);
-    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.nio.charset.Charset)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
+    inputStreamReaderSpec.addMethodHookSpec(
+        "void <init>(java.io.InputStream, java.nio.charset.Charset)",
+        "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
         HookSpec.THIS, HookSpec.ARG0);
-    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.nio.charset.CharsetDecoder)", "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
+    inputStreamReaderSpec.addMethodHookSpec(
+        "void <init>(java.io.InputStream, java.nio.charset.CharsetDecoder)",
+        "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
         HookSpec.THIS, HookSpec.ARG0);
-		inputStreamReaderSpec.addMethodHookSpec("int read()", "void afterRead1(int,java.io.InputStreamReader)", HookSpec.THIS);
-		inputStreamReaderSpec.addMethodHookSpec("int read(char[],int,int)", "void afterReadCharArrayOffset(int,java.io.InputStreamReader,char[],int)",
-				HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
+    inputStreamReaderSpec.addMethodHookSpec("int read()",
+        "void afterRead1(int,java.io.InputStreamReader)", HookSpec.THIS);
+    inputStreamReaderSpec.addMethodHookSpec("int read(char[],int,int)",
+        "void afterReadCharArrayOffset(int,java.io.InputStreamReader,char[],int)",
+        HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
     // we assume the other methods ultimately delegate to the ones we hooked
     specs.put("java/io/InputStreamReader", inputStreamReaderSpec);
 
@@ -70,7 +79,7 @@ public class AsmTransformer implements ClassFileTransformer {
     fileInputStreamSpec.addMethodHookSpec("void <init>(java.io.File)",
         "void afterInit(java.io.FileInputStream,java.io.File)", HookSpec.THIS, HookSpec.ARG0);
     specs.put("java/io/FileInputStream", fileInputStreamSpec);
-	}
+  }
 
   private ClassHookSpec getSpec(String className) {
     if (className.endsWith("URLConnection")) {
@@ -86,48 +95,48 @@ public class AsmTransformer implements ClassFileTransformer {
         "void afterGetInputStream(java.io.InputStream,java.net.URLConnection)", HookSpec.THIS);
     return spec;
   }
-	
-	public byte[] transform(ClassLoader loader, String className,
-			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
-			byte[] classfileBuffer) throws IllegalClassFormatException {
 
-		// never transform our own classes
-		if (className.startsWith("be/coekaerts/wouter/flowtracker")
-				&& ! className.startsWith("be/coekaerts/wouter/flowtracker/test")) {
-			return null;
-		}
-		
-		try {
-			ClassAdapterFactory adapterFactory;
+  public byte[] transform(ClassLoader loader, String className,
+      Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
+      byte[] classfileBuffer) throws IllegalClassFormatException {
+
+    // never transform our own classes
+    if (className.startsWith("be/coekaerts/wouter/flowtracker")
+        && !className.startsWith("be/coekaerts/wouter/flowtracker/test")) {
+      return null;
+    }
+
+    try {
+      ClassAdapterFactory adapterFactory;
       ClassHookSpec spec = getSpec(className);
       if (spec != null) {
-				adapterFactory = spec;
-			} else if (shouldInstrument(className)) {
-				adapterFactory = new FlowAnalyzingTransformer();
-			} else {
-				return null;
-			}
-				
-			ClassReader reader = new ClassReader(classfileBuffer);
-			ClassWriter writer = new ClassWriter(0);
+        adapterFactory = spec;
+      } else if (shouldInstrument(className)) {
+        adapterFactory = new FlowAnalyzingTransformer();
+      } else {
+        return null;
+      }
+
+      ClassReader reader = new ClassReader(classfileBuffer);
+      ClassWriter writer = new ClassWriter(0);
       // NICE make checkAdapter optional; for development only
       CheckClassAdapter checkAdapter = new CheckClassAdapter(writer);
       ClassVisitor adapter = adapterFactory.createClassAdapter(checkAdapter);
-			if (className.equals("java/lang/String")) {
-				adapter = new StringAdapter(adapter);
-			}
-			reader.accept(adapter, ClassReader.EXPAND_FRAMES);
-			byte[] result = writer.toByteArray();
+      if (className.equals("java/lang/String")) {
+        adapter = new StringAdapter(adapter);
+      }
+      reader.accept(adapter, ClassReader.EXPAND_FRAMES);
+      byte[] result = writer.toByteArray();
 
-			System.out.println("AsmTransformer: Transformed " + className);
-			return result;
-		} catch (Throwable t) {
-			// TODO better logging
+      System.out.println("AsmTransformer: Transformed " + className);
+      return result;
+    } catch (Throwable t) {
+      // TODO better logging
       System.err.println("Exception transforming " + className);
-			t.printStackTrace(); // make sure the exception isn't silently ignored
-			throw new RuntimeException("Exception while transforming class", t);
-		}
-	}
+      t.printStackTrace(); // make sure the exception isn't silently ignored
+      throw new RuntimeException("Exception while transforming class", t);
+    }
+  }
 
   private boolean shouldInstrument(String className) {
     if (className.equals("java/util/Arrays")
@@ -144,5 +153,4 @@ public class AsmTransformer implements ClassFileTransformer {
     }
     return false;
   }
-
 }

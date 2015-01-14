@@ -11,7 +11,9 @@
       <useProjectArtifact>false</useProjectArtifact>
       <outputDirectory>/</outputDirectory>
       <unpack>true</unpack>
-      <excludes><exclude>be.coekaerts.wouter.flowtracker:*</exclude></excludes>
+      <excludes>
+        <exclude>be.coekaerts.wouter.flowtracker:*</exclude>
+      </excludes>
     </dependencySet>
   </dependencySets>
 </assembly>

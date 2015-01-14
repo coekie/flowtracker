@@ -4,7 +4,6 @@ import be.coekaerts.wouter.flowtracker.hook.SystemHook;
 import be.coekaerts.wouter.flowtracker.util.ShutdownSuspender;
 import java.util.Map;
 
-
 @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
 public class CoreInitializer {
   public static void initialize(Map<String, String> config) {

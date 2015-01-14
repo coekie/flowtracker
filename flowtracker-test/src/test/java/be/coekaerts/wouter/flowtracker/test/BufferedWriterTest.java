@@ -19,8 +19,7 @@ public class BufferedWriterTest {
   private OutputStreamWriter out;
   private BufferedWriter bw;
 
-  @Before
-  public void setUp() throws Exception {
+  @Before public void setUp() throws Exception {
     out = new OutputStreamWriter(new ByteArrayOutputStream());
     bw = new BufferedWriter(out, 3);
   }

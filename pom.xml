@@ -1,32 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<groupId>be.coekaerts.wouter.flowtracker</groupId>
-	<artifactId>flowtracker</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
+  <groupId>be.coekaerts.wouter.flowtracker</groupId>
+  <artifactId>flowtracker</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-	<name>flowtracker</name>
-	<url>http://wouter.coekaerts.be/</url>
+  <name>flowtracker</name>
+  <url>http://wouter.coekaerts.be/</url>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<asm.version>5.0.3</asm.version>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <asm.version>5.0.3</asm.version>
     <java.version>1.7</java.version>
     <flowtracker.extraAgentArgs/>
-	</properties>
-	<modules>
-		<module>flowtracker-agent</module>
-		<module>flowtracker-core</module>
-		<module>flowtracker-weaver</module>
-		<module>flowtracker-web</module>
-		<module>flowtracker-test</module>
+  </properties>
+  <modules>
+    <module>flowtracker-agent</module>
+    <module>flowtracker-core</module>
+    <module>flowtracker-weaver</module>
+    <module>flowtracker-web</module>
+    <module>flowtracker-test</module>
     <module>flowtracker-test-jdk8</module>
-		<module>flowtracker-all</module>
+    <module>flowtracker-all</module>
     <module>flowtracker-all-dependencies</module>
-	</modules>
+  </modules>
 
   <dependencyManagement>
     <dependencies>
@@ -38,17 +39,17 @@
     </dependencies>
   </dependencyManagement>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
         <version>3.2</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
-			</plugin>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -80,8 +81,8 @@
           </toolchains>
         </configuration>
       </plugin>
-		</plugins>
-	</build>
+    </plugins>
+  </build>
 
   <prerequisites>
     <maven>3.0.3</maven>

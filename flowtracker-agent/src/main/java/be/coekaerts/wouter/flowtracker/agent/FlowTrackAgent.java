@@ -25,14 +25,14 @@ import java.util.jar.JarFile;
 import sun.net.www.protocol.file.FileURLConnection;
 
 public class FlowTrackAgent {
-	/** Configuration passed to the agent */
+  /** Configuration passed to the agent */
   private static final Map<String, String> config = new HashMap<>();
 
-	public static void premain(String agentArgs, Instrumentation inst) {
-		System.out.println("FlowTrackAgent.premain");
+  public static void premain(String agentArgs, Instrumentation inst) {
+    System.out.println("FlowTrackAgent.premain");
 
-		try {
-			initProperties(agentArgs);
+    try {
+      initProperties(agentArgs);
       // system property to override agent args. Useful in IntelliJ which picks up the agent from
       // the maven surefire settings but makes it impossible to change the arguments passed to it.
       initProperties(System.getProperty("flowtracker.agentArgs"));
@@ -48,19 +48,19 @@ public class FlowTrackAgent {
       Class.forName("be.coekaerts.wouter.flowtracker.tracker.Trackers")
           .getMethod("suspendOnCurrentThread").invoke(null);
 
-			inst.addTransformer(createTransformer(spiderClassLoader), true);
+      inst.addTransformer(createTransformer(spiderClassLoader), true);
 
-			// TODO avoid hardcoding of list of classes to retransform here
-			inst.retransformClasses(String.class);
-			inst.retransformClasses(InputStreamReader.class);
-			inst.retransformClasses(OutputStreamWriter.class);
+      // TODO avoid hardcoding of list of classes to retransform here
+      inst.retransformClasses(String.class);
+      inst.retransformClasses(InputStreamReader.class);
+      inst.retransformClasses(OutputStreamWriter.class);
       inst.retransformClasses(BufferedWriter.class);
       inst.retransformClasses(FileInputStream.class);
       inst.retransformClasses(URLConnection.class);
       inst.retransformClasses(FileURLConnection.class);
-			inst.retransformClasses(Arrays.class);
+      inst.retransformClasses(Arrays.class);
       // AbstractStringBuilder is not public
-			inst.retransformClasses(StringBuilder.class.getSuperclass());
+      inst.retransformClasses(StringBuilder.class.getSuperclass());
 
       initCore();
 
@@ -69,11 +69,11 @@ public class FlowTrackAgent {
           .getMethod("unsuspendOnCurrentThread").invoke(null);
 
       initWeb(spiderClassLoader);
-		} catch (Throwable e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-	}
+    } catch (Throwable e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
 
   /**
    * Update the bootstrap classpath and initialize the spiderClassLoader used to load the weaver
@@ -87,7 +87,7 @@ public class FlowTrackAgent {
     // all other flowtracker and dependencies jars
     List<URL> spiderClasspath = new ArrayList<>();
 
-    if (! config.containsKey("core")) { // paths not explicitly configured
+    if (!config.containsKey("core")) { // paths not explicitly configured
       // assume we're running from flowtracker-all jar with nested jars in it
       File expandDir = createExpandDir();
       JarFile jar = getThisJar();
@@ -120,11 +120,11 @@ public class FlowTrackAgent {
     return new URLClassLoader(spiderClasspath.toArray(new URL[spiderClasspath.size()]));
   }
 
-	private static ClassFileTransformer createTransformer(ClassLoader classLoader) throws Exception {
-		Class<?> transformerClass = classLoader
+  private static ClassFileTransformer createTransformer(ClassLoader classLoader) throws Exception {
+    Class<?> transformerClass = classLoader
         .loadClass("be.coekaerts.wouter.flowtracker.weaver.AsmTransformer");
-		return (ClassFileTransformer) transformerClass.getConstructor(Map.class).newInstance(config);
-	}
+    return (ClassFileTransformer) transformerClass.getConstructor(Map.class).newInstance(config);
+  }
 
   // NICE: generic plugin system would be cleaner
   private static void initWeb(ClassLoader classLoader) throws Exception {
@@ -137,22 +137,22 @@ public class FlowTrackAgent {
     clazz.newInstance();
   }
 
-	private static void initProperties(String agentArgs) {
-		if (agentArgs != null) {
+  private static void initProperties(String agentArgs) {
+    if (agentArgs != null) {
       for (String arg : agentArgs.split(";")) {
         String[] keyAndValue = arg.split("=", 2);
         config.put(keyAndValue[0], keyAndValue[1]);
       }
     }
-	}
+  }
 
-	private static String getConfig(String name) {
-		String result = config.get(name);
-		if (result == null) {
-			throw new RuntimeException("You must provide '" + name + "' as argument to the agent");
-		}
-		return result;
-	}
+  private static String getConfig(String name) {
+    String result = config.get(name);
+    if (result == null) {
+      throw new RuntimeException("You must provide '" + name + "' as argument to the agent");
+    }
+    return result;
+  }
 
   /** Returns the jar that this class is running in */
   private static JarFile getThisJar() throws IOException {

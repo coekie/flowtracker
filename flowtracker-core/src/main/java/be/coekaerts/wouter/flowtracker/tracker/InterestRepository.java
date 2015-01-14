@@ -4,9 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Keeps track of the trackers we're really interested in
- */
+/** Keeps track of the trackers we're really interested in */
 public class InterestRepository {
   private static final ConcurrentHashMap<Long, Tracker> trackers =
       new ConcurrentHashMap<>();

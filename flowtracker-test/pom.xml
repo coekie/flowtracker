@@ -1,39 +1,41 @@
 <?xml version="1.0"?>
 <project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>flowtracker</artifactId>
-		<groupId>be.coekaerts.wouter.flowtracker</groupId>
-		<version>0.0.1-SNAPSHOT</version>
-	</parent>
-	<artifactId>flowtracker-test</artifactId>
-	<name>flowtracker-test</name>
-	<dependencies>
-		<dependency>
-			<groupId>be.coekaerts.wouter.flowtracker</groupId>
-			<artifactId>flowtracker-core</artifactId>
-			<version>${project.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>flowtracker</artifactId>
+    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>flowtracker-test</artifactId>
+  <name>flowtracker-test</name>
+  <dependencies>
+    <dependency>
+      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <artifactId>flowtracker-core</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
           <!-- For cleaner debugging environment, but slower: -->
           <!--<reuseForks>false</reuseForks>-->
-					<argLine>-javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/${project.version}/flowtracker-agent-${project.version}.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/${project.version}/flowtracker-core-${project.version}.jar;spiderClasspath=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/${project.version}/flowtracker-weaver-${project.version}.jar,${settings.localRepository}/org/ow2/asm/asm-debug-all/${asm.version}/asm-debug-all-${asm.version}.jar;packages=be/coekaerts/wouter/flowtracker/test/;${flowtracker.extraAgentArgs}</argLine>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+          <argLine>
+            -javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/${project.version}/flowtracker-agent-${project.version}.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/${project.version}/flowtracker-core-${project.version}.jar;spiderClasspath=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/${project.version}/flowtracker-weaver-${project.version}.jar,${settings.localRepository}/org/ow2/asm/asm-debug-all/${asm.version}/asm-debug-all-${asm.version}.jar;packages=be/coekaerts/wouter/flowtracker/test/;${flowtracker.extraAgentArgs}
+          </argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

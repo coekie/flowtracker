@@ -7,11 +7,11 @@ import java.lang.reflect.Field;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class SystemHook {
-	@SuppressWarnings("SuspiciousSystemArraycopy")
-	public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
-		System.arraycopy(src, srcPos, dest, destPos, length);
-		Tracker.setSource(dest, destPos, length, src, srcPos);
-	}
+  @SuppressWarnings("SuspiciousSystemArraycopy")
+  public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
+    System.arraycopy(src, srcPos, dest, destPos, length);
+    Tracker.setSource(dest, destPos, length, src, srcPos);
+  }
 
   public static void initialize() {
     // we have to add trackers to the existing streams, because they were created before flowtracker

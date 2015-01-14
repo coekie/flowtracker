@@ -10,13 +10,17 @@
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
       <outputDirectory>/flowtracker/</outputDirectory>
-      <excludes><exclude>*:flowtracker-agent</exclude></excludes>
+      <excludes>
+        <exclude>*:flowtracker-agent</exclude>
+      </excludes>
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
       <outputDirectory>/</outputDirectory>
       <unpack>true</unpack>
-      <includes><include>*:flowtracker-agent</include></includes>
+      <includes>
+        <include>*:flowtracker-agent</include>
+      </includes>
     </dependencySet>
   </dependencySets>
 </assembly>

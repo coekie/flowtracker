@@ -8,114 +8,112 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 public class HookSpec {
-	public static abstract class HookArgument {
-		abstract void load(GeneratorAdapter generator);
-		abstract Type getType(HookSpec hookSpec);
-	}
-	
-	public static final HookArgument THIS = new HookArgument() {
-		@Override
-		void load(GeneratorAdapter generator) {
-			generator.loadThis();
-		}
-		
-		@Override
-		Type getType(HookSpec hookSpec) {
-			return hookSpec.targetClass;
-		}
-	};
-	
-	private static class ArgHookArgument extends HookArgument {
-		private final int index;
+  public static abstract class HookArgument {
+    abstract void load(GeneratorAdapter generator);
 
-		public ArgHookArgument(int index) {
-			this.index = index;
-		}
-		
-		@Override
-		public void load(GeneratorAdapter generator) {
-			generator.loadArg(index);
-		}
-		
-		@Override
-		Type getType(HookSpec hookSpec) {
-			return hookSpec.cacheTargetMethodArgumentTypes[index];
-		}		
-	}
-	
-	public static final HookArgument ARG0 = new ArgHookArgument(0);
-	public static final HookArgument ARG1 = new ArgHookArgument(1);
-	public static final HookArgument ARG2 = new ArgHookArgument(2);
+    abstract Type getType(HookSpec hookSpec);
+  }
 
-	private class HookMethodAdapter extends AdviceAdapter {
+  public static final HookArgument THIS = new HookArgument() {
+    @Override void load(GeneratorAdapter generator) {
+      generator.loadThis();
+    }
+
+    @Override Type getType(HookSpec hookSpec) {
+      return hookSpec.targetClass;
+    }
+  };
+
+  private static class ArgHookArgument extends HookArgument {
+    private final int index;
+
+    public ArgHookArgument(int index) {
+      this.index = index;
+    }
+
+    @Override
+    public void load(GeneratorAdapter generator) {
+      generator.loadArg(index);
+    }
+
+    @Override Type getType(HookSpec hookSpec) {
+      return hookSpec.cacheTargetMethodArgumentTypes[index];
+    }
+  }
+
+  public static final HookArgument ARG0 = new ArgHookArgument(0);
+  public static final HookArgument ARG1 = new ArgHookArgument(1);
+  public static final HookArgument ARG2 = new ArgHookArgument(2);
+
+  private class HookMethodAdapter extends AdviceAdapter {
     private final boolean hasReturnType;
 
-		private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
-			super(Opcodes.ASM5, mv, access, name, desc);
+    private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
+      super(Opcodes.ASM5, mv, access, name, desc);
       hasReturnType = desc.charAt(desc.indexOf(')') + 1) != 'V';
-		}
-		
-		@Override
-		protected void onMethodExit(int opcode) {
-			if (opcode != ATHROW) {
+    }
+
+    @Override
+    protected void onMethodExit(int opcode) {
+      if (opcode != ATHROW) {
         if (hasReturnType) {
           dup(); // copy result; one for the hook, one to return
         }
-				for (HookArgument argument : hookArguments) {
-					argument.load(this);
-				}
-				invokeStatic(Type.getType(hookClass), getHookMethod());
-			}
-		}
-		
-		@Override
-		public void visitMaxs(int maxStack, int maxLocals) {
-			// pessimistic upper limit: we push hookArguments on the stack + optionally dup return value
-			super.visitMaxs(maxStack + hookArguments.length + (hasReturnType ? 1 : 0), maxLocals);
-		}
-	}
-	
-	private final Type targetClass;
-//	private final Method targetMethod;
-	private final Class<?> hookClass;
-	private final HookArgument[] hookArguments;
-	private final Method hookMethod;
-	
-	private final Type[] cacheTargetMethodArgumentTypes;
-	
-	public HookSpec(Type targetClass, Method targetMethod,
-			Class<?> hookClass, Method hookMethod, HookArgument... hookArguments) {
-		super();
-		this.targetClass = targetClass;
-//		this.targetMethod = targetMethod;
-		this.hookClass = hookClass;
-		this.hookMethod = hookMethod;
-		this.hookArguments = hookArguments;
-		
-		this.cacheTargetMethodArgumentTypes = targetMethod.getArgumentTypes();
-	}
+        for (HookArgument argument : hookArguments) {
+          argument.load(this);
+        }
+        invokeStatic(Type.getType(hookClass), getHookMethod());
+      }
+    }
 
-//	private Class<?>[] getHookParameterClasses() throws ClassNotFoundException {
-//		Class<?>[] types = new Class<?>[hookArguments.length + 1];
-//		
-//		types[0] = Class.forName(targetMethod.getReturnType().getClassName());
-//		for (int i = 0; i < hookArguments.length ; i++) {
-//			types[i+1] = Class.forName(hookArguments[i].getType(this).getClassName()); 
-//		}
-//		
-//		return types;
-//	}
-	
-	private Method getHookMethod() {
-		return hookMethod;
-//		try {
-//			return Method.getMethod(hookClass.getDeclaredMethod(hookName, getHookParameterClasses()));
-//		} catch (Exception e) {
-//			throw new RuntimeException(e);
-//		}
-	}
-	
-	public MethodVisitor createMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
-		return new HookMethodAdapter(mv, access, name, desc);
-	}
+    @Override
+    public void visitMaxs(int maxStack, int maxLocals) {
+      // pessimistic upper limit: we push hookArguments on the stack + optionally dup return value
+      super.visitMaxs(maxStack + hookArguments.length + (hasReturnType ? 1 : 0), maxLocals);
+    }
+  }
+
+  private final Type targetClass;
+  //	private final Method targetMethod;
+  private final Class<?> hookClass;
+  private final HookArgument[] hookArguments;
+  private final Method hookMethod;
+
+  private final Type[] cacheTargetMethodArgumentTypes;
+
+  public HookSpec(Type targetClass, Method targetMethod,
+      Class<?> hookClass, Method hookMethod, HookArgument... hookArguments) {
+    super();
+    this.targetClass = targetClass;
+    //		this.targetMethod = targetMethod;
+    this.hookClass = hookClass;
+    this.hookMethod = hookMethod;
+    this.hookArguments = hookArguments;
+
+    this.cacheTargetMethodArgumentTypes = targetMethod.getArgumentTypes();
+  }
+
+  //	private Class<?>[] getHookParameterClasses() throws ClassNotFoundException {
+  //		Class<?>[] types = new Class<?>[hookArguments.length + 1];
+  //
+  //		types[0] = Class.forName(targetMethod.getReturnType().getClassName());
+  //		for (int i = 0; i < hookArguments.length ; i++) {
+  //			types[i+1] = Class.forName(hookArguments[i].getType(this).getClassName());
+  //		}
+  //
+  //		return types;
+  //	}
+
+  private Method getHookMethod() {
+    return hookMethod;
+    //		try {
+    //			return Method.getMethod(hookClass.getDeclaredMethod(hookName, getHookParameterClasses()));
+    //		} catch (Exception e) {
+    //			throw new RuntimeException(e);
+    //		}
+  }
+
+  public MethodVisitor createMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
+    return new HookMethodAdapter(mv, access, name, desc);
+  }
 }

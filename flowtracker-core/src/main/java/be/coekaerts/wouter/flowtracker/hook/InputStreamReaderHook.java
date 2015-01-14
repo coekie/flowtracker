@@ -18,21 +18,22 @@ public class InputStreamReaderHook {
     }
   }
 
-	public static void afterRead1(int result, InputStreamReader target) {
-		if (result > 0) {
-			Tracker tracker = TrackerRepository.getTracker(target);
+  public static void afterRead1(int result, InputStreamReader target) {
+    if (result > 0) {
+      Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
         ((ContentTracker) tracker).append((char) result);
       }
-		}
-	}
-	
-	public static void afterReadCharArrayOffset(int read, InputStreamReader target, char[] cbuf, int offset) {
-		if (read >= 0) {
-			Tracker tracker = TrackerRepository.getTracker(target);
+    }
+  }
+
+  public static void afterReadCharArrayOffset(int read, InputStreamReader target, char[] cbuf,
+      int offset) {
+    if (read >= 0) {
+      Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
         ((ContentTracker) tracker).append(cbuf, offset, read);
       }
-		}
-	}
+    }
+  }
 }

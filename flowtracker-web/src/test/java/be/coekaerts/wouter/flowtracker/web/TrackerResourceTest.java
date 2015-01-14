@@ -28,8 +28,6 @@ public class TrackerResourceTest {
     tracker.initDescriptor("myTracker", new TagTracker("descriptorTracker"));
     TrackerRepository.setInterestTracker(new Object(), tracker);
 
-
-
     for (TrackerResponse t : trackerResource.list()) {
       if (t.getId() == tracker.getTrackerId()) {
         assertEquals("myTracker from descriptorTracker", t.getDescription());
@@ -84,7 +82,7 @@ public class TrackerResourceTest {
     ContentTracker tracker = new ContentTracker();
     TrackerRepository.setInterestTracker(new Object(), tracker);
 
-    tracker.append(new char[]{'a', 'b', 'c', 'd'}, 1, 2);
+    tracker.append(new char[] {'a', 'b', 'c', 'd'}, 1, 2);
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
     assertEquals(1, response.getParts().size());

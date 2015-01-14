@@ -15,8 +15,7 @@ import static org.junit.Assert.fail;
  */
 public class AssemblyTest {
 
-  @Test
-  public void setupSanity() {
+  @Test public void setupSanity() {
     // The point of this test class is to ensure the assembly works.
     // To properly test that, we must not have anything else than flowtracker-all and junit on the
     // classpath.
@@ -33,8 +32,7 @@ public class AssemblyTest {
     ClassReader.class.getMethods();
   }
 
-  @Test
-  public void simpleTrackingTest() {
+  @Test public void simpleTrackingTest() {
     char[] a = new char['a'];
     Tracker aTracker = TrackerRepository.createFixedOriginTracker(a, a.length);
     char[] copy = Arrays.copyOf(a, a.length);
