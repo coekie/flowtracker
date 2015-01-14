@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.gap;
@@ -52,7 +51,6 @@ public class BufferedWriterTest {
   }
 
   /** make sure gaps (writes from unknown sources) work properly with the buffer being reused */
-  @Ignore("not implemented")
   @Test public void gaps() throws IOException {
     String str = trackCopy("abcd");
     bw.write(str);

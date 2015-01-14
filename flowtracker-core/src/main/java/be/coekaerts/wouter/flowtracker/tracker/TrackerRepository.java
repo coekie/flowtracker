@@ -28,11 +28,7 @@ public class TrackerRepository {
 
   public static Tracker getOrCreateTracker(Object obj) {
     Tracker tracker = getTracker(obj);
-    if (tracker == null) {
-      return createTracker(obj);
-    } else {
-      return tracker;
-    }
+    return tracker == null ? createTracker(obj) : tracker;
   }
 
   public static void setInterestTracker(Object obj, Tracker tracker) {

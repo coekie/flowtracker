@@ -124,13 +124,14 @@ public abstract class Tracker {
 
   public static void setSourceTracker(Object target, int targetIndex, int length,
       Tracker sourceTracker, int sourceIndex) {
+    Tracker targetTracker;
     if (sourceTracker == null) {
-      // if we're not tracking the source, we don't care where its content goes to
-      // TODO if targetTracker already has info for that range, erase it!
-      return;
+      targetTracker = TrackerRepository.getTracker(target);
+      // unknown source and unknown target; nothing to do
+      if (targetTracker == null) return;
+    } else {
+      targetTracker = TrackerRepository.getOrCreateTracker(target);
     }
-
-    Tracker targetTracker = TrackerRepository.getOrCreateTracker(target);
     targetTracker.setSourceFromTracker(targetIndex, length, sourceTracker, sourceIndex);
   }
 }

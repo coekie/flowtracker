@@ -245,7 +245,29 @@ public class TrackerTest {
     assertEntryEquals(8, 2, sourceTracker, 14, targetTracker.getEntryAt(8));
   }
 
-  @Test public void testOverwriteMiddleWithSame() {
+  @Test public void testOverwriteStart() {
+    Tracker.setSource(target, 5, 5, source, 11);
+    Tracker.setSource(target, 5, 1, source, 100);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(2, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 1, sourceTracker, 100, targetTracker.getEntryAt(5));
+    assertEntryEquals(6, 4, sourceTracker, 12, targetTracker.getEntryAt(6));
+  }
+
+  @Test public void testOverwriteEnd() {
+    Tracker.setSource(target, 5, 5, source, 11);
+    Tracker.setSource(target, 9, 1, source, 100);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(2, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 4, sourceTracker, 11, targetTracker.getEntryAt(5));
+    assertEntryEquals(9, 1, sourceTracker, 100, targetTracker.getEntryAt(9));
+  }
+
+  @Test public void testOverwriteWithSame() {
     Tracker.setSource(target, 5, 5, source, 11); // setting 5,6,7,8,9 to 11,12,13,14,15
     Tracker.setSource(target, 6, 2, source, 12); // setting 6,7 to 12,13 again
 
@@ -255,8 +277,38 @@ public class TrackerTest {
     assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
   }
 
-  // TODO testOverwriteWithGap e.g. abcd -> a??d
+  @Test public void testOverwriteWithGap() {
+    Tracker.setSource(target, 5, 5, source, 11);
+    Tracker.setSource(target, 6, 2, new Object(), 999);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(2, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 1, sourceTracker, 11, targetTracker.getEntryAt(5));
+    assertEntryEquals(8, 2, sourceTracker, 14, targetTracker.getEntryAt(8));
+  }
+
   // TODO testOverwriteWithPartialGap e.g. abcd -> axyd, where y itself is a gap in its source
+
+  @Test public void testOverwriteWithZeroLength() {
+    Tracker.setSource(target, 5, 5, source, 11);
+    Tracker.setSource(target, 7, 0, source, 100);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(1, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
+  }
+
+  @Test public void testOverwriteWithZeroLengthGap() {
+    Tracker.setSource(target, 5, 5, source, 11);
+    Tracker.setSource(target, 7, 0, new Object(), 100);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(1, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
+  }
 
   /** Use the source of the source if the direct source is mutable */
   @Test public void testMutableMiddleman() {

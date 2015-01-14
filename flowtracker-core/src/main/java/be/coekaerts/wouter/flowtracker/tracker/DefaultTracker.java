@@ -28,7 +28,9 @@ public class DefaultTracker extends Tracker {
 
   @Override
   public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
-    if (depth.isAcceptableContent(sourceTracker)) {
+    if (sourceTracker == null) {
+      doSetSourceFromTracker(index, length, null, -1);
+    } else if (depth.isAcceptableContent(sourceTracker)) {
       if (sourceTracker.isContentMutable()) {
         // we should make a copy here, because if it changes, it won't be correct anymore.
         throw new UnsupportedOperationException(
@@ -81,6 +83,8 @@ public class DefaultTracker extends Tracker {
 
   private void doSetSourceFromTracker(int index, int length, Tracker sourceTracker,
       int sourceIndex) {
+    if (length == 0) return;
+
     // check the entry right after the new one
     Entry<Integer, PartTracker> nextEntry = getEntryAt(index + length);
     if (nextEntry != null) {
@@ -106,9 +110,7 @@ public class DefaultTracker extends Tracker {
     }
 
     // remove parts that start within the new part, they are overwritten
-    if (length > 1) {
-      map.subMap(index + 1, index + length - 1).clear();
-    }
+    map.subMap(index, index + length).clear();
 
     // check the entry before the new one
     Entry<Integer, PartTracker> previousEntry = getEntryAt(index - 1);
@@ -127,8 +129,9 @@ public class DefaultTracker extends Tracker {
     }
 
     // add the new entry
-    PartTracker entry = new PartTracker(sourceTracker, sourceIndex, length);
-    map.put(index, entry);
+    if (sourceTracker != null) {
+      map.put(index, new PartTracker(sourceTracker, sourceIndex, length));
+    }
   }
 
   @Override
