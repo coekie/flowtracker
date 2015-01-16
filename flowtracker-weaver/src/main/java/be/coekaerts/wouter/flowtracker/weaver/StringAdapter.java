@@ -1,12 +1,14 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
+import java.util.Map;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
@@ -22,9 +24,11 @@ public class StringAdapter extends ClassVisitor {
 
   /** true if we've seen the field named "offset". JDK6 has this, JDK7 does not. */
   private boolean hasOffsetField;
+  private boolean debugUntracked;
 
-  public StringAdapter(ClassVisitor cv) {
+  public StringAdapter(ClassVisitor cv, Map<String, String> config) {
     super(Opcodes.ASM5, cv);
+    debugUntracked = config.containsKey(StringHook.DEBUG_UNTRACKED);
   }
 
   @Override public FieldVisitor visitField(int access, String name, String desc, String signature,
@@ -39,8 +43,26 @@ public class StringAdapter extends ClassVisitor {
     MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
     if ("contentEquals".equals(name) && "(Ljava/lang/CharSequence;)Z".equals(desc)) {
       return new StringContainsAdapter(mv, access, name, desc);
+    } else if (debugUntracked && "<init>".equals(name)) {
+      return new StringConstructorAdapter(mv, access, name, desc);
     } else {
       return mv;
+    }
+  }
+
+  private class StringConstructorAdapter extends AdviceAdapter {
+
+    public StringConstructorAdapter(MethodVisitor mv, int access, String name, String desc) {
+      super(Opcodes.ASM5, mv, access, name, desc);
+    }
+
+    @Override
+    protected void onMethodExit(int opcode) {
+      if (opcode != ATHROW) {
+        loadThis();
+        invokeStatic(Type.getType(StringHook.class),
+            Method.getMethod("void afterInit(java.lang.String)"));
+      }
     }
   }
 

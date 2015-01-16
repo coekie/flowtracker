@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker;
 
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.hook.SystemHook;
 import be.coekaerts.wouter.flowtracker.util.ShutdownSuspender;
 import java.util.Map;
@@ -9,5 +10,6 @@ public class CoreInitializer {
   public static void initialize(Map<String, String> config) {
     SystemHook.initialize();
     ShutdownSuspender.initShutdownHook("true".equals(config.get("suspendShutdown")));
+    StringHook.initDebugUntracked(config.get(StringHook.DEBUG_UNTRACKED));
   }
 }

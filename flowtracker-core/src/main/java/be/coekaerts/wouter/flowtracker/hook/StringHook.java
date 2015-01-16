@@ -3,8 +3,16 @@ package be.coekaerts.wouter.flowtracker.hook;
 import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 
 public class StringHook {
+  public static final String DEBUG_UNTRACKED = "debugUntracked";
+
+  private static String debugUntracked = null;
+
+  public static void initDebugUntracked(String debugUntrackedConfig) {
+    debugUntracked = debugUntrackedConfig;
+  }
 
   public static PartTracker getStringTrack(String str) {
     StringContentExtractor extractor = new StringContentExtractor(str);
@@ -21,6 +29,15 @@ public class StringHook {
     StringContentExtractor extractor = new StringContentExtractor(str);
 
     TrackerRepository.createFixedOriginTracker(extractor.value, str.length());
+  }
+
+  @SuppressWarnings("UnusedDeclaration") // used by instrumented code
+  public static void afterInit(String target) {
+    if (debugUntracked != null && target.contains(debugUntracked)) {
+      Trackers.suspendOnCurrentThread();
+      new Throwable("untracked").printStackTrace();
+      Trackers.unsuspendOnCurrentThread();
+    }
   }
 
   /**

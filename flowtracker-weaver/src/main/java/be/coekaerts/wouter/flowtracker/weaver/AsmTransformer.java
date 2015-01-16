@@ -20,10 +20,12 @@ import org.objectweb.asm.util.CheckClassAdapter;
 public class AsmTransformer implements ClassFileTransformer {
   private final Map<String, ClassHookSpec> specs = new HashMap<>();
   private final String[] packagesToInstrument;
+  private final Map<String, String> config;
 
   public AsmTransformer(Map<String, String> config) {
     this.packagesToInstrument = config.containsKey("packages") ? config.get("packages").split(",")
         : new String[0];
+    this.config = config;
     ClassHookSpec inputStreamReaderSpec =
         new ClassHookSpec(Type.getType("Ljava/io/InputStreamReader;"), InputStreamReaderHook.class);
     inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream)",
@@ -123,7 +125,7 @@ public class AsmTransformer implements ClassFileTransformer {
       CheckClassAdapter checkAdapter = new CheckClassAdapter(writer);
       ClassVisitor adapter = adapterFactory.createClassAdapter(checkAdapter);
       if (className.equals("java/lang/String")) {
-        adapter = new StringAdapter(adapter);
+        adapter = new StringAdapter(adapter, config);
       }
       reader.accept(adapter, ClassReader.EXPAND_FRAMES);
       byte[] result = writer.toByteArray();
