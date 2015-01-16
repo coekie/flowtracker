@@ -32,6 +32,7 @@ public class InputStreamReaderHook {
     if (read >= 0) {
       Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
+        Tracker.setSourceTracker(cbuf, offset, read, tracker, tracker.getLength());
         ((ContentTracker) tracker).append(cbuf, offset, read);
       }
     }
