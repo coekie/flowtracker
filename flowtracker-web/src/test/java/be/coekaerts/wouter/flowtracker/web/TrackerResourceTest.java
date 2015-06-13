@@ -78,6 +78,26 @@ public class TrackerResourceTest {
     assertNull(response.getParts().get(4).getSource());
   }
 
+  @Test public void trackerPartResponse_sourceContext() {
+    SinkTracker tracker = new SinkTracker();
+    TrackerRepository.setInterestTracker(new Object(), tracker);
+
+    ContentTracker sourceTracker = new ContentTracker();
+    sourceTracker.append("abcdefghijklmnopqrstuvwxyz".toCharArray(), 0, 26);
+    tracker.append("mnbcxy", 0, 6);
+    tracker.setSourceFromTracker(0, 2, sourceTracker, 12);
+    tracker.setSourceFromTracker(2, 2, sourceTracker, 1);
+    tracker.setSourceFromTracker(4, 2, sourceTracker, 24);
+
+    TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
+    // middle, full context
+    assertEquals("cdefghijklmnopqrstuvwx", response.getParts().get(0).doGetSourceContext());
+    // context near the beginning
+    assertEquals("abcdefghijklm", response.getParts().get(1).doGetSourceContext());
+    // context near the end
+    assertEquals("opqrstuvwxyz", response.getParts().get(2).doGetSourceContext());
+  }
+
   @Test public void getContentTracker() {
     ContentTracker tracker = new ContentTracker();
     TrackerRepository.setInterestTracker(new Object(), tracker);

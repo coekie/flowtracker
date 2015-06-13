@@ -110,17 +110,27 @@ public class TrackerResource {
     private final String content;
     private final TrackerResponse source;
     private final int sourceOffset;
+    private final String sourceContext;
 
     public TrackerPartResponse(String content) {
       this.content = content;
       this.source = null;
       this.sourceOffset = -1;
+      this.sourceContext = null;
     }
 
     public TrackerPartResponse(String content, PartTracker part) {
       this.content = content;
       this.source = new TrackerResponse(part.getTracker());
       this.sourceOffset = part.getIndex();
+      if (part.getTracker().supportsContent()) {
+        CharSequence sourceContent = part.getTracker().getContent();
+        this.sourceContext = sourceContent.subSequence(Math.max(0, sourceOffset - 10),
+            Math.min(sourceContent.length(), sourceOffset + part.getLength() + 10)).toString();
+      } else {
+        this.sourceContext = null;
+      }
+
     }
 
     public String getContent() {
@@ -133,6 +143,12 @@ public class TrackerResource {
 
     public int getSourceOffset() {
       return sourceOffset;
+    }
+
+    // not a real getter because it causes performance issues
+    // rename to getSourceContext to see the effect
+    public String doGetSourceContext() {
+      return sourceContext;
     }
   }
 }

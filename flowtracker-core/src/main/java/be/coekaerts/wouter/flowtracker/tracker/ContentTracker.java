@@ -12,6 +12,10 @@ public class ContentTracker extends OriginTracker {
     content.append(cbuf, offset, len);
   }
 
+  @Override public boolean supportsContent() {
+    return true;
+  }
+
   @Override public CharSequence getContent() {
     return content;
   }

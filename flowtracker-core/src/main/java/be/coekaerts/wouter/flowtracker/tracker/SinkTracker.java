@@ -3,6 +3,10 @@ package be.coekaerts.wouter.flowtracker.tracker;
 public class SinkTracker extends DefaultTracker {
   private final StringBuilder content = new StringBuilder();
 
+  @Override public boolean supportsContent() {
+    return true;
+  }
+
   @Override public CharSequence getContent() {
     return content;
   }

@@ -60,7 +60,12 @@
       {{tracker.description}}
     </div>
   </div>
-  <pre class="trackerDetail"><span class="trackerDetailPart" ng-repeat="part in selectedTrackerDetail.parts">{{part.content}}</span></pre>
+  <pre class="trackerDetail"><span class="trackerDetailPart"
+                                   ng-repeat="part in selectedTrackerDetail.parts"
+                                   title="source={{part.source.description || 'unknown'}}
+sourceOffset={{part.sourceOffset}}
+context={{part.sourceContext}}"
+      >{{part.content}}</span></pre>
 </div>
 
 <div class="settingsWrapper" ng-controller="SettingsController as settings" ng-show="settings.settings">
