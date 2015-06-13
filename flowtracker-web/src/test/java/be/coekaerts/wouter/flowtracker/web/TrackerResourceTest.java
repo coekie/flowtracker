@@ -91,11 +91,11 @@ public class TrackerResourceTest {
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
     // middle, full context
-    assertEquals("cdefghijklmnopqrstuvwx", response.getParts().get(0).doGetSourceContext());
+    assertEquals("cdefghijklmnopqrstuvwx", response.getParts().get(0).getSourceContext());
     // context near the beginning
-    assertEquals("abcdefghijklm", response.getParts().get(1).doGetSourceContext());
+    assertEquals("abcdefghijklm", response.getParts().get(1).getSourceContext());
     // context near the end
-    assertEquals("opqrstuvwxyz", response.getParts().get(2).doGetSourceContext());
+    assertEquals("opqrstuvwxyz", response.getParts().get(2).getSourceContext());
   }
 
   @Test public void getContentTracker() {

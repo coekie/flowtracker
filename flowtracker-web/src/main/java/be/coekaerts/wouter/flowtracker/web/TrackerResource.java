@@ -145,9 +145,7 @@ public class TrackerResource {
       return sourceOffset;
     }
 
-    // not a real getter because it causes performance issues
-    // rename to getSourceContext to see the effect
-    public String doGetSourceContext() {
+    public String getSourceContext() {
       return sourceContext;
     }
   }
