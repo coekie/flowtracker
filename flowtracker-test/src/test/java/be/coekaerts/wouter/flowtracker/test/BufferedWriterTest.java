@@ -59,4 +59,18 @@ public class BufferedWriterTest {
     bw.flush();
     TrackTestHelper.assertPartsCompleteEqual(out, strPart(str), gap(1), strPart(str));
   }
+
+  @Test public void gapThroughMultipleBuffers() throws IOException {
+    BufferedWriter outerBw = new BufferedWriter(bw, 3);
+    String str = trackCopy("a");
+    outerBw.write(str);
+    outerBw.write(str);
+    outerBw.flush(); // flushing before buffer is full to avoid writing straight through bw
+    outerBw.write(str);
+    // testing that a gap also gets properly written *out* of a BufferedWriter
+    // (from outerBw into bw, overwriting the previous tracker there)
+    outerBw.write('c');
+    outerBw.flush();
+    TrackTestHelper.assertPartsCompleteEqual(out, strPart(str), strPart(str), strPart(str), gap(1));
+  }
 }

@@ -51,6 +51,7 @@ public class DefaultTracker extends Tracker {
     Entry<Integer, PartTracker> startEntry = getEntryAt(sourceIndex);
     int startIndex = startEntry == null ? sourceIndex : startEntry.getKey();
 
+    int pos = sourceIndex; // TODO simplify by keeping track of pos in target (-sourceIndex + targetIndex) ?
     for (Entry<Integer, PartTracker> entry : map.tailMap(startIndex).entrySet()) {
       int partIndex = entry.getKey();
       PartTracker part = entry.getValue();
@@ -58,6 +59,12 @@ public class DefaultTracker extends Tracker {
       // if we're at a part that's after the range we want to copy, stop
       if (partIndex >= sourceIndex + length) {
         break;
+      }
+
+      // gap before this entry
+      if (partIndex > pos) {
+        targetTracker.setSourceFromTracker(targetIndex + pos - sourceIndex,
+            Math.min(partIndex, sourceIndex + length) - pos, null, -1);
       }
 
       // if the beginning of this part is cut off (because this it the first part, and sourceIndex
@@ -79,6 +86,14 @@ public class DefaultTracker extends Tracker {
 
       // push it!
       targetTracker.setSourceFromTracker(pushTargetIndex, pushLength, part, pushingPartOffset);
+
+      pos = partIndex + part.getLength();
+    }
+
+    // gap at the end
+    if (pos < sourceIndex + length) {
+      targetTracker.setSourceFromTracker(targetIndex + pos - sourceIndex,
+          sourceIndex + length - pos, null, -1);
     }
   }
 

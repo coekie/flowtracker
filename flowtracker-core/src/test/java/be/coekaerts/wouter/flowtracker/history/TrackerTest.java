@@ -12,6 +12,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertSame;
 
+@SuppressWarnings("ConstantConditions") // IntelliJ false positives
 public class TrackerTest {
   private Object source, source2;
   private Tracker sourceTracker, sourceTracker2;
@@ -277,9 +278,9 @@ public class TrackerTest {
     assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
   }
 
-  @Test public void testOverwriteWithGap() {
-    Tracker.setSource(target, 5, 5, source, 11);
-    Tracker.setSource(target, 6, 2, new Object(), 999);
+  @Test public void testOverwriteWithUntracked() {
+    Tracker.setSource(target, 5, 5, source, 11); // setup content to be overwritten
+    Tracker.setSource(target, 6, 2, new Object(), 999); // overwrite with untracked object
 
     Tracker targetTracker = TrackerRepository.getTracker(target);
     assertEquals(2, targetTracker.getEntryCount());
@@ -288,7 +289,71 @@ public class TrackerTest {
     assertEntryEquals(8, 2, sourceTracker, 14, targetTracker.getEntryAt(8));
   }
 
-  // TODO testOverwriteWithPartialGap e.g. abcd -> axyd, where y itself is a gap in its source
+  @Test public void testOverwriteWithGap() {
+    // middleman has known source at start and end, but not at where we're reading from it;
+    // in other words we'll be reading from a gap in the middle of middleman
+    Tracker.setSource(middleman, 0, 1, source2, 0);
+    Tracker.setSource(middleman, 50, 1, source2, 0);
+
+    Tracker.setSource(target, 5, 5, source, 11); // setup content to be overwritten
+    Tracker.setSource(target, 6, 2, middleman, 20);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(2, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 1, sourceTracker, 11, targetTracker.getEntryAt(5));
+    assertEntryEquals(8, 2, sourceTracker, 14, targetTracker.getEntryAt(8));
+  }
+
+  @Test public void testOverwriteWithGapInTheMiddle() {
+    // middleman has known source at start and end, but not entirely at where we're reading from it;
+    // we'll be reading from a known part + gap + known part of middleman
+    Tracker.setSource(middleman, 0, 21, source2, 200);
+    Tracker.setSource(middleman, 22, 1000, source2, 300);
+
+    Tracker.setSource(target, 5, 5, source, 11); // setup content to be overwritten
+    Tracker.setSource(target, 6, 3, middleman, 20);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(4, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 1, sourceTracker, 11, targetTracker.getEntryAt(5));
+    assertEntryEquals(6, 1, sourceTracker2, 220, targetTracker.getEntryAt(6));
+    assertEntryEquals(8, 1, sourceTracker2, 300, targetTracker.getEntryAt(8));
+    assertEntryEquals(9, 1, sourceTracker, 15, targetTracker.getEntryAt(9));
+  }
+
+  @Test public void testOverwriteWithGapInTheBeginning() {
+    // middleman has known source at the end, but not entirely at where we're reading from it;
+    // we'll be reading from a gap + known part of middleman
+    Tracker.setSource(middleman, 21, 1000, source2, 200);
+
+    Tracker.setSource(target, 5, 5, source, 11); // setup content to be overwritten
+    Tracker.setSource(target, 6, 2, middleman, 20);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(3, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 1, sourceTracker, 11, targetTracker.getEntryAt(5));
+    assertEntryEquals(7, 1, sourceTracker2, 200, targetTracker.getEntryAt(7));
+    assertEntryEquals(8, 2, sourceTracker, 14, targetTracker.getEntryAt(8));
+  }
+
+  @Test public void testOverwriteWithGapInTheEnd() {
+    // middleman has known source at the beginning, but not entirely at where we're reading from it;
+    // we'll be reading from a known part + gap of middleman
+    Tracker.setSource(middleman, 0, 21, source2, 200);
+
+    Tracker.setSource(target, 5, 5, source, 11); // setup content to be overwritten
+    Tracker.setSource(target, 6, 2, middleman, 20);
+
+    Tracker targetTracker = TrackerRepository.getTracker(target);
+    assertEquals(3, targetTracker.getEntryCount());
+
+    assertEntryEquals(5, 1, sourceTracker, 11, targetTracker.getEntryAt(5));
+    assertEntryEquals(6, 1, sourceTracker2, 220, targetTracker.getEntryAt(6));
+    assertEntryEquals(8, 2, sourceTracker, 14, targetTracker.getEntryAt(8));
+  }
 
   @Test public void testOverwriteWithZeroLength() {
     Tracker.setSource(target, 5, 5, source, 11);
@@ -300,7 +365,7 @@ public class TrackerTest {
     assertEntryEquals(5, 5, sourceTracker, 11, targetTracker.getEntryAt(5));
   }
 
-  @Test public void testOverwriteWithZeroLengthGap() {
+  @Test public void testOverwriteWithZeroLengthUntracked() {
     Tracker.setSource(target, 5, 5, source, 11);
     Tracker.setSource(target, 7, 0, new Object(), 100);
 
