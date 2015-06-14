@@ -68,7 +68,8 @@ public class TrackerResource {
     private TrackerDetailResponse(Tracker tracker) {
       if (tracker instanceof DefaultTracker) {
         // combine single content + part trackers into list of TrackerPartResponses, where each one
-        // has its own piece of the content, and adding parts for the gaps in between parts
+        // has its own piece of the content, and adding parts for the gaps in between parts.
+        // TODO replace this with a call to Tracker.pushContentToTracker?
         NavigableMap<Integer, PartTracker> map = ((DefaultTracker) tracker).getMap();
         int pos = 0;
         for (Map.Entry<Integer, PartTracker> entry : map.entrySet()) {

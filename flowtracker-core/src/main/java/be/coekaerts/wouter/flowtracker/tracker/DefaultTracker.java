@@ -65,7 +65,8 @@ public class DefaultTracker extends Tracker {
       // In other words, the offset in the part of where we want to start pushing.
       int pushingPartOffset = partIndex < sourceIndex ? sourceIndex - partIndex : 0;
 
-      // the difference between what we'll start pushing and the start of the range
+      // difference between what we'll start pushing for this part, and where we started overall.
+      // in other words our progress, going from 0 to length.
       int pushingOffset = (partIndex + pushingPartOffset) - sourceIndex;
 
       // index in the target of where we start pushing to
