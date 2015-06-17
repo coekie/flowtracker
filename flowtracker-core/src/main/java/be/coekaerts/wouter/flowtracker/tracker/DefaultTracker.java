@@ -172,7 +172,8 @@ public class DefaultTracker extends Tracker {
 
   @Override
   public int getLength() {
-    // TODO getLength
-    throw new RuntimeException("not implemented");
+    if (map.isEmpty()) return 0;
+    Entry<Integer, PartTracker> lastEntry = map.lastEntry();
+    return lastEntry.getKey() + lastEntry.getValue().getLength();
   }
 }

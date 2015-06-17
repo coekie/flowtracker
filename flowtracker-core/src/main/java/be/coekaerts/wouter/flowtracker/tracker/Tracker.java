@@ -114,6 +114,9 @@ public abstract class Tracker implements WritableTracker {
     throw new UnsupportedOperationException();
   }
 
+  // TODO move static setSource methods; belong closer to repositories or hooks.
+  //   and while we're at break the Tracker-TrackerRepository dependency cycle.
+  //   and rename setSourceFromTracker to setSource
   public static void setSource(Object target, int targetIndex, int length, Object source,
       int sourceIndex) {
     setSourceTracker(target, targetIndex, length, TrackerRepository.getTracker(source),
