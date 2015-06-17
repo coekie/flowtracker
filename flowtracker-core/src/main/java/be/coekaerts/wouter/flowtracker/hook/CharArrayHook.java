@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class CharArrayHook {
@@ -8,6 +9,6 @@ public class CharArrayHook {
       int sourceIndex) {
     array[arrayIndex] = value;
 
-    Tracker.setSourceTracker(array, arrayIndex, 1, source, sourceIndex);
+    TrackerUpdater.setSourceTracker(array, arrayIndex, 1, source, sourceIndex);
   }
 }

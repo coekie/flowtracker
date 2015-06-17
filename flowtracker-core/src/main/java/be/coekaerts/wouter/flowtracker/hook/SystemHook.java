@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
-import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
@@ -10,7 +10,7 @@ public class SystemHook {
   @SuppressWarnings("SuspiciousSystemArraycopy")
   public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
     System.arraycopy(src, srcPos, dest, destPos, length);
-    Tracker.setSource(dest, destPos, length, src, srcPos);
+    TrackerUpdater.setSource(dest, destPos, length, src, srcPos);
   }
 
   public static void initialize() {

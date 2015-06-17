@@ -12,7 +12,8 @@ public class OutputStreamWriterHook {
 
   public static void afterInit(OutputStreamWriter target, OutputStream stream) {
     if (Trackers.isActive()) {
-      createOutputStreamWriterTracker(target).initDescriptor("OutputStreamWriter", stream);
+      createOutputStreamWriterTracker(target).initDescriptor("OutputStreamWriter",
+          TrackerRepository.getTracker(stream));
     }
   }
 

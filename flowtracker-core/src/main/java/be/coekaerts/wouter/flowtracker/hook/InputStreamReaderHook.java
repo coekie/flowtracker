@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.hook;
 import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,7 +33,7 @@ public class InputStreamReaderHook {
     if (read >= 0) {
       Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
-        Tracker.setSourceTracker(cbuf, offset, read, tracker, tracker.getLength());
+        TrackerUpdater.setSourceTracker(cbuf, offset, read, tracker, tracker.getLength());
         ((ContentTracker) tracker).append(cbuf, offset, read);
       }
     }
