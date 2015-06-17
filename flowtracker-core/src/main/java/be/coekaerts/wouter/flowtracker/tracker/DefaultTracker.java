@@ -27,16 +27,16 @@ public class DefaultTracker extends Tracker {
   }
 
   @Override
-  public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
+  public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
     if (sourceTracker == null) {
-      doSetSourceFromTracker(index, length, null, -1);
+      doSetSource(index, length, null, -1);
     } else if (depth.isAcceptableContent(sourceTracker)) {
       if (sourceTracker.isContentMutable()) {
         // we should make a copy here, because if it changes, it won't be correct anymore.
         throw new UnsupportedOperationException(
             "Adding mutable tracker as source is not supported");
       } else {
-        doSetSourceFromTracker(index, length, sourceTracker, sourceIndex);
+        doSetSource(index, length, sourceTracker, sourceIndex);
       }
     } else {
       sourceTracker.pushContentToTracker(sourceIndex, length, this, index);
@@ -63,7 +63,7 @@ public class DefaultTracker extends Tracker {
 
       // gap before this entry
       if (partIndex > pos) {
-        targetTracker.setSourceFromTracker(targetIndex + pos - sourceIndex,
+        targetTracker.setSource(targetIndex + pos - sourceIndex,
             Math.min(partIndex, sourceIndex + length) - pos, null, -1);
       }
 
@@ -85,20 +85,19 @@ public class DefaultTracker extends Tracker {
       int pushLength = Math.min(length - pushingOffset, part.getLength() - pushingPartOffset);
 
       // push it!
-      targetTracker.setSourceFromTracker(pushTargetIndex, pushLength, part, pushingPartOffset);
+      targetTracker.setSource(pushTargetIndex, pushLength, part, pushingPartOffset);
 
       pos = partIndex + part.getLength();
     }
 
     // gap at the end
     if (pos < sourceIndex + length) {
-      targetTracker.setSourceFromTracker(targetIndex + pos - sourceIndex,
-          sourceIndex + length - pos, null, -1);
+      targetTracker.setSource(targetIndex + pos - sourceIndex, sourceIndex + length - pos,
+          null, -1);
     }
   }
 
-  private void doSetSourceFromTracker(int index, int length, Tracker sourceTracker,
-      int sourceIndex) {
+  private void doSetSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
     if (length == 0) return;
 
     // check the entry right after the new one

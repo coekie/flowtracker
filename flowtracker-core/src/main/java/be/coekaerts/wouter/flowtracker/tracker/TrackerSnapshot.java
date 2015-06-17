@@ -101,8 +101,7 @@ public class TrackerSnapshot {
     private final List<Part> parts = new ArrayList<>();
 
     @Override
-    public void setSourceFromTracker(int index, int length, Tracker sourceTracker,
-        int sourceIndex) {
+    public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
 
       if (sourceTracker instanceof PartTracker) {
         PartTracker partTracker = (PartTracker) sourceTracker;

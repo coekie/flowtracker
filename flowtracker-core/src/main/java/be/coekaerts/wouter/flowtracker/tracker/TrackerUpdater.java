@@ -17,6 +17,6 @@ public class TrackerUpdater {
     } else {
       targetTracker = TrackerRepository.getOrCreateTracker(target);
     }
-    targetTracker.setSourceFromTracker(targetIndex, length, sourceTracker, sourceIndex);
+    targetTracker.setSource(targetIndex, length, sourceTracker, sourceIndex);
   }
 }

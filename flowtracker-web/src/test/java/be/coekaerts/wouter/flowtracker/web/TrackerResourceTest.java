@@ -51,10 +51,10 @@ public class TrackerResourceTest {
 
     tracker.append("ab", 0, 2); // gap, no source tracker
     tracker.append("cde", 0, 3);
-    tracker.setSourceFromTracker(2, 3, sourceTracker1, 0);
+    tracker.setSource(2, 3, sourceTracker1, 0);
     tracker.append('f'); // gap, no source tracker
     tracker.append("xxgxx", 2, 1);
-    tracker.setSourceFromTracker(6, 1, sourceTracker2, 2);
+    tracker.setSource(6, 1, sourceTracker2, 2);
     tracker.append('h');
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
@@ -85,9 +85,9 @@ public class TrackerResourceTest {
     ContentTracker sourceTracker = new ContentTracker();
     sourceTracker.append("abcdefghijklmnopqrstuvwxyz".toCharArray(), 0, 26);
     tracker.append("mnbcxy", 0, 6);
-    tracker.setSourceFromTracker(0, 2, sourceTracker, 12);
-    tracker.setSourceFromTracker(2, 2, sourceTracker, 1);
-    tracker.setSourceFromTracker(4, 2, sourceTracker, 24);
+    tracker.setSource(0, 2, sourceTracker, 12);
+    tracker.setSource(2, 2, sourceTracker, 1);
+    tracker.setSource(4, 2, sourceTracker, 24);
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
     // middle, full context

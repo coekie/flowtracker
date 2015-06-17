@@ -17,5 +17,5 @@ public interface WritableTracker {
    * @param sourceTracker Tracker to use as source
    * @param sourceIndex Index into <tt>sourceTracker</tt>
    */
-  void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex);
+  void setSource(int index, int length, Tracker sourceTracker, int sourceIndex);
 }

@@ -17,8 +17,7 @@ public abstract class Tracker implements WritableTracker {
     return trackerId;
   }
 
-  @Override public void setSourceFromTracker(int index, int length, Tracker sourceTracker,
-      int sourceIndex) {
+  @Override public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
     throw new UnsupportedOperationException();
   }
 

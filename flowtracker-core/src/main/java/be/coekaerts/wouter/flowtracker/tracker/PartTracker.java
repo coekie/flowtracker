@@ -45,6 +45,6 @@ public class PartTracker extends Tracker {
   @Override
   public void pushContentToTracker(int sourceIndex, int length, WritableTracker targetTracker,
       int targetIndex) {
-    targetTracker.setSourceFromTracker(targetIndex, length, tracker, index + sourceIndex);
+    targetTracker.setSource(targetIndex, length, tracker, index + sourceIndex);
   }
 }
