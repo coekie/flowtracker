@@ -3,7 +3,7 @@ package be.coekaerts.wouter.flowtracker.tracker;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class Tracker {
+public abstract class Tracker implements WritableTracker {
   private static final AtomicLong idGenerator = new AtomicLong();
   private final long trackerId = idGenerator.getAndIncrement();
 
@@ -17,19 +17,8 @@ public abstract class Tracker {
     return trackerId;
   }
 
-  /**
-   * Set a range of the source of this tracker to the given tracker.
-   *
-   * If <tt>sourceTracker</tt> is not appropriate as a direct source for this tracker
-   * (e.g. because it is not immutable, or is not the original source), this may instead use the
-   * source of the source (and recurse) using pushContentToTracker on <tt>sourceTracker</tt>.
-   *
-   * @param index Index in this tracker
-   * @param length Size of the range
-   * @param sourceTracker Tracker to use as source
-   * @param sourceIndex Index into <tt>sourceTracker</tt>
-   */
-  public void setSourceFromTracker(int index, int length, Tracker sourceTracker, int sourceIndex) {
+  @Override public void setSourceFromTracker(int index, int length, Tracker sourceTracker,
+      int sourceIndex) {
     throw new UnsupportedOperationException();
   }
 
@@ -81,7 +70,7 @@ public abstract class Tracker {
    * @param targetTracker Tracker of which we're setting the source to this one
    * @param targetIndex Offset in <tt>targetTracker</tt> of where the range starts.
    */
-  public void pushContentToTracker(int sourceIndex, int length, Tracker targetTracker,
+  public void pushContentToTracker(int sourceIndex, int length, WritableTracker targetTracker,
       int targetIndex) {
     throw new UnsupportedOperationException();
   }

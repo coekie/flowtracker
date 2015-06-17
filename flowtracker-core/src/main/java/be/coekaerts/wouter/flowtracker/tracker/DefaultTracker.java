@@ -44,7 +44,7 @@ public class DefaultTracker extends Tracker {
   }
 
   @Override
-  public void pushContentToTracker(int sourceIndex, int length, Tracker targetTracker,
+  public void pushContentToTracker(int sourceIndex, int length, WritableTracker targetTracker,
       int targetIndex) {
     // we start at the part that contains sourceIndex
     // or, if there's no such part, at what comes after
