@@ -43,7 +43,7 @@ public class PartTracker extends Tracker {
   }
 
   @Override
-  public void pushContentToTracker(int sourceIndex, int length, WritableTracker targetTracker,
+  public void pushSourceTo(int sourceIndex, int length, WritableTracker targetTracker,
       int targetIndex) {
     targetTracker.setSource(targetIndex, length, tracker, index + sourceIndex);
   }

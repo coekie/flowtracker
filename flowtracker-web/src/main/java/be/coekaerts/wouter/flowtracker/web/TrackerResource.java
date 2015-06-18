@@ -65,7 +65,7 @@ public class TrackerResource {
 
     private TrackerDetailResponse(final Tracker tracker) {
       if (tracker instanceof DefaultTracker) {
-        tracker.pushContentToTracker(0, tracker.getLength(), new WritableTracker() {
+        tracker.pushSourceTo(0, tracker.getLength(), new WritableTracker() {
           @Override
           public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
             String content = tracker.getContent().subSequence(index, index + length).toString();

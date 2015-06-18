@@ -45,17 +45,17 @@ public abstract class Tracker implements WritableTracker {
   public abstract int getLength();
 
   /**
-   * Put a range of the content of this tracker into the given target tracker.
-   * This should be implemented by calling setSource on the target tracker.
-   * Note that it is not <em>this</em> tracker that should be pushed, but the content (the source)
-   * of this tracker.
+   * Put a range of the source of this tracker into the given target tracker.
+   * This should be implemented by calling {@link WritableTracker#setSource} on the target,
+   * possibly multiple times.
+   * Note that it is not <em>this</em> tracker that should be pushed, but the source of this.
    *
    * @param sourceIndex Index in this tracker of where the range starts.
    * @param length Size of the range
    * @param targetTracker Tracker of which we're setting the source to this one
    * @param targetIndex Offset in <tt>targetTracker</tt> of where the range starts.
    */
-  public void pushContentToTracker(int sourceIndex, int length, WritableTracker targetTracker,
+  public void pushSourceTo(int sourceIndex, int length, WritableTracker targetTracker,
       int targetIndex) {
     throw new UnsupportedOperationException();
   }

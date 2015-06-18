@@ -13,7 +13,7 @@ public class DefaultTracker extends Tracker {
    */
   public static DefaultTracker copyOf(Tracker tracker, TrackerDepth depth) {
     DefaultTracker result = new DefaultTracker(depth);
-    tracker.pushContentToTracker(0, tracker.getLength(), result, 0);
+    tracker.pushSourceTo(0, tracker.getLength(), result, 0);
     return result;
   }
 
@@ -39,12 +39,12 @@ public class DefaultTracker extends Tracker {
         doSetSource(index, length, sourceTracker, sourceIndex);
       }
     } else {
-      sourceTracker.pushContentToTracker(sourceIndex, length, this, index);
+      sourceTracker.pushSourceTo(sourceIndex, length, this, index);
     }
   }
 
   @Override
-  public void pushContentToTracker(int sourceIndex, int length, WritableTracker targetTracker,
+  public void pushSourceTo(int sourceIndex, int length, WritableTracker targetTracker,
       int targetIndex) {
     // we start at the part that contains sourceIndex
     // or, if there's no such part, at what comes after
@@ -85,7 +85,7 @@ public class DefaultTracker extends Tracker {
       int pushLength = Math.min(length - pushingOffset, part.getLength() - pushingPartOffset);
 
       // push it!
-      part.pushContentToTracker(pushingPartOffset, pushLength, targetTracker, pushTargetIndex);
+      part.pushSourceTo(pushingPartOffset, pushLength, targetTracker, pushTargetIndex);
 
       pos = partIndex + part.getLength() - sourceIndex;
     }

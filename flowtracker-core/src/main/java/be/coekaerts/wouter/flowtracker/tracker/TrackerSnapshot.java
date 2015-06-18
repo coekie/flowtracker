@@ -24,7 +24,7 @@ public class TrackerSnapshot {
   /** Create a snapshot of the current content of {@code tracker} */
   public static TrackerSnapshot of(Tracker tracker) {
     Collector collector = new Collector();
-    tracker.pushContentToTracker(0, tracker.getLength(), collector, 0);
+    tracker.pushSourceTo(0, tracker.getLength(), collector, 0);
     return new TrackerSnapshot(collector.parts);
   }
 

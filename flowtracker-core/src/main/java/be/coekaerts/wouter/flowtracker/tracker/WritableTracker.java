@@ -2,7 +2,7 @@ package be.coekaerts.wouter.flowtracker.tracker;
 
 /**
  * Object that can accept writes from
- * {@link Tracker#pushContentToTracker(int, int, WritableTracker, int)}.
+ * {@link Tracker#pushSourceTo(int, int, WritableTracker, int)}.
  */
 public interface WritableTracker {
   /**
