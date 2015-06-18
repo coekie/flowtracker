@@ -4,11 +4,10 @@ import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.WritableTracker;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -65,37 +64,24 @@ public class TrackerResource {
   public static class TrackerDetailResponse {
     private final List<TrackerPartResponse> parts = new ArrayList<>();
 
-    private TrackerDetailResponse(Tracker tracker) {
+    private TrackerDetailResponse(final Tracker tracker) {
       if (tracker instanceof DefaultTracker) {
-        // combine single content + part trackers into list of TrackerPartResponses, where each one
-        // has its own piece of the content, and adding parts for the gaps in between parts.
-        // TODO replace this with a call to Tracker.pushContentToTracker?
-        NavigableMap<Integer, PartTracker> map = ((DefaultTracker) tracker).getMap();
-        int pos = 0;
-        for (Map.Entry<Integer, PartTracker> entry : map.entrySet()) {
-          Integer partPos = entry.getKey();
-          PartTracker part = entry.getValue();
-
-          // gap before this entry
-          if (partPos != pos) {
-            String gapContent = tracker.getContent().subSequence(pos, partPos).toString();
-            parts.add(new TrackerPartResponse(gapContent));
+        tracker.pushContentToTracker(0, tracker.getLength(), new WritableTracker() {
+          @Override
+          public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
+            String content = tracker.getContent().subSequence(index, index + length).toString();
+            if (sourceTracker != null) {
+              if (sourceTracker instanceof PartTracker) {
+                // TODO sourceTracker shouldn't be a PartTracker
+                sourceTracker.pushContentToTracker(sourceIndex, length, this, index);
+              } else {
+                parts.add(new TrackerPartResponse(content, length, sourceTracker, sourceIndex));
+              }
+            } else {
+              parts.add(new TrackerPartResponse(content));
+            }
           }
-
-          // this entry
-          String content = tracker.getContent()
-              .subSequence(partPos, partPos + part.getLength())
-              .toString();
-          parts.add(new TrackerPartResponse(content, part));
-
-          pos = partPos + part.getLength();
-        }
-        // gap at the end
-        if (pos != tracker.getContent().length()) {
-          String gapContent =
-              tracker.getContent().subSequence(pos, tracker.getContent().length()).toString();
-          parts.add(new TrackerPartResponse(gapContent));
-        }
+        }, 0);
       } else {
         parts.add(new TrackerPartResponse(tracker.getContent().toString()));
       }
@@ -131,7 +117,19 @@ public class TrackerResource {
       } else {
         this.sourceContext = null;
       }
+    }
 
+    public TrackerPartResponse(String content, int length, Tracker sourceTracker, int sourceIndex) {
+      this.content = content;
+      this.source = new TrackerResponse(sourceTracker);
+      this.sourceOffset = sourceIndex;
+      if (sourceTracker.supportsContent()) {
+        CharSequence sourceContent = sourceTracker.getContent();
+        this.sourceContext = sourceContent.subSequence(Math.max(0, sourceOffset - 10),
+            Math.min(sourceContent.length(), sourceOffset + length + 10)).toString();
+      } else {
+        this.sourceContext = null;
+      }
     }
 
     public String getContent() {

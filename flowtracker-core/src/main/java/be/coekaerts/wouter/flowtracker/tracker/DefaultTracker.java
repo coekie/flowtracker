@@ -160,10 +160,6 @@ public class DefaultTracker extends Tracker {
     }
   }
 
-  public NavigableMap<Integer, PartTracker> getMap() {
-    return map;
-  }
-
   @Override
   public int getEntryCount() {
     return map.size();
