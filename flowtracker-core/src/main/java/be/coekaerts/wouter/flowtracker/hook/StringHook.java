@@ -14,6 +14,13 @@ public class StringHook {
     debugUntracked = debugUntrackedConfig;
   }
 
+  public static Tracker getStringTracker(String str) {
+    StringContentExtractor extractor = new StringContentExtractor(str);
+    return TrackerRepository.getTracker(extractor.value);
+  }
+
+  /** @deprecated use {@link #getStringTracker(String)} */
+  @Deprecated
   public static PartTracker getStringTrack(String str) {
     StringContentExtractor extractor = new StringContentExtractor(str);
 

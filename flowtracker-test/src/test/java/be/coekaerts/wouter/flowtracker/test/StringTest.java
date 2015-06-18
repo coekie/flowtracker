@@ -6,12 +6,12 @@ import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import org.junit.Test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertStringOriginPartsCompleteEqual;
+import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertTrackerPartsCompleteEqual;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.part;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.strPart;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -19,37 +19,50 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class StringTest {
-  @Test public void unkownTest() {
+  @Test public void testUnkown() {
     String a = "unkownTest";
     assertNull(TrackerRepository.getTracker(a));
-    assertNull(StringHook.getStringTrack(a));
+    assertNull(getStringTracker(a));
   }
 
-  @Test public void concatTest() {
-    String a = trackCopy("concatTest1");
-    String b = trackCopy("concatTest2");
-    String ab = a.concat(b);
-    assertEquals("concatTest1concatTest2", ab);
+  @Test public void testConcat() {
+    String foo = trackCopy("foo");
+    String bar = trackCopy("bar");
+    String foobar = foo.concat(bar);
+    assertEquals("foobar", foobar);
 
-    assertStringOriginPartsCompleteEqual(ab, strPart(a), strPart(b));
+    snapshotBuilder().stringPart(foo).stringPart(bar)
+        .assertEquals(getStringTracker(foobar));
   }
 
-  @Test public void substringBeginTest() {
+  @Test public void testSubstringBegin() {
     String foobar = trackCopy("foobar");
     String foo = foobar.substring(0, 3);
     assertEquals("foo", foo);
 
-    assertStringOriginPartsCompleteEqual(foo, strPart(foobar, 0, 3));
+    snapshotBuilder().stringPart(foobar, 0, 3)
+        .assertEquals(getStringTracker(foo));
   }
 
-  @Test public void substringEndTest() {
+  @Test public void testSubstringEnd() {
     String foobar = trackCopy("foobar");
     String bar = foobar.substring(3);
     assertEquals("bar", bar);
 
-    assertStringOriginPartsCompleteEqual(bar, strPart(foobar, 3, 3));
+    snapshotBuilder().stringPart(foobar, 3, 3)
+        .assertEquals(getStringTracker(bar));
   }
 
+  @Test public void testGetStringTracker() {
+    char[] chars = track(new char[] {'a', 'b', 'c', 'd'});
+    String str = new String(chars, 1, 2); // create String "bc"
+    assertEquals("bc", str);
+
+    snapshotBuilder().part(TrackerRepository.getTracker(chars), 1, 2)
+        .assertEquals(getStringTracker(str));
+  }
+
+  @Deprecated
   @Test public void stringTrackTest() {
     char[] chars = track(new char[] {'a', 'b', 'c', 'd'});
     String str = new String(chars, 1, 2); // create String "bc"

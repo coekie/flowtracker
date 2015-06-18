@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -125,6 +126,14 @@ public class TrackerSnapshot {
     /** Append a part containing everything in {@code source} */
     public Builder part(Tracker source) {
       return part(source, 0, source.getLength());
+    }
+
+    public Builder stringPart(String source) {
+      return part(StringHook.getStringTracker(source));
+    }
+
+    public Builder stringPart(String source, int sourceIndex, int length) {
+      return part(StringHook.getStringTracker(source), sourceIndex, length);
     }
 
     /** Append a part for which the source tracker is unknown */

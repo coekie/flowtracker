@@ -1,11 +1,9 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
-import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerDepth;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.util.Map.Entry;
 
@@ -54,13 +52,6 @@ public class TrackTestHelper {
 
   public static PartTracker gap(int length) {
     return new PartTracker(null, 0, length);
-  }
-
-  public static void assertStringOriginPartsCompleteEqual(String target,
-      PartTracker... expectedParts) {
-    assertTrackerPartsCompleteEqual(
-        DefaultTracker.copyOf(StringHook.getStringTrack(target), TrackerDepth.ORIGIN),
-        expectedParts);
   }
 
   /**

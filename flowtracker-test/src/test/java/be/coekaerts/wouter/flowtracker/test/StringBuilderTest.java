@@ -3,11 +3,12 @@ package be.coekaerts.wouter.flowtracker.test;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertStringOriginPartsCompleteEqual;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.strPart;
+import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("StringBufferReplaceableByString")
 public class StringBuilderTest {
   @Test public void testAppendStuff() {
     String abc = trackCopy("abc");
@@ -19,7 +20,8 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertEquals("abcdefghi", result);
 
-    assertStringOriginPartsCompleteEqual(result, strPart(abc), strPart(def), strPart(ghi));
+    snapshotBuilder().stringPart(abc).stringPart(def).stringPart(ghi)
+        .assertEquals(getStringTracker(result));
   }
 
   @Test public void testInsert() {
@@ -33,14 +35,12 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertEquals("abxyzcd", result);
 
-    assertStringOriginPartsCompleteEqual(result, strPart(ab), strPart(xyz), strPart(cd));
+    snapshotBuilder().stringPart(ab).stringPart(xyz).stringPart(cd)
+        .assertEquals(getStringTracker(result));
   }
 
-  /**
-   * Use StringBuilder.insert to split the original value in two
-   */
+  /** Use StringBuilder.insert to split the original value in two */
   @Test
-  @Ignore("splitting not implemented in Tracker")
   public void testInsertSplit() {
     String abcd = trackCopy("abcd");
     String xyz = trackCopy("xyz");
@@ -51,8 +51,8 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertEquals("abxyzcd", result);
 
-    assertStringOriginPartsCompleteEqual(result, strPart(abcd, 0, 2), strPart(xyz),
-        strPart(abcd, 2, 2));
+    snapshotBuilder().stringPart(abcd, 0, 2).stringPart(xyz).stringPart(abcd, 2, 2)
+        .assertEquals(getStringTracker(result));
   }
 
   @Test
@@ -63,7 +63,8 @@ public class StringBuilderTest {
     sb.reverse();
     String result = sb.toString();
     assertEquals("dcba", result);
-    assertStringOriginPartsCompleteEqual(result, strPart(abcd, 3, 1), strPart(abcd, 2, 1),
-        strPart(abcd, 1, 1), strPart(abcd, 0, 1));
+    snapshotBuilder().stringPart(abcd, 3, 1).stringPart(abcd, 2, 1).stringPart(abcd, 1, 1)
+        .stringPart(abcd, 0, 1)
+        .assertEquals(getStringTracker(result));
   }
 }
