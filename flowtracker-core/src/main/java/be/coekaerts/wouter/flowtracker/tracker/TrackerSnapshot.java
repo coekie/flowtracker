@@ -102,17 +102,10 @@ public class TrackerSnapshot {
 
     @Override
     public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
-
-      if (sourceTracker instanceof PartTracker) {
-        PartTracker partTracker = (PartTracker) sourceTracker;
-        if (length > partTracker.getLength()) throw new IllegalArgumentException("length");
-        partTracker.pushContentToTracker(sourceIndex, length, this, index);
-      } else {
-        if (index != length(parts)) {
-          throw new IllegalStateException("should only append at exactly the end");
-        }
-        parts.add(new Part(index, length, sourceTracker, sourceIndex));
+      if (index != length(parts)) {
+        throw new IllegalStateException("should only append at exactly the end");
       }
+      parts.add(new Part(index, length, sourceTracker, sourceIndex));
     }
   }
 

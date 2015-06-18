@@ -2,7 +2,6 @@ package be.coekaerts.wouter.flowtracker.web;
 
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
-import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.WritableTracker;
 import java.util.ArrayList;
@@ -71,12 +70,7 @@ public class TrackerResource {
           public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
             String content = tracker.getContent().subSequence(index, index + length).toString();
             if (sourceTracker != null) {
-              if (sourceTracker instanceof PartTracker) {
-                // TODO sourceTracker shouldn't be a PartTracker
-                sourceTracker.pushContentToTracker(sourceIndex, length, this, index);
-              } else {
-                parts.add(new TrackerPartResponse(content, length, sourceTracker, sourceIndex));
-              }
+              parts.add(new TrackerPartResponse(content, length, sourceTracker, sourceIndex));
             } else {
               parts.add(new TrackerPartResponse(content));
             }
@@ -104,19 +98,6 @@ public class TrackerResource {
       this.source = null;
       this.sourceOffset = -1;
       this.sourceContext = null;
-    }
-
-    public TrackerPartResponse(String content, PartTracker part) {
-      this.content = content;
-      this.source = new TrackerResponse(part.getTracker());
-      this.sourceOffset = part.getIndex();
-      if (part.getTracker().supportsContent()) {
-        CharSequence sourceContent = part.getTracker().getContent();
-        this.sourceContext = sourceContent.subSequence(Math.max(0, sourceOffset - 10),
-            Math.min(sourceContent.length(), sourceOffset + part.getLength() + 10)).toString();
-      } else {
-        this.sourceContext = null;
-      }
     }
 
     public TrackerPartResponse(String content, int length, Tracker sourceTracker, int sourceIndex) {

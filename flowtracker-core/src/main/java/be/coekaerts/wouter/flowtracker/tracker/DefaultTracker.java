@@ -85,7 +85,7 @@ public class DefaultTracker extends Tracker {
       int pushLength = Math.min(length - pushingOffset, part.getLength() - pushingPartOffset);
 
       // push it!
-      targetTracker.setSource(pushTargetIndex, pushLength, part, pushingPartOffset);
+      part.pushContentToTracker(pushingPartOffset, pushLength, targetTracker, pushTargetIndex);
 
       pos = partIndex + part.getLength();
     }
