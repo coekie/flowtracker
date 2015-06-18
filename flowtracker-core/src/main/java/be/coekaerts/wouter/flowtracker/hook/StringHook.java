@@ -1,6 +1,5 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
-import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
@@ -19,19 +18,6 @@ public class StringHook {
     return TrackerRepository.getTracker(extractor.value);
   }
 
-  /** @deprecated use {@link #getStringTracker(String)} */
-  @Deprecated
-  public static PartTracker getStringTrack(String str) {
-    StringContentExtractor extractor = new StringContentExtractor(str);
-
-    Tracker valueTracker = TrackerRepository.getTracker(extractor.value);
-    if (valueTracker == null) {
-      return null;
-    } else {
-      return new PartTracker(valueTracker, extractor.offset, str.length());
-    }
-  }
-
   public static void createFixedOriginTracker(String str) {
     StringContentExtractor extractor = new StringContentExtractor(str);
 
@@ -48,7 +34,7 @@ public class StringHook {
   }
 
   /**
-   * Used by {@link StringHook#getStringTrack(String)} to retrieve String.value and String.offset.
+   * Used by {@link StringHook#getStringTracker(String)} to retrieve String.value and String.offset.
    * <p>
    * The only reason this class implements {@link CharSequence} is so that it can be passed to the
    * instrumented {@link String#contentEquals(CharSequence)} method.

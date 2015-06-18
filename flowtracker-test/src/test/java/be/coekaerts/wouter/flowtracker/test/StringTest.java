@@ -1,8 +1,5 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import be.coekaerts.wouter.flowtracker.hook.StringHook;
-import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
-import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import org.junit.Test;
 
@@ -12,7 +9,6 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -56,25 +52,6 @@ public class StringTest {
     String str = new String(chars, 1, 2); // create String "bc"
     assertEquals("bc", str);
 
-    snapshotBuilder().track(chars, 1, 2)
-        .assertEquals(getStringTracker(str));
-  }
-
-  @Deprecated
-  @Test public void stringTrackTest() {
-    char[] chars = track(new char[] {'a', 'b', 'c', 'd'});
-    String str = new String(chars, 1, 2); // create String "bc"
-    assertEquals("bc", str);
-
-    // stringTrack points to the String.value char[]
-    PartTracker stringTrack = StringHook.getStringTrack(str);
-    assertNotNull(stringTrack);
-    assertEquals(0, stringTrack.getIndex());
-    assertEquals(2, stringTrack.getLength());
-
-    // String.value is copy of part of our chars
-    Tracker stringValueTracker = stringTrack.getTracker();
-    assertNotNull(stringValueTracker);
     snapshotBuilder().track(chars, 1, 2)
         .assertEquals(getStringTracker(str));
   }

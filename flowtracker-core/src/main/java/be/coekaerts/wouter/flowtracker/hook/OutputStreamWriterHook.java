@@ -47,7 +47,7 @@ public class OutputStreamWriterHook {
       int len) {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
-      Tracker sourceTracker = StringHook.getStringTrack(str);
+      Tracker sourceTracker = StringHook.getStringTracker(str);
       if (sourceTracker != null) {
         tracker.setSource(tracker.getLength(), len, sourceTracker, off);
       }

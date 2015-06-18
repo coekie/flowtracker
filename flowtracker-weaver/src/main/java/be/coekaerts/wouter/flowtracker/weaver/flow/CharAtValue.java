@@ -45,13 +45,13 @@ class CharAtValue extends TrackableValue {
   }
 
   @Override void loadSourceTracker(InsnList toInsert) {
-    // insert code for: StringHook.getStringTrack(targetString);
+    // insert code for: StringHook.getStringTracker(targetString);
     toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
-    Method getStringTrack = Method.getMethod(
-        "be.coekaerts.wouter.flowtracker.tracker.PartTracker getStringTrack(String)");
+    Method getStringTracker = Method.getMethod(
+        "be.coekaerts.wouter.flowtracker.tracker.Tracker getStringTracker(String)");
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC, "be/coekaerts/wouter/flowtracker/hook/StringHook",
-            getStringTrack.getName(), getStringTrack.getDescriptor(), false));
+            getStringTracker.getName(), getStringTracker.getDescriptor(), false));
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {
