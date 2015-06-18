@@ -6,7 +6,7 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 
-import static org.junit.Assert.assertSame;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.fail;
 
 /**
@@ -36,6 +36,6 @@ public class AssemblyTest {
     char[] a = new char['a'];
     Tracker aTracker = TrackerRepository.createFixedOriginTracker(a, a.length);
     char[] copy = Arrays.copyOf(a, a.length);
-    assertSame(aTracker, TrackerRepository.getTracker(copy).getEntryAt(0).getValue().getTracker());
+    snapshotBuilder().part(aTracker).assertTrackerOf(copy);
   }
 }

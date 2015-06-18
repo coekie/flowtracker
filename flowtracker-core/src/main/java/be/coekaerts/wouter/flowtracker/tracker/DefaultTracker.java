@@ -148,8 +148,16 @@ public class DefaultTracker extends Tracker {
     }
   }
 
-  @Override
-  public Entry<Integer, PartTracker> getEntryAt(int index) {
+  /**
+   * Returns the entry in the tracker for the given index.
+   *
+   * The key of the given entry is the index in this tracker where the entry begins.
+   * This may be equal to the given <tt>index</tt>, or less (if {@link PartTracker#getLength()} >
+   * 1).
+   *
+   * @param index The index in this Tracker
+   */
+  private Entry<Integer, PartTracker> getEntryAt(int index) {
     Entry<Integer, PartTracker> floorEntry = map.floorEntry(index);
     // if the entry that starts at or before (floor) also extends (key + length) up to index
     if (floorEntry != null && floorEntry.getKey() + floorEntry.getValue().getLength() > index) {

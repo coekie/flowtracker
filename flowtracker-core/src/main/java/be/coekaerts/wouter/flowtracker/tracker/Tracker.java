@@ -1,6 +1,5 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Tracker implements WritableTracker {
@@ -22,19 +21,6 @@ public abstract class Tracker implements WritableTracker {
   }
 
   public abstract int getEntryCount();
-
-  /**
-   * Returns the entry in the tracker for the given index.
-   *
-   * The key of the given entry is the index in this tracker where the entry begins.
-   * This may be equal to the given <tt>index</tt>, or less (if {@link PartTracker#getLength()} >
-   * 1).
-   *
-   * @param index The index in this Tracker
-   */
-  public Map.Entry<Integer, PartTracker> getEntryAt(int index) {
-    throw new UnsupportedOperationException();
-  }
 
   /**
    * Returns if the existing content of this tracker can be changed.
