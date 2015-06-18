@@ -51,7 +51,7 @@ public class DefaultTracker extends Tracker {
     Entry<Integer, PartTracker> startEntry = getEntryAt(sourceIndex);
     int startIndex = startEntry == null ? sourceIndex : startEntry.getKey();
 
-    int pos = sourceIndex; // TODO simplify by keeping track of pos in target (-sourceIndex + targetIndex) ?
+    int pos = 0; // how far we are in pushing, from 0 to length
     for (Entry<Integer, PartTracker> entry : map.tailMap(startIndex).entrySet()) {
       int partIndex = entry.getKey();
       PartTracker part = entry.getValue();
@@ -62,9 +62,9 @@ public class DefaultTracker extends Tracker {
       }
 
       // gap before this entry
-      if (partIndex > pos) {
-        targetTracker.setSource(targetIndex + pos - sourceIndex,
-            Math.min(partIndex, sourceIndex + length) - pos, null, -1);
+      int gapBefore = partIndex - sourceIndex - pos;
+      if (gapBefore > 0) {
+        targetTracker.setSource(targetIndex + pos, gapBefore, null, -1);
       }
 
       // if the beginning of this part is cut off (because this it the first part, and sourceIndex
@@ -87,13 +87,12 @@ public class DefaultTracker extends Tracker {
       // push it!
       part.pushContentToTracker(pushingPartOffset, pushLength, targetTracker, pushTargetIndex);
 
-      pos = partIndex + part.getLength();
+      pos = partIndex + part.getLength() - sourceIndex;
     }
 
     // gap at the end
-    if (pos < sourceIndex + length) {
-      targetTracker.setSource(targetIndex + pos - sourceIndex, sourceIndex + length - pos,
-          null, -1);
+    if (pos < length) {
+      targetTracker.setSource(targetIndex + pos, length - pos, null, -1);
     }
   }
 
