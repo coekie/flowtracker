@@ -3,9 +3,8 @@ package be.coekaerts.wouter.flowtracker.test;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import org.junit.Test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertPartsCompleteEqual;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.strPart;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertNull;
 
 public class CharFlowAnalysisTest {
@@ -17,7 +16,8 @@ public class CharFlowAnalysisTest {
     array[1] = abc.charAt(0);
     array[2] = abc.charAt(2);
 
-    assertPartsCompleteEqual(array, strPart(abc, 1, 1), strPart(abc, 0, 1), strPart(abc, 2, 1));
+    snapshotBuilder().trackString(abc, 1, 1).trackString(abc, 0, 1).trackString(abc, 2, 1)
+        .assertTrackerOf(array);
   }
 
   // This one is hard.
@@ -42,7 +42,7 @@ public class CharFlowAnalysisTest {
     array[1] = y;
 
     assertNull(TrackerRepository.getTracker(array));
-    // or, it would be nicer if: assertPartsCompleteEqual(array, part(abc, 0, 2));
+    // or, it would be nicer if: snapshotBuilder().stringPart(abc, 0, 2).assertTrackerOf(array)
   }
 
   // we store the origin of a value before we actually call the method,
@@ -56,7 +56,7 @@ public class CharFlowAnalysisTest {
 
     try {
       x = abc.charAt(1000);
-    } catch (IndexOutOfBoundsException e) {
+    } catch (IndexOutOfBoundsException ignore) {
     }
     array[0] = x;
 

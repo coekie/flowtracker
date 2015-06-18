@@ -15,12 +15,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertPartsCompleteEqual;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.gap;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.part;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.strPart;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
 
 public class OutputStreamWriterTest {
@@ -52,8 +49,8 @@ public class OutputStreamWriterTest {
     assertContentEquals("a");
     writer.write('b');
     assertContentEquals("ab");
-    // no parts expected because tracking of source for write(char) not implemented
-    assertPartsCompleteEqual(writer);
+    // tracking of source for write(char) not implemented
+    snapshotBuilder().gap(2).assertTrackerOf(writer);
   }
 
   @Test public void writeCharArray() throws IOException {
@@ -62,7 +59,7 @@ public class OutputStreamWriterTest {
     writer.write(abc);
     writer.write(abc);
     assertContentEquals("abcabc");
-    assertPartsCompleteEqual(writer, part(abc, 0, 3), part(abc, 0, 3));
+    snapshotBuilder().track(abc, 0, 3).track(abc, 0, 3).assertTrackerOf(writer);
   }
 
   @Test public void writeUntrackedCharArray() throws IOException {
@@ -74,7 +71,7 @@ public class OutputStreamWriterTest {
     writer.write(def);
 
     assertContentEquals("abcdef");
-    assertPartsCompleteEqual(writer, gap(3), part(def, 0, 3));
+    snapshotBuilder().gap(3).track(def, 0, 3).assertTrackerOf(writer);
   }
 
   @Test public void writeCharArrayOffset() throws IOException {
@@ -82,14 +79,14 @@ public class OutputStreamWriterTest {
     track(abcd);
     writer.write(abcd, 1, 2);
     assertContentEquals("bc");
-    assertPartsCompleteEqual(writer, part(abcd, 1, 2));
+    snapshotBuilder().track(abcd, 1, 2).assertTrackerOf(writer);
   }
 
   @Test public void writeString() throws IOException {
     String abc = trackCopy("abc");
     writer.write(abc);
     assertContentEquals("abc");
-    assertPartsCompleteEqual(writer, strPart(abc));
+    snapshotBuilder().trackString(abc).assertTrackerOf(writer);
   }
 
   @Test public void writeUntrackedString() throws IOException {
@@ -100,14 +97,14 @@ public class OutputStreamWriterTest {
     writer.write(def);
 
     assertContentEquals("abcdef");
-    assertPartsCompleteEqual(writer, gap(3), strPart(def));
+    snapshotBuilder().gap(3).trackString(def).assertTrackerOf(writer);
   }
 
   @Test public void writeStringOffset() throws IOException {
     String abcd = trackCopy("abcd");
     writer.write(abcd, 1, 2);
     assertContentEquals("bc");
-    assertPartsCompleteEqual(writer, strPart(abcd, 1, 2));
+    snapshotBuilder().trackString(abcd, 1, 2).assertTrackerOf(writer);
   }
 
   @Test public void interestAndDescriptor() throws IOException {

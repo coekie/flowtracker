@@ -20,7 +20,7 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertEquals("abcdefghi", result);
 
-    snapshotBuilder().stringPart(abc).stringPart(def).stringPart(ghi)
+    snapshotBuilder().trackString(abc).trackString(def).trackString(ghi)
         .assertEquals(getStringTracker(result));
   }
 
@@ -35,7 +35,7 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertEquals("abxyzcd", result);
 
-    snapshotBuilder().stringPart(ab).stringPart(xyz).stringPart(cd)
+    snapshotBuilder().trackString(ab).trackString(xyz).trackString(cd)
         .assertEquals(getStringTracker(result));
   }
 
@@ -51,7 +51,7 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertEquals("abxyzcd", result);
 
-    snapshotBuilder().stringPart(abcd, 0, 2).stringPart(xyz).stringPart(abcd, 2, 2)
+    snapshotBuilder().trackString(abcd, 0, 2).trackString(xyz).trackString(abcd, 2, 2)
         .assertEquals(getStringTracker(result));
   }
 
@@ -63,8 +63,8 @@ public class StringBuilderTest {
     sb.reverse();
     String result = sb.toString();
     assertEquals("dcba", result);
-    snapshotBuilder().stringPart(abcd, 3, 1).stringPart(abcd, 2, 1).stringPart(abcd, 1, 1)
-        .stringPart(abcd, 0, 1)
+    snapshotBuilder().trackString(abcd, 3, 1).trackString(abcd, 2, 1).trackString(abcd, 1, 1)
+        .trackString(abcd, 0, 1)
         .assertEquals(getStringTracker(result));
   }
 }

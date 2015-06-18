@@ -7,8 +7,6 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import org.junit.Test;
 
 import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertTrackerPartsCompleteEqual;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.part;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
@@ -31,7 +29,7 @@ public class StringTest {
     String foobar = foo.concat(bar);
     assertEquals("foobar", foobar);
 
-    snapshotBuilder().stringPart(foo).stringPart(bar)
+    snapshotBuilder().trackString(foo).trackString(bar)
         .assertEquals(getStringTracker(foobar));
   }
 
@@ -40,7 +38,7 @@ public class StringTest {
     String foo = foobar.substring(0, 3);
     assertEquals("foo", foo);
 
-    snapshotBuilder().stringPart(foobar, 0, 3)
+    snapshotBuilder().trackString(foobar, 0, 3)
         .assertEquals(getStringTracker(foo));
   }
 
@@ -49,7 +47,7 @@ public class StringTest {
     String bar = foobar.substring(3);
     assertEquals("bar", bar);
 
-    snapshotBuilder().stringPart(foobar, 3, 3)
+    snapshotBuilder().trackString(foobar, 3, 3)
         .assertEquals(getStringTracker(bar));
   }
 
@@ -58,7 +56,7 @@ public class StringTest {
     String str = new String(chars, 1, 2); // create String "bc"
     assertEquals("bc", str);
 
-    snapshotBuilder().part(TrackerRepository.getTracker(chars), 1, 2)
+    snapshotBuilder().track(chars, 1, 2)
         .assertEquals(getStringTracker(str));
   }
 
@@ -77,7 +75,8 @@ public class StringTest {
     // String.value is copy of part of our chars
     Tracker stringValueTracker = stringTrack.getTracker();
     assertNotNull(stringValueTracker);
-    assertTrackerPartsCompleteEqual(stringValueTracker, part(chars, 1, 2));
+    snapshotBuilder().track(chars, 1, 2)
+        .assertEquals(getStringTracker(str));
   }
 
   /** Test that we didn't break the normal functioning of contentEquals. */

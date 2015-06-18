@@ -128,11 +128,21 @@ public class TrackerSnapshot {
       return part(source, 0, source.getLength());
     }
 
-    public Builder stringPart(String source) {
+    public Builder track(Object source) {
+      if (source instanceof Tracker) throw new IllegalArgumentException("wrong method");
+      return part(TrackerRepository.getTracker(source));
+    }
+
+    public Builder track(Object source, int sourceIndex, int length) {
+      if (source instanceof Tracker) throw new IllegalArgumentException("wrong method");
+      return part(TrackerRepository.getTracker(source), sourceIndex, length);
+    }
+
+    public Builder trackString(String source) {
       return part(StringHook.getStringTracker(source));
     }
 
-    public Builder stringPart(String source, int sourceIndex, int length) {
+    public Builder trackString(String source, int sourceIndex, int length) {
       return part(StringHook.getStringTracker(source), sourceIndex, length);
     }
 
@@ -147,6 +157,10 @@ public class TrackerSnapshot {
 
     public void assertEquals(Tracker tracker) {
       build().assertEquals(TrackerSnapshot.of(tracker));
+    }
+
+    public void assertTrackerOf(Object obj) {
+      assertEquals(TrackerRepository.getTracker(obj));
     }
   }
 }

@@ -15,7 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.part;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -73,24 +73,24 @@ public class InputStreamReaderTest {
     // read 3 characters, 0 offset
     assertEquals(3, reader.read(buffer, 0, 3));
     assertTrue(Arrays.equals(new char[] {'a', 'b', 'c', '\0', '\0'}, buffer));
-    TrackTestHelper.assertPartsCompleteEqual(buffer, part(reader, 0, 3));
+    snapshotBuilder().track(reader, 0, 3).assertTrackerOf(buffer);
     assertContentEquals("abc");
 
     // read with offset
     assertEquals(2, reader.read(buffer, 1, 2));
     assertTrue(Arrays.equals(new char[] {'a', 'd', 'e', '\0', '\0'}, buffer));
-    TrackTestHelper.assertPartsCompleteEqual(buffer, part(reader, 0, 1), part(reader, 3, 2));
+    snapshotBuilder().track(reader, 0, 1).track(reader, 3, 2).assertTrackerOf(buffer);
     assertContentEquals("abcde");
 
     // incomplete read (only 1 instead of 5 asked chars read)
     assertEquals(1, reader.read(buffer, 0, 5));
     assertTrue(Arrays.equals(new char[] {'f', 'd', 'e', '\0', '\0'}, buffer));
-    TrackTestHelper.assertPartsCompleteEqual(buffer, part(reader, 5, 1), part(reader, 3, 2));
+    snapshotBuilder().track(reader, 5, 1).track(reader, 3, 2).assertTrackerOf(buffer);
     assertContentEquals("abcdef");
 
     // test an extra failed read (eof)
     assertEquals(-1, reader.read(buffer, 0, 5));
-    TrackTestHelper.assertPartsCompleteEqual(buffer, part(reader, 5, 1), part(reader, 3, 2));
+    snapshotBuilder().track(reader, 5, 1).track(reader, 3, 2).assertTrackerOf(buffer);
     assertContentEquals("abcdef");
   }
 
@@ -99,14 +99,14 @@ public class InputStreamReaderTest {
     // read 1 char
     assertEquals(1, reader.read(buffer1));
     assertEquals('a', buffer1[0]);
-    TrackTestHelper.assertPartsCompleteEqual(buffer1, part(reader, 0, 1));
+    snapshotBuilder().track(reader, 0, 1).assertTrackerOf(buffer1);
     assertContentEquals("a");
 
     char buffer2[] = new char[2];
     // read more
     assertEquals(2, reader.read(buffer2));
     assertTrue(Arrays.equals(new char[] {'b', 'c'}, buffer2));
-    TrackTestHelper.assertPartsCompleteEqual(buffer2, part(reader, 1, 2));
+    snapshotBuilder().track(reader, 1, 2).assertTrackerOf(buffer2);
     assertContentEquals("abc");
 
     // and more

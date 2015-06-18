@@ -2,14 +2,11 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
-import be.coekaerts.wouter.flowtracker.tracker.PartTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
-import java.util.Map.Entry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -33,69 +30,6 @@ public class TrackTestHelper {
   public static char[] track(char[] chars) {
     TrackerRepository.createFixedOriginTracker(chars, chars.length);
     return chars;
-  }
-
-  public static PartTracker strPart(String str) {
-    return StringHook.getStringTrack(str);
-  }
-
-  public static PartTracker strPart(String str, int index, int length) {
-    PartTracker fullPart = StringHook.getStringTrack(str);
-    return new PartTracker(fullPart.getTracker(), fullPart.getIndex() + index, length);
-  }
-
-  public static PartTracker part(Object obj, int index, int length) {
-    Tracker tracker = TrackerRepository.getTracker(obj);
-    assertNotNull(tracker);
-    return new PartTracker(tracker, index, length);
-  }
-
-  public static PartTracker gap(int length) {
-    return new PartTracker(null, 0, length);
-  }
-
-  /**
-   * Asserts that the tracker of the given target consist of the given parts, starting at index 0
-   * without holes.
-   */
-  public static void assertPartsCompleteEqual(Object target, PartTracker... expectedParts) {
-    assertNotNull(target);
-    assertTrackerPartsCompleteEqual(TrackerRepository.getTracker(target), expectedParts);
-  }
-
-  /** Asserts that the tracker consist of the given parts, starting at index 0 without holes. */
-  public static void assertTrackerPartsCompleteEqual(Tracker tracker,
-      PartTracker... expectedParts) {
-    assertNotNull(tracker);
-
-    int partNr = 0;
-    int index = 0;
-    for (PartTracker expectedPart : expectedParts) {
-      if (expectedPart.getTracker() == null) { // a gap
-        assertNull(tracker.getEntryAt(index));
-      } else {
-        assertEntryEquals("Part " + partNr, index, expectedPart.getLength(),
-            expectedPart.getTracker(),
-            expectedPart.getIndex(), tracker.getEntryAt(index));
-        partNr++;
-      }
-      index += expectedPart.getLength();
-    }
-
-    assertEquals(partNr, tracker.getEntryCount());
-  }
-
-  private static void assertEntryEquals(String message, int expectedEntryIndex, int expectedLength,
-      Tracker expectedTracker, int expectedPartIndex, Entry<Integer, PartTracker> entry) {
-    String prefix = message + ": ";
-    assertNotNull(prefix + "entry exists", entry);
-    assertEquals(prefix + "entry index", (Integer) expectedEntryIndex, entry.getKey());
-
-    PartTracker part = entry.getValue();
-    assertNotNull(prefix + "part", part);
-    assertEquals(prefix + "length", expectedLength, part.getLength());
-    assertSame(prefix + "tracker", expectedTracker, part.getTracker());
-    assertEquals(prefix + "part index", expectedPartIndex, part.getIndex());
   }
 
   /**

@@ -7,11 +7,9 @@ import java.io.OutputStreamWriter;
 import org.junit.Before;
 import org.junit.Test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.gap;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.part;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.strPart;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 
 public class BufferedWriterTest {
 
@@ -26,9 +24,9 @@ public class BufferedWriterTest {
   @Test public void string() throws IOException {
     String str = trackCopy("abcdefg");
     bw.write(str);
-    TrackTestHelper.assertPartsCompleteEqual(out, strPart(str, 0, 6));
+    snapshotBuilder().trackString(str, 0, 6).assertTrackerOf(out);
     bw.flush();
-    TrackTestHelper.assertPartsCompleteEqual(out, strPart(str));
+    snapshotBuilder().trackString(str).assertTrackerOf(out);
   }
 
   /** write longer than size of the buffer */
@@ -36,7 +34,7 @@ public class BufferedWriterTest {
     char[] chars = {'a', 'b', 'c', 'd', 'e', 'f'};
     track(chars);
     bw.write(chars, 1, 4);
-    TrackTestHelper.assertPartsCompleteEqual(out, part(chars, 1, 4));
+    snapshotBuilder().track(chars, 1, 4).assertTrackerOf(out);
   }
 
   /** writes shorter than size of the buffer */
@@ -47,7 +45,7 @@ public class BufferedWriterTest {
     bw.write(chars, 1, 1);
     bw.write(chars, 0, 2);
     bw.flush();
-    TrackTestHelper.assertPartsCompleteEqual(out, part(chars, 0, 2), part(chars, 0, 2));
+    snapshotBuilder().track(chars, 0, 2).track(chars, 0, 2).assertTrackerOf(out);
   }
 
   /** make sure gaps (writes from unknown sources) work properly with the buffer being reused */
@@ -57,7 +55,7 @@ public class BufferedWriterTest {
     bw.write('e');
     bw.write(str);
     bw.flush();
-    TrackTestHelper.assertPartsCompleteEqual(out, strPart(str), gap(1), strPart(str));
+    snapshotBuilder().trackString(str).gap(1).trackString(str).assertTrackerOf(out);
   }
 
   @Test public void gapThroughMultipleBuffers() throws IOException {
@@ -70,7 +68,9 @@ public class BufferedWriterTest {
     // testing that a gap also gets properly written *out* of a BufferedWriter
     // (from outerBw into bw, overwriting the previous tracker there)
     outerBw.write('c');
+    outerBw.write(str);
     outerBw.flush();
-    TrackTestHelper.assertPartsCompleteEqual(out, strPart(str), strPart(str), strPart(str), gap(1));
+    snapshotBuilder().trackString(str).trackString(str).trackString(str).gap(1).trackString(str)
+        .assertTrackerOf(out);
   }
 }
