@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Immutable copy of a tracker, that is modeled after {@link WritableTracker}.
  *
@@ -118,9 +120,7 @@ public class TrackerSnapshot {
 
     /** Append a part */
     public Builder part(Tracker source, int sourceIndex, int length) {
-      int index = length(parts); // add new one at the end
-      parts.add(new Part(index, length, source, sourceIndex));
-      return this;
+      return doPart(requireNonNull(source), sourceIndex, length);
     }
 
     /** Append a part containing everything in {@code source} */
@@ -148,7 +148,13 @@ public class TrackerSnapshot {
 
     /** Append a part for which the source tracker is unknown */
     public Builder gap(int length) {
-      return part(null, -1, length);
+      return doPart(null, -1, length);
+    }
+
+    private Builder doPart(Tracker source, int sourceIndex, int length) {
+      int index = length(parts); // add new one at the end
+      parts.add(new Part(index, length, source, sourceIndex));
+      return this;
     }
 
     public TrackerSnapshot build() {
