@@ -26,11 +26,25 @@ public class StringHook {
 
   @SuppressWarnings("UnusedDeclaration") // used by instrumented code
   public static void afterInit(String target) {
-    if (debugUntracked != null && target.contains(debugUntracked)) {
+    if (debugUntracked != null && target.contains(debugUntracked)
+        && getStringTracker(target) == null
+        // ignore the specifying of the debugUntracked string on the command line itself
+        // (but eventually that should be tracked too, see java.lang.ProcessingEnvironment)
+        && !target.contains("debugUntracked")) {
       Trackers.suspendOnCurrentThread();
       new Throwable("untracked").printStackTrace();
       Trackers.unsuspendOnCurrentThread();
     }
+  }
+
+  /** Get a tracker even when trackers are suspected; to be used from a debugger. */
+  @SuppressWarnings("unused")
+  public static Tracker forceGetStringTracker(String str) {
+    if (Trackers.isActive()) return getStringTracker(str);
+    Trackers.unsuspendOnCurrentThread();
+    Tracker result = getStringTracker(str);
+    Trackers.suspendOnCurrentThread();
+    return result;
   }
 
   /**
