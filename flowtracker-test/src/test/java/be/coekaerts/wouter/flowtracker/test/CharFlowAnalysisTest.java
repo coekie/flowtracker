@@ -54,24 +54,24 @@ public class CharFlowAnalysisTest {
 
   // This one is hard.
   // Both assignments into array come from the same statement,
-  // but x does not contain the *last* execution of that statement anymore.
-  // Optimally, we should follow the flow of these local variables.
-  // Or we should at least detect this, and mark the origin as unknown.
+  // but "secondLast" does not contain the *last* execution of that statement anymore.
+  // Ideally, we would follow the flow of these local variables; but that's not so important now.
+  // But we must detect this, and mark the origin as unknown.
   @Test public void charAtFlow() {
     String abc = trackCopy("abc");
 
     char[] array = new char[2];
 
-    char x = 0;
-    char y = 0;
+    char secondLast = 0;
+    char last = 0;
 
     for (int i = 0; i < 2; i++) {
-      x = y;
-      y = abc.charAt(i);
+      secondLast = last;
+      last = abc.charAt(i);
     }
 
-    array[0] = x;
-    array[1] = y;
+    array[0] = secondLast;
+    array[1] = last;
 
     assertNull(TrackerRepository.getTracker(array));
     // or, it would be nicer if: snapshotBuilder().stringPart(abc, 0, 2).assertTrackerOf(array)
