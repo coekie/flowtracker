@@ -83,6 +83,15 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
               mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/SystemHook";
             }
           }
+        } else if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+          MethodInsnNode mInsn = (MethodInsnNode) insn;
+          // StringBuilder.append(char) or StringBuffer.append(char)
+          if ("append".equals(mInsn.name)
+              && ("java/lang/StringBuilder".equals(mInsn.owner)
+              || "java/lang/StringBuffer".equals(mInsn.owner))
+              && mInsn.desc.startsWith("(C)")) {
+            stores.add(new AppendStore(mInsn, frame));
+          }
         }
       }
 

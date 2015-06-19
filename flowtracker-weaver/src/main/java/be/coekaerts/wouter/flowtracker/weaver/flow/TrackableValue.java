@@ -24,7 +24,7 @@ abstract class TrackableValue extends BasicValue {
    * Insert the statements needed to keep track of the origin of this value.
    *
    * This method should not be called directly, instead {@link #ensureTracked(MethodNode)} should
-   * be used, to ensure statements are inserted more than once.
+   * be used, to ensure statements are not inserted more than once.
    *
    * @param methodNode method to add the statements in, at the right place
    */

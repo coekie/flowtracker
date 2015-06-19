@@ -3,10 +3,14 @@ package be.coekaerts.wouter.flowtracker.test;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import org.junit.Test;
 
+import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+/** Test FlowAnalyzingTransformer and friends */
+@SuppressWarnings("StringBufferMayBeStringBuilder")
 public class CharFlowAnalysisTest {
   @Test public void charAt() {
     String abc = trackCopy("abc");
@@ -18,6 +22,34 @@ public class CharFlowAnalysisTest {
 
     snapshotBuilder().trackString(abc, 1, 1).trackString(abc, 0, 1).trackString(abc, 2, 1)
         .assertTrackerOf(array);
+  }
+
+  @Test public void stringBuilderAppend() {
+    String abc = trackCopy("abc");
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < abc.length(); i++) {
+      sb.append(abc.charAt(i));
+    }
+    String result = sb.toString();
+
+    assertEquals("abc", result);
+
+    snapshotBuilder().trackString(abc, 0, 3)
+        .assertEquals(getStringTracker(result));
+  }
+
+  @Test public void stringBufferAppend() {
+    String abc = trackCopy("abc");
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < abc.length(); i++) {
+      sb.append(abc.charAt(i));
+    }
+    String result = sb.toString();
+
+    assertEquals("abc", result);
+
+    snapshotBuilder().trackString(abc, 0, 3)
+        .assertEquals(getStringTracker(result));
   }
 
   // This one is hard.
