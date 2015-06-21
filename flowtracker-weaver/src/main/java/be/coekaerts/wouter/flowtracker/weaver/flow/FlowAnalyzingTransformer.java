@@ -120,8 +120,9 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     public BasicValue naryOperation(AbstractInsnNode insn, List values) throws AnalyzerException {
       if (insn instanceof MethodInsnNode) {
         MethodInsnNode mInsn = (MethodInsnNode) insn;
-        if ("java/lang/String".equals(mInsn.owner) && "charAt".equals(mInsn.name) && "(I)C".equals(
-            mInsn.desc)) {
+        if ("charAt".equals(mInsn.name) && "(I)C".equals(mInsn.desc)
+            && ("java/lang/String".equals(mInsn.owner)
+            || "java/lang/CharSequence".equals(mInsn.owner))) {
           return new CharAtValue(mInsn);
         }
       }

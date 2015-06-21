@@ -24,7 +24,16 @@ public class CharFlowAnalysisTest {
         .assertTrackerOf(array);
   }
 
-  @Test public void stringBuilderAppend() {
+  @Test public void charSequenceCharAt() {
+    CharSequence abc = trackCopy("abc");
+
+    char[] array = new char[1];
+    array[0] = abc.charAt(1);
+    snapshotBuilder().trackString((String)abc, 1, 1)
+        .assertTrackerOf(array);
+  }
+
+  @Test public void stringBuilderAppendChar() {
     String abc = trackCopy("abc");
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < abc.length(); i++) {
@@ -38,7 +47,7 @@ public class CharFlowAnalysisTest {
         .assertEquals(getStringTracker(result));
   }
 
-  @Test public void stringBufferAppend() {
+  @Test public void stringBufferAppendChar() {
     String abc = trackCopy("abc");
     StringBuffer sb = new StringBuffer();
     for (int i = 0; i < abc.length(); i++) {

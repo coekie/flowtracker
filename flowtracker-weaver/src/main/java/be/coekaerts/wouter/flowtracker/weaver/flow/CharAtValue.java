@@ -2,13 +2,12 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-/** A char received from a {@link String#charAt(int)} call. */
+/** A char received from a {@link String#charAt(int)} or {@link CharSequence#charAt(int)} call. */
 class CharAtValue extends TrackableValue {
   /** The charAt() call */
   private final MethodInsnNode mInsn;
@@ -47,11 +46,21 @@ class CharAtValue extends TrackableValue {
   @Override void loadSourceTracker(InsnList toInsert) {
     // insert code for: StringHook.getStringTracker(targetString);
     toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
-    Method getStringTracker = Method.getMethod(
-        "be.coekaerts.wouter.flowtracker.tracker.Tracker getStringTracker(String)");
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKESTATIC, "be/coekaerts/wouter/flowtracker/hook/StringHook",
-            getStringTracker.getName(), getStringTracker.getDescriptor(), false));
+    if (mInsn.owner.equals("java/lang/String")) {
+      toInsert.add(
+          new MethodInsnNode(Opcodes.INVOKESTATIC,
+              "be/coekaerts/wouter/flowtracker/hook/StringHook",
+              "getStringTracker",
+              "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;",
+              false));
+    } else if (mInsn.owner.equals("java/lang/CharSequence")) {
+      toInsert.add(
+          new MethodInsnNode(Opcodes.INVOKESTATIC,
+              "be/coekaerts/wouter/flowtracker/hook/StringHook",
+              "getCharSequenceTracker",
+              "(Ljava/lang/CharSequence;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;",
+              false));
+    }
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {

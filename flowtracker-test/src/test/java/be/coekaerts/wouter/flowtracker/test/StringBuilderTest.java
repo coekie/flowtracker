@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("StringBufferReplaceableByString")
 public class StringBuilderTest {
-  @Test public void testAppendStuff() {
+  @Test public void testAppendString() {
     String abc = trackCopy("abc");
     String def = trackCopy("def");
     String ghi = trackCopy("ghi");
@@ -21,6 +21,17 @@ public class StringBuilderTest {
     assertEquals("abcdefghi", result);
 
     snapshotBuilder().trackString(abc).trackString(def).trackString(ghi)
+        .assertEquals(getStringTracker(result));
+  }
+
+  @Test public void testAppendCharSequenceRange() {
+    String abcdef = trackCopy("abcdef");
+    StringBuilder sb = new StringBuilder();
+    sb.append(abcdef, 1, 4);
+    String result = sb.toString();
+    assertEquals("bcd", result);
+
+    snapshotBuilder().trackString(abcdef, 1, 3)
         .assertEquals(getStringTracker(result));
   }
 

@@ -18,6 +18,12 @@ public class StringHook {
     return TrackerRepository.getTracker(extractor.value);
   }
 
+  @SuppressWarnings("unused") // used by instrumented code
+  public static Tracker getCharSequenceTracker(CharSequence cs) {
+    // for now we only support Strings (when we support more this should move somewhere else)
+    return cs instanceof String ? getStringTracker((String) cs) : null;
+  }
+
   public static void createFixedOriginTracker(String str) {
     StringContentExtractor extractor = new StringContentExtractor(str);
 
