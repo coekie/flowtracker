@@ -13,10 +13,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class StringTest {
-  @Test public void testUnkown() {
-    String a = "unkownTest";
+  @Test public void testUnknown() {
+    String a = "unknownTest";
     assertNull(TrackerRepository.getTracker(a));
     assertNull(getStringTracker(a));
+  }
+
+  @Test public void testToCharArray() {
+    String foo = trackCopy("foo");
+    char[] array = foo.toCharArray();
+    snapshotBuilder().trackString(foo).assertEquals(TrackerRepository.getTracker(array));
   }
 
   @Test public void testConcat() {
