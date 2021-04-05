@@ -49,7 +49,7 @@ public class HookSpec {
     private final boolean hasReturnType;
 
     private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
-      super(Opcodes.ASM5, mv, access, name, desc);
+      super(Opcodes.ASM9, mv, access, name, desc);
       hasReturnType = desc.charAt(desc.indexOf(')') + 1) != 'V';
     }
 

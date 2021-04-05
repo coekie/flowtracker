@@ -14,8 +14,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <asm.version>5.0.3</asm.version>
-    <java.version>1.7</java.version>
+    <asm.version>9.1</asm.version>
+    <java.version>1.8</java.version>
     <flowtracker.extraAgentArgs/>
   </properties>
   <modules>
@@ -24,7 +24,7 @@
     <module>flowtracker-weaver</module>
     <module>flowtracker-web</module>
     <module>flowtracker-test</module>
-    <module>flowtracker-test-jdk8</module>
+    <module>flowtracker-test-jdk14</module>
     <module>flowtracker-all</module>
     <module>flowtracker-all-dependencies</module>
   </modules>
@@ -34,7 +34,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.11</version>
+        <version>4.13.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -44,26 +44,26 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.2</version>
+        <version>3.8.1</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
+        <version>3.2.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.17</version>
+        <version>2.22.2</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-toolchains-plugin</artifactId>
-        <version>1.1</version>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <phase>validate</phase>
@@ -85,7 +85,7 @@
   </build>
 
   <prerequisites>
-    <maven>3.0.3</maven>
+    <maven>3.1.0</maven>
   </prerequisites>
 
 </project>

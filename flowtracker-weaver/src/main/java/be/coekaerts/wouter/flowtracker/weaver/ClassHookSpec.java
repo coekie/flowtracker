@@ -12,7 +12,7 @@ import org.objectweb.asm.commons.Method;
 public class ClassHookSpec implements ClassAdapterFactory {
   private class HookClassAdapter extends ClassVisitor {
     private HookClassAdapter(ClassVisitor cv) {
-      super(Opcodes.ASM5, cv);
+      super(Opcodes.ASM9, cv);
     }
 
     @Override

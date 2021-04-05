@@ -27,7 +27,7 @@ public class StringAdapter extends ClassVisitor {
   private boolean debugUntracked;
 
   public StringAdapter(ClassVisitor cv, Map<String, String> config) {
-    super(Opcodes.ASM5, cv);
+    super(Opcodes.ASM9, cv);
     debugUntracked = config.containsKey(StringHook.DEBUG_UNTRACKED);
   }
 
@@ -53,7 +53,7 @@ public class StringAdapter extends ClassVisitor {
   private class StringConstructorAdapter extends AdviceAdapter {
 
     public StringConstructorAdapter(MethodVisitor mv, int access, String name, String desc) {
-      super(Opcodes.ASM5, mv, access, name, desc);
+      super(Opcodes.ASM9, mv, access, name, desc);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class StringAdapter extends ClassVisitor {
   private class StringContainsAdapter extends GeneratorAdapter {
 
     public StringContainsAdapter(MethodVisitor mv, int access, String name, String desc) {
-      super(Opcodes.ASM5, mv, access, name, desc);
+      super(Opcodes.ASM9, mv, access, name, desc);
     }
 
     @Override
