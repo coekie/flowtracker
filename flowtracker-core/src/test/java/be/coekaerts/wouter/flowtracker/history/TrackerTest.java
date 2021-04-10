@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.history;
 
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Growth;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,13 @@ public class TrackerTest {
 
     snapshotBuilder().gap(5).part(source, 105, 3)
         .assertEquals(target);
+  }
+
+  @Test public void testSetSingleSourceOtherLength() {
+    target.setSource(5, 3, source, 105, Growth.DOUBLE); // setting 5,6,7
+
+    snapshotBuilder().gap(5).part(3, source, 105, Growth.DOUBLE)
+            .assertEquals(target);
   }
 
   /** Set one source, then a second one after it, leaving a gap in between */
@@ -340,6 +348,20 @@ public class TrackerTest {
     target.setSource(1000, 3, middleman, 1);
 
     snapshotBuilder().gap(1000).part(source, 200, 1).part(source, 300, 1).part(source, 400, 1)
+        .assertEquals(target);
+  }
+
+  @Test public void testGrowthCombining() {
+    middleman.setSource(0, 10, source, 0, Growth.DOUBLE);
+    target.setSource(0, 3, middleman, 0, Growth.of(3, 1));
+    snapshotBuilder().part(3, source, 0, Growth.of(6, 1))
+        .assertEquals(target);
+  }
+
+  @Test public void testTransitiveGrowthTruncation() {
+    middleman.setSource(0, 10, source, 0);
+    target.setSource(0, 3, middleman, 0, Growth.DOUBLE);
+    snapshotBuilder().part(3, source, 0, Growth.DOUBLE)
         .assertEquals(target);
   }
 }

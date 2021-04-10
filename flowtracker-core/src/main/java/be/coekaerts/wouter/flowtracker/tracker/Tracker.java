@@ -16,7 +16,7 @@ public abstract class Tracker implements WritableTracker {
     return trackerId;
   }
 
-  @Override public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
+  @Override public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex, Growth growth) {
     throw new UnsupportedOperationException();
   }
 
@@ -55,8 +55,15 @@ public abstract class Tracker implements WritableTracker {
    * @param targetTracker Tracker of which we're setting the source to this one
    * @param targetIndex Offset in <tt>targetTracker</tt> of where the range starts.
    */
+  // TODO make difference between sourceLength and targetLength / growth
   public void pushSourceTo(int sourceIndex, int length, WritableTracker targetTracker,
       int targetIndex) {
+    pushSourceTo(sourceIndex, length, targetTracker, targetIndex, Growth.NONE);
+  }
+
+  // TODO[growth] now that length is targetLength, the parameter order does not make sense anymore
+  public void pushSourceTo(int sourceIndex, int targetLength, WritableTracker targetTracker,
+      int targetIndex, Growth growth) {
     throw new UnsupportedOperationException();
   }
 

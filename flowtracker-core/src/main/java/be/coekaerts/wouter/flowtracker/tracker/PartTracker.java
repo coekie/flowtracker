@@ -3,13 +3,15 @@ package be.coekaerts.wouter.flowtracker.tracker;
 /** Part of a {@link Tracker} that comes from one source. */
 public class PartTracker extends Tracker {
   private final Tracker tracker;
-  private final int index;
+  private final int sourceIndex;
   private int length;
+  private final Growth growth;
 
-  public PartTracker(Tracker tracker, int index, int length) {
+  public PartTracker(Tracker tracker, int sourceIndex, int length, Growth growth) {
     this.tracker = tracker;
-    this.index = index;
+    this.sourceIndex = sourceIndex;
     this.length = length;
+    this.growth = growth;
   }
 
   /**
@@ -24,8 +26,8 @@ public class PartTracker extends Tracker {
   /**
    * The index in {@link #getTracker()} where this part starts
    */
-  public int getIndex() {
-    return index;
+  public int getSourceIndex() {
+    return sourceIndex;
   }
 
   /** The length of this part */
@@ -37,14 +39,19 @@ public class PartTracker extends Tracker {
     this.length = length;
   }
 
+  Growth getGrowth() {
+    return growth;
+  }
+
   @Override
   public int getEntryCount() {
     return 1;
   }
 
   @Override
-  public void pushSourceTo(int sourceIndex, int length, WritableTracker targetTracker,
-      int targetIndex) {
-    targetTracker.setSource(targetIndex, length, tracker, index + sourceIndex);
+  public void pushSourceTo(int sourceIndex, int targetLength, WritableTracker targetTracker,
+      int targetIndex, Growth growth) {
+    targetTracker.setSource(targetIndex, targetLength, tracker, this.sourceIndex + sourceIndex,
+        this.growth.combine(growth));
   }
 }

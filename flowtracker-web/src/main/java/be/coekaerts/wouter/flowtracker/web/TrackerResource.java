@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.web;
 
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Growth;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.WritableTracker;
@@ -67,7 +68,8 @@ public class TrackerResource {
       if (tracker instanceof DefaultTracker) {
         tracker.pushSourceTo(0, tracker.getLength(), new WritableTracker() {
           @Override
-          public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
+          public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
+              Growth growth) {
             String content = tracker.getContent().subSequence(index, index + length).toString();
             if (sourceTracker != null) {
               parts.add(new TrackerPartResponse(content, length, sourceTracker, sourceIndex));
@@ -91,6 +93,7 @@ public class TrackerResource {
     private final String content;
     private final TrackerResponse source;
     private final int sourceOffset;
+    // TODO growth
     private final String sourceContext;
 
     public TrackerPartResponse(String content) {

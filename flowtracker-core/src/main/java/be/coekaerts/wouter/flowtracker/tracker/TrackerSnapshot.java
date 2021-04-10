@@ -69,17 +69,20 @@ public class TrackerSnapshot {
     private final int length;
     private final Tracker source;
     private final int sourceIndex;
+    private final Growth growth;
 
-    private Part(int index, int length, Tracker source, int sourceIndex) {
+    private Part(int index, int length, Tracker source, int sourceIndex, Growth growth) {
       this.index = index;
       this.length = length;
       this.source = source;
       this.sourceIndex = sourceIndex;
+      this.growth = growth;
     }
 
     @Override public String toString() {
       return "{" + index + "-" + (index + length) + "="
-          + (source == null ? "null" : (source + "@" + sourceIndex)) + "}";
+          + (source == null ? "null" : (source + "@" + sourceIndex + growth.toOperationString()))
+          + "}";
     }
 
     @Override public boolean equals(Object o) {
@@ -88,6 +91,7 @@ public class TrackerSnapshot {
       Part other = (Part) o;
       return index == other.index
           && length == other.length
+          && growth.equals(other.growth)
           && source == other.source
           && sourceIndex == other.sourceIndex;
     }
@@ -104,11 +108,11 @@ public class TrackerSnapshot {
     private final List<Part> parts = new ArrayList<>();
 
     @Override
-    public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
+    public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex, Growth growth) {
       if (index != length(parts)) {
         throw new IllegalStateException("should only append at exactly the end");
       }
-      parts.add(new Part(index, length, sourceTracker, sourceIndex));
+      parts.add(new Part(index, length, sourceTracker, sourceIndex, growth));
     }
   }
 
@@ -119,8 +123,14 @@ public class TrackerSnapshot {
     private Builder() {}
 
     /** Append a part */
+    // TODO make order of arguments consistent with setSource & other part() overloads
     public Builder part(Tracker source, int sourceIndex, int length) {
-      return doPart(requireNonNull(source), sourceIndex, length);
+      return doPart(length, requireNonNull(source), sourceIndex, Growth.NONE);
+    }
+
+    /** Append a part */
+    public Builder part(int length, Tracker source, int sourceIndex, Growth growth) {
+      return doPart(length, requireNonNull(source), sourceIndex, growth);
     }
 
     /** Append a part containing everything in {@code source} */
@@ -148,12 +158,12 @@ public class TrackerSnapshot {
 
     /** Append a part for which the source tracker is unknown */
     public Builder gap(int length) {
-      return doPart(null, -1, length);
+      return doPart(length,null, -1, Growth.NONE);
     }
 
-    private Builder doPart(Tracker source, int sourceIndex, int length) {
+    private Builder doPart(int length, Tracker source, int sourceIndex, Growth growth) {
       int index = length(parts); // add new one at the end
-      parts.add(new Part(index, length, source, sourceIndex));
+      parts.add(new Part(index, length, source, sourceIndex, growth));
       return this;
     }
 

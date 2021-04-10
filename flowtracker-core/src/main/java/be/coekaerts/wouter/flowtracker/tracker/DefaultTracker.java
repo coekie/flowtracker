@@ -27,25 +27,27 @@ public class DefaultTracker extends Tracker {
   }
 
   @Override
-  public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
+  public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex, Growth growth) {
     if (sourceTracker == null) {
-      doSetSource(index, length, null, -1);
+      doSetSource(index, length, null, -1, Growth.NONE);
     } else if (depth.isAcceptableContent(sourceTracker)) {
       if (sourceTracker.isContentMutable()) {
         // we should make a copy here, because if it changes, it won't be correct anymore.
         throw new UnsupportedOperationException(
             "Adding mutable tracker as source is not supported");
       } else {
-        doSetSource(index, length, sourceTracker, sourceIndex);
+        doSetSource(index, length, sourceTracker, sourceIndex, growth);
       }
     } else {
-      sourceTracker.pushSourceTo(sourceIndex, length, this, index);
+      sourceTracker.pushSourceTo(sourceIndex, length, this, index, growth);
     }
   }
 
   @Override
-  public void pushSourceTo(int sourceIndex, int length, WritableTracker targetTracker,
-      int targetIndex) {
+  // TODO really take growth into account, for the indexes. all usages of targetLength here are
+  //  probably wrong
+  public void pushSourceTo(int sourceIndex, int targetLength, WritableTracker targetTracker,
+      int targetIndex, Growth growth) {
     // we start at the part that contains sourceIndex
     // or, if there's no such part, at what comes after
     Entry<Integer, PartTracker> startEntry = getEntryAt(sourceIndex);
@@ -57,14 +59,15 @@ public class DefaultTracker extends Tracker {
       PartTracker part = entry.getValue();
 
       // if we're at a part that's after the range we want to copy, stop
-      if (partIndex >= sourceIndex + length) {
+      // TODO[growth] s/targetLength/sourceLength/, probably
+      if (partIndex >= sourceIndex + targetLength) {
         break;
       }
 
       // gap before this entry
       int gapBefore = partIndex - sourceIndex - pos;
       if (gapBefore > 0) {
-        targetTracker.setSource(targetIndex + pos, gapBefore, null, -1);
+        targetTracker.setSource(targetIndex + pos, gapBefore, null, -1, Growth.NONE);
       }
 
       // if the beginning of this part is cut off (because this it the first part, and sourceIndex
@@ -82,31 +85,34 @@ public class DefaultTracker extends Tracker {
       // The length of what we're pushing. This is limited by two things:
       // * the length given in arguments
       // * the available size of the part we're handling
-      int pushLength = Math.min(length - pushingOffset, part.getLength() - pushingPartOffset);
+      int pushLength = Math.min(targetLength - pushingOffset, part.getLength() - pushingPartOffset);
 
       // push it!
-      part.pushSourceTo(pushingPartOffset, pushLength, targetTracker, pushTargetIndex);
+      part.pushSourceTo(pushingPartOffset, pushLength, targetTracker, pushTargetIndex, growth);
 
       pos = partIndex + part.getLength() - sourceIndex;
     }
 
     // gap at the end
-    if (pos < length) {
-      targetTracker.setSource(targetIndex + pos, length - pos, null, -1);
+    if (pos < targetLength) {
+      targetTracker.setSource(targetIndex + pos, targetLength - pos, null, -1);
     }
   }
 
-  private void doSetSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
+  private void doSetSource(int index, int length, Tracker sourceTracker, int sourceIndex,
+      Growth growth) {
     if (length == 0) return;
 
-    // check the entry right after the new one
+    // check the entry right after the new one (starting where new one ends, or overlapping)
     Entry<Integer, PartTracker> nextEntry = getEntryAt(index + length);
     if (nextEntry != null) {
       PartTracker nextPart = nextEntry.getValue();
-      if (nextPart.getTracker() == sourceTracker && // same source
-          // and relative index is the same (no gaps or skipping in the source)
-          (index - nextEntry.getKey() == sourceIndex - nextPart.getIndex())) {
-        // if it aligns with the new one, merge two parts together by extending length
+      if (nextPart.getTracker() == sourceTracker // same source
+          && nextPart.getGrowth().equals(growth)
+          // and indexes align: difference in source is same as in target (scaled by growth)
+          && growth.lengthMatches(sourceIndex - nextPart.getSourceIndex(),
+              index - nextEntry.getKey())) {
+        // merge two parts together by extending length
         // note: old nextEntry itself will be removed below
         length = nextEntry.getKey() + nextPart.getLength() - index;
       } else if (nextEntry.getKey() != index + length) {
@@ -117,9 +123,12 @@ public class DefaultTracker extends Tracker {
         int oldStart = nextEntry.getKey();
         int newStart = index + length;
         int delta = newStart - oldStart;
+        // TODO[growth] verify behaviour
+        // TODO[growth] do something special if we're cutting nextPart at not-a-block-boundary
         map.put(newStart, new PartTracker(nextPart.getTracker(),
-            nextPart.getIndex() + delta,
-            nextPart.getLength() - delta));
+            nextPart.getSourceIndex() + growth.targetToSource(delta),
+            nextPart.getLength() - delta,
+            growth));
       }
     }
 
@@ -130,9 +139,11 @@ public class DefaultTracker extends Tracker {
     Entry<Integer, PartTracker> previousEntry = getEntryAt(index - 1);
     if (previousEntry != null) {
       PartTracker previousPart = previousEntry.getValue();
-      if (previousPart.getTracker() == sourceTracker && // same source
-          // and relative index is the same (no gaps or skipping in the source)
-          (index - previousEntry.getKey() == sourceIndex - previousPart.getIndex())) {
+      if (previousPart.getTracker() == sourceTracker // same source
+          && previousPart.getGrowth().equals(growth)
+          // and indexes align: difference in source index is same as difference in target (scaled by growth)
+          && growth.lengthMatches(sourceIndex - previousPart.getSourceIndex(),
+              index - previousEntry.getKey())) {
         // then extend the entry before it by extending its length
         previousPart.setLength(index + length - previousEntry.getKey());
         return; // no need to add the entry anymore
@@ -144,7 +155,7 @@ public class DefaultTracker extends Tracker {
 
     // add the new entry
     if (sourceTracker != null) {
-      map.put(index, new PartTracker(sourceTracker, sourceIndex, length));
+      map.put(index, new PartTracker(sourceTracker, sourceIndex, length, growth));
     }
   }
 

@@ -17,5 +17,17 @@ public interface WritableTracker {
    * @param sourceTracker Tracker to use as source
    * @param sourceIndex Index into <tt>sourceTracker</tt>
    */
-  void setSource(int index, int length, Tracker sourceTracker, int sourceIndex);
+  // TODO remove this overload
+  default void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
+    setSource(index, length, sourceTracker, sourceIndex, Growth.NONE);
+  }
+
+  // TODO remove the default implementation
+  // TODO this needs more thought, see NOTES
+  // TODO document behaviour (or intention) for copying part of a block (character) from source:
+  //   in order to know for each index in the target from which source block they come, either
+  //   sourceIndex needs to point to the start of a block, or it needs to be a short length (shorter
+  //   than Growth.something)
+  void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
+      Growth growth);
 }
