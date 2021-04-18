@@ -25,6 +25,18 @@ public class CharFlowAnalysisTest {
         .assertTrackerOf(array);
   }
 
+  @Test public void byteArray() {
+    byte[] abc = track(new byte[3]);
+
+    byte[] array = new byte[3];
+    array[0] = abc[1];
+    array[1] = abc[0];
+    array[2] = abc[2];
+
+    snapshotBuilder().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1)
+        .assertTrackerOf(array);
+  }
+
   @Test public void charAt() {
     String abc = trackCopy("abc");
 

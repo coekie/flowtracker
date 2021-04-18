@@ -8,9 +8,9 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-/** A value from a {@link Opcodes#CALOAD} operation: the loading of a char from a char[]. */
+/** A value from getting an element of an array (e.g. {@link Opcodes#CALOAD}) */
 // on the stack: char[] target, int index
-class CaLoad extends TrackableValue {
+class ArrayLoadValue extends TrackableValue {
   /** The {@link Opcodes#CALOAD} call */
   private final InsnNode insn;
 
@@ -19,8 +19,8 @@ class CaLoad extends TrackableValue {
   /** Index of the local variable storing the index */
   private int indexLocal;
 
-  CaLoad(InsnNode insn) {
-    super(Type.CHAR_TYPE);
+  ArrayLoadValue(InsnNode insn, Type type) {
+    super(type);
     this.insn = insn;
   }
 

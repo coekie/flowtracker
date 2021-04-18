@@ -10,16 +10,17 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
-/** The storing of a char in a char[]. */
+/** The storing of a value in an array, e.g. a char in a char[]. */
 // on the stack: char[] target, int index, char toStore 
-class CaStore extends Store {
+class ArrayStore extends Store {
   private final InsnNode storeInsn;
+  /** Method in ArrayHook to call as a replacement for the array store operation */
+  private final String hookMethod;
 
-  CaStore(InsnNode storeInsn, Frame<BasicValue> frame) {
+  ArrayStore(InsnNode storeInsn, Frame<BasicValue> frame, String hookMethod) {
     super(frame);
     this.storeInsn = storeInsn;
-
-    assert Types.CHAR_ARRAY.equals(getStackFromTop(2).getType());
+    this.hookMethod = hookMethod;
   }
 
   void insertTrackStatements(MethodNode methodNode) {
@@ -40,11 +41,10 @@ class CaStore extends Store {
 
     methodNode.maxStack = Math.max(frame.getStackSize() + 2, methodNode.maxStack);
 
-    Method hook = Method.getMethod(
-        "void setCharWithOrigin(char[],int,char,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
+    Method hook = Method.getMethod(hookMethod);
 
     toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-        "be/coekaerts/wouter/flowtracker/hook/CharArrayHook", hook.getName(), hook.getDescriptor(),
+        "be/coekaerts/wouter/flowtracker/hook/ArrayHook", hook.getName(), hook.getDescriptor(),
         false));
 
     methodNode.instructions.insert(storeInsn, toInsert);
@@ -54,5 +54,15 @@ class CaStore extends Store {
   /** The value being stored */
   private BasicValue getStored() {
     return getStackFromTop(0);
+  }
+
+  static ArrayStore createCharArrayStore(InsnNode storeInsn, Frame<BasicValue> frame) {
+    return new ArrayStore(storeInsn, frame,
+        "void setChar(char[],int,char,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
+  }
+
+  static ArrayStore createByteArrayStore(InsnNode storeInsn, Frame<BasicValue> frame) {
+    return new ArrayStore(storeInsn, frame,
+        "void setByte(byte[],int,byte,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
   }
 }

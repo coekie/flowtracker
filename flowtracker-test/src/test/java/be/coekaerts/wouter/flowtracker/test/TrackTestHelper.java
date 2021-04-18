@@ -32,6 +32,12 @@ public class TrackTestHelper {
     return chars;
   }
 
+  /** Adds a tracker on the given object and returns it. */
+  public static byte[] track(byte[] bytes) {
+    TrackerRepository.createFixedOriginTracker(bytes, bytes.length);
+    return bytes;
+  }
+
   /**
    * Assert that the given object is in the InterestRepository and has a descriptor with the given
    * message and object

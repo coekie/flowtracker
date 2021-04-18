@@ -71,7 +71,9 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         AbstractInsnNode insn = instructions.get(i);
         Frame<BasicValue> frame = frames[i];
         if (insn.getOpcode() == Opcodes.CASTORE) {
-          stores.add(new CaStore((InsnNode) insn, frame));
+          stores.add(ArrayStore.createCharArrayStore((InsnNode) insn, frame));
+        } else if (insn.getOpcode() == Opcodes.BASTORE) {
+          stores.add(ArrayStore.createByteArrayStore((InsnNode) insn, frame));
         } else if (insn.getOpcode() == Opcodes.INVOKESTATIC) {
           MethodInsnNode mInsn = (MethodInsnNode) insn;
           if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
@@ -124,8 +126,10 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         throws AnalyzerException {
       if (aInsn.getOpcode() == CALOAD) {
         InsnNode insn = (InsnNode) aInsn;
-        return new CaLoad(insn);
-        //System.out.println(insn);
+        return new ArrayLoadValue(insn, Type.CHAR_TYPE);
+      } else if (aInsn.getOpcode() == BALOAD) {
+        InsnNode insn = (InsnNode) aInsn;
+        return new ArrayLoadValue(insn, Type.BYTE_TYPE);
       }
       return super.binaryOperation(aInsn, value1, value2);
     }
