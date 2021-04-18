@@ -78,9 +78,11 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
           MethodInsnNode mInsn = (MethodInsnNode) insn;
           if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
               && "(Ljava/lang/Object;ILjava/lang/Object;II)V".equals(mInsn.desc)) {
-            // if it is a copy from char[] to char[]
-            if (Types.CHAR_ARRAY.equals(frame.getStack(frame.getStackSize() - 5).getType())
-                && Types.CHAR_ARRAY.equals((frame.getStack(frame.getStackSize() - 3)).getType())) {
+            // if it is a copy from char[] to char[] or from byte[] to byte[]
+            Type sourceType = frame.getStack(frame.getStackSize() - 5).getType();
+            Type destType = frame.getStack(frame.getStackSize() - 3).getType();
+            if ((Types.CHAR_ARRAY.equals(sourceType) && Types.CHAR_ARRAY.equals(destType))
+              || (Types.BYTE_ARRAY.equals(sourceType) && Types.BYTE_ARRAY.equals(destType))) {
               // replace it with a call to our hook instead
               mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/SystemHook";
             }
@@ -113,8 +115,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 
     @Override
     public BasicValue newValue(Type type) {
-      // for char[], remember the exact type
-      if (CHAR_ARRAY_TYPE.equals(type)) {
+      // for char[] and byte[] remember the exact type
+      if (Types.CHAR_ARRAY.equals(type) || Types.BYTE_ARRAY.equals(type)) {
         return new BasicValue(type);
       }
       // for others the exact type doesn't matter
@@ -148,8 +150,6 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
       return super.naryOperation(insn, values);
     }
   }
-
-  private static final Type CHAR_ARRAY_TYPE = Type.getType("[C");
 
   public ClassVisitor createClassAdapter(ClassVisitor cv) {
     return new FlowClassAdapter(cv);
