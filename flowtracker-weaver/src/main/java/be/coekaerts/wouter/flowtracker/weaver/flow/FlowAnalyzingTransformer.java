@@ -119,6 +119,17 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
       return super.newValue(type);
     }
 
+    @Override
+    public BasicValue binaryOperation(AbstractInsnNode aInsn, BasicValue value1, BasicValue value2)
+        throws AnalyzerException {
+      if (aInsn.getOpcode() == CALOAD) {
+        InsnNode insn = (InsnNode) aInsn;
+        return new CaLoad(insn);
+        //System.out.println(insn);
+      }
+      return super.binaryOperation(aInsn, value1, value2);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public BasicValue naryOperation(AbstractInsnNode insn, List values) throws AnalyzerException {

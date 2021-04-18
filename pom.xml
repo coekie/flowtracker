@@ -24,7 +24,7 @@
     <module>flowtracker-weaver</module>
     <module>flowtracker-web</module>
     <module>flowtracker-test</module>
-    <module>flowtracker-test-jdk14</module>
+    <!--<module>flowtracker-test-jdk14</module>-->
     <module>flowtracker-all</module>
     <module>flowtracker-all-dependencies</module>
   </modules>

@@ -31,12 +31,11 @@ class CharAtValue extends TrackableValue {
 
     InsnList toInsert = new InsnList();
 
-    // we could avoid some local-to-stack copying by dupping:
-    // toInsert.add(new InsnNode(Opcodes.DUP2));
-
+    // store target and index
     toInsert.add(new VarInsnNode(Opcodes.ISTORE, indexLocal));
     toInsert.add(new VarInsnNode(Opcodes.ASTORE, targetStringLocal));
 
+    // put them back on the stack for the actual operation
     toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
     toInsert.add(new VarInsnNode(Opcodes.ILOAD, indexLocal));
 

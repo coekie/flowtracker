@@ -4,6 +4,7 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import org.junit.Test;
 
 import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
@@ -12,6 +13,18 @@ import static org.junit.Assert.assertNull;
 /** Test FlowAnalyzingTransformer and friends */
 @SuppressWarnings("StringBufferMayBeStringBuilder")
 public class CharFlowAnalysisTest {
+  @Test public void charArray() {
+    char[] abc = track(new char[3]);
+
+    char[] array = new char[3];
+    array[0] = abc[1];
+    array[1] = abc[0];
+    array[2] = abc[2];
+
+    snapshotBuilder().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1)
+        .assertTrackerOf(array);
+  }
+
   @Test public void charAt() {
     String abc = trackCopy("abc");
 
@@ -24,12 +37,14 @@ public class CharFlowAnalysisTest {
         .assertTrackerOf(array);
   }
 
+  @SuppressWarnings("UnnecessaryLocalVariable") // we want its type to be a CharSequence
   @Test public void charSequenceCharAt() {
-    CharSequence abc = trackCopy("abc");
+    String str = trackCopy("abc");
+    CharSequence abc = str;
 
     char[] array = new char[1];
     array[0] = abc.charAt(1);
-    snapshotBuilder().trackString((String)abc, 1, 1)
+    snapshotBuilder().trackString(str, 1, 1)
         .assertTrackerOf(array);
   }
 
