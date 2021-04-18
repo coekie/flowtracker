@@ -1,16 +1,14 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
-import org.junit.Test;
-
 import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import org.junit.Test;
 
 public class StringTest {
   @Test public void testUnknown() {
@@ -60,14 +58,5 @@ public class StringTest {
 
     snapshotBuilder().track(chars, 1, 2)
         .assertEquals(getStringTracker(str));
-  }
-
-  /** Test that we didn't break the normal functioning of contentEquals. */
-  @Test public void contentEqualsTest() {
-    String str = "abcd";
-    StringBuilder sb = new StringBuilder();
-    sb.append("ab").append("cd");
-    assertTrue(str.contentEquals(sb));
-    assertFalse(str.contentEquals("foo"));
   }
 }

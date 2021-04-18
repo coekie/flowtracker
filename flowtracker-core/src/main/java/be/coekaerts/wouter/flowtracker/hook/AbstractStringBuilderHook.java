@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 /** Hook methods called by instrumented code for {@link StringBuilder} and {@link StringBuffer} */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class AbstractStringBuilderHook {
-  public static final Field valueField;
+  private static final Field valueField;
 
   static {
     try {

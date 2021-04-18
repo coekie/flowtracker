@@ -3,8 +3,20 @@ package be.coekaerts.wouter.flowtracker.hook;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import java.lang.reflect.Field;
 
 public class StringHook {
+  private static final Field valueField;
+
+  static {
+    try {
+      valueField = String.class.getDeclaredField("value");
+      valueField.setAccessible(true);
+    } catch (NoSuchFieldException e) {
+      throw new Error("Cannot find String.value", e);
+    }
+  }
+
   public static final String DEBUG_UNTRACKED = "debugUntracked";
 
   private static String debugUntracked = null;
@@ -14,8 +26,7 @@ public class StringHook {
   }
 
   public static Tracker getStringTracker(String str) {
-    StringContentExtractor extractor = new StringContentExtractor(str);
-    return TrackerRepository.getTracker(extractor.value);
+    return TrackerRepository.getTracker(getValueArray(str));
   }
 
   @SuppressWarnings("unused") // used by instrumented code
@@ -25,9 +36,16 @@ public class StringHook {
   }
 
   public static void createFixedOriginTracker(String str) {
-    StringContentExtractor extractor = new StringContentExtractor(str);
+    TrackerRepository.createFixedOriginTracker(getValueArray(str), str.length());
+  }
 
-    TrackerRepository.createFixedOriginTracker(extractor.value, str.length());
+  /** Get the "value" field from a String */
+  private static Object getValueArray(String str) {
+    try {
+      return valueField.get(str);
+    } catch (IllegalAccessException e) {
+      throw new Error(e);
+    }
   }
 
   @SuppressWarnings("UnusedDeclaration") // used by instrumented code
@@ -43,7 +61,7 @@ public class StringHook {
     }
   }
 
-  /** Get a tracker even when trackers are suspected; to be used from a debugger. */
+  /** Get a tracker even when trackers are suspended; to be used from a debugger. */
   @SuppressWarnings("unused")
   public static Tracker forceGetStringTracker(String str) {
     if (Trackers.isActive()) return getStringTracker(str);
@@ -51,47 +69,5 @@ public class StringHook {
     Tracker result = getStringTracker(str);
     Trackers.suspendOnCurrentThread();
     return result;
-  }
-
-  /**
-   * Used by {@link StringHook#getStringTracker(String)} to retrieve String.value and String.offset.
-   * <p>
-   * The only reason this class implements {@link CharSequence} is so that it can be passed to the
-   * instrumented {@link String#contentEquals(CharSequence)} method.
-   */
-  public static class StringContentExtractor implements CharSequence {
-    private char[] value;
-    private int offset;
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private StringContentExtractor(String str) {
-      // contentEquals has been instrumented to deal with this extractor.
-      str.contentEquals(this);
-    }
-
-    /**
-     * Called by {@link String#contentEquals(CharSequence)}, to expose the String content.
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    public void setContent(char[] value, int offset) {
-      this.value = value;
-      this.offset = offset;
-    }
-
-    @Override
-    public int length() {
-      throw new UnsupportedOperationException("This is not supposed to get called. "
-          + "Hint: was String.contentEquals was not instrumented because the agent is not loaded?");
-    }
-
-    @Override
-    public char charAt(int index) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CharSequence subSequence(int start, int end) {
-      throw new UnsupportedOperationException();
-    }
   }
 }
