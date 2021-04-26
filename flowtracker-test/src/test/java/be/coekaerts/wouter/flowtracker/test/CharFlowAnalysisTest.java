@@ -1,19 +1,34 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
-import org.junit.Test;
-
 import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerRepository.getTracker;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 /** Test FlowAnalyzingTransformer and friends */
 @SuppressWarnings("StringBufferMayBeStringBuilder")
 public class CharFlowAnalysisTest {
-  @Test public void charArray() {
+  private final FlowTester ft = new FlowTester();
+
+  @Test public void charArrayLoadValue() {
+    char[] array = track(new char[3]);
+    FlowTester.assertTrackedValue(array[2], getTracker(array), 2);
+  }
+
+  @Test public void charArrayStore() {
+    char[] array = new char[3];
+    array[2] = ft.createSourceChar('a');
+    snapshotBuilder().gap(2).part(ft.theSource(), ft.theSourceIndex(), 1)
+        .assertTrackerOf(array);
+  }
+
+  @Test public void charArrayLoadAndStore() {
     char[] abc = track(new char[3]);
 
     char[] array = new char[3];
@@ -39,14 +54,7 @@ public class CharFlowAnalysisTest {
 
   @Test public void charAt() {
     String abc = trackCopy("abc");
-
-    char[] array = new char[3];
-    array[0] = abc.charAt(1);
-    array[1] = abc.charAt(0);
-    array[2] = abc.charAt(2);
-
-    snapshotBuilder().trackString(abc, 1, 1).trackString(abc, 0, 1).trackString(abc, 2, 1)
-        .assertTrackerOf(array);
+    FlowTester.assertTrackedValue(abc.charAt(1), getStringTracker(abc), 1);
   }
 
   @SuppressWarnings("UnnecessaryLocalVariable") // we want its type to be a CharSequence
@@ -54,10 +62,7 @@ public class CharFlowAnalysisTest {
     String str = trackCopy("abc");
     CharSequence abc = str;
 
-    char[] array = new char[1];
-    array[0] = abc.charAt(1);
-    snapshotBuilder().trackString(str, 1, 1)
-        .assertTrackerOf(array);
+    FlowTester.assertTrackedValue(abc.charAt(1), getStringTracker(str), 1);
   }
 
   @Test public void stringBuilderAppendChar() {
@@ -109,7 +114,7 @@ public class CharFlowAnalysisTest {
     array[0] = secondLast;
     array[1] = last;
 
-    assertNull(TrackerRepository.getTracker(array));
+    assertNull(getTracker(array));
     // or, it would be nicer if: snapshotBuilder().stringPart(abc, 0, 2).assertTrackerOf(array)
   }
 
@@ -129,6 +134,21 @@ public class CharFlowAnalysisTest {
     array[0] = x;
 
     // we notice that it's not an easy case, so we don't track it
-    assertNull(TrackerRepository.getTracker(array));
+    assertNull(getTracker(array));
+  }
+
+  // TODO charToByte for Latin1String.inflate
+  //  - TrackableValue for constants?
+  //  - track through "&" operation and cast
+  @Ignore
+  @Test public void charToByte() {
+    byte[] src = track(new byte[4]);
+    char[] dst = new char[3];
+    for (int i = 0; i < 3; i++) {
+      // test case from Latin1String.inflate
+      dst[i] = (char)(src[i + 1] & 255);
+    }
+
+    snapshotBuilder().track(src, 1, 3).assertTrackerOf(dst);
   }
 }

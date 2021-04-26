@@ -74,27 +74,33 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
           stores.add(ArrayStore.createCharArrayStore((InsnNode) insn, frame));
         } else if (insn.getOpcode() == Opcodes.BASTORE) {
           stores.add(ArrayStore.createByteArrayStore((InsnNode) insn, frame));
-        } else if (insn.getOpcode() == Opcodes.INVOKESTATIC) {
+        } else if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL
+            || insn.getOpcode() == Opcodes.INVOKESTATIC) {
           MethodInsnNode mInsn = (MethodInsnNode) insn;
+
           if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
               && "(Ljava/lang/Object;ILjava/lang/Object;II)V".equals(mInsn.desc)) {
             // if it is a copy from char[] to char[] or from byte[] to byte[]
             Type sourceType = frame.getStack(frame.getStackSize() - 5).getType();
             Type destType = frame.getStack(frame.getStackSize() - 3).getType();
             if ((Types.CHAR_ARRAY.equals(sourceType) && Types.CHAR_ARRAY.equals(destType))
-              || (Types.BYTE_ARRAY.equals(sourceType) && Types.BYTE_ARRAY.equals(destType))) {
+                || (Types.BYTE_ARRAY.equals(sourceType) && Types.BYTE_ARRAY.equals(destType))) {
               // replace it with a call to our hook instead
               mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/SystemHook";
             }
-          }
-        } else if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL) {
-          MethodInsnNode mInsn = (MethodInsnNode) insn;
-          // StringBuilder.append(char) or StringBuffer.append(char)
-          if ("append".equals(mInsn.name)
+          } else if ("append".equals(mInsn.name)
               && ("java/lang/StringBuilder".equals(mInsn.owner)
               || "java/lang/StringBuffer".equals(mInsn.owner))
               && mInsn.desc.startsWith("(C)")) {
             stores.add(new AppendStore(mInsn, frame));
+          } else if (mInsn.owner.equals("be/coekaerts/wouter/flowtracker/test/FlowTester")) {
+            if (mInsn.name.equals("assertTrackedValue")) {
+              stores.add(new TesterStore(mInsn, frame, 2));
+            } else if (mInsn.name.equals("assertIsTheTrackedValue")
+                || mInsn.name.equals("getCharSourceTracker")
+                || mInsn.name.equals("getCharSourceIndex")) {
+              stores.add(new TesterStore(mInsn, frame, 0));
+            }
           }
         }
       }
@@ -145,6 +151,10 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
             && ("java/lang/String".equals(mInsn.owner)
             || "java/lang/CharSequence".equals(mInsn.owner))) {
           return new CharAtValue(mInsn);
+        } else if ("be/coekaerts/wouter/flowtracker/test/FlowTester".equals(mInsn.owner)) {
+          if ("createSourceChar".equals(mInsn.name)) {
+            return new TesterValue(mInsn);
+          }
         }
       }
       return super.naryOperation(insn, values);

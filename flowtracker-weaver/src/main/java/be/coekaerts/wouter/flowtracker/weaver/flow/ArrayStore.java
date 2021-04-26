@@ -39,7 +39,7 @@ class ArrayStore extends Store {
       toInsert.add(new InsnNode(Opcodes.ICONST_0));
     }
 
-    methodNode.maxStack = Math.max(frame.getStackSize() + 2, methodNode.maxStack);
+    methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
 
     Method hook = Method.getMethod(hookMethod);
 

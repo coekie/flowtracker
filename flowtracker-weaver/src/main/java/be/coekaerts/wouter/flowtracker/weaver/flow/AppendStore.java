@@ -31,7 +31,6 @@ class AppendStore extends Store {
 
       methodNode.maxStack = Math.max(frame.getStackSize() + 2, methodNode.maxStack);
 
-      // invokeInsn.name is either java/lang/StringBuilder or java/lang/StringBuffer
       String hookMethod;
       if ("java/lang/StringBuilder".equals(invokeInsn.owner)) {
         hookMethod = "(Ljava/lang/StringBuilder;CLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)Ljava/lang/StringBuilder;";
