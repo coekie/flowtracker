@@ -1,5 +1,11 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedCharArray;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static org.junit.Assert.assertEquals;
+
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,11 +20,6 @@ import java.nio.charset.CoderResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.assertEquals;
 
 public class OutputStreamWriterTest {
 
@@ -54,8 +55,7 @@ public class OutputStreamWriterTest {
   }
 
   @Test public void writeCharArray() throws IOException {
-    char[] abc = {'a', 'b', 'c'};
-    track(abc);
+    char[] abc = trackedCharArray("abc");
     writer.write(abc);
     writer.write(abc);
     assertContentEquals("abcabc");
@@ -63,9 +63,8 @@ public class OutputStreamWriterTest {
   }
 
   @Test public void writeUntrackedCharArray() throws IOException {
-    char[] abc = {'a', 'b', 'c'}; // without tracking
-    char[] def = {'d', 'e', 'f'}; // with tracking to test if offset is still correct
-    track(def);
+    char[] abc = untrackedCharArray("abc"); // without tracking
+    char[] def = trackedCharArray("def"); // with tracking to test if offset is still correct
 
     writer.write(abc);
     writer.write(def);
@@ -75,8 +74,7 @@ public class OutputStreamWriterTest {
   }
 
   @Test public void writeCharArrayOffset() throws IOException {
-    char[] abcd = {'a', 'b', 'c', 'd'};
-    track(abcd);
+    char[] abcd = trackedCharArray("abcd");
     writer.write(abcd, 1, 2);
     assertContentEquals("bc");
     snapshotBuilder().track(abcd, 1, 2).assertTrackerOf(writer);

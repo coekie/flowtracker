@@ -1,16 +1,15 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import java.util.Arrays;
-import org.junit.Test;
-
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerRepository.getTracker;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+
+import java.util.Arrays;
+import org.junit.Test;
 
 /** Test for {@link Arrays}. */
 public class ArraysTest {
   @Test public void copyOf() {
-    char[] abcdef = track("abcdef".toCharArray());
+    char[] abcdef = TrackTestHelper.trackedCharArray("abcdef");
     char[] abcd = Arrays.copyOf(abcdef, 4);
 
     snapshotBuilder().track(abcdef, 0, 4)
@@ -18,7 +17,7 @@ public class ArraysTest {
   }
 
   @Test public void copyOfRange() {
-    char[] abcdef = track("abcdef".toCharArray());
+    char[] abcdef = TrackTestHelper.trackedCharArray("abcdef");
     char[] bcde = Arrays.copyOfRange(abcdef, 1, 5);
     snapshotBuilder().track(abcdef, 1, 4)
         .assertEquals(getTracker(bcde));

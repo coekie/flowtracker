@@ -9,7 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Helper for testing instrumentation of FlowAnalyzingTransformer and its TrackableValues and Stores
+ * Helper for testing instrumentation of FlowAnalyzingTransformer and its TrackableValues and
+ * Stores.
+ *
+ * This class gets some special instrumentation, see {@code TesterStore} and {@code TesterValue} and
+ * their usage.
  */
 class FlowTester {
   private final List<Tracker> sources = new ArrayList<>();
@@ -26,6 +30,20 @@ class FlowTester {
   char $tracked_createSourceChar(char c) {
     sources.add(new FixedOriginTracker(-1));
     return c;
+  }
+
+  /**
+   * Returns the byte value, and treats this byte as the source.
+   * Calls to this method should get replaced by {@link #$tracked_createSourceByte(byte)}.
+   */
+  byte createSourceByte(@SuppressWarnings("unused") byte b) {
+    throw sourceNotTrackedError();
+  }
+
+  @SuppressWarnings("unused") // invoked by TesterValue instrumentation
+  byte $tracked_createSourceByte(byte b) {
+    sources.add(new FixedOriginTracker(-1));
+    return b;
   }
 
   // TODO this might be useful, but unused for now...
@@ -57,8 +75,27 @@ class FlowTester {
     throw valueNotTrackedError();
   }
 
+  /**
+   * Assert that the the given value is tracked as coming from index {@code expectedIndex} in
+   * {@code expectedSource}.
+   * Calls to this method should get replaced by
+   * {@link #$tracked_assertTrackedValue(byte, Tracker, int, Tracker, int)}.
+   */
+  static void assertTrackedValue(@SuppressWarnings("unused") byte b,
+      @SuppressWarnings("unused") Tracker expectedSource,
+      @SuppressWarnings("unused") int expectedIndex) {
+    throw valueNotTrackedError();
+  }
+
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   static void $tracked_assertTrackedValue(char c, Tracker expectedTracker, int expectedIndex,
+      Tracker actualTracker, int actualIndex) {
+    assertEquals(expectedTracker, actualTracker);
+    assertEquals(expectedIndex, actualIndex);
+  }
+
+  @SuppressWarnings("unused") // invoked by TesterStore instrumentation
+  static void $tracked_assertTrackedValue(byte b, Tracker expectedTracker, int expectedIndex,
       Tracker actualTracker, int actualIndex) {
     assertEquals(expectedTracker, actualTracker);
     assertEquals(expectedIndex, actualIndex);
@@ -73,8 +110,23 @@ class FlowTester {
     throw valueNotTrackedError();
   }
 
+  /**
+   * Assert that the the given value is tracked as coming from this tester.
+   * Calls to this method should get replaced by
+   * {@link #$tracked_assertIsTheTrackedValue(byte, Tracker, int)}.
+   */
+  void assertIsTheTrackedValue(@SuppressWarnings("unused") byte b) {
+    throw valueNotTrackedError();
+  }
+
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   void $tracked_assertIsTheTrackedValue(char c, Tracker actualTracker, int actualIndex) {
+    assertEquals(theSource(), actualTracker);
+    assertEquals(theSourceIndex(), actualIndex);
+  }
+
+  @SuppressWarnings("unused") // invoked by TesterStore instrumentation
+  void $tracked_assertIsTheTrackedValue(byte b, Tracker actualTracker, int actualIndex) {
     assertEquals(theSource(), actualTracker);
     assertEquals(theSourceIndex(), actualIndex);
   }
@@ -84,8 +136,18 @@ class FlowTester {
     throw valueNotTrackedError();
   }
 
+  /** Returns the Tracker from which the value is tracked as coming */
+  static Tracker getByteSourceTracker(@SuppressWarnings("unused") byte value) {
+    throw valueNotTrackedError();
+  }
+
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   static Tracker $tracked_getCharSourceTracker(char value, Tracker tracker, int index) {
+    return tracker;
+  }
+
+  @SuppressWarnings("unused") // invoked by TesterStore instrumentation
+  static Tracker $tracked_getByteSourceTracker(byte value, Tracker tracker, int index) {
     return tracker;
   }
 
@@ -97,8 +159,21 @@ class FlowTester {
     throw valueNotTrackedError();
   }
 
+  /**
+   * Returns the index in {@link #getByteSourceTracker(byte)} that the value is tracked as coming
+   * from
+   */
+  static int getByteSourceIndex(@SuppressWarnings("unused") byte b) {
+    throw valueNotTrackedError();
+  }
+
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   static int $tracked_getCharSourceIndex(char c, Tracker tracker, int index) {
+    return index;
+  }
+
+  @SuppressWarnings("unused") // invoked by TesterStore instrumentation
+  static int $tracked_getByteSourceIndex(byte b, Tracker tracker, int index) {
     return index;
   }
 

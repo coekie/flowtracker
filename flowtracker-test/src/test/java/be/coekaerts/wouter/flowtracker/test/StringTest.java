@@ -1,8 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -52,7 +52,7 @@ public class StringTest {
   }
 
   @Test public void testGetStringTracker() {
-    char[] chars = track(new char[] {'a', 'b', 'c', 'd'});
+    char[] chars = trackedCharArray("abcd");
     String str = new String(chars, 1, 2); // create String "bc"
     assertEquals("bc", str);
 

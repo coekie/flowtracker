@@ -55,7 +55,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     @Override
     public void visitEnd() {
       super.visitEnd();
-      FlowInterpreter interpreter = new FlowInterpreter();
+      FlowInterpreter interpreter = new FlowInterpreter(owner);
       Analyzer<BasicValue> analyzer = new Analyzer<>(interpreter);
       try {
         analyzer.analyze(owner, this);
@@ -98,7 +98,9 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
               stores.add(new TesterStore(mInsn, frame, 2));
             } else if (mInsn.name.equals("assertIsTheTrackedValue")
                 || mInsn.name.equals("getCharSourceTracker")
-                || mInsn.name.equals("getCharSourceIndex")) {
+                || mInsn.name.equals("getCharSourceIndex")
+                || mInsn.name.equals("getByteSourceTracker")
+                || mInsn.name.equals("getByteSourceIndex")) {
               stores.add(new TesterStore(mInsn, frame, 0));
             }
           }
@@ -114,9 +116,11 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
   }
 
   private static class FlowInterpreter extends BasicInterpreter {
+    private final String owner;
 
-    public FlowInterpreter() {
+    public FlowInterpreter(String owner) {
       super(Opcodes.ASM9);
+      this.owner = owner;
     }
 
     @Override
@@ -127,6 +131,23 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
       }
       // for others the exact type doesn't matter
       return super.newValue(type);
+    }
+
+    @Override
+    public BasicValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
+      switch (insn.getOpcode()) {
+        case Opcodes.ICONST_M1:
+        case Opcodes.ICONST_0:
+        case Opcodes.ICONST_1:
+        case Opcodes.ICONST_2:
+        case Opcodes.ICONST_3:
+        case Opcodes.ICONST_4:
+        case Opcodes.ICONST_5:
+        case Opcodes.SIPUSH:
+        case Opcodes.BIPUSH:
+          return new ConstantValue(Type.INT_TYPE, owner);
+      }
+      return super.newOperation(insn);
     }
 
     @Override
@@ -152,7 +173,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
             || "java/lang/CharSequence".equals(mInsn.owner))) {
           return new CharAtValue(mInsn);
         } else if ("be/coekaerts/wouter/flowtracker/test/FlowTester".equals(mInsn.owner)) {
-          if ("createSourceChar".equals(mInsn.name)) {
+          if ("createSourceChar".equals(mInsn.name) || "createSourceByte".equals(mInsn.name)) {
             return new TesterValue(mInsn);
           }
         }

@@ -1,8 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerRepository.getTracker;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
@@ -17,7 +17,7 @@ public class CharFlowAnalysisTest {
   private final FlowTester ft = new FlowTester();
 
   @Test public void charArrayLoadValue() {
-    char[] array = track(new char[3]);
+    char[] array = TrackTestHelper.trackedCharArrayWithLength(3);
     FlowTester.assertTrackedValue(array[2], getTracker(array), 2);
   }
 
@@ -29,7 +29,7 @@ public class CharFlowAnalysisTest {
   }
 
   @Test public void charArrayLoadAndStore() {
-    char[] abc = track(new char[3]);
+    char[] abc = TrackTestHelper.trackedCharArrayWithLength(3);
 
     char[] array = new char[3];
     array[0] = abc[1];
@@ -41,7 +41,7 @@ public class CharFlowAnalysisTest {
   }
 
   @Test public void byteArray() {
-    byte[] abc = track(new byte[3]);
+    byte[] abc = trackedByteArray("abc");
 
     byte[] array = new byte[3];
     array[0] = abc[1];
@@ -142,7 +142,7 @@ public class CharFlowAnalysisTest {
   //  - track through "&" operation and cast
   @Ignore
   @Test public void charToByte() {
-    byte[] src = track(new byte[4]);
+    byte[] src = trackedByteArray("abcd");
     char[] dst = new char[3];
     for (int i = 0; i < 3; i++) {
       // test case from Latin1String.inflate

@@ -26,16 +26,34 @@ public class TrackTestHelper {
     return str;
   }
 
-  /** Adds a tracker on the given object and returns it. */
-  public static char[] track(char[] chars) {
-    TrackerRepository.createFixedOriginTracker(chars, chars.length);
-    return chars;
+  /** Create a tracked char array, with the given length */
+  public static char[] trackedCharArrayWithLength(int length) {
+    char[] result = new char[length];
+    TrackerRepository.createFixedOriginTracker(result, length);
+    return result;
   }
 
-  /** Adds a tracker on the given object and returns it. */
-  public static byte[] track(byte[] bytes) {
-    TrackerRepository.createFixedOriginTracker(bytes, bytes.length);
-    return bytes;
+  /** Create a tracked char array */
+  public static char[] trackedCharArray(String str) {
+    char[] result = str.toCharArray();
+    TrackerRepository.createFixedOriginTracker(result, result.length);
+    return result;
+  }
+
+  /** Create a char array without tracking */
+  public static char[] untrackedCharArray(String str) {
+    char[] result = str.toCharArray();
+    if (TrackerRepository.getTracker(result) != null) {
+      throw new IllegalStateException("Did not expect result to be tracked");
+    }
+    return result;
+  }
+
+  /** Create a tracked byte array */
+  public static byte[] trackedByteArray(String str) {
+    byte[] result = str.getBytes();
+    TrackerRepository.createFixedOriginTracker(result, result.length);
+    return result;
   }
 
   /**

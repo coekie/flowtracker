@@ -1,5 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,16 +10,12 @@ import java.io.OutputStreamWriter;
 import org.junit.Before;
 import org.junit.Test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.track;
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-
 public class BufferedWriterTest {
 
   private OutputStreamWriter out;
   private BufferedWriter bw;
 
-  @Before public void setUp() throws Exception {
+  @Before public void setUp() {
     out = new OutputStreamWriter(new ByteArrayOutputStream());
     bw = new BufferedWriter(out, 3);
   }
@@ -31,16 +30,14 @@ public class BufferedWriterTest {
 
   /** write longer than size of the buffer */
   @Test public void longCharArray() throws IOException {
-    char[] chars = {'a', 'b', 'c', 'd', 'e', 'f'};
-    track(chars);
+    char[] chars = TrackTestHelper.trackedCharArray("abcdef");
     bw.write(chars, 1, 4);
     snapshotBuilder().track(chars, 1, 4).assertTrackerOf(out);
   }
 
   /** writes shorter than size of the buffer */
   @Test public void shortCharArray() throws IOException {
-    char[] chars = {'a', 'b'};
-    track(chars);
+    char[] chars = TrackTestHelper.trackedCharArray("ab");
     bw.write(chars, 0, 1);
     bw.write(chars, 1, 1);
     bw.write(chars, 0, 2);
