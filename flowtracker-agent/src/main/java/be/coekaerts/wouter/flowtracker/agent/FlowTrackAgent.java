@@ -1,20 +1,17 @@
 package be.coekaerts.wouter.flowtracker.agent;
 
-import java.io.BufferedWriter;
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +19,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import sun.net.www.protocol.file.FileURLConnection;
 
 public class FlowTrackAgent {
   /** Configuration passed to the agent */
@@ -37,7 +33,7 @@ public class FlowTrackAgent {
       // the maven surefire settings but makes it impossible to change the arguments passed to it.
       initProperties(System.getProperty("flowtracker.agentArgs"));
 
-      /**
+      /*
        * Classloader used to load the weaver and the web interface.
        * Those are loaded with their dependencies in a separate class loader to avoid polluting the
        * classpath of the application.
@@ -48,19 +44,17 @@ public class FlowTrackAgent {
       Class.forName("be.coekaerts.wouter.flowtracker.tracker.Trackers")
           .getMethod("suspendOnCurrentThread").invoke(null);
 
-      inst.addTransformer(createTransformer(spiderClassLoader), true);
+      ClassFileTransformer transformer = createTransformer(spiderClassLoader);
+      inst.addTransformer(transformer, true);
 
-      // TODO avoid hardcoding of list of classes to retransform here
-      inst.retransformClasses(String.class);
-      inst.retransformClasses(InputStreamReader.class);
-      inst.retransformClasses(OutputStreamWriter.class);
-      inst.retransformClasses(BufferedWriter.class);
-      inst.retransformClasses(FileInputStream.class);
-      inst.retransformClasses(URLConnection.class);
-      inst.retransformClasses(FileURLConnection.class);
-      inst.retransformClasses(Arrays.class);
-      // AbstractStringBuilder is not public
-      inst.retransformClasses(StringBuilder.class.getSuperclass());
+      // retransform classes that have already been loaded
+      Method shouldRetransform = transformer.getClass()
+          .getMethod("shouldRetransformOnStartup", Class.class);
+      for (Class<?> loadedClass : inst.getAllLoadedClasses()) {
+        if ((Boolean) shouldRetransform.invoke(transformer, loadedClass)) {
+          inst.retransformClasses(loadedClass);
+        }
+      }
 
       initCore();
 
@@ -117,7 +111,7 @@ public class FlowTrackAgent {
     // make the instrumented JDK classes find the hook class
     inst.appendToBootstrapClassLoaderSearch(coreJar);
 
-    return new URLClassLoader(spiderClasspath.toArray(new URL[spiderClasspath.size()]));
+    return new URLClassLoader(spiderClasspath.toArray(new URL[0]));
   }
 
   private static ClassFileTransformer createTransformer(ClassLoader classLoader) throws Exception {
@@ -156,7 +150,7 @@ public class FlowTrackAgent {
 
   /** Returns the jar that this class is running in */
   private static JarFile getThisJar() throws IOException {
-    URL url = FlowTrackAgent.class.getResource("FlowTrackAgent.class");
+    URL url = requireNonNull(FlowTrackAgent.class.getResource("FlowTrackAgent.class"));
     String path = url.getPath();
     if (!"jar".equals(url.getProtocol()) || !path.startsWith("file:/")) {
       throw new IllegalStateException("Flowtracker not launched from jar file: " + url);

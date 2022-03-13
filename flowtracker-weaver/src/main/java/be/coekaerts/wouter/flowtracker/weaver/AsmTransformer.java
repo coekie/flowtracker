@@ -101,21 +101,9 @@ public class AsmTransformer implements ClassFileTransformer {
   public byte[] transform(ClassLoader loader, String className,
       Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
       byte[] classfileBuffer) throws IllegalClassFormatException {
-
-    // never transform our own classes
-    if (className.startsWith("be/coekaerts/wouter/flowtracker")
-        && !className.startsWith("be/coekaerts/wouter/flowtracker/test")) {
-      return null;
-    }
-
     try {
-      ClassAdapterFactory adapterFactory;
-      ClassHookSpec spec = getSpec(className);
-      if (spec != null) {
-        adapterFactory = spec;
-      } else if (shouldInstrument(className)) {
-        adapterFactory = new FlowAnalyzingTransformer();
-      } else {
+      ClassAdapterFactory adapterFactory = getAdapterFactory(className);
+      if (adapterFactory == null) {
         return null;
       }
 
@@ -140,7 +128,35 @@ public class AsmTransformer implements ClassFileTransformer {
     }
   }
 
-  private boolean shouldInstrument(String className) {
+  // called using reflection from FlowTrackAgent
+  public boolean shouldRetransformOnStartup(Class<?> clazz) {
+    return getAdapterFactory(Type.getInternalName(clazz)) != null;
+  }
+
+  private ClassAdapterFactory getAdapterFactory(String className) {
+    // don't transform classes without a name,
+    // e.g. classes created at runtime through Unsafe.defineAnonymousClass
+    if (className == null) {
+      return null;
+    }
+
+    // never transform our own classes
+    if (className.startsWith("be/coekaerts/wouter/flowtracker")
+        && !className.startsWith("be/coekaerts/wouter/flowtracker/test")) {
+      return null;
+    }
+
+    ClassHookSpec spec = getSpec(className);
+    if (spec != null) {
+      return spec;
+    } else if (shouldAnalyze(className)) {
+      return new FlowAnalyzingTransformer();
+    } else {
+      return null;
+    }
+  }
+
+  private boolean shouldAnalyze(String className) {
     if (className.equals("java/util/Arrays")
         || className.equals("java/lang/String")
         || className.equals("java/lang/AbstractStringBuilder")
