@@ -158,7 +158,7 @@ public class AsmTransformer implements ClassFileTransformer {
 
   private boolean shouldAnalyze(String className) {
     if (className.equals("java/util/Arrays")
-        || className.equals("java/lang/String")
+        || className.startsWith("java/lang/String") // String and friends like StringLatin1
         || className.equals("java/lang/AbstractStringBuilder")
         || className.equals("java/io/BufferedWriter")) {
       return true;
