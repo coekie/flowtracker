@@ -151,14 +151,42 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     }
 
     @Override
+    public BasicValue unaryOperation(AbstractInsnNode insn, BasicValue value)
+        throws AnalyzerException {
+      switch (insn.getOpcode()) {
+        case Opcodes.I2B:
+        case Opcodes.I2C:
+        case Opcodes.I2S:
+          // cast operation. we don't care about the fact that the casting can change the value, so
+          // we ignore that: we treat the result as the same value (same type, same source).
+          // It's ok to keep it as the same type, because this is going from a BasicValue.INT_VALUE
+          // (which includes byte, char & int) to another INT_VALUE.
+          return value;
+      }
+
+      return super.unaryOperation(insn, value);
+    }
+
+    @Override
     public BasicValue binaryOperation(AbstractInsnNode aInsn, BasicValue value1, BasicValue value2)
         throws AnalyzerException {
-      if (aInsn.getOpcode() == CALOAD) {
-        InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(insn, Type.CHAR_TYPE);
-      } else if (aInsn.getOpcode() == BALOAD) {
-        InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(insn, Type.BYTE_TYPE);
+      switch (aInsn.getOpcode()) {
+        case CALOAD: {
+          InsnNode insn = (InsnNode) aInsn;
+          return new ArrayLoadValue(insn, Type.CHAR_TYPE);
+        }
+        case BALOAD: {
+          InsnNode insn = (InsnNode) aInsn;
+          return new ArrayLoadValue(insn, Type.BYTE_TYPE);
+        }
+        case IAND: {
+          // treat `x & constant` as having the same source as x
+          if (value2 instanceof ConstantValue) {
+            return value1;
+          } else if (value1 instanceof ConstantValue) {
+            return value2;
+          }
+        }
       }
       return super.binaryOperation(aInsn, value1, value2);
     }

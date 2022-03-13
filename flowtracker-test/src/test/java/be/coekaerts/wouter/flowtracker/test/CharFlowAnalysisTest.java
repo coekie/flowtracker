@@ -8,7 +8,6 @@ import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBu
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 /** Test FlowAnalyzingTransformer and friends */
@@ -137,10 +136,25 @@ public class CharFlowAnalysisTest {
     assertNull(getTracker(array));
   }
 
-  // TODO charToByte for Latin1String.inflate
-  //  - TrackableValue for constants?
-  //  - track through "&" operation and cast
-  @Ignore
+  @Test public void cast() {
+    int i = ft.createSourceByte((byte) 'a');
+    ft.assertIsTheTrackedValue((byte) i);
+    ft.assertIsTheTrackedValue((char) i);
+    ft.assertIsTheTrackedValue((byte) (int) (byte) i);
+    ft.assertIsTheTrackedValue((char) (int) (char) i);
+    ft.assertIsTheTrackedValue((char) (short) (char) i);
+  }
+
+  // Test that we track a value through "x & 255". (Analyzed code may use that to convert a signed
+  // byte into an unsigned value.)
+  @Test public void binaryAnd() {
+    byte b = ft.createSourceByte((byte) 'a');
+    ft.assertIsTheTrackedValue((char) (b & 255));
+    ft.assertIsTheTrackedValue((char) (255 & b));
+  }
+
+  // combining some things, but redundant with other tests.
+  // this test is similar to what Latin1String.inflate does
   @Test public void charToByte() {
     byte[] src = trackedByteArray("abcd");
     char[] dst = new char[3];

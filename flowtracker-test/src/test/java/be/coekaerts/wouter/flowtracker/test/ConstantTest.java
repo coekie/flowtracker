@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import org.junit.Test;
 
+/** Test tracking of primitive constants */
 public class ConstantTest {
   @Test
   public void testCharConstant() {
