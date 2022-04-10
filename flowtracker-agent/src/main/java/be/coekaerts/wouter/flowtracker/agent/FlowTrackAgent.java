@@ -52,7 +52,12 @@ public class FlowTrackAgent {
           .getMethod("shouldRetransformOnStartup", Class.class);
       for (Class<?> loadedClass : inst.getAllLoadedClasses()) {
         if ((Boolean) shouldRetransform.invoke(transformer, loadedClass)) {
-          inst.retransformClasses(loadedClass);
+          try {
+            inst.retransformClasses(loadedClass);
+          } catch (Throwable t) {
+            System.err.println("Failed to retransform " + loadedClass);
+            throw t;
+          }
         }
       }
 
@@ -63,6 +68,7 @@ public class FlowTrackAgent {
           .getMethod("unsuspendOnCurrentThread").invoke(null);
 
       initWeb(spiderClassLoader);
+      postInitCore();
     } catch (Throwable e) {
       e.printStackTrace();
       System.exit(1);
@@ -193,5 +199,16 @@ public class FlowTrackAgent {
     Class.forName("be.coekaerts.wouter.flowtracker.CoreInitializer")
         .getMethod("initialize", Map.class)
         .invoke(null, config);
+  }
+
+  /** Abort, to avoid hanging shutdown hook when initialization fails */
+  private static void postInitCore() {
+    try {
+      Class.forName("be.coekaerts.wouter.flowtracker.CoreInitializer")
+          .getMethod("postInitialize", Map.class)
+          .invoke(null, config);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

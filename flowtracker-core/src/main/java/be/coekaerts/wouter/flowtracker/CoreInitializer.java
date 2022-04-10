@@ -9,7 +9,14 @@ import java.util.Map;
 public class CoreInitializer {
   public static void initialize(Map<String, String> config) {
     SystemHook.initialize();
-    ShutdownSuspender.initShutdownHook("true".equals(config.get("suspendShutdown")));
     StringHook.initDebugUntracked(config.get(StringHook.DEBUG_UNTRACKED));
+  }
+
+  /**
+   * Initialize the shutdown hook. This is initialized later, to avoid having a hanging shutdown
+   * hook without a UI available to stop it if initialization fails.
+   */
+  public static void postInitialize(Map<String, String> config) {
+    ShutdownSuspender.initShutdownHook("true".equals(config.get("suspendShutdown")));
   }
 }

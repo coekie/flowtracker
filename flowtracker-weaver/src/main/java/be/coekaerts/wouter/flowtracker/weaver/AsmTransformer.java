@@ -150,6 +150,11 @@ public class AsmTransformer implements ClassFileTransformer {
       return null;
     }
 
+    // don't transform array classes
+    if (className.charAt(0) == '[') {
+      return null;
+    }
+
     // never transform our own classes
     if (className.startsWith("be/coekaerts/wouter/flowtracker")
         && !className.startsWith("be/coekaerts/wouter/flowtracker/test")) {
