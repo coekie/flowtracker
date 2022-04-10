@@ -17,6 +17,7 @@
     <asm.version>9.1</asm.version>
     <java.version>1.8</java.version>
     <flowtracker.extraAgentArgs/>
+    <!--<flowtracker.extraAgentArgs>dumpByteCode=/tmp/bytecode</flowtracker.extraAgentArgs>-->
   </properties>
   <modules>
     <module>flowtracker-agent</module>
