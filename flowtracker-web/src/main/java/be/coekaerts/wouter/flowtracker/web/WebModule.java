@@ -59,7 +59,7 @@ public class WebModule {
    * our own web server
    */
   private static class TrackerSuspendingThreadPool extends QueuedThreadPool {
-    @Override protected Thread newThread(final Runnable runnable) {
+    @Override public Thread newThread(final Runnable runnable) {
       return super.newThread(new Runnable() {
         @Override public void run() {
           Trackers.suspendOnCurrentThread();
