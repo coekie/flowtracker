@@ -111,7 +111,9 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         store.insertTrackStatements(this);
       }
 
-      this.accept(mv); // send the result to the next MethodVisitor
+      if (mv != null) {
+        this.accept(mv); // send the result to the next MethodVisitor
+      }
     }
   }
 
