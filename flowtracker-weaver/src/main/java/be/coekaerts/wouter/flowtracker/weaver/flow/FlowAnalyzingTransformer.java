@@ -77,7 +77,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         Frame<BasicValue> frame = frames[i];
         if (insn.getOpcode() == Opcodes.CASTORE) {
           stores.add(ArrayStore.createCharArrayStore((InsnNode) insn, frame));
-        } else if (insn.getOpcode() == Opcodes.BASTORE) {
+        } else if (insn.getOpcode() == Opcodes.BASTORE
+            && frame.getStack(frame.getStackSize() - 3).getType().equals(Types.BYTE_ARRAY)) {
           stores.add(ArrayStore.createByteArrayStore((InsnNode) insn, frame));
         } else if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL
             || insn.getOpcode() == Opcodes.INVOKESTATIC) {

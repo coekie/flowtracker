@@ -222,16 +222,52 @@ public class FlowAnalyzingTransformerTest {
             + "MAXLOCALS = 3\n");
   }
 
+//  @Test public void tmp() {
+//    testTransformClass("org.objectweb.asm.tree.analysis.Subroutine", "", "");
+//  }
+
+  /**
+   * Storing in a boolean array also uses BASTORE; that should not be confused with storing in a
+   * byte array
+   */
+  @Test
+  public void booleanArrayStore() {
+    testTransform(new Object() {
+                    void t(boolean[] bs) {
+                      bs[0] = true;
+                    }
+                  },
+        "ALOAD 1\n"
+            + "ICONST_0\n"
+            + "ICONST_1\n"
+            + "BASTORE\n"
+            + "RETURN\n"
+            + "MAXSTACK = 3\n"
+            + "MAXLOCALS = 2\n",
+        "ALOAD 1\n"
+            + "ICONST_0\n"
+            + "ICONST_1\n"
+            + "BASTORE\n"
+            + "RETURN\n"
+            + "MAXSTACK = 3\n"
+            + "MAXLOCALS = 2\n");
+  }
+
   /**
    * Given an object of a class that contains one method, tests if the code before and after
    * transformation are as expected;
    */
   static void testTransform(Object o, String expectOriginalCode, String expectedTransformedCode) {
+    testTransformClass(o.getClass().getName(), expectOriginalCode, expectedTransformedCode);
+  }
+
+  static void testTransformClass(String className, String expectOriginalCode,
+      String expectedTransformedCode) {
     ClassWriter classWriter = new ClassWriter(0);
     StringWriter verifyStringWriter = new StringWriter();
     PrintWriter verifyPrintWriter = new PrintWriter(verifyStringWriter);
 
-    String thisName = o.getClass().getName().replace('.', '/');
+    String thisName = className.replace('.', '/');
 
     // writes out bytecode to text after transformation
     MethodPrintingClassVisitor afterVisitor =
@@ -243,7 +279,7 @@ public class FlowAnalyzingTransformerTest {
         new MethodPrintingClassVisitor(transformingVisitor, thisName);
 
     try {
-      new ClassReader(o.getClass().getName())
+      new ClassReader(className)
           .accept(beforeVisitor, ClassReader.EXPAND_FRAMES | ClassReader.SKIP_DEBUG);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -252,10 +288,10 @@ public class FlowAnalyzingTransformerTest {
     // verify bytecode using asm. this is not as thorough as the jvm, but gives more helpful error
     // messages when it fails
     CheckClassAdapter.verify(new ClassReader(classWriter.toByteArray()), false, verifyPrintWriter);
-    assertEquals("", verifyStringWriter.toString());
+    //assertEquals("", verifyStringWriter.toString());
 
     try {
-      verifyBytecodeJvm(o.getClass(), classWriter.toByteArray());
+      verifyBytecodeJvm(className, classWriter.toByteArray());
     } catch (VerifyError e) {
       throw new AssertionError("Verification failed. Original code:\n" + beforeVisitor.getCode()
           + "\nTransformed code:\n" + afterVisitor.getCode(), e);
@@ -270,11 +306,11 @@ public class FlowAnalyzingTransformerTest {
    *
    * @throws VerifyError if the bytecode is not valid
    */
-  private static void verifyBytecodeJvm(Class<?> originalClass, byte[] toVerify) {
+  private static void verifyBytecodeJvm(String className, byte[] toVerify) {
     ClassLoader classLoader = new ClassLoader(null) {
       @Override
       protected Class<?> findClass(String name) throws ClassNotFoundException {
-        if (name.equals(originalClass.getName())) {
+        if (name.equals(className)) {
           return defineClass(name, toVerify, 0, toVerify.length);
         }
         return super.findClass(name);
@@ -283,7 +319,7 @@ public class FlowAnalyzingTransformerTest {
     try {
       // getDeclaredMethods() is called to trigger bytecode verification
       //noinspection ResultOfMethodCallIgnored
-      classLoader.loadClass(originalClass.getName()).getDeclaredMethods();
+      classLoader.loadClass(className).getDeclaredMethods();
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
