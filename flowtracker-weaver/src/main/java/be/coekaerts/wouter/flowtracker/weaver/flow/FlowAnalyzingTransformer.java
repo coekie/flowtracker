@@ -8,8 +8,11 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.LocalVariablesSorter;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
@@ -41,15 +44,17 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     }
   }
 
-  private static class FlowMethodAdapter extends MethodNode {
+  static class FlowMethodAdapter extends MethodNode {
     private final String owner;
-    private final MethodVisitor mv;
+    /** The next visitor in the chain after this one */
+    private final TransparentLocalVariablesSorter varSorter;
+    private final InsnList intro = new InsnList();
 
     public FlowMethodAdapter(MethodVisitor mv, String owner, int access, String name, String desc,
         String signature, String[] exceptions) {
       super(Opcodes.ASM9, access, name, desc, signature, exceptions);
       this.owner = owner;
-      this.mv = mv;
+      this.varSorter = new TransparentLocalVariablesSorter(access, desc, mv);
     }
 
     @Override
@@ -111,9 +116,43 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         store.insertTrackStatements(this);
       }
 
-      if (mv != null) {
-        this.accept(mv); // send the result to the next MethodVisitor
-      }
+      this.instructions.insert(intro);
+
+      // send the result to the next MethodVisitor
+      this.accept(varSorter);
+    }
+
+    /**
+     * Create a new local variable for storing the index of a tracker, that is an int initialized
+     * to -1
+     */
+    TrackLocal newLocalForIndex() {
+      return newLocal(Type.INT_TYPE, new LdcInsnNode(-1));
+    }
+
+    /** Create a new local variable for storing an object, initialized to null */
+    TrackLocal newLocalForObject(Type type) {
+      return newLocal(type, new InsnNode(Opcodes.ACONST_NULL));
+    }
+
+    /**
+     * Create a new local variable that can be used by our added code.
+     *
+     * We get an index for these variables at the beginning of the method (from the
+     * {@link #varSorter}), and ensure they are initialized. That way they can be accessed by any of
+     * our added code without worrying about where they have definitely been set. Also, adding new
+     * variables anywhere else with {@link LocalVariablesSorter} in a method that has frames (jumps)
+     * is practically impossible because it does not properly update frames (see
+     * https://gitlab.ow2.org/asm/asm/-/issues/316352).
+     */
+    private TrackLocal newLocal(Type type, AbstractInsnNode initialValue) {
+      TrackLocal local = new TrackLocal(type, varSorter.newLocal(type));
+      // initialize the variable to -1 at the start of the method
+      // NICE only initialize when necessary (if there is a jump, or it is read before it is first
+      //  written to)
+      intro.add(initialValue);
+      intro.add(local.store());
+      return local;
     }
   }
 
@@ -175,11 +214,11 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
       switch (aInsn.getOpcode()) {
         case CALOAD: {
           InsnNode insn = (InsnNode) aInsn;
-          return new ArrayLoadValue(insn, Type.CHAR_TYPE);
+          return new ArrayLoadValue(insn, Type.CHAR_TYPE, Types.CHAR_ARRAY);
         }
         case BALOAD: {
           InsnNode insn = (InsnNode) aInsn;
-          return new ArrayLoadValue(insn, Type.BYTE_TYPE);
+          return new ArrayLoadValue(insn, Type.BYTE_TYPE, Types.BYTE_ARRAY);
         }
         case IAND: {
           // treat `x & constant` as having the same source as x

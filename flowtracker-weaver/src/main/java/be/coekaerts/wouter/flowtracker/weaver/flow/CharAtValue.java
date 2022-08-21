@@ -1,21 +1,20 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
 
 /** A char received from a {@link String#charAt(int)} or {@link CharSequence#charAt(int)} call. */
 class CharAtValue extends TrackableValue {
   /** The charAt() call */
   private final MethodInsnNode mInsn;
 
-  /** Index of the local variable storing the target String */
-  private int targetStringLocal;
-  /** Index of the local variable storing the index */
-  private int indexLocal;
+  /** Local variable storing the target String or CharSequence */
+  private TrackLocal targetStringLocal;
+  /** Local variable storing the index */
+  private TrackLocal indexLocal;
 
   CharAtValue(MethodInsnNode mInsn) {
     super(Type.CHAR_TYPE);
@@ -23,28 +22,28 @@ class CharAtValue extends TrackableValue {
     // Note: when it can return something else than char, we get type with Type.getReturnType(mInsn.desc)
   }
 
-  @Override void insertTrackStatements(MethodNode methodNode) {
+  @Override void insertTrackStatements(FlowMethodAdapter methodNode) {
     // on the stack before the charAt call: String target, int index
 
-    targetStringLocal = methodNode.maxLocals++;
-    indexLocal = methodNode.maxLocals++;
+    targetStringLocal = methodNode.newLocalForObject(Type.getObjectType(mInsn.owner));
+    indexLocal = methodNode.newLocalForIndex();
 
     InsnList toInsert = new InsnList();
 
     // store target and index
-    toInsert.add(new VarInsnNode(Opcodes.ISTORE, indexLocal));
-    toInsert.add(new VarInsnNode(Opcodes.ASTORE, targetStringLocal));
+    toInsert.add(indexLocal.store());
+    toInsert.add(targetStringLocal.store());
 
     // put them back on the stack for the actual operation
-    toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
-    toInsert.add(new VarInsnNode(Opcodes.ILOAD, indexLocal));
+    toInsert.add(targetStringLocal.load());
+    toInsert.add(indexLocal.load());
 
     methodNode.instructions.insertBefore(mInsn, toInsert);
   }
 
   @Override void loadSourceTracker(InsnList toInsert) {
     // insert code for: StringHook.getStringTracker(targetString);
-    toInsert.add(new VarInsnNode(Opcodes.ALOAD, targetStringLocal));
+    toInsert.add(targetStringLocal.load());
     if (mInsn.owner.equals("java/lang/String")) {
       toInsert.add(
           new MethodInsnNode(Opcodes.INVOKESTATIC,
@@ -63,6 +62,6 @@ class CharAtValue extends TrackableValue {
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {
-    toInsert.add(new VarInsnNode(Opcodes.ILOAD, indexLocal));
+    toInsert.add(indexLocal.load());
   }
 }

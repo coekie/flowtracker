@@ -1,8 +1,8 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
 /** A value of which we can track where it came from */
@@ -13,7 +13,7 @@ abstract class TrackableValue extends BasicValue {
     super(type);
   }
 
-  void ensureTracked(MethodNode methodNode) {
+  void ensureTracked(FlowMethodAdapter methodNode) {
     if (!tracked) {
       insertTrackStatements(methodNode);
       tracked = true;
@@ -23,12 +23,12 @@ abstract class TrackableValue extends BasicValue {
   /**
    * Insert the statements needed to keep track of the origin of this value.
    *
-   * This method should not be called directly, instead {@link #ensureTracked(MethodNode)} should
-   * be used, to ensure statements are not inserted more than once.
+   * This method should not be called directly, instead {@link #ensureTracked(FlowMethodAdapter)}
+   * should be used, to ensure statements are not inserted more than once.
    *
    * @param methodNode method to add the statements in, at the right place
    */
-  abstract void insertTrackStatements(MethodNode methodNode);
+  abstract void insertTrackStatements(FlowMethodAdapter methodNode);
 
   /**
    * Add the tracker from which this value came on top of the stack.

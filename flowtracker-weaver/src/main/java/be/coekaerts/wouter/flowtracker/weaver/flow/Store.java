@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
-import org.objectweb.asm.tree.MethodNode;
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
@@ -12,7 +12,7 @@ abstract class Store {
     this.frame = frame;
   }
 
-  abstract void insertTrackStatements(MethodNode methodNode);
+  abstract void insertTrackStatements(FlowMethodAdapter methodNode);
 
   BasicValue getStackFromTop(int indexFromTop) {
     return frame.getStack(frame.getStackSize() - indexFromTop - 1);

@@ -1,12 +1,11 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
-import be.coekaerts.wouter.flowtracker.weaver.Types;
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
@@ -23,7 +22,7 @@ class ArrayStore extends Store {
     this.hookMethod = hookMethod;
   }
 
-  void insertTrackStatements(MethodNode methodNode) {
+  void insertTrackStatements(FlowMethodAdapter methodNode) {
     BasicValue stored = getStored();
 
     InsnList toInsert = new InsnList();

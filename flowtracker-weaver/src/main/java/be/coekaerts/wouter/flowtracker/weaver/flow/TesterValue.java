@@ -1,37 +1,36 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
 
 /** A value received from a {@code FlowTester.createSource*()}. */
 class TesterValue extends TrackableValue {
   /** The call to FlowTester.createSource*() */
   private final MethodInsnNode mInsn;
 
-  /** Index of the local variable storing the target FlowTester */
-  private int testerLocal;
+  /** Local variable storing the target FlowTester */
+  private TrackLocal testerLocal;
 
   TesterValue(MethodInsnNode mInsn) {
     super(Type.getReturnType(mInsn.desc));
     this.mInsn = mInsn;
   }
 
-  @Override void insertTrackStatements(MethodNode methodNode) {
+  @Override void insertTrackStatements(FlowMethodAdapter methodNode) {
     // on the stack before the call: FlowTester tester, char c
-    testerLocal = methodNode.maxLocals++;
+    testerLocal = methodNode.newLocalForObject(
+        Type.getObjectType("be/coekaerts/wouter/flowtracker/test/FlowTester"));
 
     InsnList toInsert = new InsnList();
 
     // store tester
     toInsert.add(new InsnNode(Opcodes.DUP2)); // dup tester and c
     toInsert.add(new InsnNode(Opcodes.POP)); // pop c
-    toInsert.add(new VarInsnNode(Opcodes.ASTORE, testerLocal)); // store tester
+    toInsert.add(testerLocal.store()); // store tester
 
     mInsn.name = "$tracked_" + mInsn.name;
 
@@ -40,7 +39,7 @@ class TesterValue extends TrackableValue {
 
   @Override void loadSourceTracker(InsnList toInsert) {
     // insert code for: testerLocal.theSource()
-    toInsert.add(new VarInsnNode(Opcodes.ALOAD, testerLocal));
+    toInsert.add(testerLocal.load());
       toInsert.add(
           new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
               "be/coekaerts/wouter/flowtracker/test/FlowTester",
@@ -50,7 +49,7 @@ class TesterValue extends TrackableValue {
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {
-    toInsert.add(new VarInsnNode(Opcodes.ALOAD, testerLocal));
+    toInsert.add(testerLocal.load());
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
             "be/coekaerts/wouter/flowtracker/test/FlowTester",

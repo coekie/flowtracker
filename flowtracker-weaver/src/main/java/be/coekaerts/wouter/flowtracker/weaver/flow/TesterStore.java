@@ -1,8 +1,8 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
@@ -21,7 +21,7 @@ class TesterStore extends Store {
     this.valueStackIndexFromTop = valueStackIndexFromTop;
   }
 
-  void insertTrackStatements(MethodNode methodNode) {
+  void insertTrackStatements(FlowMethodAdapter methodNode) {
     BasicValue stored = getStackFromTop(valueStackIndexFromTop);
 
     if (stored instanceof TrackableValue) { // if we know where the value we are storing came from

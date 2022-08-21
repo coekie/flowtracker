@@ -1,9 +1,9 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
@@ -17,7 +17,7 @@ class AppendStore extends Store {
     this.invokeInsn = invokeInsn;
   }
 
-  void insertTrackStatements(MethodNode methodNode) {
+  void insertTrackStatements(FlowMethodAdapter methodNode) {
     BasicValue stored = getCharValue();
 
     InsnList toInsert = new InsnList();

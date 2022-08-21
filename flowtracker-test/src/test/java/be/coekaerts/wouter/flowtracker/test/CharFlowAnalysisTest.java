@@ -165,4 +165,23 @@ public class CharFlowAnalysisTest {
 
     snapshotBuilder().track(src, 1, 3).assertTrackerOf(dst);
   }
+
+  /** Test handling of a jump; mostly if frames are correctly updated by the LocalVariablesSorter */
+  @SuppressWarnings("ConstantConditions")
+  @Test public void jump() {
+    char ch = ft.createSourceChar('a');
+    if (false) {
+      return;
+    }
+    ft.assertIsTheTrackedValue(ch);
+  }
+
+  @SuppressWarnings("ConstantConditions")
+  @Test public void jump2() {
+    char ch;
+    do {
+      ch = ft.createSourceChar('a');
+    } while (false);
+    ft.assertIsTheTrackedValue(ch);
+  }
 }
