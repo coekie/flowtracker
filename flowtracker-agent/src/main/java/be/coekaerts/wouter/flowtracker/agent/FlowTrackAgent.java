@@ -49,9 +49,9 @@ public class FlowTrackAgent {
 
       // retransform classes that have already been loaded
       Method shouldRetransform = transformer.getClass()
-          .getMethod("shouldRetransformOnStartup", Class.class);
+          .getMethod("shouldRetransformOnStartup", Class.class, Instrumentation.class);
       for (Class<?> loadedClass : inst.getAllLoadedClasses()) {
-        if ((Boolean) shouldRetransform.invoke(transformer, loadedClass)) {
+        if ((Boolean) shouldRetransform.invoke(transformer, loadedClass, inst)) {
           try {
             inst.retransformClasses(loadedClass);
           } catch (Throwable t) {
