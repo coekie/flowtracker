@@ -59,6 +59,13 @@ public class WebModule {
    * our own web server
    */
   private static class TrackerSuspendingThreadPool extends QueuedThreadPool {
+
+    public TrackerSuspendingThreadPool() {
+      // make some thread daemon threads. unfortunately it also makes other threads, that are harder
+      // to make daemon threads
+      setDaemon(true);
+    }
+
     @Override public Thread newThread(final Runnable runnable) {
       return super.newThread(new Runnable() {
         @Override public void run() {
