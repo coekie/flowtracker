@@ -111,7 +111,7 @@ public class AsmTransformer implements ClassFileTransformer {
       Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
       byte[] classfileBuffer) throws IllegalClassFormatException {
     try {
-      ClassAdapterFactory adapterFactory = getAdapterFactory(className);
+      ClassAdapterFactory adapterFactory = getAdapterFactory(loader, className);
       if (adapterFactory == null) {
         return null;
       }
@@ -141,11 +141,11 @@ public class AsmTransformer implements ClassFileTransformer {
 
   // called using reflection from FlowTrackAgent
   public boolean shouldRetransformOnStartup(Class<?> clazz, Instrumentation instrumentation) {
-    return getAdapterFactory(Type.getInternalName(clazz)) != null
+    return getAdapterFactory(clazz.getClassLoader(), Type.getInternalName(clazz)) != null
         && instrumentation.isModifiableClass(clazz);
   }
 
-  private ClassAdapterFactory getAdapterFactory(String className) {
+  private ClassAdapterFactory getAdapterFactory(ClassLoader classLoader, String className) {
     // don't transform classes without a name,
     // e.g. classes created at runtime through Unsafe.defineAnonymousClass
     if (className == null) {
@@ -160,6 +160,9 @@ public class AsmTransformer implements ClassFileTransformer {
     // never transform our own classes
     if (className.startsWith("be/coekaerts/wouter/flowtracker")
         && !className.startsWith("be/coekaerts/wouter/flowtracker/test")) {
+      return null;
+    }
+    if (classLoader == AsmTransformer.class.getClassLoader()) {
       return null;
     }
 
