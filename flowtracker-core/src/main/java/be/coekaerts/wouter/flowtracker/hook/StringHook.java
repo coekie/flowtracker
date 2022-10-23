@@ -11,7 +11,6 @@ public class StringHook {
   static {
     try {
       valueField = String.class.getDeclaredField("value");
-      valueField.setAccessible(true);
     } catch (NoSuchFieldException e) {
       throw new Error("Cannot find String.value", e);
     }
@@ -41,11 +40,7 @@ public class StringHook {
 
   /** Get the "value" field from a String */
   private static Object getValueArray(String str) {
-    try {
-      return valueField.get(str);
-    } catch (IllegalAccessException e) {
-      throw new Error(e);
-    }
+    return Reflection.getField(str, valueField);
   }
 
   @SuppressWarnings("UnusedDeclaration") // used by instrumented code

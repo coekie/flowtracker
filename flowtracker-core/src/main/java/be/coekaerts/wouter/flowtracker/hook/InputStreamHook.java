@@ -12,7 +12,6 @@ public class InputStreamHook {
   static {
     try {
       filterInputStreamIn = FilterInputStream.class.getDeclaredField("in");
-      filterInputStreamIn.setAccessible(true);
     } catch (NoSuchFieldException e) {
       throw new Error(e);
     }
@@ -24,11 +23,7 @@ public class InputStreamHook {
     if (tracker != null) {
       return tracker;
     } else if (stream instanceof FilterInputStream) {
-      try {
-        return getInputStreamTracker((InputStream) filterInputStreamIn.get(stream));
-      } catch (IllegalAccessException e) {
-        throw new Error(e);
-      }
+      return getInputStreamTracker((InputStream) Reflection.getField(stream, filterInputStreamIn));
     } else {
       return null;
     }

@@ -12,7 +12,6 @@ public class AbstractStringBuilderHook {
   static {
     try {
       valueField = StringBuilder.class.getSuperclass().getDeclaredField("value");
-      valueField.setAccessible(true);
     } catch (NoSuchFieldException e) {
       throw new Error("Cannot find AbstractStringBuilder.value", e);
     }
@@ -30,11 +29,9 @@ public class AbstractStringBuilderHook {
     return sb;
   }
 
-  private static void trackAppendChar(Object sb, int sbLength, char c, Tracker source, int sourceIndex) {
-    try {
-      TrackerUpdater.setSourceTracker(valueField.get(sb), sbLength - 1, 1, source, sourceIndex);
-    } catch (IllegalAccessException e) {
-      throw new Error(e);
-    }
+  private static void trackAppendChar(Object sb, int sbLength, char c, Tracker source,
+      int sourceIndex) {
+    TrackerUpdater.setSourceTracker(Reflection.getField(sb, valueField), sbLength - 1, 1, source,
+        sourceIndex);
   }
 }

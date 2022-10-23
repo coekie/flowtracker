@@ -23,11 +23,10 @@ public class SystemHook {
   private static void addSystemOutErrTracker(PrintStream printStream, String name) {
     try {
       Field charOutField = PrintStream.class.getDeclaredField("charOut");
-      charOutField.setAccessible(true);
       OutputStreamWriterHook.createOutputStreamWriterTracker(
-          (OutputStreamWriter) charOutField.get(printStream))
+          (OutputStreamWriter) Reflection.getField(printStream, charOutField))
           .initDescriptor(name + ".charOut", null);
-    } catch (NoSuchFieldException | IllegalAccessException e) {
+    } catch (ReflectiveOperationException e) {
       System.err.println("Cannot access PrintStream.charOut. Cannot hook System.out/err:");
       e.printStackTrace(System.err);
     }
