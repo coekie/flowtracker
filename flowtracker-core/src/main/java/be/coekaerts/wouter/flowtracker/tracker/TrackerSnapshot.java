@@ -1,11 +1,11 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import static java.util.Objects.requireNonNull;
+
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Immutable copy of a tracker, that is modeled after {@link WritableTracker}.
@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
  * Just used for testing for now. This is convenient because the WritableTracker interface is the
  * main way we look at what's inside a tracker, so that's what we want our tests to test. But it's
  * not an interface you can directly write assertions on. It's easier to create a snapshot built
- * from it (with {@link #of(Tracker)} and compare that to an expected snapshot (build with
+ * from it (with {@link #of(Tracker)}) and compare that to an expected snapshot (build with
  * {@link #snapshotBuilder()}).
  */
 public class TrackerSnapshot {

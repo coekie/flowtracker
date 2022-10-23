@@ -91,6 +91,13 @@ public class AsmTransformer implements ClassFileTransformer {
         FileInputStreamHook.class);
     fileInputStreamSpec.addMethodHookSpec("void <init>(java.io.File)",
         "void afterInit(java.io.FileInputStream,java.io.File)", HookSpec.THIS, HookSpec.ARG0);
+    fileInputStreamSpec.addMethodHookSpec("int read()",
+        "void afterRead1(int,java.io.FileInputStream)", HookSpec.THIS);
+    fileInputStreamSpec.addMethodHookSpec("int read(byte[])",
+        "void afterReadByteArray(int,java.io.FileInputStream,byte[])", HookSpec.THIS, HookSpec.ARG0);
+    fileInputStreamSpec.addMethodHookSpec("int read(byte[],int,int)",
+        "void afterReadByteArrayOffset(int,java.io.FileInputStream,byte[],int)", HookSpec.THIS,
+        HookSpec.ARG0, HookSpec.ARG1);
     specs.put("java/io/FileInputStream", fileInputStreamSpec);
   }
 
