@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
@@ -56,6 +55,9 @@ public class AsmTransformer implements ClassFileTransformer {
     inputStreamReaderSpec.addMethodHookSpec("int read(char[],int,int)",
         "void afterReadCharArrayOffset(int,java.io.InputStreamReader,char[],int)",
         HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
+    inputStreamReaderSpec.addMethodHookSpec("int read(java.nio.CharBuffer)",
+        "void afterReadCharBuffer(int,java.io.InputStreamReader,java.nio.CharBuffer)",
+        HookSpec.THIS, HookSpec.ARG0);
     // we assume the other methods ultimately delegate to the ones we hooked
     specs.put("java/io/InputStreamReader", inputStreamReaderSpec);
 
@@ -109,7 +111,7 @@ public class AsmTransformer implements ClassFileTransformer {
 
   public byte[] transform(ClassLoader loader, String className,
       Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
-      byte[] classfileBuffer) throws IllegalClassFormatException {
+      byte[] classfileBuffer) {
     try {
       ClassAdapterFactory adapterFactory = getAdapterFactory(loader, className);
       if (adapterFactory == null) {
