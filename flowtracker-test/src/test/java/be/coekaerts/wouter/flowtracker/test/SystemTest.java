@@ -11,6 +11,11 @@ import org.junit.Test;
  * Test for {@link System}
  */
 public class SystemTest {
+	/** Not actually a test, but helps with debugging maven toolchain stuff */
+	@Test public void printJavaVersion() {
+		System.out.println("Java version: " + System.getProperty("java.version"));
+	}
+
 	@Test
 	public void charArrayCopy() {
 		char[] abcdef = trackedCharArray("abcdef");
