@@ -1,6 +1,5 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -35,16 +34,5 @@ public class ByteOriginTracker extends OriginTracker {
   @Override
   public int getLength() {
     return content.size();
-  }
-
-  // using ByteArrayOutputStream to store a dynamically growing byte array
-  private static class ByteSequence extends ByteArrayOutputStream {
-    byte[] getBuf() {
-      return buf;
-    }
-
-    ByteBuffer getByteContent() {
-      return ByteBuffer.wrap(buf, 0, size());
-    }
   }
 }

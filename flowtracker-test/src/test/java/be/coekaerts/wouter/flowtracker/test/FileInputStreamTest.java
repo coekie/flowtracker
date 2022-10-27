@@ -17,13 +17,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class FileInputStreamHookTest {
+/** Test instrumentation of {@link FileInputStream} */
+public class FileInputStreamTest {
   private static File file;
 
   @BeforeClass public static void createTmpFile() throws IOException {
-    file = Files.createTempFile("flowtracker_InputStreamHookTest", "txt").toFile();
+    file = Files.createTempFile("flowtracker_InputStreamHookTest", "").toFile();
     try (var out = new FileOutputStream(file)) {
-      out.write(new byte[]{1, 2, 3});
+      out.write(new byte[]{'a', 'b', 'c'});
     }
   }
 
@@ -32,48 +33,45 @@ public class FileInputStreamHookTest {
   }
 
   @Test public void descriptor() throws IOException {
-    var fisFromFile = new FileInputStream(file);
-    TrackTestHelper.assertDescriptor(fisFromFile, "FileInputStream for " + file.getPath(), null);
+    try (var fisFromFile = new FileInputStream(file)) {
+      TrackTestHelper.assertDescriptor(fisFromFile, "FileInputStream for " + file.getPath(), null);
+    }
 
-    var fisFromName = new FileInputStream(file.getPath());
-    TrackTestHelper.assertDescriptor(fisFromName, "FileInputStream for " + file.getPath(), null);
+    try (var fisFromName = new FileInputStream(file.getPath())) {
+      TrackTestHelper.assertDescriptor(fisFromName, "FileInputStream for " + file.getPath(), null);
+    }
   }
 
   @Test public void read() throws IOException {
     try (var fis = new FileInputStream(file)) {
-      var fisTracker = (ByteOriginTracker) requireNonNull(TrackerRepository.getTracker(fis));
-
       byte[] buffer = new byte[5];
       assertEquals(3, fis.read(buffer));
 
-      snapshotBuilder().part(fisTracker, 0, 3)
-          .assertTrackerOf(buffer);
-
-      assertEquals(ByteBuffer.wrap(new byte[]{1, 2, 3}), fisTracker.getByteContent());
+      assertContentEquals("abc", fis);
+      snapshotBuilder().track(fis, 0, 3).assertTrackerOf(buffer);
     }
   }
 
   @Test public void readWithOffset() throws IOException {
     try (var fis = new FileInputStream(file)) {
-      var fisTracker = (ByteOriginTracker) requireNonNull(TrackerRepository.getTracker(fis));
-
       byte[] buffer = new byte[5];
       assertEquals(3, fis.read(buffer, 1, 4));
 
-      snapshotBuilder().gap(1).part(fisTracker, 0, 3)
+      assertContentEquals("abc", fis);
+      snapshotBuilder().gap(1).track(fis, 0, 3)
           .assertTrackerOf(buffer);
-
-      assertEquals(ByteBuffer.wrap(new byte[]{1, 2, 3}), fisTracker.getByteContent());
     }
   }
 
   @Test public void readSingleByte() throws IOException {
     try (var fis = new FileInputStream(file)) {
-      var fisTracker = (ByteOriginTracker) requireNonNull(TrackerRepository.getTracker(fis));
-
-      assertEquals(1, fis.read());
-
-      assertEquals(ByteBuffer.wrap(new byte[]{1}), fisTracker.getByteContent());
+      assertEquals('a', fis.read());
+      assertContentEquals("a", fis);
     }
+  }
+
+  private void assertContentEquals(String expected, FileInputStream fis) {
+    var tracker = (ByteOriginTracker) requireNonNull(TrackerRepository.getTracker(fis));
+    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
   }
 }

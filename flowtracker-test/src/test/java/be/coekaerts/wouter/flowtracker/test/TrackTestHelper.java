@@ -1,14 +1,14 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import be.coekaerts.wouter.flowtracker.hook.StringHook;
-import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
-import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
+import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 
 /**
  * Helper methods for testing Trackers
@@ -53,6 +53,15 @@ public class TrackTestHelper {
   public static byte[] trackedByteArray(String str) {
     byte[] result = str.getBytes();
     TrackerRepository.createFixedOriginTracker(result, result.length);
+    return result;
+  }
+
+  /** Create a byte array without tracking */
+  public static byte[] untrackedByteArray(String str) {
+    byte[] result = str.getBytes();
+    if (TrackerRepository.getTracker(result) != null) {
+      throw new IllegalStateException("Did not expect result to be tracked");
+    }
     return result;
   }
 

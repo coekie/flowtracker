@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+// TODO rename to CharSinkTracker?
 public class SinkTracker extends DefaultTracker {
   private final StringBuilder content = new StringBuilder();
 

@@ -31,7 +31,7 @@ public class OutputStreamWriterHook {
     }
   }
 
-  public static void afterWriteCharArrayOffset(OutputStreamWriter target, char cbuf[], int off,
+  public static void afterWriteCharArrayOffset(OutputStreamWriter target, char[] cbuf, int off,
       int len) {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
