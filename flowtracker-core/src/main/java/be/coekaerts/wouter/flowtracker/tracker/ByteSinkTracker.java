@@ -2,6 +2,12 @@ package be.coekaerts.wouter.flowtracker.tracker;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Tracker for writing to a sink of bytes.
+ *
+ * @see ByteOriginTracker
+ * @see CharSinkTracker
+ */
 public class ByteSinkTracker extends DefaultTracker {
   private final ByteSequence content = new ByteSequence();
 

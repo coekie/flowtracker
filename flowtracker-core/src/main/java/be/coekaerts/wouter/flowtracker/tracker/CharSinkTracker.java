@@ -1,7 +1,12 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
-// TODO rename to CharSinkTracker?
-public class SinkTracker extends DefaultTracker {
+/**
+ * Tracker for writing to a sink of chars.
+ *
+ * @see CharOriginTracker
+ * @see ByteSinkTracker
+ */
+public class CharSinkTracker extends DefaultTracker {
   private final StringBuilder content = new StringBuilder();
 
   @Override public boolean supportsContent() {

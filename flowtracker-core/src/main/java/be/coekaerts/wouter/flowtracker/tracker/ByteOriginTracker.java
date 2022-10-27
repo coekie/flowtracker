@@ -5,7 +5,8 @@ import java.nio.ByteBuffer;
 /**
  * Tracker for reading from a source of bytes.
  *
- * @see ContentTracker
+ * @see CharOriginTracker
+ * @see ByteSinkTracker
  */
 public class ByteOriginTracker extends OriginTracker {
   private final ByteSequence content = new ByteSequence();

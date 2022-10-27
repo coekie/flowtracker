@@ -1,20 +1,20 @@
 package be.coekaerts.wouter.flowtracker.web;
 
-import be.coekaerts.wouter.flowtracker.tracker.ContentTracker;
-import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
-import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
-import be.coekaerts.wouter.flowtracker.tracker.SinkTracker;
-import be.coekaerts.wouter.flowtracker.tracker.TagTracker;
-import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
-import org.junit.Before;
-import org.junit.Test;
-
 import static be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerDetailResponse;
 import static be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerResponse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
+import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
+import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
+import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
+import be.coekaerts.wouter.flowtracker.tracker.TagTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import org.junit.Before;
+import org.junit.Test;
 
 public class TrackerResourceTest {
   private TrackerResource trackerResource;
@@ -38,7 +38,7 @@ public class TrackerResourceTest {
   }
 
   @Test public void getSinkTracker() {
-    SinkTracker tracker = new SinkTracker();
+    CharSinkTracker tracker = new CharSinkTracker();
     TrackerRepository.setInterestTracker(new Object(), tracker);
 
     Tracker sourceTracker1 = new FixedOriginTracker(3);
@@ -79,10 +79,10 @@ public class TrackerResourceTest {
   }
 
   @Test public void trackerPartResponse_sourceContext() {
-    SinkTracker tracker = new SinkTracker();
+    CharSinkTracker tracker = new CharSinkTracker();
     TrackerRepository.setInterestTracker(new Object(), tracker);
 
-    ContentTracker sourceTracker = new ContentTracker();
+    CharOriginTracker sourceTracker = new CharOriginTracker();
     sourceTracker.append("abcdefghijklmnopqrstuvwxyz".toCharArray(), 0, 26);
     tracker.append("mnbcxy", 0, 6);
     tracker.setSource(0, 2, sourceTracker, 12);
@@ -99,7 +99,7 @@ public class TrackerResourceTest {
   }
 
   @Test public void getContentTracker() {
-    ContentTracker tracker = new ContentTracker();
+    CharOriginTracker tracker = new CharOriginTracker();
     TrackerRepository.setInterestTracker(new Object(), tracker);
 
     tracker.append(new char[] {'a', 'b', 'c', 'd'}, 1, 2);

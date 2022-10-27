@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
-import be.coekaerts.wouter.flowtracker.tracker.SinkTracker;
+import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
@@ -17,8 +17,8 @@ public class OutputStreamWriterHook {
     }
   }
 
-  static SinkTracker createOutputStreamWriterTracker(OutputStreamWriter target) {
-    SinkTracker tracker = new SinkTracker();
+  static CharSinkTracker createOutputStreamWriterTracker(OutputStreamWriter target) {
+    CharSinkTracker tracker = new CharSinkTracker();
     TrackerRepository.setInterestTracker(target, tracker);
     return tracker;
   }
@@ -26,7 +26,7 @@ public class OutputStreamWriterHook {
   public static void afterWrite1(OutputStreamWriter target, int c) {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
-      ((SinkTracker) tracker).append((char) c);
+      ((CharSinkTracker) tracker).append((char) c);
       // TODO tracking of source of single character writes
     }
   }
@@ -39,7 +39,7 @@ public class OutputStreamWriterHook {
       if (sourceTracker != null) {
         tracker.setSource(tracker.getLength(), len, sourceTracker, off);
       }
-      ((SinkTracker) tracker).append(cbuf, off, len);
+      ((CharSinkTracker) tracker).append(cbuf, off, len);
     }
   }
 
@@ -51,7 +51,7 @@ public class OutputStreamWriterHook {
       if (sourceTracker != null) {
         tracker.setSource(tracker.getLength(), len, sourceTracker, off);
       }
-      ((SinkTracker) tracker).append(str, off, len);
+      ((CharSinkTracker) tracker).append(str, off, len);
     }
   }
 }
