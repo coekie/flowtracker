@@ -42,19 +42,24 @@ public class ClassHookSpec implements ClassAdapterFactory {
     this.hookClass = hookClass;
   }
 
-  public void addMethodHookSpec(String targetMethod, String hookMethod,
+  public ClassHookSpec addMethodHookSpec(String targetMethod, String hookMethod,
       HookArgument... hookArguments) {
-    addMethodHookSpec(Method.getMethod(targetMethod), Method.getMethod(hookMethod), hookArguments);
+    return addMethodHookSpec(Method.getMethod(targetMethod), Method.getMethod(hookMethod), hookArguments);
   }
 
-  public void addMethodHookSpec(Method targetMethod, Method hookMethod,
+  public ClassHookSpec addMethodHookSpec(Method targetMethod, Method hookMethod,
       HookArgument... hookArguments) {
     HookSpec hookSpec =
         new HookSpec(targetClass, targetMethod, hookClass, hookMethod, hookArguments);
     methodHookSpecs.put(targetMethod, hookSpec);
+    return this;
   }
 
   public ClassVisitor createClassAdapter(ClassVisitor cv) {
     return new HookClassAdapter(cv);
+  }
+
+  Type getTargetClass() {
+    return targetClass;
   }
 }
