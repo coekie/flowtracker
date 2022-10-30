@@ -80,6 +80,9 @@ public class TrackTestHelper {
     Tracker tracker = TrackerRepository.getTracker(sut);
     assertNotNull(tracker);
     assertEquals(expectedDescriptor, tracker.getDescriptor());
-    assertSame(TrackerRepository.getTracker(expectedDescriptorObj), tracker.getDescriptorTracker());
+    Tracker expectedTracker = expectedDescriptorObj instanceof Tracker
+        ? (Tracker) expectedDescriptorObj
+        : TrackerRepository.getTracker(expectedDescriptorObj);
+    assertSame(expectedTracker, tracker.getDescriptorTracker());
   }
 }

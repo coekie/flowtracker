@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.test;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertTrue;
 
+import be.coekaerts.wouter.flowtracker.hook.InputStreamHook;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,8 +18,8 @@ public class URLTest {
   @Test public void fileURLConnection() throws IOException {
     URL url = requireNonNull(URLTest.class.getResource("URLTest.class"));
     InputStream in = url.openStream();
-    String descriptor = requireNonNull(TrackerRepository.getTracker(in)).getDescriptor();
-    assertTrue(descriptor.startsWith("InputStream from file:"));
+    String descriptor = requireNonNull(InputStreamHook.getInputStreamTracker(in)).getDescriptor();
+    assertTrue(descriptor.startsWith("FileInputStream for"));
     assertTrue(descriptor.endsWith(URLTest.class.getName().replace(".", "/") + ".class"));
     in.close();
   }

@@ -1,5 +1,13 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static java.util.Objects.requireNonNull;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import be.coekaerts.wouter.flowtracker.hook.InputStreamHook;
+import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -7,18 +15,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CoderResult;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class InputStreamReaderTest {
   private final String testFileName =
@@ -43,7 +45,17 @@ public class InputStreamReaderTest {
   }
 
   private void assertContentEquals(String expected) {
-    assertEquals(expected, TrackerRepository.getTracker(reader).getContent().toString());
+    assertEquals(expected,
+        requireNonNull(TrackerRepository.getTracker(reader)).getContent().toString());
+
+    var tracker = (ByteOriginTracker) requireNonNull(InputStreamHook.getInputStreamTracker(stream));
+    // the underlying InputStream may have already read more; so we only test that it starts with
+    // the expected content
+    ByteBuffer byteContent = tracker.getByteContent();
+    ByteBuffer slice = byteContent.slice();
+    slice.position(byteContent.position());
+    slice.limit(expected.getBytes().length - slice.position());
+    assertEquals(ByteBuffer.wrap(expected.getBytes()), slice);
   }
 
   @Test public void readSingleChar() throws IOException {
@@ -68,23 +80,23 @@ public class InputStreamReaderTest {
     // we assume in this test that it can always immediately read the asked amount;
     // i.e. no incomplete read except that the end of the file
 
-    char buffer[] = new char[5];
+    char[] buffer = new char[5];
 
     // read 3 characters, 0 offset
     assertEquals(3, reader.read(buffer, 0, 3));
-    assertTrue(Arrays.equals(new char[] {'a', 'b', 'c', '\0', '\0'}, buffer));
+    assertArrayEquals(new char[]{'a', 'b', 'c', '\0', '\0'}, buffer);
     snapshotBuilder().track(reader, 0, 3).assertTrackerOf(buffer);
     assertContentEquals("abc");
 
     // read with offset
     assertEquals(2, reader.read(buffer, 1, 2));
-    assertTrue(Arrays.equals(new char[] {'a', 'd', 'e', '\0', '\0'}, buffer));
+    assertArrayEquals(new char[]{'a', 'd', 'e', '\0', '\0'}, buffer);
     snapshotBuilder().track(reader, 0, 1).track(reader, 3, 2).assertTrackerOf(buffer);
     assertContentEquals("abcde");
 
     // incomplete read (only 1 instead of 5 asked chars read)
     assertEquals(1, reader.read(buffer, 0, 5));
-    assertTrue(Arrays.equals(new char[] {'f', 'd', 'e', '\0', '\0'}, buffer));
+    assertArrayEquals(new char[]{'f', 'd', 'e', '\0', '\0'}, buffer);
     snapshotBuilder().track(reader, 5, 1).track(reader, 3, 2).assertTrackerOf(buffer);
     assertContentEquals("abcdef");
 
@@ -95,17 +107,17 @@ public class InputStreamReaderTest {
   }
 
   @Test public void readCharArray() throws IOException {
-    char buffer1[] = new char[1];
+    char[] buffer1 = new char[1];
     // read 1 char
     assertEquals(1, reader.read(buffer1));
     assertEquals('a', buffer1[0]);
     snapshotBuilder().track(reader, 0, 1).assertTrackerOf(buffer1);
     assertContentEquals("a");
 
-    char buffer2[] = new char[2];
+    char[] buffer2 = new char[2];
     // read more
     assertEquals(2, reader.read(buffer2));
-    assertTrue(Arrays.equals(new char[] {'b', 'c'}, buffer2));
+    assertArrayEquals(new char[]{'b', 'c'}, buffer2);
     snapshotBuilder().track(reader, 1, 2).assertTrackerOf(buffer2);
     assertContentEquals("abc");
 
@@ -137,12 +149,13 @@ public class InputStreamReaderTest {
     assertContentEquals("abcdef");
   }
 
+  @SuppressWarnings("CharsetObjectCanBeUsed")
   @Test public void interestAndDescriptor() throws IOException {
     assertInterestAndDescriptor(reader);
     assertInterestAndDescriptor(new InputStreamReader(stream, "UTF-8"));
-    assertInterestAndDescriptor(new InputStreamReader(stream, Charset.forName("UTF-8")));
+    assertInterestAndDescriptor(new InputStreamReader(stream, StandardCharsets.UTF_8));
     assertInterestAndDescriptor(new InputStreamReader(stream,
-        new CharsetDecoder(Charset.forName("UTF-8"), 1, 1) {
+        new CharsetDecoder(StandardCharsets.UTF_8, 1, 1) {
           @Override protected CoderResult decodeLoop(ByteBuffer in, CharBuffer out) {
             return null;
           }
@@ -150,12 +163,14 @@ public class InputStreamReaderTest {
   }
 
   /** Test if stuff in InputStreamHook is applied here */
-  @Test public void descriptorForOtherStreams() throws IOException {
+  @Test public void descriptorForOtherStreams() {
     InputStreamReader reader = new InputStreamReader(new BufferedInputStream(stream));
-    TrackTestHelper.assertInterestAndDescriptor(reader, "InputStreamReader", stream);
+    TrackTestHelper.assertInterestAndDescriptor(reader, "InputStreamReader",
+        InputStreamHook.getInputStreamTracker(stream));
   }
 
   private void assertInterestAndDescriptor(InputStreamReader reader) {
-    TrackTestHelper.assertInterestAndDescriptor(reader, "InputStreamReader", stream);
+    TrackTestHelper.assertInterestAndDescriptor(reader, "InputStreamReader",
+        InputStreamHook.getInputStreamTracker(stream));
   }
 }

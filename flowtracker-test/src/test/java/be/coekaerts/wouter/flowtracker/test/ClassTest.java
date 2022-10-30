@@ -1,17 +1,18 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
-import java.io.IOException;
+import static java.util.Objects.requireNonNull;
+import static org.junit.Assert.assertTrue;
+
+import be.coekaerts.wouter.flowtracker.hook.InputStreamHook;
 import java.io.InputStream;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-
 public class ClassTest {
-  @Test public void getResourceAsStream() throws IOException {
-    InputStream stream = URLTest.class.getResourceAsStream("URLTest.class");
-    String descriptor = TrackerRepository.getTracker(stream).getDescriptor();
-    assertTrue(descriptor.startsWith("InputStream from"));
-    assertTrue(descriptor.endsWith(URLTest.class.getName().replace(".", "/") + ".class"));
+  @Test public void getResourceAsStream() {
+    InputStream stream = URLTest.class.getResourceAsStream("ClassTest.class");
+    String descriptor =
+        requireNonNull(InputStreamHook.getInputStreamTracker(stream)).getDescriptor();
+    assertTrue(descriptor.startsWith("FileInputStream for "));
+    assertTrue(descriptor.endsWith(ClassTest.class.getName().replace(".", "/") + ".class"));
   }
 }
