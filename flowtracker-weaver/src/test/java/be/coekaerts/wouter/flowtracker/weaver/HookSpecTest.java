@@ -2,6 +2,8 @@ package be.coekaerts.wouter.flowtracker.weaver;
 
 import static org.junit.Assert.assertEquals;
 
+import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
+import be.coekaerts.wouter.flowtracker.weaver.HookSpec.OnEnterHookArgument;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -16,6 +18,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.ClassRemapper;
+import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.SimpleRemapper;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
@@ -44,6 +47,23 @@ public class HookSpecTest {
             "void afterWithReturnValue(java.lang.String,int)", HookSpec.ARG0));
     assertEquals("withReturnValue 5\n"
         + "afterWithReturnValue retVal 5\n", log.toString());
+  }
+
+  @Test
+  public void testOnEnter() throws ReflectiveOperationException {
+    HookArgument arg0OnEnter = new OnEnterHookArgument(Type.getType(String.class), 2) {
+      @Override
+      void loadOnMethodEnter(GeneratorAdapter generator) {
+        generator.loadArg(0);
+      }
+    };
+
+    transformAndRun(new ClassHookSpec(Type.getType(HookedWithOnEnter.class), MyHook.class)
+        .addMethodHookSpec("void withOnEnter(java.lang.String)",
+            "void afterWithOnEnter(java.lang.String,java.lang.String)",
+            arg0OnEnter, HookSpec.ARG0));
+    assertEquals("withOnEnter originalArg 2\n"
+        + "afterWithOnEnter originalArg updatedArg\n", log.toString());
   }
 
   /**
@@ -135,6 +155,10 @@ public class HookSpecTest {
     public static void afterWithReturnValue(String returnValue, int i) {
       log("afterWithReturnValue", returnValue, i);
     }
+
+    public static void afterWithOnEnter(String argOnEnter, String arg) {
+      log("afterWithOnEnter", argOnEnter, arg);
+    }
   }
 }
 
@@ -163,5 +187,20 @@ class WithReturnValue implements Runnable {
   String withReturnValue(int i) {
     HookSpecTest.log("withReturnValue", i);
     return "retVal";
+  }
+}
+
+class HookedWithOnEnter implements Runnable {
+  @Override
+  public void run() {
+    withOnEnter("originalArg");
+  }
+
+  @SuppressWarnings({"SameParameterValue", "UnusedAssignment"})
+  void withOnEnter(String arg) {
+    int i = 1; // a local variable just to test that local vars get renumbered correctly
+    i++;
+    HookSpecTest.log("withOnEnter", arg, i);
+    arg = "updatedArg";
   }
 }

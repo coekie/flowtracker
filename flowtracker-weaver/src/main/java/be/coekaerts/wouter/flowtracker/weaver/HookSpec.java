@@ -9,6 +9,13 @@ import org.objectweb.asm.commons.Method;
 
 public class HookSpec {
   public static abstract class HookArgument {
+    /**
+     * Add code at the start of the method (optional).
+     */
+    void onMethodEnter(GeneratorAdapter generator) {
+    }
+
+    /** Load the value of this argument on the stack */
     abstract void load(GeneratorAdapter generator);
 
     abstract Type getType(HookSpec hookSpec);
@@ -41,6 +48,50 @@ public class HookSpec {
     }
   }
 
+  /**
+   * Argument for hook method that is calculated when entering the method, stored in a fresh local
+   * variable, and loaded again when calling the hook.
+   */
+  abstract static class OnEnterHookArgument extends HookArgument {
+    private final Type type;
+
+    /**
+     * The index of the local variable to store the value in. This depends on if the method is
+     * static or not (first slot taken by "this") and the arguments.
+     * (Alternatively we could let onMethodEnter determine this, but then it needs to be passed back
+     * into "load".)
+     */
+    private final int localIndex;
+
+    OnEnterHookArgument(Type type, int localIndex) {
+      this.type = type;
+      this.localIndex = localIndex;
+    }
+
+    abstract void loadOnMethodEnter(GeneratorAdapter generator);
+
+    @Override
+    void onMethodEnter(GeneratorAdapter generator) {
+      int local = generator.newLocal(Type.getType(String.class));
+      if (local != localIndex) {
+        throw new IllegalStateException("Expected localIndex " + localIndex + " but got " + local);
+      }
+
+      loadOnMethodEnter(generator);
+      generator.storeLocal(localIndex);
+    }
+
+    @Override
+    void load(GeneratorAdapter generator) {
+      generator.loadLocal(localIndex);
+    }
+
+    @Override
+    Type getType(HookSpec hookSpec) {
+      return type;
+    }
+  }
+
   public static final HookArgument ARG0 = new ArgHookArgument(0);
   public static final HookArgument ARG1 = new ArgHookArgument(1);
   public static final HookArgument ARG2 = new ArgHookArgument(2);
@@ -51,6 +102,14 @@ public class HookSpec {
     private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
       super(Opcodes.ASM9, mv, access, name, desc);
       hasReturnType = desc.charAt(desc.indexOf(')') + 1) != 'V';
+    }
+
+    @Override
+    protected void onMethodEnter() {
+      for (HookArgument argument : hookArguments) {
+        argument.onMethodEnter(this);
+      }
+      super.onMethodEnter();
     }
 
     @Override
@@ -74,43 +133,23 @@ public class HookSpec {
   }
 
   private final Type targetClass;
-  //	private final Method targetMethod;
   private final Class<?> hookClass;
   private final HookArgument[] hookArguments;
   private final Method hookMethod;
-
   private final Type[] cacheTargetMethodArgumentTypes;
 
   public HookSpec(Type targetClass, Method targetMethod,
       Class<?> hookClass, Method hookMethod, HookArgument... hookArguments) {
     super();
     this.targetClass = targetClass;
-    //		this.targetMethod = targetMethod;
     this.hookClass = hookClass;
     this.hookMethod = hookMethod;
     this.hookArguments = hookArguments;
-
     this.cacheTargetMethodArgumentTypes = targetMethod.getArgumentTypes();
   }
 
-  //	private Class<?>[] getHookParameterClasses() throws ClassNotFoundException {
-  //		Class<?>[] types = new Class<?>[hookArguments.length + 1];
-  //
-  //		types[0] = Class.forName(targetMethod.getReturnType().getClassName());
-  //		for (int i = 0; i < hookArguments.length ; i++) {
-  //			types[i+1] = Class.forName(hookArguments[i].getType(this).getClassName());
-  //		}
-  //
-  //		return types;
-  //	}
-
   private Method getHookMethod() {
     return hookMethod;
-    //		try {
-    //			return Method.getMethod(hookClass.getDeclaredMethod(hookName, getHookParameterClasses()));
-    //		} catch (Exception e) {
-    //			throw new RuntimeException(e);
-    //		}
   }
 
   public MethodVisitor createMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
