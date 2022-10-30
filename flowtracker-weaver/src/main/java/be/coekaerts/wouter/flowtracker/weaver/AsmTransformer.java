@@ -131,6 +131,15 @@ public class AsmTransformer implements ClassFileTransformer {
     return spec;
   }
 
+  // not used yet, see CharsetEncoderTest
+//  private ClassHookSpec charsetEncoderSpec() {
+//    return new ClassHookSpec(Type.getType("Ljava/nio/charset/CharsetEncoder;"),
+//            CharsetEncoderHook.class)
+//        .addMethodHookSpec(
+//            "java.nio.charset.CoderResult encode(java.nio.CharBuffer,java.nio.ByteBuffer,boolean)",
+//            "void afterEncode(int,int,java.nio.CharBuffer,java.nio.ByteBuffer)", ...);
+//  }
+
   public byte[] transform(ClassLoader loader, String className,
       Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
       byte[] classfileBuffer) {
