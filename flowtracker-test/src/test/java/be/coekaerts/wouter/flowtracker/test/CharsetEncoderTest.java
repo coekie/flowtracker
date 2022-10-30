@@ -43,8 +43,8 @@ public class CharsetEncoderTest {
     utf8Encoder().encode(CharBuffer.wrap(chars), bb, false);
 
     assertArrayEquals("a\u00A3bc\0".getBytes(), bb.array());
-    // TODO this isn't right, lost track at the non-ascii char
-    snapshotBuilder().track(chars, 0, 1).assertTrackerOf(bb.array());
+    // TODO this isn't right, lost track of the non-ascii char
+    snapshotBuilder().track(chars, 0, 1).gap(2).track(chars, 2, 2).assertTrackerOf(bb.array());
   }
 
   // TODO test non-ASCII chars. also test cases with surrogate pairs (especially tricky with

@@ -7,6 +7,11 @@ import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
+/**
+ * Hook methods called by instrumented code for OutputStreamWriter.
+ *
+ * <p>This is partially redundant with tracking the content of FileOutputStream.
+ */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class OutputStreamWriterHook {
 

@@ -4,8 +4,10 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedCharArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 
+import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,9 +16,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
+import java.nio.charset.StandardCharsets;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,8 +43,15 @@ public class OutputStreamWriterTest {
     }
   }
 
-  private void assertContentEquals(String expected) {
-    assertEquals(expected, TrackerRepository.getTracker(writer).getContent().toString());
+  private void assertContentEquals(String expected) throws IOException {
+    // check content of writer
+    assertEquals(expected,
+        requireNonNull(TrackerRepository.getTracker(writer)).getContent().toString());
+
+    // check content of FileOutputStream
+    writer.flush();
+    var tracker = (ByteSinkTracker) requireNonNull(TrackerRepository.getTracker(stream));
+    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
   }
 
   @Test public void writeSingleChar() throws IOException {
@@ -52,6 +61,7 @@ public class OutputStreamWriterTest {
     assertContentEquals("ab");
     // tracking of source for write(char) not implemented
     snapshotBuilder().gap(2).assertTrackerOf(writer);
+    snapshotBuilder().gap(2).assertTrackerOf(stream);
   }
 
   @Test public void writeCharArray() throws IOException {
@@ -60,6 +70,7 @@ public class OutputStreamWriterTest {
     writer.write(abc);
     assertContentEquals("abcabc");
     snapshotBuilder().track(abc, 0, 3).track(abc, 0, 3).assertTrackerOf(writer);
+    snapshotBuilder().track(abc, 0, 3).track(abc, 0, 3).assertTrackerOf(stream);
   }
 
   @Test public void writeUntrackedCharArray() throws IOException {
@@ -71,6 +82,7 @@ public class OutputStreamWriterTest {
 
     assertContentEquals("abcdef");
     snapshotBuilder().gap(3).track(def, 0, 3).assertTrackerOf(writer);
+    snapshotBuilder().gap(3).track(def, 0, 3).assertTrackerOf(stream);
   }
 
   @Test public void writeCharArrayOffset() throws IOException {
@@ -78,6 +90,7 @@ public class OutputStreamWriterTest {
     writer.write(abcd, 1, 2);
     assertContentEquals("bc");
     snapshotBuilder().track(abcd, 1, 2).assertTrackerOf(writer);
+    snapshotBuilder().track(abcd, 1, 2).assertTrackerOf(stream);
   }
 
   @Test public void writeString() throws IOException {
@@ -85,6 +98,7 @@ public class OutputStreamWriterTest {
     writer.write(abc);
     assertContentEquals("abc");
     snapshotBuilder().trackString(abc).assertTrackerOf(writer);
+    snapshotBuilder().trackString(abc).assertTrackerOf(stream);
   }
 
   @Test public void writeUntrackedString() throws IOException {
@@ -96,6 +110,7 @@ public class OutputStreamWriterTest {
 
     assertContentEquals("abcdef");
     snapshotBuilder().gap(3).trackString(def).assertTrackerOf(writer);
+    snapshotBuilder().gap(3).trackString(def).assertTrackerOf(stream);
   }
 
   @Test public void writeStringOffset() throws IOException {
@@ -105,12 +120,13 @@ public class OutputStreamWriterTest {
     snapshotBuilder().trackString(abcd, 1, 2).assertTrackerOf(writer);
   }
 
+  @SuppressWarnings("CharsetObjectCanBeUsed")
   @Test public void interestAndDescriptor() throws IOException {
     assertInterestAndDescriptor(writer);
     assertInterestAndDescriptor(new OutputStreamWriter(stream, "UTF-8"));
-    assertInterestAndDescriptor(new OutputStreamWriter(stream, Charset.forName("UTF-8")));
+    assertInterestAndDescriptor(new OutputStreamWriter(stream, StandardCharsets.UTF_8));
     assertInterestAndDescriptor(new OutputStreamWriter(stream,
-        new CharsetEncoder(Charset.forName("UTF-8"), 1, 1) {
+        new CharsetEncoder(StandardCharsets.UTF_8, 1, 1) {
           @Override protected CoderResult encodeLoop(CharBuffer in, ByteBuffer out) {
             return null;
           }
