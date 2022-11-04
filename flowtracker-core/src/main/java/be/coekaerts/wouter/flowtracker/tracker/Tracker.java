@@ -76,6 +76,12 @@ public abstract class Tracker implements WritableTracker {
     this.descriptorTracker = descriptorTracker;
   }
 
+  /** Replaces {@link #getDescriptor()} and {@link #getDescriptorTracker()} */
+  public void replaceDescriptor(String descriptor, Tracker descriptorTracker) {
+    this.descriptor = descriptor;
+    this.descriptorTracker = descriptorTracker;
+  }
+
   /** Description of what kind of object is being tracked and/or where it got created from */
   public String getDescriptor() {
     return descriptor;

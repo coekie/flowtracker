@@ -1,8 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.hook.InputStreamHook;
@@ -31,14 +29,7 @@ public class URLTest {
     URL url = requireNonNull(org.junit.Test.class.getResource("Test.class"));
     try (InputStream in = url.openStream()) {
       Tracker tracker = requireNonNull(InputStreamHook.getInputStreamTracker(in));
-      assertEquals("InflaterInputStream", tracker.getDescriptor());
-
-
-      Tracker descTracker = tracker.getDescriptorTracker();
-      assertNull(descTracker); // TODO track ZipFileInflaterInputStream
-      //assertEquals("something", descTracker.getDescriptor());
-//    assertTrue(descriptor.startsWith("InputStream from jar:file:"));
-//    assertTrue(descriptor.endsWith(".jar!/org/junit/Test.class"));
+      assertTrue(tracker.getDescriptor().matches("Unzipped .*\\.jar file org/junit/Test.class"));
     }
   }
 }

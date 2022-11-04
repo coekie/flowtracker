@@ -10,10 +10,12 @@ import java.util.zip.InflaterInputStream;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class InflaterInputStreamHook {
+  public static final String DESCRIPTOR = "InflaterInputStream";
+
   public static void afterInit(InflaterInputStream target, InputStream in) {
     if (Trackers.isActive()) {
       var tracker = new ByteOriginTracker();
-      tracker.initDescriptor("InflaterInputStream", InputStreamHook.getInputStreamTracker(in));
+      tracker.initDescriptor(DESCRIPTOR, InputStreamHook.getInputStreamTracker(in));
       TrackerRepository.setTracker(target, tracker);
     }
   }
