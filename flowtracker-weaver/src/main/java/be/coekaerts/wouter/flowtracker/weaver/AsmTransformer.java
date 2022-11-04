@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.weaver;
 
 import be.coekaerts.wouter.flowtracker.hook.FileInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.FileOutputStreamHook;
+import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.InputStreamReaderHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
@@ -114,6 +115,17 @@ public class AsmTransformer implements ClassFileTransformer {
         "void afterWriteByteArrayOffset(java.io.FileOutputStream,byte[],int,int)",
         HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
     specs.put("java/io/FileOutputStream", fileOutputStreamSpec);
+
+    ClassHookSpec inflaterInputStreamSpec = new ClassHookSpec(
+        Type.getType("Ljava/util/zip/InflaterInputStream;"), InflaterInputStreamHook.class);
+    inflaterInputStreamSpec.addMethodHookSpec(
+        "void <init>(java.io.InputStream,java.util.zip.Inflater,int)",
+        "void afterInit(java.util.zip.InflaterInputStream,java.io.InputStream)",
+        HookSpec.THIS, HookSpec.ARG0);
+    inflaterInputStreamSpec.addMethodHookSpec("int read(byte[],int,int)",
+        "void afterReadByteArrayOffset(int,java.util.zip.InflaterInputStream,byte[],int)",
+        HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
+    specs.put("java/util/zip/InflaterInputStream", inflaterInputStreamSpec);
   }
 
   private ClassHookSpec getSpec(String className) {

@@ -1,10 +1,12 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static java.util.Objects.requireNonNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.hook.InputStreamHook;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -17,20 +19,26 @@ public class URLTest {
    */
   @Test public void fileURLConnection() throws IOException {
     URL url = requireNonNull(URLTest.class.getResource("URLTest.class"));
-    InputStream in = url.openStream();
-    String descriptor = requireNonNull(InputStreamHook.getInputStreamTracker(in)).getDescriptor();
-    assertTrue(descriptor.startsWith("FileInputStream for"));
-    assertTrue(descriptor.endsWith(URLTest.class.getName().replace(".", "/") + ".class"));
-    in.close();
+    try (InputStream in = url.openStream()) {
+      String descriptor = requireNonNull(InputStreamHook.getInputStreamTracker(in)).getDescriptor();
+      assertTrue(descriptor.startsWith("FileInputStream for"));
+      assertTrue(descriptor.endsWith(URLTest.class.getName().replace(".", "/") + ".class"));
+    }
   }
 
   /** Test getting an input stream from a jar file */
   @Test public void jarURLConnection() throws IOException {
     URL url = requireNonNull(org.junit.Test.class.getResource("Test.class"));
-    InputStream in = url.openStream();
-    String descriptor = requireNonNull(TrackerRepository.getTracker(in)).getDescriptor();
-    assertTrue(descriptor.startsWith("InputStream from jar:file:"));
-    assertTrue(descriptor.endsWith(".jar!/org/junit/Test.class"));
-    in.close();
+    try (InputStream in = url.openStream()) {
+      Tracker tracker = requireNonNull(InputStreamHook.getInputStreamTracker(in));
+      assertEquals("InflaterInputStream", tracker.getDescriptor());
+
+
+      Tracker descTracker = tracker.getDescriptorTracker();
+      assertNull(descTracker); // TODO track ZipFileInflaterInputStream
+      //assertEquals("something", descTracker.getDescriptor());
+//    assertTrue(descriptor.startsWith("InputStream from jar:file:"));
+//    assertTrue(descriptor.endsWith(".jar!/org/junit/Test.class"));
+    }
   }
 }

@@ -31,7 +31,7 @@ public class InputStreamReaderHook {
 
   public static void afterReadCharArrayOffset(int read, InputStreamReader target, char[] cbuf,
       int offset) {
-    if (read >= 0) {
+    if (read > 0) {
       Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
         TrackerUpdater.setSourceTracker(cbuf, offset, read, tracker, tracker.getLength());
@@ -41,7 +41,7 @@ public class InputStreamReaderHook {
   }
 
   public static void afterReadCharBuffer(int read, InputStreamReader target, CharBuffer buf) {
-    if (read >= 0) {
+    if (read > 0) {
       Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
         int pos = buf.position();

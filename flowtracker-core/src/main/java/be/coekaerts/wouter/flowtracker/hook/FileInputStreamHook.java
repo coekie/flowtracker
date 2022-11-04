@@ -30,7 +30,7 @@ public class FileInputStreamHook {
   }
 
   public static void afterReadByteArray(int read, FileInputStream target, byte[] buf) {
-    if (read >= 0) {
+    if (read > 0) {
       Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
         TrackerUpdater.setSourceTracker(buf, 0, read, tracker, tracker.getLength());
@@ -41,7 +41,7 @@ public class FileInputStreamHook {
 
   public static void afterReadByteArrayOffset(int read, FileInputStream target, byte[] buf,
       int offset) {
-    if (read >= 0) {
+    if (read > 0) {
       Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
         TrackerUpdater.setSourceTracker(buf, offset, read, tracker, tracker.getLength());
