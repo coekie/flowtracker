@@ -3,7 +3,6 @@ package be.coekaerts.wouter.flowtracker.weaver;
 import be.coekaerts.wouter.flowtracker.hook.FileInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.FileOutputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
-import be.coekaerts.wouter.flowtracker.hook.InputStreamReaderHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
 import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
@@ -37,32 +36,6 @@ public class AsmTransformer implements ClassFileTransformer {
         ? new File(config.get("dumpByteCode"))
         : null;
     this.config = config;
-    ClassHookSpec inputStreamReaderSpec =
-        new ClassHookSpec(Type.getType("Ljava/io/InputStreamReader;"), InputStreamReaderHook.class);
-    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream)",
-        "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
-    inputStreamReaderSpec.addMethodHookSpec("void <init>(java.io.InputStream, java.lang.String)",
-        "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
-    inputStreamReaderSpec.addMethodHookSpec(
-        "void <init>(java.io.InputStream, java.nio.charset.Charset)",
-        "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
-    inputStreamReaderSpec.addMethodHookSpec(
-        "void <init>(java.io.InputStream, java.nio.charset.CharsetDecoder)",
-        "void afterInit(java.io.InputStreamReader,java.io.InputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
-    inputStreamReaderSpec.addMethodHookSpec("int read()",
-        "void afterRead1(int,java.io.InputStreamReader)", HookSpec.THIS);
-    inputStreamReaderSpec.addMethodHookSpec("int read(char[],int,int)",
-        "void afterReadCharArrayOffset(int,java.io.InputStreamReader,char[],int)",
-        HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
-    inputStreamReaderSpec.addMethodHookSpec("int read(java.nio.CharBuffer)",
-        "void afterReadCharBuffer(int,java.io.InputStreamReader,java.nio.CharBuffer)",
-        HookSpec.THIS, HookSpec.ARG0);
-    // we assume the other methods ultimately delegate to the ones we hooked
-    specs.put("java/io/InputStreamReader", inputStreamReaderSpec);
 
     ClassHookSpec outputStreamWriterSpec = new ClassHookSpec(
         Type.getType("Ljava/io/OutputStreamWriter;"), OutputStreamWriterHook.class);
@@ -235,7 +208,9 @@ public class AsmTransformer implements ClassFileTransformer {
         || className.startsWith("java/lang/String") // String and friends like StringLatin1
         || className.equals("java/lang/AbstractStringBuilder")
         || className.equals("java/io/BufferedWriter")
-        || className.equals("sun/nio/cs/UTF_8$Encoder")) {
+        || className.equals("sun/nio/cs/UTF_8$Encoder")
+        || className.equals("sun/nio/cs/UTF_8$Decoder")
+    ) {
       return true;
     }
 
