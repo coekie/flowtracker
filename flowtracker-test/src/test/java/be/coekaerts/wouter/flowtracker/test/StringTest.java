@@ -8,6 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class StringTest {
@@ -58,5 +59,40 @@ public class StringTest {
 
     snapshotBuilder().track(chars, 1, 2)
         .assertEquals(getStringTracker(str));
+  }
+
+  /** Test {@link String#replace(CharSequence, CharSequence)} */
+  @Test public void testReplaceStrings() {
+    String src = trackCopy("abcd");
+    String replacement = trackCopy("x");
+    String result = src.replace("bc", replacement);
+    assertEquals("axd", result);
+    snapshotBuilder().trackString(src, 0, 1).trackString(replacement).trackString(src, 3, 1)
+        .assertEquals(getStringTracker(result));
+  }
+
+  /** Test {@link String#replace(char, char)} */
+  // TODO flow analysis is not smart enough yet for StringLatin1.replace.
+  //   probably because of this line: buf[i] = (c == (byte)oldChar) ? (byte)newChar : c;
+  //   it can't track where value came from if that depends on what code path it took?
+  @Ignore
+  @Test public void testReplaceChars() {
+    String src = trackCopy("abc");
+    String result = src.replace('b', 'x');
+    assertEquals("axc", result);
+    snapshotBuilder().trackString(src, 0, 1).gap(1).trackString(src, 2, 1)
+        .assertEquals(getStringTracker(result));
+  }
+
+  /** Test {@link String#replace(CharSequence, CharSequence)} with single-char String */
+  // String.replace handles replacing single-char String with another single-char String special
+  @Ignore // same as testReplaceChars()
+  @Test public void testReplaceSingleCharString() {
+    String src = trackCopy("abc");
+    String replacement = trackCopy("x");
+    String result = src.replace("b", replacement);
+    assertEquals("axc", result);
+    snapshotBuilder().trackString(src, 0, 1).trackString(replacement).trackString(src, 2, 1)
+        .assertEquals(getStringTracker(result));
   }
 }

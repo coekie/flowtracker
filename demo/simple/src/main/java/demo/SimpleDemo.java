@@ -10,7 +10,7 @@ public class SimpleDemo {
   public static void main(String[] args) throws IOException {
     System.out.println("Starting");
     try (BufferedReader reader = new BufferedReader(new FileReader("/etc/issue"))) {
-      System.out.println(reader.readLine().replace("u", "U"));
+      System.out.println(reader.readLine());
     }
     Files.copy(Paths.get("/etc/issue"), System.out);
     System.out.write("test\n".getBytes());
