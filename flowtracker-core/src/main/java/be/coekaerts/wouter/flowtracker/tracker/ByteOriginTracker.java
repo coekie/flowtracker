@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
  * @see CharOriginTracker
  * @see ByteSinkTracker
  */
-public class ByteOriginTracker extends OriginTracker {
+public class ByteOriginTracker extends OriginTracker implements ByteContentTracker {
   private final ByteSequence content = new ByteSequence();
 
   public void append(byte b) {
@@ -35,5 +35,10 @@ public class ByteOriginTracker extends OriginTracker {
   @Override
   public int getLength() {
     return content.size();
+  }
+
+  @Override
+  public ByteSequence getContent() {
+    return content;
   }
 }

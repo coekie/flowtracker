@@ -8,6 +8,7 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
+import be.coekaerts.wouter.flowtracker.tracker.CharContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,7 +47,8 @@ public class OutputStreamWriterTest {
   private void assertContentEquals(String expected) throws IOException {
     // check content of writer
     assertEquals(expected,
-        requireNonNull(TrackerRepository.getTracker(writer)).getContent().toString());
+        requireNonNull((CharContentTracker)TrackerRepository.getTracker(writer)).getContent()
+            .toString());
 
     // check content of FileOutputStream
     writer.flush();

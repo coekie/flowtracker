@@ -6,12 +6,8 @@ package be.coekaerts.wouter.flowtracker.tracker;
  * @see CharOriginTracker
  * @see ByteSinkTracker
  */
-public class CharSinkTracker extends DefaultTracker {
+public class CharSinkTracker extends DefaultTracker implements CharContentTracker {
   private final StringBuilder content = new StringBuilder();
-
-  @Override public boolean supportsContent() {
-    return true;
-  }
 
   @Override public CharSequence getContent() {
     return content;

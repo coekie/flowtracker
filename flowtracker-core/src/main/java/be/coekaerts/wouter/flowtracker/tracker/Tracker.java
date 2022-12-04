@@ -94,17 +94,4 @@ public abstract class Tracker implements WritableTracker {
   public Tracker getDescriptorTracker() {
     return descriptorTracker;
   }
-
-  /** if this tracker has content; if {@link #getContent()} is supported */
-  public boolean supportsContent() {
-    return false;
-  }
-
-  /**
-   * The current content for this tracker, or throws {@link UnsupportedOperationException} if not
-   * {@link #supportsContent()}.
-   */
-  public CharSequence getContent() {
-    throw new UnsupportedOperationException();
-  }
 }

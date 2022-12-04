@@ -1,5 +1,9 @@
 package be.coekaerts.wouter.flowtracker.web;
 
+import static java.util.Objects.requireNonNull;
+
+import be.coekaerts.wouter.flowtracker.tracker.ByteContentTracker;
+import be.coekaerts.wouter.flowtracker.tracker.CharContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Growth;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
@@ -64,13 +68,13 @@ public class TrackerResource {
   public static class TrackerDetailResponse {
     private final List<TrackerPartResponse> parts = new ArrayList<>();
 
-    private TrackerDetailResponse(final Tracker tracker) {
+    private TrackerDetailResponse(Tracker tracker) {
       if (tracker instanceof DefaultTracker) {
         tracker.pushSourceTo(0, tracker.getLength(), new WritableTracker() {
           @Override
           public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
               Growth growth) {
-            String content = tracker.getContent().subSequence(index, index + length).toString();
+            String content = requireNonNull(getContentAsString(tracker, index, index + length));
             if (sourceTracker != null) {
               parts.add(new TrackerPartResponse(content, length, sourceTracker, sourceIndex));
             } else {
@@ -79,7 +83,8 @@ public class TrackerResource {
           }
         }, 0);
       } else {
-        parts.add(new TrackerPartResponse(tracker.getContent().toString()));
+        parts.add(new TrackerPartResponse(
+            getContentAsString(tracker, 0, getContentLength(tracker))));
       }
     }
 
@@ -107,13 +112,9 @@ public class TrackerResource {
       this.content = content;
       this.source = new TrackerResponse(sourceTracker);
       this.sourceOffset = sourceIndex;
-      if (sourceTracker.supportsContent()) {
-        CharSequence sourceContent = sourceTracker.getContent();
-        this.sourceContext = sourceContent.subSequence(Math.max(0, sourceOffset - 10),
-            Math.min(sourceContent.length(), sourceOffset + length + 10)).toString();
-      } else {
-        this.sourceContext = null;
-      }
+      this.sourceContext = getContentAsString(sourceTracker,
+          Math.max(0, sourceOffset - 10),
+          Math.min(getContentLength(sourceTracker), sourceOffset + length + 10));
     }
 
     public String getContent() {
@@ -130,6 +131,31 @@ public class TrackerResource {
 
     public String getSourceContext() {
       return sourceContext;
+    }
+  }
+
+  private static String getContentAsString(Tracker tracker, int start, int end) {
+    if (tracker instanceof CharContentTracker) {
+      CharContentTracker charTracker = (CharContentTracker) tracker;
+      return charTracker.getContent().subSequence(start, end).toString();
+    } else if (tracker instanceof ByteContentTracker) {
+      ByteContentTracker byteTracker = (ByteContentTracker) tracker;
+      // TODO encoding
+      return new String(byteTracker.getContent().getByteContent().array(), start, end - start);
+    } else {
+      return null;
+    }
+  }
+
+  private static int getContentLength(Tracker tracker) {
+    if (tracker instanceof CharContentTracker) {
+      CharContentTracker charTracker = (CharContentTracker) tracker;
+      return charTracker.getContent().length();
+    } else if (tracker instanceof ByteContentTracker) {
+      ByteContentTracker byteTracker = (ByteContentTracker) tracker;
+      return byteTracker.getContent().size();
+    } else {
+      return 0;
     }
   }
 }

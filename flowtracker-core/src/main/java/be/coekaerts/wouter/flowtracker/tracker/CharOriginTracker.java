@@ -6,7 +6,7 @@ package be.coekaerts.wouter.flowtracker.tracker;
  * @see ByteOriginTracker
  * @see CharSinkTracker
  */
-public class CharOriginTracker extends OriginTracker {
+public class CharOriginTracker extends OriginTracker implements CharContentTracker {
 
   private final StringBuilder content = new StringBuilder();
 
@@ -20,10 +20,6 @@ public class CharOriginTracker extends OriginTracker {
 
   public void append(CharSequence charSequence) {
     content.append(charSequence);
-  }
-
-  @Override public boolean supportsContent() {
-    return true;
   }
 
   @Override public CharSequence getContent() {

@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
  * @see ByteOriginTracker
  * @see CharSinkTracker
  */
-public class ByteSinkTracker extends DefaultTracker {
+public class ByteSinkTracker extends DefaultTracker implements ByteContentTracker {
   private final ByteSequence content = new ByteSequence();
 
   @Override
@@ -26,5 +26,10 @@ public class ByteSinkTracker extends DefaultTracker {
 
   public ByteBuffer getByteContent() {
     return content.getByteContent();
+  }
+
+  @Override
+  public ByteSequence getContent() {
+    return content;
   }
 }

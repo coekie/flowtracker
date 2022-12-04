@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 /**
  * A dynamically growing byte array
  */
-class ByteSequence extends ByteArrayOutputStream {
-  ByteBuffer getByteContent() {
+public class ByteSequence extends ByteArrayOutputStream {
+  public ByteBuffer getByteContent() {
     return ByteBuffer.wrap(buf, 0, size());
   }
 }
