@@ -13,7 +13,7 @@ public class FileOutputStreamHook {
     if (Trackers.isActive()) {
       var tracker = new ByteSinkTracker();
       tracker.initDescriptor("FileOutputStream for " + file.getAbsolutePath(), null);
-      TrackerRepository.setTracker(target, tracker);
+      TrackerRepository.setInterestTracker(target, tracker);
     }
   }
 

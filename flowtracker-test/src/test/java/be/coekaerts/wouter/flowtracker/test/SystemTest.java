@@ -4,7 +4,9 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteAr
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import org.junit.Test;
 
 /**
@@ -36,6 +38,14 @@ public class SystemTest {
 		assertEquals('d', defabc[0]);
 	}
 
-  // IntelliJ and maven/surefire replace System.out and System.err with their own implementations,
-  // and we haven't implemented anything yet to handle those, so we don't test those.
+	@Test
+	public void outAndErr() {
+		// IntelliJ and maven/surefire replace System.out and System.err with their own implementations,
+		// and we haven't implemented anything yet to handle those, so we don't test anything tied to
+		// the _current_ value of System.out and System.err.
+		assertTrue(InterestRepository.getTrackers().stream()
+				.anyMatch(t -> t.getDescriptor().equals("FileOutputStream for System.out")));
+		assertTrue(InterestRepository.getTrackers().stream()
+				.anyMatch(t -> t.getDescriptor().equals("FileOutputStream for System.err")));
+	}
 }
