@@ -72,17 +72,21 @@ public class TrackTestHelper {
   static void assertInterestAndDescriptor(Object sut, String expectedDescriptor,
       Object expectedDescriptorObj) {
     assertDescriptor(sut, expectedDescriptor, expectedDescriptorObj);
-    assertTrue(InterestRepository.getTrackers().contains(TrackerRepository.getTracker(sut)));
+    assertTrue(InterestRepository.getTrackers().contains(tracker(sut)));
   }
 
   static void assertDescriptor(Object sut, String expectedDescriptor,
       Object expectedDescriptorObj) {
-    Tracker tracker = TrackerRepository.getTracker(sut);
+    Tracker tracker = tracker(sut);
     assertNotNull(tracker);
     assertEquals(expectedDescriptor, tracker.getDescriptor());
     Tracker expectedTracker = expectedDescriptorObj instanceof Tracker
         ? (Tracker) expectedDescriptorObj
         : TrackerRepository.getTracker(expectedDescriptorObj);
     assertSame(expectedTracker, tracker.getDescriptorTracker());
+  }
+
+  private static Tracker tracker(Object o) {
+    return o instanceof Tracker ? (Tracker) o : TrackerRepository.getTracker(o);
   }
 }
