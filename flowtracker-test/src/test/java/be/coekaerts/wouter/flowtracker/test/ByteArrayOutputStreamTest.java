@@ -20,7 +20,6 @@ public class ByteArrayOutputStreamTest extends AbstractOutputStreamTest<ByteArra
 
   @Override
   void assertContentEquals(String expected, ByteArrayOutputStream os) {
-    byte[] bytes = os.toByteArray();
-    assertArrayEquals(expected.getBytes(), bytes);
+    assertArrayEquals(expected.getBytes(), os.toByteArray());
   }
 }

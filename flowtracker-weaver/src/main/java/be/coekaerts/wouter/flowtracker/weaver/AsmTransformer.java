@@ -208,6 +208,7 @@ public class AsmTransformer implements ClassFileTransformer {
         || className.startsWith("java/lang/String") // String and friends like StringLatin1
         || className.equals("java/lang/AbstractStringBuilder")
         || className.equals("java/io/BufferedWriter")
+        || className.equals("java/io/BufferedOutputStream")
         || className.equals("java/io/ByteArrayOutputStream")
         || className.equals("sun/nio/cs/UTF_8$Encoder")
         || className.equals("sun/nio/cs/UTF_8$Decoder")
