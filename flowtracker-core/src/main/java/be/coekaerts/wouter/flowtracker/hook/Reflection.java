@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /** Does reflection, circumventing accessibility and module access checks */
-class Reflection {
+public class Reflection {
   private static final Object unsafe;
   private static final Method objectFieldOffset;
   private static final Method getObject;
@@ -22,7 +22,7 @@ class Reflection {
     }
   }
 
-  static Field getDeclaredField(Class<?> clazz, String name) {
+  public static Field getDeclaredField(Class<?> clazz, String name) {
     try {
       return clazz.getDeclaredField(name);
     } catch (NoSuchFieldException e) {
@@ -30,7 +30,7 @@ class Reflection {
     }
   }
 
-  static Object getFieldValue(Object o, Field f) {
+  public static Object getFieldValue(Object o, Field f) {
     try {
       long offset = (long) objectFieldOffset.invoke(unsafe, f);
       return getObject.invoke(unsafe, o, offset);

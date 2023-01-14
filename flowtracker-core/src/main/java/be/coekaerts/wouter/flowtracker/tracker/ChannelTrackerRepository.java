@@ -1,28 +1,28 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
-import java.nio.channels.Channel;
+import java.io.FileDescriptor;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class ChannelTrackerRepository {
   // like TrackerRepository, ideally these would be concurrent weak identity hash maps?
-  private static final Map<Channel, TrackerPair> map =
-      Collections.synchronizedMap(new IdentityHashMap<Channel, TrackerPair>());
+  private static final Map<FileDescriptor, TrackerPair> map =
+      Collections.synchronizedMap(new IdentityHashMap<>());
 
-  public static Tracker getReadTracker(Channel channel) {
+  public static Tracker getReadTracker(FileDescriptor fd) {
     if (!Trackers.isActive()) return null;
-    TrackerPair pair = map.get(channel);
+    TrackerPair pair = map.get(fd);
     return pair == null ? null : pair.readTracker;
   }
 
-  public static Tracker getWriteTracker(Channel channel) {
+  public static Tracker getWriteTracker(FileDescriptor fd) {
     if (!Trackers.isActive()) return null;
-    TrackerPair pair = map.get(channel);
+    TrackerPair pair = map.get(fd);
     return pair == null ? null : pair.writeTracker;
   }
 
-  public static void createTracker(Channel channel, String descriptor, boolean read,
+  public static void createTracker(FileDescriptor fd, String descriptor, boolean read,
       boolean write) {
     ByteOriginTracker readTracker;
     if (read) {
@@ -43,7 +43,7 @@ public class ChannelTrackerRepository {
     }
 
     TrackerPair pair = new TrackerPair(readTracker, writeTracker);
-    map.put(channel, pair);
+    map.put(fd, pair);
   }
 
   private static class TrackerPair {

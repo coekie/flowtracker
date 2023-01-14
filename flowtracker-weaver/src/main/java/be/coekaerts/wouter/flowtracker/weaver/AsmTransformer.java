@@ -7,6 +7,7 @@ import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
 import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
+import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -93,10 +94,12 @@ public class AsmTransformer implements ClassFileTransformer {
 
     ClassHookSpec fileChannelSpec = new ClassHookSpec(Type.getType("Lsun/nio/ch/FileChannelImpl;"),
         FileChannelImplHook.class);
+    HookArgument fileChannelFd = HookSpec.field(Type.getType("Lsun/nio/ch/FileChannelImpl;"), "fd",
+        Type.getType("Ljava/io/FileDescriptor;"));
     fileChannelSpec.addMethodHookSpec("void <init>(java.io.FileDescriptor,java.lang.String,"
             + "boolean,boolean,boolean,java.lang.Object)",
-        "void afterInit(java.nio.channels.FileChannel,java.lang.String,boolean,boolean)",
-        HookSpec.THIS, HookSpec.ARG1, HookSpec.ARG2, HookSpec.ARG3);
+        "void afterInit(java.io.FileDescriptor,java.lang.String,boolean,boolean)",
+        fileChannelFd, HookSpec.ARG1, HookSpec.ARG2, HookSpec.ARG3);
     specs.put("sun/nio/ch/FileChannelImpl", fileChannelSpec);
 
     ClassHookSpec inflaterInputStreamSpec = new ClassHookSpec(

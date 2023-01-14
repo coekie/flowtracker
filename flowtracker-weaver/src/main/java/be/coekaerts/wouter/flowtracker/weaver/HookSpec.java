@@ -48,6 +48,21 @@ public class HookSpec {
     }
   }
 
+  public static HookArgument field(Type owner, String name, Type type) {
+    return new HookArgument() {
+      @Override
+      void load(GeneratorAdapter generator) {
+        generator.loadThis();
+        generator.getField(owner, name, type);
+      }
+
+      @Override
+      Type getType(HookSpec hookSpec) {
+        return type;
+      }
+    };
+  }
+
   /**
    * Argument for hook method that is calculated when entering the method, stored in a fresh local
    * variable, and loaded again when calling the hook.
