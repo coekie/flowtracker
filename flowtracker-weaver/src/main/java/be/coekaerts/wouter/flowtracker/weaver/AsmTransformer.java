@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.weaver;
 import be.coekaerts.wouter.flowtracker.hook.FileChannelImplHook;
 import be.coekaerts.wouter.flowtracker.hook.FileInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.FileOutputStreamHook;
+import be.coekaerts.wouter.flowtracker.hook.IOUtilHook;
 import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
@@ -101,6 +102,22 @@ public class AsmTransformer implements ClassFileTransformer {
         "void afterInit(java.io.FileDescriptor,java.lang.String,boolean,boolean)",
         fileChannelFd, HookSpec.ARG1, HookSpec.ARG2, HookSpec.ARG3);
     specs.put("sun/nio/ch/FileChannelImpl", fileChannelSpec);
+
+    ClassHookSpec ioUtilSpec = new ClassHookSpec(Type.getType("Lsun/nio/ch/IOUtil;"),
+        IOUtilHook.class);
+    // between JDK 11 and 17 an extra argument "async" was added
+    if (Runtime.version().feature() >= 17) {
+      ioUtilSpec.addMethodHookSpec("int read(java.io.FileDescriptor,java.nio.ByteBuffer,long,"
+              + "boolean,boolean,int,sun.nio.ch.NativeDispatcher)",
+          "void afterReadByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
+          HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+    } else {
+      ioUtilSpec.addMethodHookSpec("int read(java.io.FileDescriptor,java.nio.ByteBuffer,long,"
+              + "boolean,int,sun.nio.ch.NativeDispatcher)",
+          "void afterReadByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
+          HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+    }
+    specs.put("sun/nio/ch/IOUtil", ioUtilSpec);
 
     ClassHookSpec inflaterInputStreamSpec = new ClassHookSpec(
         Type.getType("Ljava/util/zip/InflaterInputStream;"), InflaterInputStreamHook.class);

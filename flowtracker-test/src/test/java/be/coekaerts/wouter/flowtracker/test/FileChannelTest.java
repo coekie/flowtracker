@@ -1,8 +1,12 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static java.util.Objects.requireNonNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.hook.Reflection;
+import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ChannelTrackerRepository;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -39,7 +43,7 @@ public class FileChannelTest {
   public void descriptor() throws IOException {
     try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ)) {
       TrackTestHelper.assertInterestAndDescriptor(
-          ChannelTrackerRepository.getReadTracker(getFd(channel)),
+          getReadTracker(channel),
           "Read channel for " + file.getPath(), null);
     }
   }
@@ -49,15 +53,42 @@ public class FileChannelTest {
     try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ)) {
       ByteBuffer bb = ByteBuffer.allocate(10);
       channel.read(bb);
-      // TODO assert channel tracker content and bb tracker
+      assertReadContentEquals("abc", channel);
+      snapshotBuilder().part(getReadTracker(channel), 0, 3).assertTrackerOf(bb.array());
+    }
+  }
+
+  @Test
+  public void readMultiple() throws IOException {
+    try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ)) {
+      ByteBuffer bb = ByteBuffer.allocate(2);
+      channel.read(bb);
+      assertReadContentEquals("ab", channel);
+      snapshotBuilder().part(getReadTracker(channel), 0, 2).assertTrackerOf(bb.array());
+
+      bb.position(0);
+      channel.read(bb);
+      assertReadContentEquals("abc", channel);
+      snapshotBuilder().part(getReadTracker(channel), 2, 1).part(getReadTracker(channel), 1, 1)
+          .assertTrackerOf(bb.array());
     }
   }
 
   // TODO other FileChannel.read methods
+  // TODO direct ByteBuffer
   // TODO FileChannel.write
 
-  static FileDescriptor getFd(FileChannel target) {
-    return (FileDescriptor) Reflection.getFieldValue(target, fdField);
+  private void assertReadContentEquals(String expected, FileChannel channel) {
+    var tracker = (ByteOriginTracker) requireNonNull(getReadTracker(channel));
+    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
+  }
+
+  static ByteOriginTracker getReadTracker(FileChannel channel) {
+    return ChannelTrackerRepository.getReadTracker(getFd(channel));
+  }
+
+  static FileDescriptor getFd(FileChannel channel) {
+    return (FileDescriptor) Reflection.getFieldValue(channel, fdField);
   }
 
   private static Field fdField() {

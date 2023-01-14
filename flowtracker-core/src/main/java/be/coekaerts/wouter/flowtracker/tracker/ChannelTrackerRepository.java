@@ -10,13 +10,13 @@ public class ChannelTrackerRepository {
   private static final Map<FileDescriptor, TrackerPair> map =
       Collections.synchronizedMap(new IdentityHashMap<>());
 
-  public static Tracker getReadTracker(FileDescriptor fd) {
+  public static ByteOriginTracker getReadTracker(FileDescriptor fd) {
     if (!Trackers.isActive()) return null;
     TrackerPair pair = map.get(fd);
     return pair == null ? null : pair.readTracker;
   }
 
-  public static Tracker getWriteTracker(FileDescriptor fd) {
+  public static ByteSinkTracker getWriteTracker(FileDescriptor fd) {
     if (!Trackers.isActive()) return null;
     TrackerPair pair = map.get(fd);
     return pair == null ? null : pair.writeTracker;
