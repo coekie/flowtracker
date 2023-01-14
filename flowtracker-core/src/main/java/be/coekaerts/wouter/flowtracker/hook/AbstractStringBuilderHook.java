@@ -7,15 +7,8 @@ import java.lang.reflect.Field;
 /** Hook methods called by instrumented code for {@link StringBuilder} and {@link StringBuffer} */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class AbstractStringBuilderHook {
-  private static final Field valueField;
-
-  static {
-    try {
-      valueField = StringBuilder.class.getSuperclass().getDeclaredField("value");
-    } catch (NoSuchFieldException e) {
-      throw new Error("Cannot find AbstractStringBuilder.value", e);
-    }
-  }
+  private static final Field valueField =
+      Reflection.getDeclaredField(StringBuilder.class.getSuperclass(), "value");
 
   public static StringBuilder append(StringBuilder sb, char c, Tracker source, int sourceIndex) {
     sb.append(c);
@@ -31,7 +24,7 @@ public class AbstractStringBuilderHook {
 
   private static void trackAppendChar(Object sb, int sbLength, char c, Tracker source,
       int sourceIndex) {
-    TrackerUpdater.setSourceTracker(Reflection.getField(sb, valueField), sbLength - 1, 1, source,
+    TrackerUpdater.setSourceTracker(Reflection.getFieldValue(sb, valueField), sbLength - 1, 1, source,
         sourceIndex);
   }
 }

@@ -22,7 +22,15 @@ class Reflection {
     }
   }
 
-  static Object getField(Object o, Field f) {
+  static Field getDeclaredField(Class<?> clazz, String name) {
+    try {
+      return clazz.getDeclaredField(name);
+    } catch (NoSuchFieldException e) {
+      throw new Error("Cannot find " + clazz + "." + name, e);
+    }
+  }
+
+  static Object getFieldValue(Object o, Field f) {
     try {
       long offset = (long) objectFieldOffset.invoke(unsafe, f);
       return getObject.invoke(unsafe, o, offset);

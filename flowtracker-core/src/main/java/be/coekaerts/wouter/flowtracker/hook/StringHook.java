@@ -6,15 +6,7 @@ import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.lang.reflect.Field;
 
 public class StringHook {
-  private static final Field valueField;
-
-  static {
-    try {
-      valueField = String.class.getDeclaredField("value");
-    } catch (NoSuchFieldException e) {
-      throw new Error("Cannot find String.value", e);
-    }
-  }
+  private static final Field valueField = Reflection.getDeclaredField(String.class, "value");
 
   public static final String DEBUG_UNTRACKED = "debugUntracked";
 
@@ -40,7 +32,7 @@ public class StringHook {
 
   /** Get the "value" field from a String */
   private static Object getValueArray(String str) {
-    return Reflection.getField(str, valueField);
+    return Reflection.getFieldValue(str, valueField);
   }
 
   @SuppressWarnings("UnusedDeclaration") // used by instrumented code

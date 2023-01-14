@@ -29,13 +29,13 @@ public class SystemHook {
       // track on the OutputStreamWriter level
       Field charOutField = PrintStream.class.getDeclaredField("charOut");
       OutputStreamWriterHook.createOutputStreamWriterTracker(
-          (OutputStreamWriter) Reflection.getField(printStream, charOutField))
+          (OutputStreamWriter) Reflection.getFieldValue(printStream, charOutField))
           .initDescriptor(name + ".charOut", null);
 
       // track on the OutputStream level
       Field outField = FilterOutputStream.class.getDeclaredField("out");
       FileOutputStream fileOut = (FileOutputStream)
-          Reflection.getField(Reflection.getField(printStream, outField), outField);
+          Reflection.getFieldValue(Reflection.getFieldValue(printStream, outField), outField);
       var tracker = new ByteSinkTracker();
       tracker.initDescriptor("FileOutputStream for " + name, null);
       TrackerRepository.setInterestTracker(fileOut, tracker);
