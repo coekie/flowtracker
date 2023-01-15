@@ -9,7 +9,7 @@ public class FileChannelImplHook {
   public static void afterInit(FileDescriptor fd, String path, boolean readable,
       boolean writeable) {
     if (Trackers.isActive()) {
-      if (FileDescriptorTrackerRepository.getReadTracker(fd) == null) {
+      if (!FileDescriptorTrackerRepository.hasTracker(fd)) {
         FileDescriptorTrackerRepository.createTracker(fd, "FileChannel for " + path, readable,
             writeable);
       }

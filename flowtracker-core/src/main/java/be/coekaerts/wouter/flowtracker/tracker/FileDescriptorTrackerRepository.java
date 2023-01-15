@@ -22,6 +22,10 @@ public class FileDescriptorTrackerRepository {
     return pair == null ? null : pair.writeTracker;
   }
 
+  public static boolean hasTracker(FileDescriptor fd) {
+    return map.containsKey(fd);
+  }
+
   public static void createTracker(FileDescriptor fd, String descriptor, boolean read,
       boolean write) {
     ByteOriginTracker readTracker;

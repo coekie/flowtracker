@@ -1,5 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -39,6 +41,22 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
     try (var fosFromName = new FileOutputStream(file.getPath())) {
       TrackTestHelper.assertDescriptor(getTracker(fosFromName),
           "FileOutputStream for " + file.getPath(), null);
+    }
+  }
+
+  @Test
+  public void channel() throws IOException {
+    byte[] abc = trackedByteArray("abc");
+    ByteBuffer bb = ByteBuffer.wrap(trackedByteArray("def"));
+    try (var os = createOutputStream()) {
+      // first write to FileOutputStream
+      os.write(abc);
+
+      // then write through associated FileChannel
+      os.getChannel().write(bb);
+
+      assertContentEquals("abcdef", os);
+      snapshotBuilder().track(abc, 0, 3).track(bb.array(), 0, 3).assertEquals(getTracker(os));
     }
   }
 
