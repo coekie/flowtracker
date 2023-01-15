@@ -11,9 +11,8 @@ import java.io.FileDescriptor;
 public class FileInputStreamHook {
   public static void afterInit(FileDescriptor fd, File file) {
     if (Trackers.isActive()) {
-      var tracker = new ByteOriginTracker();
-      tracker.initDescriptor("FileInputStream for " + file.getAbsolutePath(), null);
-      FileDescriptorTrackerRepository.createTracker(fd, "FileInputStream for " + file.getAbsolutePath(),
+      FileDescriptorTrackerRepository.createTracker(fd,
+          "FileInputStream for " + file.getAbsolutePath(),
           true, false);
     }
   }

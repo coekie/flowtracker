@@ -1,5 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
@@ -9,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -30,7 +34,7 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
   }
 
   @Override
-  InputStream createInputStream(byte[] bytes) throws IOException {
+  FileInputStream createInputStream(byte[] bytes) throws IOException {
     try (var out = new FileOutputStream(file)) {
       out.write(bytes);
     }
@@ -55,6 +59,23 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
     try (var fisFromName = new FileInputStream(file.getPath())) {
       TrackTestHelper.assertDescriptor(getStreamTracker(fisFromName),
           "FileInputStream for " + file.getPath(), null);
+    }
+  }
+
+  @Test
+  public void channel() throws IOException {
+    try (FileInputStream is = createInputStream("1234".getBytes())) {
+      // first read from the FileInputStream
+      byte[] buffer = new byte[2];
+      assertEquals(2, is.read(buffer));
+
+      // then read from the associated FileChannel
+      FileChannel channel = is.getChannel();
+      ByteBuffer bb = ByteBuffer.wrap(new byte[2]);
+      assertEquals(2, channel.read(bb));
+      snapshotBuilder().part(getStreamTracker(is), 2, 2).assertTrackerOf(bb.array());
+
+      assertContentEquals("1234", is);
     }
   }
 }

@@ -48,7 +48,7 @@ public abstract class AbstractInputStreamTest {
     }
   }
 
-  private void assertContentEquals(String expected, InputStream is) {
+  void assertContentEquals(String expected, InputStream is) {
     var tracker = (ByteOriginTracker) requireNonNull(getStreamTracker(is));
     assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
   }
