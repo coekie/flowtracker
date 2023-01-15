@@ -66,6 +66,16 @@ public class HookSpecTest {
         + "afterWithOnEnter originalArg updatedArg\n", log.toString());
   }
 
+  @Test
+  public void testField() throws ReflectiveOperationException {
+    transformAndRun(new ClassHookSpec(Type.getType(WithField.class), MyHook.class)
+        .addMethodHookSpec("void withField()",
+            "void afterWithField(int)",
+            HookSpec.field(Type.getType("Lbe/coekaerts/wouter/flowtracker/weaver/WithField2;"),
+                "i", Type.getType(int.class))));
+    assertEquals("afterWithField 10\n", log.toString());
+  }
+
   /**
    * Transform the class according to the spec, invoke its constructor and {@link Runnable#run()}
    */
@@ -159,6 +169,10 @@ public class HookSpecTest {
     public static void afterWithOnEnter(String argOnEnter, String arg) {
       log("afterWithOnEnter", argOnEnter, arg);
     }
+
+    public static void afterWithField(int i) {
+      log("afterWithField", i);
+    }
   }
 }
 
@@ -202,5 +216,18 @@ class HookedWithOnEnter implements Runnable {
     i++;
     HookSpecTest.log("withOnEnter", arg, i);
     arg = "updatedArg";
+  }
+}
+
+class WithField implements Runnable {
+  int i;
+
+  @Override
+  public void run() {
+    withField();
+  }
+
+  void withField() {
+    i = 10;
   }
 }
