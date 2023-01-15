@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
-import be.coekaerts.wouter.flowtracker.tracker.ChannelTrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
 
@@ -9,7 +9,8 @@ public class FileChannelImplHook {
   public static void afterInit(FileDescriptor fd, String path, boolean readable,
       boolean writeable) {
     if (Trackers.isActive()) {
-      ChannelTrackerRepository.createTracker(fd, path, readable, writeable);
+      FileDescriptorTrackerRepository.createTracker(fd, "FileChannel for " + path, readable,
+          writeable);
     }
   }
 }

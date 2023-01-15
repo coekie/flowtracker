@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import be.coekaerts.wouter.flowtracker.tracker.TagTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,6 +28,11 @@ public class InflaterInputStreamTest extends AbstractInputStreamTest {
   @Override
   InputStream createInputStream(byte[] bytes) {
     return new InflaterInputStream(new ByteArrayInputStream(deflated));
+  }
+
+  @Override
+  Tracker getStreamTracker(InputStream is) {
+    return TrackerRepository.getTracker(is);
   }
 
   @Test

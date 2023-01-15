@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-public class ChannelTrackerRepository {
+public class FileDescriptorTrackerRepository {
   // like TrackerRepository, ideally these would be concurrent weak identity hash maps?
   private static final Map<FileDescriptor, TrackerPair> map =
       Collections.synchronizedMap(new IdentityHashMap<>());
@@ -27,7 +27,7 @@ public class ChannelTrackerRepository {
     ByteOriginTracker readTracker;
     if (read) {
       readTracker = new ByteOriginTracker();
-      readTracker.initDescriptor("Read channel for " + descriptor, null);
+      readTracker.initDescriptor((write ? "Read " : "") + descriptor, null);
       InterestRepository.interestTrackerCreated(readTracker);
     } else {
       readTracker = null;
@@ -36,7 +36,7 @@ public class ChannelTrackerRepository {
     ByteSinkTracker writeTracker;
     if (write) {
       writeTracker = new ByteSinkTracker();
-      writeTracker.initDescriptor("Write channel for " + descriptor, null);
+      writeTracker.initDescriptor((read ? "Write " : "") + descriptor, null);
       InterestRepository.interestTrackerCreated(writeTracker);
     } else {
       writeTracker = null;

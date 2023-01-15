@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -15,6 +15,7 @@ public abstract class AbstractInputStreamTest {
   private static final byte[] abc = "abc".getBytes();
 
   abstract InputStream createInputStream(byte[] bytes) throws IOException;
+  abstract Tracker getStreamTracker(InputStream is);
 
   @Test
   public void read() throws IOException {
@@ -23,7 +24,7 @@ public abstract class AbstractInputStreamTest {
       assertEquals(3, is.read(buffer));
 
       assertContentEquals("abc", is);
-      snapshotBuilder().track(is, 0, 3).assertTrackerOf(buffer);
+      snapshotBuilder().part(getStreamTracker(is), 0, 3).assertTrackerOf(buffer);
     }
   }
 
@@ -34,7 +35,7 @@ public abstract class AbstractInputStreamTest {
       assertEquals(3, fis.read(buffer, 1, 4));
 
       assertContentEquals("abc", fis);
-      snapshotBuilder().gap(1).track(fis, 0, 3)
+      snapshotBuilder().gap(1).part(getStreamTracker(fis), 0, 3)
           .assertTrackerOf(buffer);
     }
   }
@@ -48,7 +49,7 @@ public abstract class AbstractInputStreamTest {
   }
 
   private void assertContentEquals(String expected, InputStream is) {
-    var tracker = (ByteOriginTracker) requireNonNull(TrackerRepository.getTracker(is));
+    var tracker = (ByteOriginTracker) requireNonNull(getStreamTracker(is));
     assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
   }
 }

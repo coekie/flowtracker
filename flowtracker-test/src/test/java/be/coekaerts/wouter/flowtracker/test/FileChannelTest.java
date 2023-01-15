@@ -9,7 +9,7 @@ import static org.junit.Assert.assertTrue;
 import be.coekaerts.wouter.flowtracker.hook.Reflection;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
-import be.coekaerts.wouter.flowtracker.tracker.ChannelTrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -48,7 +48,7 @@ public class FileChannelTest {
     try (FileChannel channel = FileChannel.open(fileToRead.toPath(), StandardOpenOption.READ)) {
       TrackTestHelper.assertInterestAndDescriptor(
           getReadTracker(channel),
-          "Read channel for " + fileToRead.getPath(), null);
+          "FileChannel for " + fileToRead.getPath(), null);
     }
   }
 
@@ -127,11 +127,11 @@ public class FileChannelTest {
   }
 
   static ByteOriginTracker getReadTracker(FileChannel channel) {
-    return ChannelTrackerRepository.getReadTracker(getFd(channel));
+    return FileDescriptorTrackerRepository.getReadTracker(getFd(channel));
   }
 
   static ByteSinkTracker getWriteTracker(FileChannel channel) {
-    return ChannelTrackerRepository.getWriteTracker(getFd(channel));
+    return FileDescriptorTrackerRepository.getWriteTracker(getFd(channel));
   }
 
   static FileDescriptor getFd(FileChannel channel) {

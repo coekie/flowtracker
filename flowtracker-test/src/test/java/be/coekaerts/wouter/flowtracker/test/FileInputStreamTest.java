@@ -2,6 +2,8 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static org.junit.Assert.assertTrue;
 
+import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -35,13 +37,24 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
     return new FileInputStream(file);
   }
 
+  @Override
+  Tracker getStreamTracker(InputStream is) {
+    try {
+      return FileDescriptorTrackerRepository.getReadTracker(((FileInputStream) is).getFD());
+    } catch (IOException e) {
+      throw new AssertionError(e);
+    }
+  }
+
   @Test public void descriptor() throws IOException {
     try (var fisFromFile = new FileInputStream(file)) {
-      TrackTestHelper.assertDescriptor(fisFromFile, "FileInputStream for " + file.getPath(), null);
+      TrackTestHelper.assertDescriptor(getStreamTracker(fisFromFile),
+          "FileInputStream for " + file.getPath(), null);
     }
 
     try (var fisFromName = new FileInputStream(file.getPath())) {
-      TrackTestHelper.assertDescriptor(fisFromName, "FileInputStream for " + file.getPath(), null);
+      TrackTestHelper.assertDescriptor(getStreamTracker(fisFromName),
+          "FileInputStream for " + file.getPath(), null);
     }
   }
 }
