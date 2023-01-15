@@ -8,6 +8,7 @@ import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
 import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
+import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
 import java.io.File;
@@ -84,16 +85,18 @@ public class AsmTransformer implements ClassFileTransformer {
 
     ClassHookSpec fileOutputStreamSpec =
         new ClassHookSpec(Type.getType("Ljava/io/FileOutputStream;"), FileOutputStreamHook.class);
+    HookArgument fileOutputStreamFd = HookSpec.field(Type.getType("Ljava/io/FileOutputStream;"),
+        "fd", Type.getType("Ljava/io/FileDescriptor;"));
     fileOutputStreamSpec.addMethodHookSpec("void <init>(java.io.File,boolean)",
-        "void afterInit(java.io.FileOutputStream,java.io.File)", HookSpec.THIS, HookSpec.ARG0);
+        "void afterInit(java.io.FileDescriptor,java.io.File)", fileOutputStreamFd, HookSpec.ARG0);
     fileOutputStreamSpec.addMethodHookSpec("void write(int)",
-        "void afterWrite1(java.io.FileOutputStream,int)", HookSpec.THIS, HookSpec.ARG0);
+        "void afterWrite1(java.io.FileDescriptor,int)", fileOutputStreamFd, HookSpec.ARG0);
     fileOutputStreamSpec.addMethodHookSpec("void write(byte[])",
-        "void afterWriteByteArray(java.io.FileOutputStream,byte[])",
-        HookSpec.THIS, HookSpec.ARG0);
+        "void afterWriteByteArray(java.io.FileDescriptor,byte[])",
+        fileOutputStreamFd, HookSpec.ARG0);
     fileOutputStreamSpec.addMethodHookSpec("void write(byte[],int,int)",
-        "void afterWriteByteArrayOffset(java.io.FileOutputStream,byte[],int,int)",
-        HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+        "void afterWriteByteArrayOffset(java.io.FileDescriptor,byte[],int,int)",
+        fileOutputStreamFd, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
     specs.put("java/io/FileOutputStream", fileOutputStreamSpec);
 
     ClassHookSpec fileChannelSpec = new ClassHookSpec(Type.getType("Lsun/nio/ch/FileChannelImpl;"),
@@ -199,9 +202,14 @@ public class AsmTransformer implements ClassFileTransformer {
       return result;
     } catch (Throwable t) {
       // TODO better logging
-      System.err.println("Exception transforming " + className);
-      t.printStackTrace(); // make sure the exception isn't silently ignored
-      throw new RuntimeException("Exception while transforming class", t);
+      Trackers.suspendOnCurrentThread();
+      try {
+        System.err.println("Exception transforming " + className);
+        t.printStackTrace(); // make sure the exception isn't silently ignored
+        throw new RuntimeException("Exception while transforming class", t);
+      } finally {
+        Trackers.unsuspendOnCurrentThread();
+      }
     }
   }
 

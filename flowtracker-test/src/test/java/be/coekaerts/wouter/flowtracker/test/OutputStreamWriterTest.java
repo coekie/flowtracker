@@ -9,11 +9,11 @@ import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharContentTracker;
+import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -27,12 +27,14 @@ import org.junit.Test;
 public class OutputStreamWriterTest {
 
   private OutputStreamWriter writer;
-  private OutputStream stream;
+  private FileOutputStream stream;
+  private ByteSinkTracker streamTracker;
 
   @Before public void setupWriter() throws IOException {
     File file = File.createTempFile("OutputStreamWriterTest", "");
     stream = new FileOutputStream(file);
     writer = new OutputStreamWriter(stream);
+    streamTracker = requireNonNull(FileDescriptorTrackerRepository.getWriteTracker(stream.getFD()));
   }
 
   @After public void close() throws IOException {
@@ -52,8 +54,7 @@ public class OutputStreamWriterTest {
 
     // check content of FileOutputStream
     writer.flush();
-    var tracker = (ByteSinkTracker) requireNonNull(TrackerRepository.getTracker(stream));
-    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
+    assertEquals(ByteBuffer.wrap(expected.getBytes()), streamTracker.getByteContent());
   }
 
   @Test public void writeSingleChar() throws IOException {
@@ -63,7 +64,7 @@ public class OutputStreamWriterTest {
     assertContentEquals("ab");
     // tracking of source for write(char) not implemented
     snapshotBuilder().gap(2).assertTrackerOf(writer);
-    snapshotBuilder().gap(2).assertTrackerOf(stream);
+    snapshotBuilder().gap(2).assertEquals(streamTracker);
   }
 
   @Test public void writeCharArray() throws IOException {
@@ -72,7 +73,7 @@ public class OutputStreamWriterTest {
     writer.write(abc);
     assertContentEquals("abcabc");
     snapshotBuilder().track(abc, 0, 3).track(abc, 0, 3).assertTrackerOf(writer);
-    snapshotBuilder().track(abc, 0, 3).track(abc, 0, 3).assertTrackerOf(stream);
+    snapshotBuilder().track(abc, 0, 3).track(abc, 0, 3).assertEquals(streamTracker);
   }
 
   @Test public void writeUntrackedCharArray() throws IOException {
@@ -84,7 +85,7 @@ public class OutputStreamWriterTest {
 
     assertContentEquals("abcdef");
     snapshotBuilder().gap(3).track(def, 0, 3).assertTrackerOf(writer);
-    snapshotBuilder().gap(3).track(def, 0, 3).assertTrackerOf(stream);
+    snapshotBuilder().gap(3).track(def, 0, 3).assertEquals(streamTracker);
   }
 
   @Test public void writeCharArrayOffset() throws IOException {
@@ -92,7 +93,7 @@ public class OutputStreamWriterTest {
     writer.write(abcd, 1, 2);
     assertContentEquals("bc");
     snapshotBuilder().track(abcd, 1, 2).assertTrackerOf(writer);
-    snapshotBuilder().track(abcd, 1, 2).assertTrackerOf(stream);
+    snapshotBuilder().track(abcd, 1, 2).assertEquals(streamTracker);
   }
 
   @Test public void writeString() throws IOException {
@@ -100,7 +101,7 @@ public class OutputStreamWriterTest {
     writer.write(abc);
     assertContentEquals("abc");
     snapshotBuilder().trackString(abc).assertTrackerOf(writer);
-    snapshotBuilder().trackString(abc).assertTrackerOf(stream);
+    snapshotBuilder().trackString(abc).assertEquals(streamTracker);
   }
 
   @Test public void writeUntrackedString() throws IOException {
@@ -112,7 +113,7 @@ public class OutputStreamWriterTest {
 
     assertContentEquals("abcdef");
     snapshotBuilder().gap(3).trackString(def).assertTrackerOf(writer);
-    snapshotBuilder().gap(3).trackString(def).assertTrackerOf(stream);
+    snapshotBuilder().gap(3).trackString(def).assertEquals(streamTracker);
   }
 
   @Test public void writeStringOffset() throws IOException {
