@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
@@ -7,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.hook.Reflection;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
+import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ChannelTrackerRepository;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -24,35 +26,37 @@ import org.junit.Test;
 public class FileChannelTest {
   private static final Field fdField = fdField();
 
-  private static File file;
+  private static File fileToRead;
+  private static File fileToWrite;
 
   @BeforeClass
   public static void createTmpFile() throws IOException {
-    file = Files.createTempFile("flowtracker_FileChannelTest", "").toFile();
-    try (var out = new FileOutputStream(file)) {
+    fileToRead = Files.createTempFile("flowtracker_FileChannelTest_read", "").toFile();
+    try (var out = new FileOutputStream(fileToRead)) {
       out.write(new byte[]{'a', 'b', 'c'});
     }
+    fileToWrite = Files.createTempFile("flowtracker_FileChannelTest_write", "").toFile();
   }
 
   @AfterClass
   public static void removeTmpFile() {
-    assertTrue(file.delete());
+    assertTrue(fileToRead.delete());
   }
 
   @Test
   public void descriptor() throws IOException {
-    try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ)) {
+    try (FileChannel channel = FileChannel.open(fileToRead.toPath(), StandardOpenOption.READ)) {
       TrackTestHelper.assertInterestAndDescriptor(
           getReadTracker(channel),
-          "Read channel for " + file.getPath(), null);
+          "Read channel for " + fileToRead.getPath(), null);
     }
   }
 
   @Test
   public void read() throws IOException {
-    try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ)) {
+    try (FileChannel channel = FileChannel.open(fileToRead.toPath(), StandardOpenOption.READ)) {
       ByteBuffer bb = ByteBuffer.allocate(10);
-      channel.read(bb);
+      assertEquals(3, channel.read(bb));
       assertReadContentEquals("abc", channel);
       snapshotBuilder().part(getReadTracker(channel), 0, 3).assertTrackerOf(bb.array());
     }
@@ -60,31 +64,74 @@ public class FileChannelTest {
 
   @Test
   public void readMultiple() throws IOException {
-    try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ)) {
+    try (FileChannel channel = FileChannel.open(fileToRead.toPath(), StandardOpenOption.READ)) {
       ByteBuffer bb = ByteBuffer.allocate(2);
-      channel.read(bb);
+      assertEquals(2, channel.read(bb));
       assertReadContentEquals("ab", channel);
       snapshotBuilder().part(getReadTracker(channel), 0, 2).assertTrackerOf(bb.array());
 
       bb.position(0);
-      channel.read(bb);
+      assertEquals(1, channel.read(bb));
       assertReadContentEquals("abc", channel);
       snapshotBuilder().part(getReadTracker(channel), 2, 1).part(getReadTracker(channel), 1, 1)
           .assertTrackerOf(bb.array());
     }
   }
 
-  // TODO other FileChannel.read methods
-  // TODO direct ByteBuffer
-  // TODO FileChannel.write
+  @Test
+  public void readWithPosition() throws IOException {
+    try (FileChannel channel = FileChannel.open(fileToRead.toPath(), StandardOpenOption.READ)) {
+      ByteBuffer bb = ByteBuffer.allocate(10);
+      channel.read(bb, 1);
+      assertReadContentEquals("bc", channel);
+      snapshotBuilder().part(getReadTracker(channel), 0, 2).assertTrackerOf(bb.array());
+    }
+  }
+
+  // TODO hook FileChannel.read methods that take a ByteBuffer[]
+  // TODO handle direct ByteBuffers
+  // TODO track seeking (using channel.position & passing position argument to operations)
+  // TODO Channel.transferFrom / transferTo
+
+  @Test
+  public void write() throws IOException {
+    try (FileChannel channel = FileChannel.open(fileToWrite.toPath(), StandardOpenOption.WRITE)) {
+      ByteBuffer bb = ByteBuffer.wrap(trackedByteArray("abc"));
+      channel.write(bb);
+      assertWrittenContentEquals("abc", channel);
+      snapshotBuilder().track(bb.array()).assertEquals(getWriteTracker(channel));
+    }
+  }
+
+  @Test
+  public void writeMultiple() throws IOException {
+    try (FileChannel channel = FileChannel.open(fileToWrite.toPath(), StandardOpenOption.WRITE)) {
+      ByteBuffer bb1 = ByteBuffer.wrap(trackedByteArray("abc"));
+      ByteBuffer bb2 = ByteBuffer.wrap(trackedByteArray("def"));
+      channel.write(bb1);
+      channel.write(bb2);
+      assertWrittenContentEquals("abcdef", channel);
+      snapshotBuilder().track(bb1.array()).track(bb2.array())
+          .assertEquals(getWriteTracker(channel));
+    }
+  }
 
   private void assertReadContentEquals(String expected, FileChannel channel) {
     var tracker = (ByteOriginTracker) requireNonNull(getReadTracker(channel));
     assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
   }
 
+  private void assertWrittenContentEquals(String expected, FileChannel channel) {
+    var tracker = (ByteSinkTracker) requireNonNull(getWriteTracker(channel));
+    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
+  }
+
   static ByteOriginTracker getReadTracker(FileChannel channel) {
     return ChannelTrackerRepository.getReadTracker(getFd(channel));
+  }
+
+  static ByteSinkTracker getWriteTracker(FileChannel channel) {
+    return ChannelTrackerRepository.getWriteTracker(getFd(channel));
   }
 
   static FileDescriptor getFd(FileChannel channel) {

@@ -111,10 +111,18 @@ public class AsmTransformer implements ClassFileTransformer {
               + "boolean,boolean,int,sun.nio.ch.NativeDispatcher)",
           "void afterReadByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
           HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+      ioUtilSpec.addMethodHookSpec("int write(java.io.FileDescriptor,java.nio.ByteBuffer,long,"
+              + "boolean,boolean,int,sun.nio.ch.NativeDispatcher)",
+          "void afterWriteByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
+          HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
     } else {
       ioUtilSpec.addMethodHookSpec("int read(java.io.FileDescriptor,java.nio.ByteBuffer,long,"
               + "boolean,int,sun.nio.ch.NativeDispatcher)",
           "void afterReadByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
+          HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+      ioUtilSpec.addMethodHookSpec("int write(java.io.FileDescriptor,java.nio.ByteBuffer,long,"
+              + "boolean,int,sun.nio.ch.NativeDispatcher)",
+          "void afterWriteByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
           HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
     }
     specs.put("sun/nio/ch/IOUtil", ioUtilSpec);
