@@ -30,6 +30,10 @@ public class TrackerSnapshot {
     return new TrackerSnapshot(collector.parts);
   }
 
+  public List<Part> getParts() {
+    return parts;
+  }
+
   @Override public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof TrackerSnapshot)) return false;
@@ -64,12 +68,12 @@ public class TrackerSnapshot {
     return lastPart.index + lastPart.length;
   }
 
-  private static final class Part {
-    private final int index;
-    private final int length;
-    private final Tracker source;
-    private final int sourceIndex;
-    private final Growth growth;
+  public static final class Part {
+    public final int index;
+    public final int length;
+    public final Tracker source;
+    public final int sourceIndex;
+    public final Growth growth;
 
     private Part(int index, int length, Tracker source, int sourceIndex, Growth growth) {
       this.index = index;
