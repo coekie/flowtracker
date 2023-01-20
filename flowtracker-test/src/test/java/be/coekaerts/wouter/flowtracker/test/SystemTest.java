@@ -44,8 +44,8 @@ public class SystemTest {
 		// and we haven't implemented anything yet to handle those, so we don't test anything tied to
 		// the _current_ value of System.out and System.err.
 		assertTrue(InterestRepository.getTrackers().stream()
-				.anyMatch(t -> t.getDescriptor().equals("FileOutputStream for System.out")));
+				.anyMatch(t -> t.getDescriptor().equals("System.out")));
 		assertTrue(InterestRepository.getTrackers().stream()
-				.anyMatch(t -> t.getDescriptor().equals("FileOutputStream for System.err")));
+				.anyMatch(t -> t.getDescriptor().equals("System.err")));
 	}
 }

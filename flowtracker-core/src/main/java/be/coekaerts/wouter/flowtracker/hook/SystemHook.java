@@ -1,8 +1,8 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
-import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.OutputStreamWriter;
@@ -36,9 +36,10 @@ public class SystemHook {
       Field outField = FilterOutputStream.class.getDeclaredField("out");
       FileOutputStream fileOut = (FileOutputStream)
           Reflection.getFieldValue(Reflection.getFieldValue(printStream, outField), outField);
-      var tracker = new ByteSinkTracker();
-      tracker.initDescriptor("FileOutputStream for " + name, null);
-      TrackerRepository.setInterestTracker(fileOut, tracker);
+      Field fdField = FileOutputStream.class.getDeclaredField("fd");
+      FileDescriptor fd = (FileDescriptor)
+          Reflection.getFieldValue(fileOut, fdField);
+      FileDescriptorTrackerRepository.createTracker(fd, name, false, true);
     } catch (ReflectiveOperationException e) {
       System.err.println("Cannot access PrintStream.charOut. Cannot hook System.out/err:");
       e.printStackTrace(System.err);
