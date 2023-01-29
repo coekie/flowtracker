@@ -1,26 +1,16 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import sun.misc.Unsafe;
 
-/** Does reflection, circumventing accessibility and module access checks */
+/**
+ * Does reflection, circumventing accessibility and module access checks.
+ *
+ * <p>This is currently a simple wrapper around Unsafe, mostly kept to make it easy to change
+ * (again) how we access fields if JDK changes require it.
+ */
 public class Reflection {
-  private static final Object unsafe;
-  private static final Method objectFieldOffset;
-  private static final Method getObject;
-
-  static {
-    try {
-      Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-      Field theUnsafe = unsafeClass.getDeclaredField("theUnsafe");
-      theUnsafe.setAccessible(true);
-      unsafe = theUnsafe.get(null);
-      objectFieldOffset = unsafeClass.getDeclaredMethod("objectFieldOffset", Field.class);
-      getObject = unsafeClass.getDeclaredMethod("getObject", Object.class, long.class);
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
-    }
-  }
+  private static final Unsafe unsafe = Unsafe.getUnsafe();
 
   public static Field getDeclaredField(Class<?> clazz, String name) {
     try {
@@ -30,12 +20,10 @@ public class Reflection {
     }
   }
 
+  // TODO optimize: instead of getting field offset every time, have something like FieldAccessor
+  //  that is stored in a static field in the class that calls this (instead of the Field instance)
   public static Object getFieldValue(Object o, Field f) {
-    try {
-      long offset = (long) objectFieldOffset.invoke(unsafe, f);
-      return getObject.invoke(unsafe, o, offset);
-    } catch (ReflectiveOperationException e) {
-      throw new RuntimeException(e);
-    }
+    long offset = unsafe.objectFieldOffset(f);
+    return unsafe.getObject(o, offset);
   }
 }
