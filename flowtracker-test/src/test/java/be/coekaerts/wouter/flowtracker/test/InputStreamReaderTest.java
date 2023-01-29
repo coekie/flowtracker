@@ -130,20 +130,23 @@ public class InputStreamReaderTest {
 
     assertEquals(3, reader.read(buffer));
     assertContentEquals("abc");
-    // TODO tracking in CharBuffer
-    //snapshotBuilder().part(tracker, 1, 3).assertTrackerOf(buffer.array());
+    assertArrayEquals("abc".toCharArray(), buffer.array());
+    snapshotBuilder().part(tracker, 0, 3).assertTrackerOf(buffer.array());
 
     buffer.position(1);
     assertEquals(2, reader.read(buffer));
     assertContentEquals("abcde");
-    //snapshotBuilder().part(tracker, 1, 5).assertTrackerOf(buffer.array());
+    assertArrayEquals("ade".toCharArray(), buffer.array());
+    snapshotBuilder().part(tracker, 0, 1).part(tracker, 3, 2).assertTrackerOf(buffer.array());
+
     buffer.position(1);
     assertEquals(1, reader.read(buffer));
     assertContentEquals("abcdef");
-    //snapshotBuilder().part(tracker, 1, 6).assertTrackerOf(buffer.array());
+    assertArrayEquals("afe".toCharArray(), buffer.array());
+    snapshotBuilder().part(tracker, 0, 1).part(tracker, 5, 1).part(tracker, 4, 1)
+        .assertTrackerOf(buffer.array());
 
     assertEquals(-1, reader.read(buffer));
     assertContentEquals("abcdef");
-    //snapshotBuilder().part(tracker, 1, 6).assertTrackerOf(buffer.array());
   }
 }
