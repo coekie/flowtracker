@@ -16,6 +16,8 @@ public class TrackerUpdater {
       if (targetTracker == null) return;
     } else {
       targetTracker = TrackerRepository.getOrCreateTracker(target);
+      // if tracking is disabled, do nothing
+      if (targetTracker == null) return;
     }
     targetTracker.setSource(targetIndex, length, sourceTracker, sourceIndex);
   }

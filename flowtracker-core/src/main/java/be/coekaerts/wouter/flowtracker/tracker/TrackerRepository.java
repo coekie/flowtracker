@@ -27,7 +27,8 @@ public class TrackerRepository {
   }
 
   public static Tracker getOrCreateTracker(Object obj) {
-    Tracker tracker = getTracker(obj);
+    if (!Trackers.isActive()) return null;
+    Tracker tracker = objectToTracker.get(obj);
     return tracker == null ? createTracker(obj) : tracker;
   }
 
@@ -40,6 +41,8 @@ public class TrackerRepository {
     if (obj == null) {
       throw new NullPointerException("Can't track null");
     } else if (getTracker(obj) != null) {
+      // FIXME race condition: two threads could try to create tracker for same obj at same time.
+      //  use Map.putIfAbsent in getOrCreateTracker?
       throw new IllegalStateException("Object already has a tracker: " + obj
           + " has " + getTracker(obj));
     } else {
