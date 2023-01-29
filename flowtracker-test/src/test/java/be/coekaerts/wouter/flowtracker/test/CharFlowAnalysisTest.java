@@ -51,6 +51,22 @@ public class CharFlowAnalysisTest {
         .assertTrackerOf(array);
   }
 
+  // regression test for NPE in analysis when byte[] type is null
+  @SuppressWarnings("ConstantValue")
+  @Test public void byteArrayNull() {
+    byte[] a = trackedByteArray("a");
+
+    byte[] bytes = null;
+    if (bytes == null) {
+      bytes = new byte[1];
+    }
+    bytes[0] = a[0];
+
+    // would be nice if this was tracked. for now, we're happy with it not blowing up
+    // snapshotBuilder().track(a, 0, 1).assertTrackerOf(bytes);
+    assertNull(getTracker(bytes));
+  }
+
   @Test public void charAt() {
     String abc = trackCopy("abc");
     FlowTester.assertTrackedValue(abc.charAt(1), getStringTracker(abc), 1);

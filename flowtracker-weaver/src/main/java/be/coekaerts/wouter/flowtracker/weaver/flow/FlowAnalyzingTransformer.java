@@ -59,16 +59,18 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 
     @Override
     public void visitEnd() {
+      try {
+        doVisitEnd();
+      } catch (Exception e) {
+        throw new RuntimeException("Exception handling " + owner + " " + name + " " + desc, e);
+      }
+    }
+
+    private void doVisitEnd() throws AnalyzerException {
       super.visitEnd();
       FlowInterpreter interpreter = new FlowInterpreter(owner);
       Analyzer<BasicValue> analyzer = new Analyzer<>(interpreter);
-      try {
-        analyzer.analyze(owner, this);
-      } catch (AnalyzerException e) {
-        throw new RuntimeException(e);
-      }
-
-      Frame<BasicValue>[] frames = analyzer.getFrames();
+      Frame<BasicValue>[] frames = analyzer.analyze(owner, this);
 
       List<Store> stores = new ArrayList<>();
 
@@ -78,7 +80,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         if (insn.getOpcode() == Opcodes.CASTORE) {
           stores.add(ArrayStore.createCharArrayStore((InsnNode) insn, frame));
         } else if (insn.getOpcode() == Opcodes.BASTORE
-            && frame.getStack(frame.getStackSize() - 3).getType().equals(Types.BYTE_ARRAY)) {
+            && Types.BYTE_ARRAY.equals(frame.getStack(frame.getStackSize() - 3).getType())) {
           stores.add(ArrayStore.createByteArrayStore((InsnNode) insn, frame));
         } else if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL
             || insn.getOpcode() == Opcodes.INVOKESTATIC) {
