@@ -25,8 +25,6 @@ public class FlowTrackAgent {
   private static final Map<String, String> config = new HashMap<>();
 
   public static void premain(String agentArgs, Instrumentation inst) {
-    System.out.println("FlowTrackAgent.premain");
-
     try {
       initProperties(agentArgs);
       // system property to override agent args. Useful in IntelliJ which picks up the agent from
@@ -43,6 +41,8 @@ public class FlowTrackAgent {
       // do not track our own initialization
       Class.forName("be.coekaerts.wouter.flowtracker.tracker.Trackers")
           .getMethod("suspendOnCurrentThread").invoke(null);
+
+      initLogging();
 
       ClassFileTransformer transformer = createTransformer(spiderClassLoader);
       inst.addTransformer(transformer, true);
@@ -193,6 +193,12 @@ public class FlowTrackAgent {
     } finally {
       in.close();
     }
+  }
+
+  private static void initLogging() throws Exception {
+    Class.forName("be.coekaerts.wouter.flowtracker.util.Logger")
+        .getMethod("initLogging", Map.class)
+        .invoke(null, config);
   }
 
   private static void initCore() throws Exception {

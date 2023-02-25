@@ -16,8 +16,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <asm.version>9.1</asm.version>
     <java.version>11</java.version>
-    <flowtracker.extraAgentArgs/>
+    <!--<flowtracker.extraAgentArgs/>-->
     <!--<flowtracker.extraAgentArgs>dumpByteCode=/tmp/bytecode</flowtracker.extraAgentArgs>-->
+    <flowtracker.extraAgentArgs>logging=true</flowtracker.extraAgentArgs>
   </properties>
   <modules>
     <module>flowtracker-agent</module>

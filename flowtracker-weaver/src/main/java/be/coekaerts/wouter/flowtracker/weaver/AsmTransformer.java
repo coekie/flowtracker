@@ -8,7 +8,7 @@ import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
 import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
-import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
 import java.io.File;
@@ -27,6 +27,8 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 @SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
 public class AsmTransformer implements ClassFileTransformer {
+  private static final Logger logger = new Logger("AsmTransformer");
+
   private final Map<String, ClassHookSpec> specs = new HashMap<>();
   private final String[] packagesToInstrument;
   private final File dumpByteCodePath;
@@ -198,18 +200,11 @@ public class AsmTransformer implements ClassFileTransformer {
 
       maybeDumpByteCode(className, result);
 
-      System.out.println("AsmTransformer: Transformed " + className);
+      logger.info("Transformed %s", className);
       return result;
     } catch (Throwable t) {
-      // TODO better logging
-      Trackers.suspendOnCurrentThread();
-      try {
-        System.err.println("Exception transforming " + className);
-        t.printStackTrace(); // make sure the exception isn't silently ignored
-        throw new RuntimeException("Exception while transforming class", t);
-      } finally {
-        Trackers.unsuspendOnCurrentThread();
-      }
+      logger.error(t, "Exception transforming %s", className);
+      throw new RuntimeException("Exception transforming class " + className, t);
     }
   }
 

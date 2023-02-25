@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
 public class ClassHookSpec implements ClassAdapterFactory {
+  private static final Logger logger = new Logger("ClassHookSpec");
+
   private class HookClassAdapter extends ClassVisitor {
     private HookClassAdapter(ClassVisitor cv) {
       super(Opcodes.ASM9, cv);
@@ -23,8 +26,7 @@ public class ClassHookSpec implements ClassAdapterFactory {
       Method method = new Method(name, desc);
       HookSpec hookSpec = methodHookSpecs.get(method);
       if (hookSpec != null) {
-        System.out.println(
-            "ClassHookSpec: Transforming " + targetClass.getClassName() + "." + name + desc);
+        logger.info("Transforming %s.%s%s", targetClass.getClassName(), name, desc);
         return hookSpec.createMethodAdapter(mv, access, name, desc);
       } else {
         return mv;

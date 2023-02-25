@@ -6,8 +6,8 @@ import be.coekaerts.wouter.flowtracker.util.ShutdownSuspender;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-@SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
 public class CoreInitializer {
+  @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
   public static void initialize(Map<String, String> config) {
     ensureInitialized();
     SystemHook.initialize();
@@ -24,6 +24,7 @@ public class CoreInitializer {
    * Initialize the shutdown hook. This is initialized later, to avoid having a hanging shutdown
    * hook without a UI available to stop it if initialization fails.
    */
+  @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
   public static void postInitialize(Map<String, String> config) {
     ShutdownSuspender.initShutdownHook("true".equals(config.get("suspendShutdown")));
   }
