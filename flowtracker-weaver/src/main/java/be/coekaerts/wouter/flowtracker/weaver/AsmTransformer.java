@@ -25,8 +25,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.util.CheckClassAdapter;
 
-@SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
-public class AsmTransformer implements ClassFileTransformer {
+class AsmTransformer implements ClassFileTransformer {
   private static final Logger logger = new Logger("AsmTransformer");
 
   private final Map<String, ClassHookSpec> specs = new HashMap<>();
@@ -208,8 +207,7 @@ public class AsmTransformer implements ClassFileTransformer {
     }
   }
 
-  // called using reflection from FlowTrackAgent
-  public boolean shouldRetransformOnStartup(Class<?> clazz, Instrumentation instrumentation) {
+  boolean shouldRetransformOnStartup(Class<?> clazz, Instrumentation instrumentation) {
     return getAdapterFactory(clazz.getClassLoader(), Type.getInternalName(clazz)) != null
         && instrumentation.isModifiableClass(clazz);
   }

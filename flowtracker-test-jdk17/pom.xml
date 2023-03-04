@@ -41,6 +41,9 @@
           <argLine>
             -javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/${project.version}/flowtracker-agent-${project.version}.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/${project.version}/flowtracker-core-${project.version}.jar;spiderClasspath=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/${project.version}/flowtracker-weaver-${project.version}.jar,${settings.localRepository}/org/ow2/asm/asm/${asm.version}/asm-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-util/${asm.version}/asm-util-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-commons/${asm.version}/asm-commons-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-analysis/${asm.version}/asm-analysis-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-tree/${asm.version}/asm-tree-${asm.version}.jar;packages=be/coekaerts/wouter/flowtracker/test/;${flowtracker.extraAgentArgs}
           </argLine>
+          <classpathDependencyExcludes>
+            <classpathDependencyExclude>be.coekaerts.wouter.flowtracker:flowtracker-core</classpathDependencyExclude>
+          </classpathDependencyExcludes>
         </configuration>
       </plugin>
     </plugins>

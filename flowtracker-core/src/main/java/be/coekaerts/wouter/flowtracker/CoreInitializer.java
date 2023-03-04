@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class CoreInitializer {
-  @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
   public static void initialize(Map<String, String> config) {
     ensureInitialized();
     SystemHook.initialize();

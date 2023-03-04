@@ -6,7 +6,6 @@ import java.util.Map;
 public class Logger {
   private static boolean logging;
 
-  @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
   public static void initLogging(Map<String, String> config) {
     if ("true".equals(config.get("logging"))) {
       logging = true;

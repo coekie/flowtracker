@@ -13,6 +13,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <artifactId>flowtracker-core</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>

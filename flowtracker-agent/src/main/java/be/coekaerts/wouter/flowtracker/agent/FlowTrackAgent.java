@@ -2,13 +2,14 @@ package be.coekaerts.wouter.flowtracker.agent;
 
 import static java.util.Objects.requireNonNull;
 
+import be.coekaerts.wouter.flowtracker.CoreInitializer;
+import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import be.coekaerts.wouter.flowtracker.util.Logger;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -35,40 +36,29 @@ public class FlowTrackAgent {
        * Classloader used to load the weaver and the web interface.
        * Those are loaded with their dependencies in a separate class loader to avoid polluting the
        * classpath of the application.
+       *
+       * This also puts flowtracker-core on the bootstrap classpath. So code before this line should
+       * not make any references to classes in flowtracker-core yet.
        */
       ClassLoader spiderClassLoader = initClassLoaders(inst);
 
+      Logger.initLogging(config);
+
       // do not track our own initialization
-      Class.forName("be.coekaerts.wouter.flowtracker.tracker.Trackers")
-          .getMethod("suspendOnCurrentThread").invoke(null);
+      Trackers.suspendOnCurrentThread();
 
-      initLogging();
+      spiderClassLoader
+          .loadClass("be.coekaerts.wouter.flowtracker.weaver.WeaverInitializer")
+          .getMethod("initialize", Instrumentation.class, Map.class)
+          .invoke(null, inst, config);
 
-      ClassFileTransformer transformer = createTransformer(spiderClassLoader);
-      inst.addTransformer(transformer, true);
-
-      // retransform classes that have already been loaded
-      Method shouldRetransform = transformer.getClass()
-          .getMethod("shouldRetransformOnStartup", Class.class, Instrumentation.class);
-      for (Class<?> loadedClass : inst.getAllLoadedClasses()) {
-        if ((Boolean) shouldRetransform.invoke(transformer, loadedClass, inst)) {
-          try {
-            inst.retransformClasses(loadedClass);
-          } catch (Throwable t) {
-            System.err.println("Failed to retransform " + loadedClass);
-            throw t;
-          }
-        }
-      }
-
-      initCore();
+      CoreInitializer.initialize(config);
 
       // initialization done, unsuspend tracking
-      Class.forName("be.coekaerts.wouter.flowtracker.tracker.Trackers")
-          .getMethod("unsuspendOnCurrentThread").invoke(null);
+      Trackers.unsuspendOnCurrentThread();
 
       initWeb(spiderClassLoader);
-      postInitCore();
+      CoreInitializer.postInitialize(config);
     } catch (Throwable e) {
       e.printStackTrace();
       System.exit(1);
@@ -118,12 +108,6 @@ public class FlowTrackAgent {
     inst.appendToBootstrapClassLoaderSearch(coreJar);
 
     return new URLClassLoader(spiderClasspath.toArray(new URL[0]));
-  }
-
-  private static ClassFileTransformer createTransformer(ClassLoader classLoader) throws Exception {
-    Class<?> transformerClass = classLoader
-        .loadClass("be.coekaerts.wouter.flowtracker.weaver.AsmTransformer");
-    return (ClassFileTransformer) transformerClass.getConstructor(Map.class).newInstance(config);
   }
 
   // NICE: generic plugin system would be cleaner
@@ -192,29 +176,6 @@ public class FlowTrackAgent {
       }
     } finally {
       in.close();
-    }
-  }
-
-  private static void initLogging() throws Exception {
-    Class.forName("be.coekaerts.wouter.flowtracker.util.Logger")
-        .getMethod("initLogging", Map.class)
-        .invoke(null, config);
-  }
-
-  private static void initCore() throws Exception {
-    Class.forName("be.coekaerts.wouter.flowtracker.CoreInitializer")
-        .getMethod("initialize", Map.class)
-        .invoke(null, config);
-  }
-
-  /** Abort, to avoid hanging shutdown hook when initialization fails */
-  private static void postInitCore() {
-    try {
-      Class.forName("be.coekaerts.wouter.flowtracker.CoreInitializer")
-          .getMethod("postInitialize", Map.class)
-          .invoke(null, config);
-    } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 }
