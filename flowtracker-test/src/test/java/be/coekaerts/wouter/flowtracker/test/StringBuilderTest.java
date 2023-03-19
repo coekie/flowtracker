@@ -1,12 +1,11 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
 import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 @SuppressWarnings("StringBufferReplaceableByString")
 public class StringBuilderTest {
@@ -67,7 +66,6 @@ public class StringBuilderTest {
   }
 
   @Test
-  @Ignore("getting value from array not implemented")
   public void testReverse() {
     String abcd = trackCopy("abcd");
     StringBuilder sb = new StringBuilder(abcd);

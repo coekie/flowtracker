@@ -1,13 +1,9 @@
-package be.coekaerts.wouter.flowtracker.history;
-
-import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
-import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
-import be.coekaerts.wouter.flowtracker.tracker.Growth;
-import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import org.junit.Before;
-import org.junit.Test;
+package be.coekaerts.wouter.flowtracker.tracker;
 
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+
+import org.junit.Before;
+import org.junit.Test;
 
 public class TrackerTest {
   private Tracker source, source2, target, middleman;

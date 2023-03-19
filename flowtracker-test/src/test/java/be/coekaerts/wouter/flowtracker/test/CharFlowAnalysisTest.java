@@ -200,4 +200,30 @@ public class CharFlowAnalysisTest {
     } while (false);
     ft.assertIsTheTrackedValue(ch);
   }
+
+  /**
+   * Regression test that tests that when we get a value out of an array, we find out where it came
+   * from at that point; and not at the moment use that value because by then the value in the array
+   * might have already changed.
+   */
+  @Test public void arrayLoadMutatedBeforeUse() {
+    FlowTester ft2 = new FlowTester();
+
+    char[] array1 = new char[1];
+    array1[0] = ft.createSourceChar('a');
+
+    // testing that we track where gotA and gotB come from based on the time they were read; not
+    // the time they were used
+    char gotA = array1[0];
+    array1[0] = ft2.createSourceChar('b');
+    char gotB = array1[0];
+
+    char[] target = new char[2];
+    target[0] = gotA;
+    target[1] = gotB;
+
+    snapshotBuilder().part(ft.theSource(), ft.theSourceIndex(), 1)
+        .part(ft2.theSource(), ft2.theSourceIndex(), 1)
+        .assertTrackerOf(target);
+  }
 }
