@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -29,9 +28,6 @@ import org.objectweb.asm.util.TraceMethodVisitor;
  * makes this a convenient tool to help understand what's going on with the bytecode exactly, and
  * for debugging.
  */
-// TODO too fragile indeed; mvn uses different compiler than my IntelliJ, and that generates other
-//   code
-@Ignore
 public class FlowAnalyzingTransformerTest {
 
   @Test
@@ -81,10 +77,14 @@ public class FlowAnalyzingTransformerTest {
             + "RETURN\n"
             + "MAXSTACK = 4\n"
             + "MAXLOCALS = 3\n",
+        // intro
         "ACONST_NULL\n"
             + "ASTORE 3\n"
             + "LDC -1\n"
             + "ISTORE 4\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 5\n"
+            // ...
             + "ALOAD 1\n"
             + "ICONST_1\n"
             + "ALOAD 2\n"
@@ -94,19 +94,24 @@ public class FlowAnalyzingTransformerTest {
             + "ASTORE 3\n"
             + "ALOAD 3\n"
             + "ILOAD 4\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook.getElementTracker (Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;\n"
+            + "ASTORE 5\n"
+            + "ALOAD 3\n"
+            + "ILOAD 4\n"
             // ...
             + "BALOAD\n"
             // from ArrayStore.insertTrackStatements
             //   from ArrayLoadValue.loadSourceTracker
-            + "ALOAD 3\n"
-            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerRepository.getTracker (Ljava/lang/Object;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "ALOAD 5\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
             //   from ArrayLoadValue.loadSourceIndex
-            + "ILOAD 4\n"
+            + "ALOAD 5\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setByte ([BIBLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
             // ...
             + "RETURN\n"
             + "MAXSTACK = 6\n"
-            + "MAXLOCALS = 5\n");
+            + "MAXLOCALS = 6\n");
   }
 
   @Test
@@ -140,29 +145,36 @@ public class FlowAnalyzingTransformerTest {
             + "ASTORE 4\n"
             + "LDC -1\n"
             + "ISTORE 5\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 6\n"
             + "ALOAD 2\n"
             + "ICONST_0\n"
             + "ISTORE 5\n"
             + "ASTORE 4\n"
             + "ALOAD 4\n"
             + "ILOAD 5\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook.getElementTracker (Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;\n"
+            + "ASTORE 6\n"
+            + "ALOAD 4\n"
+            + "ILOAD 5\n"
             + "CALOAD\n"
-            + "ISTORE 6\n"
+            + "ISTORE 7\n"
             + "ILOAD 3\n"
             + "IFEQ L0\n"
             + "RETURN\n"
             + "L0\n"
-            + "FRAME FULL [$THIS$ [C [C I [C I I] []\n"
+            + "FRAME FULL [$THIS$ [C [C I [C I be/coekaerts/wouter/flowtracker/tracker/TrackerPoint I] []\n"
             + "ALOAD 1\n"
             + "ICONST_0\n"
-            + "ILOAD 6\n"
-            + "ALOAD 4\n"
-            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerRepository.getTracker (Ljava/lang/Object;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
-            + "ILOAD 5\n"
+            + "ILOAD 7\n"
+            + "ALOAD 6\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "ALOAD 6\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setChar ([CICLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
             + "RETURN\n"
             + "MAXSTACK = 6\n"
-            + "MAXLOCALS = 7\n");
+            + "MAXLOCALS = 8\n");
   }
 
   static char[] myCharArray;
@@ -197,8 +209,10 @@ public class FlowAnalyzingTransformerTest {
             + "ASTORE 1\n"
             + "LDC -1\n"
             + "ISTORE 2\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 3\n"
             + "L0\n"
-            + "FRAME FULL [$THIS$ [C I] []\n"
+            + "FRAME FULL [$THIS$ [C I be/coekaerts/wouter/flowtracker/tracker/TrackerPoint] []\n"
             + "GETSTATIC $THISTEST$.myBoolean : Z\n"
             + "IFEQ L1\n"
             + "GETSTATIC $THISTEST$.myCharArray : [C\n"
@@ -209,17 +223,22 @@ public class FlowAnalyzingTransformerTest {
             + "ASTORE 1\n"
             + "ALOAD 1\n"
             + "ILOAD 2\n"
-            + "CALOAD\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook.getElementTracker (Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;\n"
+            + "ASTORE 3\n"
             + "ALOAD 1\n"
-            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerRepository.getTracker (Ljava/lang/Object;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
             + "ILOAD 2\n"
+            + "CALOAD\n"
+            + "ALOAD 3\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "ALOAD 3\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setChar ([CICLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
             + "GOTO L0\n"
             + "L1\n"
-            + "FRAME FULL [$THIS$ [C I] []\n"
+            + "FRAME FULL [$THIS$ [C I be/coekaerts/wouter/flowtracker/tracker/TrackerPoint] []\n"
             + "RETURN\n"
             + "MAXSTACK = 6\n"
-            + "MAXLOCALS = 3\n");
+            + "MAXLOCALS = 4\n");
   }
 
 //  @Test public void tmp() {
