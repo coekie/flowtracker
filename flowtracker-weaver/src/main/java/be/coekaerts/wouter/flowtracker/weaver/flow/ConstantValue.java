@@ -23,6 +23,7 @@ public class ConstantValue extends TrackableValue {
 
   @Override
   void loadSourceTracker(InsnList toInsert) {
+    // NICE the Tracker could be a ConstantDynamic
     toInsert.add(new LdcInsnNode(descriptor));
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC,
