@@ -27,9 +27,12 @@ class ArrayStore extends Store {
 
     InsnList toInsert = new InsnList();
 
+    methodNode.addComment(toInsert, "begin ArrayStore.insertTrackStatements: "
+        + "ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)");
+
     if (stored instanceof TrackableValue) { // if we know where the value we are storing came from
       TrackableValue trackedStored = (TrackableValue) stored;
-      trackedStored.ensureTracked(methodNode);
+      trackedStored.ensureTracked();
 
       trackedStored.loadSourceTracker(toInsert);
       trackedStored.loadSourceIndex(toInsert);
@@ -45,6 +48,8 @@ class ArrayStore extends Store {
     toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
         "be/coekaerts/wouter/flowtracker/hook/ArrayHook", hook.getName(), hook.getDescriptor(),
         false));
+
+    methodNode.addComment(toInsert, "end ArrayStore.insertTrackStatements");
 
     methodNode.instructions.insert(storeInsn, toInsert);
     methodNode.instructions.remove(storeInsn); // our hook takes care of the storing

@@ -16,17 +16,18 @@ class CharAtValue extends TrackableValue {
   /** Local variable storing the index */
   private TrackLocal indexLocal;
 
-  CharAtValue(MethodInsnNode mInsn) {
-    super(Type.CHAR_TYPE);
+  CharAtValue(FlowMethodAdapter flowMethodAdapter, MethodInsnNode mInsn) {
+    super(flowMethodAdapter, Type.CHAR_TYPE);
     this.mInsn = mInsn;
     // Note: when it can return something else than char, we get type with Type.getReturnType(mInsn.desc)
   }
 
-  @Override void insertTrackStatements(FlowMethodAdapter methodNode) {
+  @Override void insertTrackStatements() {
     // on the stack before the charAt call: String target, int index
 
-    targetStringLocal = methodNode.newLocalForObject(Type.getObjectType(mInsn.owner));
-    indexLocal = methodNode.newLocalForIndex();
+    targetStringLocal = flowMethodAdapter.newLocalForObject(Type.getObjectType(mInsn.owner),
+        "CharAtValue targetString");
+    indexLocal = flowMethodAdapter.newLocalForIndex("CharAtValue index");
 
     InsnList toInsert = new InsnList();
 
@@ -38,11 +39,12 @@ class CharAtValue extends TrackableValue {
     toInsert.add(targetStringLocal.load());
     toInsert.add(indexLocal.load());
 
-    methodNode.instructions.insertBefore(mInsn, toInsert);
+    flowMethodAdapter.instructions.insertBefore(mInsn, toInsert);
   }
 
   @Override void loadSourceTracker(InsnList toInsert) {
-    // insert code for: StringHook.getStringTracker(targetString);
+    flowMethodAdapter.addComment(toInsert,
+        "CharAtValue.loadSourceTracker: StringHook.getStringTracker(targetString)");
     toInsert.add(targetStringLocal.load());
     if (mInsn.owner.equals("java/lang/String")) {
       toInsert.add(
@@ -62,6 +64,7 @@ class CharAtValue extends TrackableValue {
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {
+    flowMethodAdapter.addComment(toInsert, "CharAtValue.loadSourceIndex");
     toInsert.add(indexLocal.load());
   }
 }

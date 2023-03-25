@@ -17,21 +17,22 @@ class ArrayLoadValue extends TrackableValue {
   /** Local variable storing the PointTracker for the loaded char or byte */
   private TrackLocal pointTrackerLocal;
 
-  ArrayLoadValue(InsnNode insn, Type type, Type arrayType) {
-    super(type);
+  ArrayLoadValue(FlowMethodAdapter flowMethodAdapter, InsnNode insn, Type type, Type arrayType) {
+    super(flowMethodAdapter, type);
     this.insn = insn;
     this.arrayType = arrayType;
   }
 
-  @Override void insertTrackStatements(FlowMethodAdapter methodNode) {
+  @Override void insertTrackStatements() {
     // on the stack before the CALOAD call: char[] target, int index
 
     // Local variable storing the target char[] or byte[]
-    TrackLocal targetLocal = methodNode.newLocalForObject(arrayType);
+    TrackLocal targetLocal = flowMethodAdapter.newLocalForObject(arrayType, "ArrayLoadValue array");
     // Local variable storing the index
-    TrackLocal indexLocal = methodNode.newLocalForIndex();
-    pointTrackerLocal = methodNode.newLocalForObject(
-        Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
+    TrackLocal indexLocal = flowMethodAdapter.newLocalForIndex("ArrayLoadValue index");
+    pointTrackerLocal = flowMethodAdapter.newLocalForObject(
+        Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"),
+        "ArrayLoadValue PointTracker");
 
     InsnList toInsert = new InsnList();
 
@@ -54,11 +55,12 @@ class ArrayLoadValue extends TrackableValue {
     toInsert.add(targetLocal.load());
     toInsert.add(indexLocal.load());
 
-    methodNode.instructions.insertBefore(insn, toInsert);
+    flowMethodAdapter.instructions.insertBefore(insn, toInsert);
   }
 
   @Override void loadSourceTracker(InsnList toInsert) {
-    // insert code for: PointTracker.getTracker(pointTracker)
+    flowMethodAdapter.addComment(toInsert,
+        "ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)");
     toInsert.add(pointTrackerLocal.load());
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC,
@@ -69,7 +71,8 @@ class ArrayLoadValue extends TrackableValue {
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {
-    // insert code for: PointTracker.getIndex(pointTracker)
+    flowMethodAdapter.addComment(toInsert,
+        "ArrayLoadValue.loadSourceIndex: PointTracker.getIndex(pointTracker)");
     toInsert.add(pointTrackerLocal.load());
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC,

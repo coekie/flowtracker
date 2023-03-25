@@ -7,28 +7,28 @@ import org.objectweb.asm.tree.analysis.BasicValue;
 
 /** A value of which we can track where it came from */
 abstract class TrackableValue extends BasicValue {
+  final FlowMethodAdapter flowMethodAdapter;
   private boolean tracked;
 
-  TrackableValue(Type type) {
+  TrackableValue(FlowMethodAdapter flowMethodAdapter, Type type) {
     super(type);
+    this.flowMethodAdapter = flowMethodAdapter;
   }
 
-  void ensureTracked(FlowMethodAdapter methodNode) {
+  void ensureTracked() {
     if (!tracked) {
-      insertTrackStatements(methodNode);
+      insertTrackStatements();
       tracked = true;
     }
   }
 
   /**
    * Insert the statements needed to keep track of the origin of this value.
-   *
-   * This method should not be called directly, instead {@link #ensureTracked(FlowMethodAdapter)}
+   * <p>
+   * This method should not be called directly, instead {@link #ensureTracked()}
    * should be used, to ensure statements are not inserted more than once.
-   *
-   * @param methodNode method to add the statements in, at the right place
    */
-  abstract void insertTrackStatements(FlowMethodAdapter methodNode);
+  abstract void insertTrackStatements();
 
   /**
    * Add the tracker from which this value came on top of the stack.

@@ -20,11 +20,13 @@ class AppendStore extends Store {
   void insertTrackStatements(FlowMethodAdapter methodNode) {
     BasicValue stored = getCharValue();
 
-    InsnList toInsert = new InsnList();
-
     if (stored instanceof TrackableValue) { // if we know where the value we are storing came from
+      InsnList toInsert = new InsnList();
+      methodNode.addComment(toInsert, "begin AppendStore.insertTrackStatements: "
+          + "AbstractStringBuilderHook.append(sb, c [already on stack], tracker, index");
+
       TrackableValue trackedStored = (TrackableValue) stored;
-      trackedStored.ensureTracked(methodNode);
+      trackedStored.ensureTracked();
 
       trackedStored.loadSourceTracker(toInsert);
       trackedStored.loadSourceIndex(toInsert);
@@ -43,6 +45,8 @@ class AppendStore extends Store {
           "be/coekaerts/wouter/flowtracker/hook/AbstractStringBuilderHook", "append",
           hookMethod,
           false));
+
+      methodNode.addComment(toInsert, "end AppendStore.insertTrackStatements");
 
       methodNode.instructions.insert(invokeInsn, toInsert);
       methodNode.instructions.remove(invokeInsn); // our hook takes care of the storing

@@ -15,15 +15,16 @@ class TesterValue extends TrackableValue {
   /** Local variable storing the target FlowTester */
   private TrackLocal testerLocal;
 
-  TesterValue(MethodInsnNode mInsn) {
-    super(Type.getReturnType(mInsn.desc));
+  TesterValue(FlowMethodAdapter flowMethodAdapter, MethodInsnNode mInsn) {
+    super(flowMethodAdapter, Type.getReturnType(mInsn.desc));
     this.mInsn = mInsn;
   }
 
-  @Override void insertTrackStatements(FlowMethodAdapter methodNode) {
+  @Override void insertTrackStatements() {
     // on the stack before the call: FlowTester tester, char c
-    testerLocal = methodNode.newLocalForObject(
-        Type.getObjectType("be/coekaerts/wouter/flowtracker/test/FlowTester"));
+    testerLocal = flowMethodAdapter.newLocalForObject(
+        Type.getObjectType("be/coekaerts/wouter/flowtracker/test/FlowTester"),
+        "TesterValue tester");
 
     InsnList toInsert = new InsnList();
 
@@ -34,11 +35,12 @@ class TesterValue extends TrackableValue {
 
     mInsn.name = "$tracked_" + mInsn.name;
 
-    methodNode.instructions.insertBefore(mInsn, toInsert);
+    flowMethodAdapter.instructions.insertBefore(mInsn, toInsert);
   }
 
   @Override void loadSourceTracker(InsnList toInsert) {
-    // insert code for: testerLocal.theSource()
+    flowMethodAdapter.addComment(toInsert,
+        "TesterValue.loadSourceTracker: testerLocal.theSource()");
     toInsert.add(testerLocal.load());
       toInsert.add(
           new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
@@ -49,6 +51,8 @@ class TesterValue extends TrackableValue {
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {
+    flowMethodAdapter.addComment(toInsert,
+        "TesterValue.loadSourceIndex: testerLocal.theSourceIndex()");
     toInsert.add(testerLocal.load());
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKEVIRTUAL,

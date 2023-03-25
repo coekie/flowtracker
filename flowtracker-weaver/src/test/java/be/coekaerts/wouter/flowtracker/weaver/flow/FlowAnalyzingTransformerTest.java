@@ -37,6 +37,7 @@ public class FlowAnalyzingTransformerTest {
                       System.arraycopy(bytes1, 1, bytes2, 2, 3);
                     }
                   },
+        // original code
         "ALOAD 1\n"
             + "ICONST_1\n"
             + "ALOAD 2\n"
@@ -46,6 +47,7 @@ public class FlowAnalyzingTransformerTest {
             + "RETURN\n"
             + "MAXSTACK = 5\n"
             + "MAXLOCALS = 3\n",
+        // transformed code
         "ALOAD 1\n"
             + "ICONST_1\n"
             + "ALOAD 2\n"
@@ -68,6 +70,7 @@ public class FlowAnalyzingTransformerTest {
                       bytes1[1] = bytes2[2];
                     }
                   },
+        // original code
         "ALOAD 1\n"
             + "ICONST_1\n"
             + "ALOAD 2\n"
@@ -77,19 +80,20 @@ public class FlowAnalyzingTransformerTest {
             + "RETURN\n"
             + "MAXSTACK = 4\n"
             + "MAXLOCALS = 3\n",
-        // intro
-        "ACONST_NULL\n"
+        // transformed code
+        "// Initialize newLocal ArrayLoadValue array\n"
+            + "ACONST_NULL\n"
             + "ASTORE 3\n"
+            + "// Initialize newLocal ArrayLoadValue index\n"
             + "LDC -1\n"
             + "ISTORE 4\n"
+            + "// Initialize newLocal ArrayLoadValue PointTracker\n"
             + "ACONST_NULL\n"
             + "ASTORE 5\n"
-            // ...
             + "ALOAD 1\n"
             + "ICONST_1\n"
             + "ALOAD 2\n"
             + "ICONST_2\n"
-            // from ArrayLoadValue.insertTrackStatements
             + "ISTORE 4\n"
             + "ASTORE 3\n"
             + "ALOAD 3\n"
@@ -98,17 +102,16 @@ public class FlowAnalyzingTransformerTest {
             + "ASTORE 5\n"
             + "ALOAD 3\n"
             + "ILOAD 4\n"
-            // ...
             + "BALOAD\n"
-            // from ArrayStore.insertTrackStatements
-            //   from ArrayLoadValue.loadSourceTracker
+            + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)\n"
+            + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
             + "ALOAD 5\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
-            //   from ArrayLoadValue.loadSourceIndex
+            + "// ArrayLoadValue.loadSourceIndex: PointTracker.getIndex(pointTracker)\n"
             + "ALOAD 5\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setByte ([BIBLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
-            // ...
+            + "// end ArrayStore.insertTrackStatements\n"
             + "RETURN\n"
             + "MAXSTACK = 6\n"
             + "MAXLOCALS = 6\n");
@@ -125,6 +128,7 @@ public class FlowAnalyzingTransformerTest {
                       out[0] = ch;
                     }
                   },
+        // original code
         "ALOAD 2\n"
             + "ICONST_0\n"
             + "CALOAD\n"
@@ -141,10 +145,14 @@ public class FlowAnalyzingTransformerTest {
             + "RETURN\n"
             + "MAXSTACK = 3\n"
             + "MAXLOCALS = 5\n",
-        "ACONST_NULL\n"
+        // transformed code
+        "// Initialize newLocal ArrayLoadValue array\n"
+            + "ACONST_NULL\n"
             + "ASTORE 4\n"
+            + "// Initialize newLocal ArrayLoadValue index\n"
             + "LDC -1\n"
             + "ISTORE 5\n"
+            + "// Initialize newLocal ArrayLoadValue PointTracker\n"
             + "ACONST_NULL\n"
             + "ASTORE 6\n"
             + "ALOAD 2\n"
@@ -167,11 +175,15 @@ public class FlowAnalyzingTransformerTest {
             + "ALOAD 1\n"
             + "ICONST_0\n"
             + "ILOAD 7\n"
+            + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)\n"
+            + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
             + "ALOAD 6\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "// ArrayLoadValue.loadSourceIndex: PointTracker.getIndex(pointTracker)\n"
             + "ALOAD 6\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setChar ([CICLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
+            + "// end ArrayStore.insertTrackStatements\n"
             + "RETURN\n"
             + "MAXSTACK = 6\n"
             + "MAXLOCALS = 8\n");
@@ -189,6 +201,7 @@ public class FlowAnalyzingTransformerTest {
                       }
                     }
                   },
+        // original code
         "L0\n"
             + "FRAME FULL [$THIS$] []\n"
             + "GETSTATIC $THISTEST$.myBoolean : Z\n"
@@ -205,10 +218,14 @@ public class FlowAnalyzingTransformerTest {
             + "RETURN\n"
             + "MAXSTACK = 4\n"
             + "MAXLOCALS = 1\n",
-        "ACONST_NULL\n"
+        // transformed code
+        "// Initialize newLocal ArrayLoadValue array\n"
+            + "ACONST_NULL\n"
             + "ASTORE 1\n"
+            + "// Initialize newLocal ArrayLoadValue index\n"
             + "LDC -1\n"
             + "ISTORE 2\n"
+            + "// Initialize newLocal ArrayLoadValue PointTracker\n"
             + "ACONST_NULL\n"
             + "ASTORE 3\n"
             + "L0\n"
@@ -228,11 +245,15 @@ public class FlowAnalyzingTransformerTest {
             + "ALOAD 1\n"
             + "ILOAD 2\n"
             + "CALOAD\n"
+            + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)\n"
+            + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
             + "ALOAD 3\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "// ArrayLoadValue.loadSourceIndex: PointTracker.getIndex(pointTracker)\n"
             + "ALOAD 3\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setChar ([CICLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
+            + "// end ArrayStore.insertTrackStatements\n"
             + "GOTO L0\n"
             + "L1\n"
             + "FRAME FULL [$THIS$ [C I be/coekaerts/wouter/flowtracker/tracker/TrackerPoint] []\n"
@@ -292,7 +313,7 @@ public class FlowAnalyzingTransformerTest {
     MethodPrintingClassVisitor afterVisitor =
         new MethodPrintingClassVisitor(new CheckClassAdapter(classWriter), thisName);
     ClassVisitor transformingVisitor =
-        new FlowAnalyzingTransformer().createClassAdapter(afterVisitor);
+        new FlowAnalyzingTransformer(new RealCommentator()).createClassAdapter(afterVisitor);
     // writes out original bytecode to text
     MethodPrintingClassVisitor beforeVisitor =
         new MethodPrintingClassVisitor(transformingVisitor, thisName);
@@ -350,7 +371,7 @@ public class FlowAnalyzingTransformerTest {
    */
   private static class MethodPrintingClassVisitor extends ClassVisitor {
 
-    final Textifier textifier = new Textifier();
+    final Textifier textifier = new CommentTextifier();
     final String thisName;
 
     public MethodPrintingClassVisitor(ClassVisitor cv, String thisName) {

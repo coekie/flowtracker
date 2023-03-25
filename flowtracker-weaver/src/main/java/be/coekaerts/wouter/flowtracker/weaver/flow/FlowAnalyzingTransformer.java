@@ -22,7 +22,17 @@ import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
 public class FlowAnalyzingTransformer implements ClassAdapterFactory {
-  private static class FlowClassAdapter extends ClassVisitor {
+  private final Commentator commentator;
+
+  public FlowAnalyzingTransformer() {
+    this.commentator = new Commentator(); // noop Commentator
+  }
+
+  FlowAnalyzingTransformer(Commentator commentator) {
+    this.commentator = commentator;
+  }
+
+  private class FlowClassAdapter extends ClassVisitor {
     private String name;
 
     public FlowClassAdapter(ClassVisitor cv) {
@@ -44,7 +54,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     }
   }
 
-  static class FlowMethodAdapter extends MethodNode {
+  class FlowMethodAdapter extends MethodNode {
     private final String owner;
     /** The next visitor in the chain after this one */
     private final TransparentLocalVariablesSorter varSorter;
@@ -68,7 +78,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 
     private void doVisitEnd() throws AnalyzerException {
       super.visitEnd();
-      FlowInterpreter interpreter = new FlowInterpreter(owner);
+      FlowInterpreter interpreter = new FlowInterpreter(this);
       Analyzer<BasicValue> analyzer = new Analyzer<>(interpreter);
       Frame<BasicValue>[] frames = analyzer.analyze(owner, this);
 
@@ -129,18 +139,18 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
      * Create a new local variable for storing the index of a tracker, that is an int initialized
      * to -1
      */
-    TrackLocal newLocalForIndex() {
-      return newLocal(Type.INT_TYPE, new LdcInsnNode(-1));
+    TrackLocal newLocalForIndex(String sourceForComment) {
+      return newLocal(Type.INT_TYPE, new LdcInsnNode(-1), sourceForComment);
     }
 
     /** Create a new local variable for storing an object, initialized to null */
-    TrackLocal newLocalForObject(Type type) {
-      return newLocal(type, new InsnNode(Opcodes.ACONST_NULL));
+    TrackLocal newLocalForObject(Type type, String sourceForComment) {
+      return newLocal(type, new InsnNode(Opcodes.ACONST_NULL), sourceForComment);
     }
 
     /**
      * Create a new local variable that can be used by our added code.
-     *
+     * <p>
      * We get an index for these variables at the beginning of the method (from the
      * {@link #varSorter}), and ensure they are initialized. That way they can be accessed by any of
      * our added code without worrying about where they have definitely been set. Also, adding new
@@ -148,23 +158,28 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
      * is practically impossible because it does not properly update frames (see
      * https://gitlab.ow2.org/asm/asm/-/issues/316352).
      */
-    private TrackLocal newLocal(Type type, AbstractInsnNode initialValue) {
+    private TrackLocal newLocal(Type type, AbstractInsnNode initialValue, String sourceForComment) {
       TrackLocal local = new TrackLocal(type, varSorter.newLocal(type));
       // initialize the variable to -1 at the start of the method
       // NICE only initialize when necessary (if there is a jump, or it is read before it is first
       //  written to)
+      addComment(intro, "Initialize newLocal %s", sourceForComment);
       intro.add(initialValue);
       intro.add(local.store());
       return local;
     }
+
+    void addComment(InsnList insnList, String comment, Object... commentArgs) {
+      commentator.addComment(insnList, comment, commentArgs);
+    }
   }
 
   private static class FlowInterpreter extends BasicInterpreter {
-    private final String owner;
+    private final FlowMethodAdapter flowMethodAdapter;
 
-    public FlowInterpreter(String owner) {
+    public FlowInterpreter(FlowMethodAdapter flowMethodAdapter) {
       super(Opcodes.ASM9);
-      this.owner = owner;
+      this.flowMethodAdapter = flowMethodAdapter;
     }
 
     @Override
@@ -189,7 +204,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         case Opcodes.ICONST_5:
         case Opcodes.SIPUSH:
         case Opcodes.BIPUSH:
-          return new ConstantValue(Type.INT_TYPE, owner);
+          return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, flowMethodAdapter.owner);
       }
       return super.newOperation(insn);
     }
@@ -217,11 +232,11 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
       switch (aInsn.getOpcode()) {
         case CALOAD: {
           InsnNode insn = (InsnNode) aInsn;
-          return new ArrayLoadValue(insn, Type.CHAR_TYPE, Types.CHAR_ARRAY);
+          return new ArrayLoadValue(flowMethodAdapter, insn, Type.CHAR_TYPE, Types.CHAR_ARRAY);
         }
         case BALOAD: {
           InsnNode insn = (InsnNode) aInsn;
-          return new ArrayLoadValue(insn, Type.BYTE_TYPE, Types.BYTE_ARRAY);
+          return new ArrayLoadValue(flowMethodAdapter, insn, Type.BYTE_TYPE, Types.BYTE_ARRAY);
         }
         case IAND: {
           // treat `x & constant` as having the same source as x
@@ -243,10 +258,10 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         if ("charAt".equals(mInsn.name) && "(I)C".equals(mInsn.desc)
             && ("java/lang/String".equals(mInsn.owner)
             || "java/lang/CharSequence".equals(mInsn.owner))) {
-          return new CharAtValue(mInsn);
+          return new CharAtValue(flowMethodAdapter, mInsn);
         } else if ("be/coekaerts/wouter/flowtracker/test/FlowTester".equals(mInsn.owner)) {
           if ("createSourceChar".equals(mInsn.name) || "createSourceByte".equals(mInsn.name)) {
-            return new TesterValue(mInsn);
+            return new TesterValue(flowMethodAdapter, mInsn);
           }
         }
       }

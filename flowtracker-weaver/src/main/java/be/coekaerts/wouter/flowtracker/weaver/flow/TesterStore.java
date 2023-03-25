@@ -26,13 +26,18 @@ class TesterStore extends Store {
 
     if (stored instanceof TrackableValue) { // if we know where the value we are storing came from
       TrackableValue trackedStored = (TrackableValue) stored;
-      trackedStored.ensureTracked(methodNode);
+      trackedStored.ensureTracked();
 
       // replace the call with a call to the $tracked_ method, with two extra arguments: the tracker
       // and the index
       InsnList toInsert = new InsnList();
+      methodNode.addComment(toInsert, "begin TesterStore.insertTrackStatements");
+
       trackedStored.loadSourceTracker(toInsert);
       trackedStored.loadSourceIndex(toInsert);
+
+      methodNode.addComment(toInsert,
+          "end TesterStore.insertTrackStatements. also replaced next invocation");
 
       methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
 
