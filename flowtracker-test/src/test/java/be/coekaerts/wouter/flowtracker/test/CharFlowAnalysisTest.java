@@ -169,6 +169,11 @@ public class CharFlowAnalysisTest {
     ft.assertIsTheTrackedValue((char) (255 & b));
   }
 
+  @Test public void byteToUnsignedInt() {
+    byte b = ft.createSourceByte((byte) 'a');
+    ft.assertIsTheTrackedValue((byte) Byte.toUnsignedInt(b));
+  }
+
   // combining some things, but redundant with other tests.
   // this test is similar to what Latin1String.inflate does
   @Test public void charToByte() {

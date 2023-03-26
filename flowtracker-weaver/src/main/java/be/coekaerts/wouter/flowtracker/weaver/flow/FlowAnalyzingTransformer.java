@@ -256,9 +256,9 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
       return super.binaryOperation(aInsn, value1, value2);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public BasicValue naryOperation(AbstractInsnNode insn, List values) throws AnalyzerException {
+    public BasicValue naryOperation(AbstractInsnNode insn, List<? extends BasicValue> values)
+        throws AnalyzerException {
       if (insn instanceof MethodInsnNode) {
         MethodInsnNode mInsn = (MethodInsnNode) insn;
         if ("charAt".equals(mInsn.name) && "(I)C".equals(mInsn.desc)
@@ -271,6 +271,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
           if ("createSourceChar".equals(mInsn.name) || "createSourceByte".equals(mInsn.name)) {
             return new TesterValue(flowMethodAdapter, mInsn);
           }
+        } else if ("java/lang/Byte".equals(mInsn.owner) && "toUnsignedInt".equals(mInsn.name)) {
+          return values.get(0);
         }
       }
       return super.naryOperation(insn, values);
