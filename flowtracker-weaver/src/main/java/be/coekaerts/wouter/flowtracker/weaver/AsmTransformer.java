@@ -143,6 +143,9 @@ class AsmTransformer implements ClassFileTransformer {
     inflaterInputStreamSpec.addMethodHookSpec("int read(byte[],int,int)",
         "void afterReadByteArrayOffset(int,java.util.zip.InflaterInputStream,byte[],int)",
         HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
+    inflaterInputStreamSpec.addMethodHookSpec("int read()",
+        "void afterRead1(int,java.util.zip.InflaterInputStream)",
+        HookSpec.THIS);
     specs.put("java/util/zip/InflaterInputStream", inflaterInputStreamSpec);
 
     ClassHookSpec zipFileSpec = new ClassHookSpec(

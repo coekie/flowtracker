@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class InflaterInputStreamTest extends AbstractInputStreamTest {
@@ -53,12 +52,5 @@ public class InflaterInputStreamTest extends AbstractInputStreamTest {
     try (InputStream is = new InflaterInputStream(src, new Inflater(), 512)) {
       TrackTestHelper.assertDescriptor(is, "InflaterInputStream", srcTracker);
     }
-  }
-
-  @Override
-  @Test
-  @Ignore // TODO InflaterInputStreamTest.readSingleByte
-  public void readSingleByte() throws IOException {
-    super.readSingleByte();
   }
 }
