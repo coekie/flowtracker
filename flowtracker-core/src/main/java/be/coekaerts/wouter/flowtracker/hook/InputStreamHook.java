@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.FileInputStream;
@@ -10,9 +11,11 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 
 public class InputStreamHook {
+  /** Signature of {@link InputStream#read()} */
+  static final String READ1_SIGNATURE = Invocation.signature("read", "()I");
+
   private static final Field filterInputStreamIn =
       Reflection.getDeclaredField(FilterInputStream.class, "in");
-
 
   /** Returns the tracker of an input stream, ignoring wrapping FilterInputStreams */
   public static Tracker getInputStreamTracker(InputStream stream) {

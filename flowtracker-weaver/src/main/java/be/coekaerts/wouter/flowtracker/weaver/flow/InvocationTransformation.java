@@ -21,7 +21,7 @@ class InvocationTransformation {
     invocationLocal = methodNode.newLocal(
         Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"),
         List.of(
-            new LdcInsnNode(methodNode.name + " " + methodNode.desc),
+            new LdcInsnNode(Invocation.signature(methodNode.name, methodNode.desc)),
             new MethodInsnNode(Opcodes.INVOKESTATIC,
             "be/coekaerts/wouter/flowtracker/tracker/Invocation",
             "start",

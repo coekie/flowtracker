@@ -43,8 +43,10 @@ public abstract class AbstractInputStreamTest {
   @Test
   public void readSingleByte() throws IOException {
     try (InputStream fis = createInputStream(abc)) {
-      assertEquals('a', fis.read());
-      assertContentEquals("a", fis);
+      // TODO also assert the value of the byte returned by read()
+      FlowTester.assertTrackedValue((byte) fis.read(), getStreamTracker(fis), 0);
+      FlowTester.assertTrackedValue((byte) fis.read(), getStreamTracker(fis), 1);
+      assertContentEquals("ab", fis);
     }
   }
 

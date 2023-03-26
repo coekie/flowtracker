@@ -32,7 +32,7 @@ class InvocationReturnValue extends TrackableValue {
     InsnList toInsert = new InsnList();
 
     flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.insertTrackStatements");
-    toInsert.add(new LdcInsnNode(mInsn.name + " " + mInsn.desc));
+    toInsert.add(new LdcInsnNode(Invocation.signature(mInsn.name, mInsn.desc)));
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC,
             "be/coekaerts/wouter/flowtracker/tracker/Invocation",

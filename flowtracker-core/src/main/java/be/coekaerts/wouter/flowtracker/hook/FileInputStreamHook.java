@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.hook;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.File;
@@ -23,6 +24,8 @@ public class FileInputStreamHook {
     if (result > 0) {
       ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
       if (tracker != null) {
+        Invocation invocation = Invocation.start(InputStreamHook.READ1_SIGNATURE);
+        Invocation.returning(invocation, tracker, tracker.getLength());
         tracker.append((byte) result);
       }
     }

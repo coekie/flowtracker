@@ -7,12 +7,12 @@ package be.coekaerts.wouter.flowtracker.tracker;
 public class Invocation {
   private static final ThreadLocal<Invocation> pending = new ThreadLocal<>();
 
-  private final String desc;
+  private final String signature;
   public Tracker returnTracker;
   public int returnIndex;
 
-  Invocation(String desc) {
-    this.desc = desc;
+  Invocation(String signature) {
+    this.signature = signature;
   }
 
   /**
@@ -29,8 +29,8 @@ public class Invocation {
    * Called by a caller before calling another method through which we want to track return or
    * parameter values.
    */
-  public static Invocation calling(String desc) {
-    Invocation invocation = new Invocation(desc);
+  public static Invocation calling(String signature) {
+    Invocation invocation = new Invocation(signature);
     pending.set(invocation);
     return invocation;
   }
@@ -38,14 +38,18 @@ public class Invocation {
   /**
    * Called inside the called method
    */
-  public static Invocation start(String desc) {
+  public static Invocation start(String signature) {
     Invocation invocation = pending.get();
     if (invocation != null) {
       pending.remove();
-      if (desc.equals(invocation.desc)) {
+      if (signature.equals(invocation.signature)) {
         return invocation;
       }
     }
     return null;
+  }
+
+  public static String signature(String name, String desc) {
+    return name + " " + desc;
   }
 }
