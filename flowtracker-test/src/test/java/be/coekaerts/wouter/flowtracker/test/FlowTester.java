@@ -4,14 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Helper for testing instrumentation of FlowAnalyzingTransformer and its TrackableValues and
  * Stores.
- *
+ * <p>
  * This class gets some special instrumentation, see {@code TesterStore} and {@code TesterValue} and
  * their usage.
  */
@@ -47,10 +46,10 @@ class FlowTester {
   }
 
   // TODO this might be useful, but unused for now...
-  <T> T createSource(T t) {
-    sources.add(TrackerRepository.createFixedOriginTracker(t, -1));
-    return t;
-  }
+//  <T> T createSource(T t) {
+//    sources.add(TrackerRepository.createFixedOriginTracker(t, -1));
+//    return t;
+//  }
 
   Tracker theSource() {
     assertEquals("theSource should only be used if there is exactly one source",
@@ -67,36 +66,42 @@ class FlowTester {
    * Assert that the the given value is tracked as coming from index {@code expectedIndex} in
    * {@code expectedSource}.
    * Calls to this method should get replaced by
-   * {@link #$tracked_assertTrackedValue(char, Tracker, int, Tracker, int)}.
+   * {@link #$tracked_assertTrackedValue(char, char, Tracker, int, Tracker, int)}.
    */
   static void assertTrackedValue(@SuppressWarnings("unused") char c,
+      @SuppressWarnings("unused") char expected,
       @SuppressWarnings("unused") Tracker expectedSource,
       @SuppressWarnings("unused") int expectedIndex) {
     throw valueNotTrackedError();
   }
 
   /**
-   * Assert that the the given value is tracked as coming from index {@code expectedIndex} in
+   * Assert that the given value is tracked as coming from index {@code expectedIndex} in
    * {@code expectedSource}.
    * Calls to this method should get replaced by
-   * {@link #$tracked_assertTrackedValue(byte, Tracker, int, Tracker, int)}.
+   * {@link #$tracked_assertTrackedValue(byte, byte, Tracker, int, Tracker, int)}.
    */
   static void assertTrackedValue(@SuppressWarnings("unused") byte b,
+      @SuppressWarnings("unused") byte expected,
       @SuppressWarnings("unused") Tracker expectedSource,
       @SuppressWarnings("unused") int expectedIndex) {
     throw valueNotTrackedError();
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
-  static void $tracked_assertTrackedValue(char c, Tracker expectedTracker, int expectedIndex,
+  static void $tracked_assertTrackedValue(char c, char expected,
+      Tracker expectedTracker, int expectedIndex,
       Tracker actualTracker, int actualIndex) {
+    assertEquals(expected, c);
     assertEquals(expectedTracker, actualTracker);
     assertEquals(expectedIndex, actualIndex);
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
-  static void $tracked_assertTrackedValue(byte b, Tracker expectedTracker, int expectedIndex,
+  static void $tracked_assertTrackedValue(byte b, byte expected,
+      Tracker expectedTracker, int expectedIndex,
       Tracker actualTracker, int actualIndex) {
+    assertEquals(expected, b);
     assertEquals(expectedTracker, actualTracker);
     assertEquals(expectedIndex, actualIndex);
   }

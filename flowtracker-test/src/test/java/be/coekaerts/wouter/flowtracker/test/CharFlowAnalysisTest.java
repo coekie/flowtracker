@@ -17,7 +17,7 @@ public class CharFlowAnalysisTest {
 
   @Test public void charArrayLoadValue() {
     char[] array = TrackTestHelper.trackedCharArrayWithLength(3);
-    FlowTester.assertTrackedValue(array[2], getTracker(array), 2);
+    FlowTester.assertTrackedValue(array[2], '\0', getTracker(array), 2);
   }
 
   @Test public void charArrayStore() {
@@ -69,7 +69,7 @@ public class CharFlowAnalysisTest {
 
   @Test public void charAt() {
     String abc = trackCopy("abc");
-    FlowTester.assertTrackedValue(abc.charAt(1), getStringTracker(abc), 1);
+    FlowTester.assertTrackedValue(abc.charAt(1), 'b', getStringTracker(abc), 1);
   }
 
   @SuppressWarnings("UnnecessaryLocalVariable") // we want its type to be a CharSequence
@@ -77,7 +77,7 @@ public class CharFlowAnalysisTest {
     String str = trackCopy("abc");
     CharSequence abc = str;
 
-    FlowTester.assertTrackedValue(abc.charAt(1), getStringTracker(str), 1);
+    FlowTester.assertTrackedValue(abc.charAt(1), 'b', getStringTracker(str), 1);
   }
 
   @Test public void stringBuilderAppendChar() {

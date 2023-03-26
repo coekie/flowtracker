@@ -9,7 +9,7 @@ public class InvocationInstrumentationTest {
   public void test() {
     char[] array = TrackTestHelper.trackedCharArray("abc");
     ArrayWrapper wrapper = new ArrayWrapper(array);
-    FlowTester.assertTrackedValue((byte) wrapper.read(2), getTracker(array), 2);
+    FlowTester.assertTrackedValue((byte) wrapper.read(2), (byte) 'c', getTracker(array), 2);
   }
 
   static class ArrayWrapper {

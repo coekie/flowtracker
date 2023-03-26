@@ -114,7 +114,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
             stores.add(new AppendStore(mInsn, frame));
           } else if (mInsn.owner.equals("be/coekaerts/wouter/flowtracker/test/FlowTester")) {
             if (mInsn.name.equals("assertTrackedValue")) {
-              stores.add(new TesterStore(mInsn, frame, 2));
+              stores.add(new TesterStore(mInsn, frame, 3));
             } else if (mInsn.name.equals("assertIsTheTrackedValue")
                 || mInsn.name.equals("getCharSourceTracker")
                 || mInsn.name.equals("getCharSourceIndex")

@@ -11,13 +11,13 @@ public class FlowTesterTest {
   @Test
   public void testCreateAndAssertTrackedValue_char() {
     char a = ft.createSourceChar('a');
-    FlowTester.assertTrackedValue(a, ft.theSource(), ft.theSourceIndex());
+    FlowTester.assertTrackedValue(a, 'a', ft.theSource(), ft.theSourceIndex());
   }
 
   @Test
   public void testCreateAndAssertTrackedValue_byte() {
     byte a = ft.createSourceByte((byte) 'a');
-    FlowTester.assertTrackedValue(a, ft.theSource(), ft.theSourceIndex());
+    FlowTester.assertTrackedValue(a, (byte) 'a', ft.theSource(), ft.theSourceIndex());
   }
 
   @Test
