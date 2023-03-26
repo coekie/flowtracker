@@ -10,7 +10,7 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /** Value returned from a called method, that we track using {@link Invocation} */
-public class InvocationReturnValue extends TrackableValue {
+class InvocationReturnValue extends TrackableValue {
   /** The call */
   private final MethodInsnNode mInsn;
 
@@ -62,4 +62,8 @@ public class InvocationReturnValue extends TrackableValue {
         "I"));
   }
 
+  // TODO better conditions for when to track call
+  static boolean shouldInstrumentInvocation(String name, String desc) {
+    return "read".equals(name) && desc.endsWith("I");
+  }
 }

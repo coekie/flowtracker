@@ -35,6 +35,7 @@ class ArrayLoadValue extends TrackableValue {
         "ArrayLoadValue PointTracker");
 
     InsnList toInsert = new InsnList();
+    flowMethodAdapter.addComment(toInsert, "begin ArrayLoadValue.insertTrackStatements");
 
     // store target and index
     toInsert.add(indexLocal.store());
@@ -54,6 +55,7 @@ class ArrayLoadValue extends TrackableValue {
     // put target and index back on the stack for the actual operation
     toInsert.add(targetLocal.load());
     toInsert.add(indexLocal.load());
+    flowMethodAdapter.addComment(toInsert, "end ArrayLoadValue.insertTrackStatements");
 
     flowMethodAdapter.instructions.insertBefore(insn, toInsert);
   }

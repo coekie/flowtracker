@@ -58,7 +58,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     private final String owner;
     /** The next visitor in the chain after this one */
     private final TransparentLocalVariablesSorter varSorter;
-    private final InsnList intro = new InsnList();
+    final InsnList intro = new InsnList();
+    private final InvocationTransformation invocation = new InvocationTransformation();
 
     public FlowMethodAdapter(MethodVisitor mv, String owner, int access, String name, String desc,
         String signature, String[] exceptions) {
@@ -122,6 +123,9 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
               stores.add(new TesterStore(mInsn, frame, 0));
             }
           }
+        } else if (insn.getOpcode() == Opcodes.IRETURN
+            && InvocationReturnValue.shouldInstrumentInvocation(name, desc)) {
+          stores.add(new InvocationReturnStore((InsnNode) insn, frame, invocation));
         }
       }
 
@@ -140,12 +144,12 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
      * to -1
      */
     TrackLocal newLocalForIndex(String sourceForComment) {
-      return newLocal(Type.INT_TYPE, new LdcInsnNode(-1), sourceForComment);
+      return newLocal(Type.INT_TYPE, List.of(new LdcInsnNode(-1)), sourceForComment);
     }
 
     /** Create a new local variable for storing an object, initialized to null */
     TrackLocal newLocalForObject(Type type, String sourceForComment) {
-      return newLocal(type, new InsnNode(Opcodes.ACONST_NULL), sourceForComment);
+      return newLocal(type, List.of(new InsnNode(Opcodes.ACONST_NULL)), sourceForComment);
     }
 
     /**
@@ -158,13 +162,15 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
      * is practically impossible because it does not properly update frames (see
      * <a href="https://gitlab.ow2.org/asm/asm/-/issues/316352">asm#316352</a>).
      */
-    private TrackLocal newLocal(Type type, AbstractInsnNode initialValue, String sourceForComment) {
+    TrackLocal newLocal(Type type, List<AbstractInsnNode> initialValue, String sourceForComment) {
       TrackLocal local = new TrackLocal(type, varSorter.newLocal(type));
       // initialize the variable to -1 at the start of the method
       // NICE only initialize when necessary (if there is a jump, or it is read before it is first
       //  written to)
       addComment(intro, "Initialize newLocal %s", sourceForComment);
-      intro.add(initialValue);
+      for (AbstractInsnNode initialValueInstruction : initialValue) {
+        intro.add(initialValueInstruction);
+      }
       intro.add(local.store());
       return local;
     }
@@ -259,8 +265,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
             && ("java/lang/String".equals(mInsn.owner)
             || "java/lang/CharSequence".equals(mInsn.owner))) {
           return new CharAtValue(flowMethodAdapter, mInsn);
-        } else if ("read".equals(mInsn.name) && mInsn.desc.endsWith("I")) {
-          // TODO better conditions for when to track call
+        } else if (InvocationReturnValue.shouldInstrumentInvocation(mInsn.name, mInsn.desc)) {
           return new InvocationReturnValue(flowMethodAdapter, mInsn);
         } else if ("be/coekaerts/wouter/flowtracker/test/FlowTester".equals(mInsn.owner)) {
           if ("createSourceChar".equals(mInsn.name) || "createSourceByte".equals(mInsn.name)) {
