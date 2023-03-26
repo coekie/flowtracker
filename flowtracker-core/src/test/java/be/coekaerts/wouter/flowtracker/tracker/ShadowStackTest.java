@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-import be.coekaerts.wouter.flowtracker.tracker.ShadowStack.Frame;
+import be.coekaerts.wouter.flowtracker.tracker.ShadowStack.Invocation;
 import org.junit.Test;
 
 public class ShadowStackTest {
@@ -12,22 +12,28 @@ public class ShadowStackTest {
   public void testReturnValue() {
     Tracker tracker = new CharOriginTracker();
 
-    Frame callingReadFrame = ShadowStack.calling("read");
+    Invocation callingInvocation = ShadowStack.calling("read");
     // inside the called read() method:
     {
-      Frame readFrame = ShadowStack.start("read");
-      assertSame(callingReadFrame, readFrame);
-      // assert readFrame == callingReadFrame
-      Frame.returning(readFrame, tracker, 2);
+      Invocation calledInvocation = ShadowStack.start("read");
+      assertSame(callingInvocation, calledInvocation);
+      Invocation.returning(calledInvocation, tracker, 2);
     }
 
-    // then in the calling method we can access callingReadFrame.returnedTrackerPoint
-    assertEquals(tracker, callingReadFrame.returnTracker);
-    assertEquals(2, callingReadFrame.returnIndex);
+    assertEquals(tracker, callingInvocation.returnTracker);
+    assertEquals(2, callingInvocation.returnIndex);
   }
 
   @Test
   public void testStartWithoutCalling() {
+    assertNull(ShadowStack.start("read"));
+  }
+
+  @Test
+  public void testUseEachInvocationOnlyOnce() {
+    Invocation calling = ShadowStack.calling("read");
+    Invocation called = ShadowStack.start("read");
+    assertSame(calling, called);
     assertNull(ShadowStack.start("read"));
   }
 }

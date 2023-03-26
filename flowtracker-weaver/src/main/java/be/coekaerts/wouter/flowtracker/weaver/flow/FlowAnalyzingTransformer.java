@@ -156,7 +156,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
      * our added code without worrying about where they have definitely been set. Also, adding new
      * variables anywhere else with {@link LocalVariablesSorter} in a method that has frames (jumps)
      * is practically impossible because it does not properly update frames (see
-     * https://gitlab.ow2.org/asm/asm/-/issues/316352).
+     * <a href="https://gitlab.ow2.org/asm/asm/-/issues/316352">asm#316352</a>).
      */
     private TrackLocal newLocal(Type type, AbstractInsnNode initialValue, String sourceForComment) {
       TrackLocal local = new TrackLocal(type, varSorter.newLocal(type));
@@ -259,6 +259,9 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
             && ("java/lang/String".equals(mInsn.owner)
             || "java/lang/CharSequence".equals(mInsn.owner))) {
           return new CharAtValue(flowMethodAdapter, mInsn);
+        } else if ("read".equals(mInsn.name) && mInsn.desc.endsWith("I")) {
+          // TODO better conditions for when to track call
+          return new InvocationReturnValue(flowMethodAdapter, mInsn);
         } else if ("be/coekaerts/wouter/flowtracker/test/FlowTester".equals(mInsn.owner)) {
           if ("createSourceChar".equals(mInsn.name) || "createSourceByte".equals(mInsn.name)) {
             return new TesterValue(flowMethodAdapter, mInsn);

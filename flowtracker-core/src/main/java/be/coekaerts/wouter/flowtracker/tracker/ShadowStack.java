@@ -4,47 +4,47 @@ package be.coekaerts.wouter.flowtracker.tracker;
  * Facilitates tracking of primitive values through calls, for return values and parameters.
  */
 public class ShadowStack {
-  private static final ThreadLocal<Frame> pending = new ThreadLocal<>();
+  private static final ThreadLocal<Invocation> pending = new ThreadLocal<>();
 
   /**
    * Called by a caller before calling another method through which we want to track return or
    * parameter values.
    */
-  public static Frame calling(String desc) {
-    Frame frame = new Frame(desc);
-    pending.set(frame);
-    return frame;
+  public static Invocation calling(String desc) {
+    Invocation invocation = new Invocation(desc);
+    pending.set(invocation);
+    return invocation;
   }
 
   /**
    * Called inside the called method
    */
-  public static Frame start(String desc) {
-    Frame frame = pending.get();
-    if (frame != null) {
+  public static Invocation start(String desc) {
+    Invocation invocation = pending.get();
+    if (invocation != null) {
       pending.remove();
-      if (desc.equals(frame.desc)) {
-        return frame;
+      if (desc.equals(invocation.desc)) {
+        return invocation;
       }
     }
     return null;
   }
 
   /** Represents a method call, to both the caller and callee */
-  public static class Frame {
+  public static class Invocation {
     private final String desc;
     public Tracker returnTracker;
     public int returnIndex;
 
-    private Frame(String desc) {
+    private Invocation(String desc) {
       this.desc = desc;
     }
 
     /** Sets the source tracker of a returned value */
-    public static void returning(Frame frame, Tracker tracker, int index) {
-      if (frame != null) {
-        frame.returnTracker = tracker;
-        frame.returnIndex = index;
+    public static void returning(Invocation invocation, Tracker tracker, int index) {
+      if (invocation != null) {
+        invocation.returnTracker = tracker;
+        invocation.returnIndex = index;
       }
     }
   }

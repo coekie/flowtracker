@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import org.junit.Test;
@@ -33,6 +34,7 @@ public class FlowAnalyzingTransformerTest {
   @Test
   public void testArraycopy() {
     testTransform(new Object() {
+                    @SuppressWarnings("unused")
                     void t(byte[] bytes1, byte[] bytes2) {
                       System.arraycopy(bytes1, 1, bytes2, 2, 3);
                     }
@@ -66,6 +68,7 @@ public class FlowAnalyzingTransformerTest {
   @Test
   public void testTracker() {
     testTransform(new Object() {
+                    @SuppressWarnings("unused")
                     void t(byte[] bytes1, byte[] bytes2) {
                       bytes1[1] = bytes2[2];
                     }
@@ -120,6 +123,7 @@ public class FlowAnalyzingTransformerTest {
   @Test
   public void testFrames() {
     testTransform(new Object() {
+                    @SuppressWarnings("unused")
                     void t(char[] out, char[] in, boolean b) {
                       char ch = in[0];
                       if (b) {
@@ -191,10 +195,12 @@ public class FlowAnalyzingTransformerTest {
 
   static char[] myCharArray;
   static boolean myBoolean;
+  static InputStream inputStream;
 
   @Test
   public void testFramesLoop() {
     testTransform(new Object() {
+                    @SuppressWarnings("unused")
                     void t() {
                       while (myBoolean) {
                         myCharArray[0] = myCharArray[1];
@@ -273,6 +279,7 @@ public class FlowAnalyzingTransformerTest {
   @Test
   public void booleanArrayStore() {
     testTransform(new Object() {
+                    @SuppressWarnings("unused")
                     void t(boolean[] bs) {
                       bs[0] = true;
                     }
@@ -291,6 +298,51 @@ public class FlowAnalyzingTransformerTest {
             + "RETURN\n"
             + "MAXSTACK = 3\n"
             + "MAXLOCALS = 2\n");
+  }
+
+  @Test
+  public void showStackCallRead() {
+    testTransform(new Object() {
+                    @SuppressWarnings("unused")
+                    void t(byte[] bytes) throws IOException {
+                      bytes[1] = (byte) inputStream.read();
+                    }
+                  },
+        // original code
+        "ALOAD 1\n"
+            + "ICONST_1\n"
+            + "GETSTATIC $THISTEST$.inputStream : Ljava/io/InputStream;\n"
+            + "INVOKEVIRTUAL java/io/InputStream.read ()I\n"
+            + "I2B\n"
+            + "BASTORE\n"
+            + "RETURN\n"
+            + "MAXSTACK = 3\n"
+            + "MAXLOCALS = 2\n",
+        // transformed code
+        "// Initialize newLocal InvocationReturnValue invocation\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 2\n"
+            + "ALOAD 1\n"
+            + "ICONST_1\n"
+            + "GETSTATIC $THISTEST$.inputStream : Ljava/io/InputStream;\n"
+            + "// InvocationReturnValue.insertTrackStatements\n"
+            + "LDC \"read ()I\"\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/ShadowStack.calling (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
+            + "ASTORE 2\n"
+            + "INVOKEVIRTUAL java/io/InputStream.read ()I\n"
+            + "I2B\n"
+            + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)\n"
+            + "// InvocationReturnValue.loadSourceTracker\n"
+            + "ALOAD 2\n"
+            + "GETFIELD be/coekaerts/wouter/flowtracker/tracker/Invocation.returnTracker : Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "// InvocationReturnValue.loadSourceIndex\n"
+            + "ALOAD 2\n"
+            + "GETFIELD be/coekaerts/wouter/flowtracker/tracker/Invocation.returnIndex : I\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setByte ([BIBLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
+            + "// end ArrayStore.insertTrackStatements\n"
+            + "RETURN\n"
+            + "MAXSTACK = 6\n"
+            + "MAXLOCALS = 3\n");
   }
 
   /**
@@ -328,7 +380,7 @@ public class FlowAnalyzingTransformerTest {
     // verify bytecode using asm. this is not as thorough as the jvm, but gives more helpful error
     // messages when it fails
     CheckClassAdapter.verify(new ClassReader(classWriter.toByteArray()), false, verifyPrintWriter);
-    //assertEquals("", verifyStringWriter.toString());
+    assertEquals("", verifyStringWriter.toString());
 
     try {
       verifyBytecodeJvm(className, classWriter.toByteArray());
