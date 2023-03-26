@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
-import be.coekaerts.wouter.flowtracker.tracker.ShadowStack.Invocation;
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -26,7 +26,7 @@ class InvocationReturnValue extends TrackableValue {
     // on the stack before the charAt call: String target, int index
 
     invocationLocal = flowMethodAdapter.newLocalForObject(
-        Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/ShadowStack$Invocation;"),
+        Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"),
         "InvocationReturnValue invocation");
 
     InsnList toInsert = new InsnList();
@@ -35,7 +35,7 @@ class InvocationReturnValue extends TrackableValue {
     toInsert.add(new LdcInsnNode(mInsn.name + " " + mInsn.desc));
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/tracker/ShadowStack",
+            "be/coekaerts/wouter/flowtracker/tracker/Invocation",
             "calling",
             "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;",
             false));

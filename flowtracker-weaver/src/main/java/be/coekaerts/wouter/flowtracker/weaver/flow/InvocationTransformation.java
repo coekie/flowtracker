@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
-import be.coekaerts.wouter.flowtracker.tracker.ShadowStack.Invocation;
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
@@ -19,11 +19,11 @@ class InvocationTransformation {
       return;
     }
     invocationLocal = methodNode.newLocal(
-        Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/ShadowStack$Invocation;"),
+        Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"),
         List.of(
             new LdcInsnNode(methodNode.name + " " + methodNode.desc),
             new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/tracker/ShadowStack",
+            "be/coekaerts/wouter/flowtracker/tracker/Invocation",
             "start",
             "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;",
             false)

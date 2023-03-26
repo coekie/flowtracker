@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
-import be.coekaerts.wouter.flowtracker.tracker.ShadowStack.Invocation;
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
