@@ -10,6 +10,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -126,6 +127,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         } else if (insn.getOpcode() == Opcodes.IRETURN
             && InvocationReturnValue.shouldInstrumentInvocation(name, desc)) {
           stores.add(new InvocationReturnStore((InsnNode) insn, frame, invocation));
+        } else if (insn.getOpcode() == Opcodes.PUTFIELD) {
+          stores.add(new FieldStore((FieldInsnNode) insn, frame));
         }
       }
 
