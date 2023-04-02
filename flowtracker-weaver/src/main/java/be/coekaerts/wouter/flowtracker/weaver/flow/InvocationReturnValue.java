@@ -64,6 +64,11 @@ class InvocationReturnValue extends TrackableValue {
 
   // TODO better conditions for when to track call
   static boolean shouldInstrumentInvocation(String name, String desc) {
-    return "read".equals(name) && desc.endsWith("I");
+    // heuristic guessing which methods are worth tracking the return value of, because that
+    // probably is a char or byte read from somewhere
+    return name.startsWith("read") && desc.endsWith("I")
+        // don't instrument methods where the output is going through a buffer passed into it as
+        // parameter. for those, the returned value is probably the length
+        && !desc.contains("[") && !desc.contains("Buffer");
   }
 }

@@ -198,6 +198,7 @@ public class FlowAnalyzingTransformerTest {
   }
 
   static char[] myCharArray;
+  static char[] myByteArray;
   static boolean myBoolean;
   static InputStream inputStream;
 
@@ -357,57 +358,57 @@ public class FlowAnalyzingTransformerTest {
   public void invocationReturnStore() {
     testTransform(new Object() {
                     @SuppressWarnings("unused")
-                    int read(byte[] bytes) {
-                      return bytes[1];
+                    int read() {
+                      return myByteArray[1];
                     }
                   },
         // original code
-        "ALOAD 1\n"
+        "GETSTATIC $THISTEST$.myByteArray : [C\n"
             + "ICONST_1\n"
-            + "BALOAD\n"
+            + "CALOAD\n"
             + "IRETURN\n"
             + "MAXSTACK = 2\n"
-            + "MAXLOCALS = 2\n",
+            + "MAXLOCALS = 1\n",
         // transformed code
         "// Initialize newLocal ArrayLoadValue array\n"
             + "ACONST_NULL\n"
-            + "ASTORE 2\n"
+            + "ASTORE 1\n"
             + "// Initialize newLocal ArrayLoadValue index\n"
             + "LDC -1\n"
-            + "ISTORE 3\n"
+            + "ISTORE 2\n"
             + "// Initialize newLocal ArrayLoadValue PointTracker\n"
             + "ACONST_NULL\n"
-            + "ASTORE 4\n"
+            + "ASTORE 3\n"
             + "// Initialize newLocal InvocationTransformation invocation\n"
-            + "LDC \"read ([B)I\"\n"
+            + "LDC \"read ()I\"\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.start (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
-            + "ASTORE 5\n"
-            + "ALOAD 1\n"
+            + "ASTORE 4\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
             + "ICONST_1\n"
             + "// begin ArrayLoadValue.insertTrackStatements\n"
-            + "ISTORE 3\n"
-            + "ASTORE 2\n"
-            + "ALOAD 2\n"
-            + "ILOAD 3\n"
+            + "ISTORE 2\n"
+            + "ASTORE 1\n"
+            + "ALOAD 1\n"
+            + "ILOAD 2\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook.getElementTracker (Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;\n"
-            + "ASTORE 4\n"
-            + "ALOAD 2\n"
-            + "ILOAD 3\n"
+            + "ASTORE 3\n"
+            + "ALOAD 1\n"
+            + "ILOAD 2\n"
             + "// end ArrayLoadValue.insertTrackStatements\n"
-            + "BALOAD\n"
+            + "CALOAD\n"
             + "// begin InvocationReturnStore.insertTrackStatements\n"
-            + "ALOAD 5\n"
-            + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
             + "ALOAD 4\n"
+            + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
+            + "ALOAD 3\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
             + "// ArrayLoadValue.loadSourceIndex: PointTracker.getIndex(pointTracker)\n"
-            + "ALOAD 4\n"
+            + "ALOAD 3\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.returning (Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
             + "// end InvocationReturnStore.insertTrackStatements\n"
             + "IRETURN\n"
             + "MAXSTACK = 4\n"
-            + "MAXLOCALS = 6\n");
+            + "MAXLOCALS = 5\n");
   }
 
   /**

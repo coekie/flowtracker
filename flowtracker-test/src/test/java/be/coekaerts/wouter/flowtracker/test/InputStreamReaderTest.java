@@ -16,7 +16,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 // we used to handle tracking on the InputStreamReader level, but now it's all handled on
@@ -58,9 +57,9 @@ public class InputStreamReaderTest {
   }
 
   @Test public void readSingleChar() throws IOException {
-    assertEquals('a', reader.read());
+    FlowTester.assertTrackedValue((char) reader.read(), 'a', tracker, 0);
     assertContentEquals("a");
-    assertEquals('b', reader.read());
+    FlowTester.assertTrackedValue((char) reader.read(), 'b', tracker, 1);
     assertContentEquals("ab");
 
     // read the rest
@@ -113,8 +112,7 @@ public class InputStreamReaderTest {
     assertContentEquals("ab");
   }
 
-  // TODO StreamDecoder has a special case for len==1, treats it like read(), which we don't track
-  @Ignore
+  // StreamDecoder has a special case for len==1, treats it like read()
   @Test
   public void readCharArraySize1() throws IOException {
     char[] buffer1 = new char[1];
