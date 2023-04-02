@@ -3,7 +3,6 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import be.coekaerts.wouter.flowtracker.tracker.FieldRepository;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -26,7 +25,7 @@ class FieldStore extends Store {
     BasicValue stored = getStackFromTop(0);
 
     // only track char or byte
-    if (stored.getType().getSort() != Type.CHAR && stored.getType().getSort() != Type.BYTE) {
+    if (!FieldValue.shouldTrackType(stored.getType())) {
       return;
     }
 

@@ -230,6 +230,13 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
           // It's ok to keep it as the same type, because this is going from a BasicValue.INT_VALUE
           // (which includes byte, char & int) to another INT_VALUE.
           return value;
+        case Opcodes.GETFIELD:
+          FieldInsnNode fieldInsn = (FieldInsnNode) insn;
+          Type fieldType = Type.getType(((FieldInsnNode) insn).desc);
+          if (FieldValue.shouldTrackType(fieldType)) {
+            return new FieldValue(flowMethodAdapter, fieldInsn, fieldType);
+          }
+          break;
       }
 
       return super.unaryOperation(insn, value);
