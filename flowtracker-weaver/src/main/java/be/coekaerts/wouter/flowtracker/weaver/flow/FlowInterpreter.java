@@ -175,9 +175,18 @@ class FlowInterpreter extends Interpreter<FlowValue> {
 
   @Override
   public FlowValue merge(FlowValue value1, FlowValue value2) {
-    if (!value1.equals(value2)) {
-      return FlowValue.UNINITIALIZED_VALUE;
+    if (value1.equals(value2)) {
+      return value1;
+    } else {
+      Type type1 = value1.getType();
+      Type type2 = value2.getType();
+      if (type1 == null || type2 == null) {
+        return FlowValue.UNINITIALIZED_VALUE;
+      } else if (type1.getSort() == Type.OBJECT && type2.getSort() == Type.OBJECT) {
+        return FlowValue.REFERENCE_VALUE;
+      } else {
+        return FlowValue.UNINITIALIZED_VALUE;
+      }
     }
-    return value1;
   }
 }
