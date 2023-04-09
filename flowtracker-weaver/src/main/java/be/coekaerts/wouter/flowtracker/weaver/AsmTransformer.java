@@ -10,6 +10,8 @@ import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
 import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
 import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
+import be.coekaerts.wouter.flowtracker.weaver.debug.DumpTextTransformer;
+import be.coekaerts.wouter.flowtracker.weaver.debug.RealCommentator;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,6 +33,7 @@ class AsmTransformer implements ClassFileTransformer {
   private final Map<String, ClassHookSpec> specs = new HashMap<>();
   private final String[] packagesToInstrument;
   private final File dumpByteCodePath;
+  private final File dumpTextPath;
   private final Map<String, String> config;
 
   public AsmTransformer(Map<String, String> config) {
@@ -39,6 +42,9 @@ class AsmTransformer implements ClassFileTransformer {
         : new String[0];
     dumpByteCodePath = config.containsKey("dumpByteCode")
         ? new File(config.get("dumpByteCode"))
+        : null;
+    dumpTextPath = config.containsKey("dumpText")
+        ? new File(config.get("dumpText"))
         : null;
     this.config = config;
 
@@ -240,7 +246,15 @@ class AsmTransformer implements ClassFileTransformer {
     if (spec != null) {
       return spec;
     } else if (shouldAnalyze(className)) {
-      return new FlowAnalyzingTransformer();
+      if (dumpTextPath == null) {
+        return new FlowAnalyzingTransformer();
+      } else {
+        // if we're dumping the text, then use RealCommentator to instrument it, so that the dumped
+        // text includes comments
+        FlowAnalyzingTransformer flowTransformer
+            = new FlowAnalyzingTransformer(new RealCommentator());
+        return new DumpTextTransformer(flowTransformer, className, dumpTextPath);
+      }
     } else {
       return null;
     }

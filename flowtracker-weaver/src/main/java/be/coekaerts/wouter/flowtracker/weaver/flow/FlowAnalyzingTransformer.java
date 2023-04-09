@@ -29,7 +29,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     this.commentator = new Commentator(); // noop Commentator
   }
 
-  FlowAnalyzingTransformer(Commentator commentator) {
+  public FlowAnalyzingTransformer(Commentator commentator) {
     this.commentator = commentator;
   }
 

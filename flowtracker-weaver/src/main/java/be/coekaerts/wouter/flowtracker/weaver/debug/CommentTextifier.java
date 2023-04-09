@@ -1,6 +1,6 @@
-package be.coekaerts.wouter.flowtracker.weaver.flow;
+package be.coekaerts.wouter.flowtracker.weaver.debug;
 
-import be.coekaerts.wouter.flowtracker.weaver.flow.RealCommentator.CommentLabel;
+import be.coekaerts.wouter.flowtracker.weaver.debug.RealCommentator.CommentLabel;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.util.Textifier;

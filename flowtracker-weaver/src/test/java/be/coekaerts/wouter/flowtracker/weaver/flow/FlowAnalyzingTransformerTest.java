@@ -2,6 +2,8 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import static org.junit.Assert.assertEquals;
 
+import be.coekaerts.wouter.flowtracker.weaver.debug.CommentTextifier;
+import be.coekaerts.wouter.flowtracker.weaver.debug.RealCommentator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
