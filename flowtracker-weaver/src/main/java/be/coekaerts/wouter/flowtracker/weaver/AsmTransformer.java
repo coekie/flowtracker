@@ -266,6 +266,7 @@ class AsmTransformer implements ClassFileTransformer {
         || className.equals("java/lang/AbstractStringBuilder")
         || className.equals("java/io/BufferedWriter")
         || className.equals("java/io/BufferedOutputStream")
+        || className.equals("java/io/ByteArrayInputStream")
         || className.equals("java/io/ByteArrayOutputStream")
         || className.equals("java/io/InputStreamReader")
         || className.equals("java/nio/HeapCharBuffer")
