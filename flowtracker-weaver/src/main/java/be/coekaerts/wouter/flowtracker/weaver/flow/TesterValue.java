@@ -16,7 +16,7 @@ class TesterValue extends TrackableValue {
   private TrackLocal testerLocal;
 
   TesterValue(FlowMethodAdapter flowMethodAdapter, MethodInsnNode mInsn) {
-    super(flowMethodAdapter, Type.getReturnType(mInsn.desc));
+    super(flowMethodAdapter, Type.getReturnType(mInsn.desc), mInsn);
     this.mInsn = mInsn;
   }
 

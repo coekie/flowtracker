@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -11,8 +12,9 @@ import org.objectweb.asm.tree.MethodInsnNode;
 public class ConstantValue extends TrackableValue {
   private final String descriptor;
 
-  ConstantValue(FlowMethodAdapter flowMethodAdapter, Type type, String descriptor) {
-    super(flowMethodAdapter, type);
+  ConstantValue(FlowMethodAdapter flowMethodAdapter, Type type, String descriptor,
+      AbstractInsnNode insn) {
+    super(flowMethodAdapter, type, insn);
     this.descriptor = descriptor;
   }
 

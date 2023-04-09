@@ -2,16 +2,19 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 
 /** A value of which we can track where it came from */
 abstract class TrackableValue extends FlowValue {
   final FlowMethodAdapter flowMethodAdapter;
+  private final AbstractInsnNode insn;
   private boolean tracked;
 
-  TrackableValue(FlowMethodAdapter flowMethodAdapter, Type type) {
+  TrackableValue(FlowMethodAdapter flowMethodAdapter, Type type, AbstractInsnNode insn) {
     super(type);
     this.flowMethodAdapter = flowMethodAdapter;
+    this.insn = insn;
   }
 
   void ensureTracked() {
@@ -19,6 +22,11 @@ abstract class TrackableValue extends FlowValue {
       insertTrackStatements();
       tracked = true;
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o == this || (super.equals(o) && ((TrackableValue) o).insn == this.insn);
   }
 
   /**

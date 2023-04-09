@@ -18,7 +18,7 @@ class ArrayLoadValue extends TrackableValue {
   private TrackLocal pointTrackerLocal;
 
   ArrayLoadValue(FlowMethodAdapter flowMethodAdapter, InsnNode insn, Type type, Type arrayType) {
-    super(flowMethodAdapter, type);
+    super(flowMethodAdapter, type, insn);
     this.insn = insn;
     this.arrayType = arrayType;
   }

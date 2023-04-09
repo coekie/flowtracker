@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import java.util.Objects;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
@@ -28,5 +29,21 @@ class FlowValue extends BasicValue {
 
   FlowValue(Type type) {
     super(type);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) {
+      return true;
+    } else if (o.getClass() != this.getClass()) {
+      return false;
+    } else {
+      return Objects.equals(getType(), ((FlowValue) o).getType());
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return getType() == null ? 0 : getType().hashCode();
   }
 }

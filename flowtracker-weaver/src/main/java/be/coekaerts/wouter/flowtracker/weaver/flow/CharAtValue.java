@@ -17,7 +17,7 @@ class CharAtValue extends TrackableValue {
   private TrackLocal indexLocal;
 
   CharAtValue(FlowMethodAdapter flowMethodAdapter, MethodInsnNode mInsn) {
-    super(flowMethodAdapter, Type.CHAR_TYPE);
+    super(flowMethodAdapter, Type.CHAR_TYPE, mInsn);
     this.mInsn = mInsn;
     // Note: when it can return something else than char, we get type with Type.getReturnType(mInsn.desc)
   }

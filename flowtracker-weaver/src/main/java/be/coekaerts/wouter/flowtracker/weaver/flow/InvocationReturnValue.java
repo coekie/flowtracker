@@ -18,7 +18,7 @@ class InvocationReturnValue extends TrackableValue {
   private TrackLocal invocationLocal;
 
   InvocationReturnValue(FlowMethodAdapter flowMethodAdapter, MethodInsnNode mInsn) {
-    super(flowMethodAdapter, Type.getReturnType(mInsn.desc));
+    super(flowMethodAdapter, Type.getReturnType(mInsn.desc), mInsn);
     this.mInsn = mInsn;
   }
 

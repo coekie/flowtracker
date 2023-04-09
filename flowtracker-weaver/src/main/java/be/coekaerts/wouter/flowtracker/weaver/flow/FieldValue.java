@@ -18,7 +18,7 @@ class FieldValue extends TrackableValue {
   private TrackLocal pointTrackerLocal;
 
   FieldValue(FlowMethodAdapter flowMethodAdapter, FieldInsnNode insn, Type type) {
-    super(flowMethodAdapter, type);
+    super(flowMethodAdapter, type, insn);
     this.insn = insn;
   }
 
@@ -83,6 +83,9 @@ class FieldValue extends TrackableValue {
   }
 
   static boolean shouldTrackType(Type type) {
+    if (type == null) {
+      return false;
+    }
     int sort = type.getSort();
     return sort == Type.CHAR || sort == Type.BYTE;
   }

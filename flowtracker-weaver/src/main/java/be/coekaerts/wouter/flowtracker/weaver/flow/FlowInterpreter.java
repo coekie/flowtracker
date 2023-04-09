@@ -83,7 +83,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       case Opcodes.ICONST_5:
       case Opcodes.SIPUSH:
       case Opcodes.BIPUSH:
-        return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, flowMethodAdapter.owner);
+        return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, flowMethodAdapter.owner, insn);
     }
     return toFlowValue(basicInterpreter.newOperation(insn));
   }
