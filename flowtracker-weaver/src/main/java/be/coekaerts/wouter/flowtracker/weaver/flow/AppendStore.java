@@ -4,7 +4,6 @@ import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.Flow
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
 /** Invocation of {@link StringBuilder#append(char)} or {@link StringBuffer#append(char)}. */
@@ -12,13 +11,13 @@ import org.objectweb.asm.tree.analysis.Frame;
 class AppendStore extends Store {
   private final MethodInsnNode invokeInsn;
 
-  AppendStore(MethodInsnNode invokeInsn, Frame<BasicValue> frame) {
+  AppendStore(MethodInsnNode invokeInsn, Frame<FlowValue> frame) {
     super(frame);
     this.invokeInsn = invokeInsn;
   }
 
   void insertTrackStatements(FlowMethodAdapter methodNode) {
-    BasicValue stored = getCharValue();
+    FlowValue stored = getCharValue();
 
     if (stored instanceof TrackableValue) { // if we know where the value we are storing came from
       InsnList toInsert = new InsnList();
@@ -54,7 +53,7 @@ class AppendStore extends Store {
   }
 
   /** The value being stored */
-  private BasicValue getCharValue() {
+  private FlowValue getCharValue() {
     return getStackFromTop(0);
   }
 }

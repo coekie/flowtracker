@@ -8,7 +8,6 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
 /** The storing of a value in a field. */
@@ -16,13 +15,13 @@ import org.objectweb.asm.tree.analysis.Frame;
 class FieldStore extends Store {
   private final FieldInsnNode storeInsn;
 
-  FieldStore(FieldInsnNode storeInsn, Frame<BasicValue> frame) {
+  FieldStore(FieldInsnNode storeInsn, Frame<FlowValue> frame) {
     super(frame);
     this.storeInsn = storeInsn;
   }
 
   void insertTrackStatements(FlowMethodAdapter methodNode) {
-    BasicValue stored = getStackFromTop(0);
+    FlowValue stored = getStackFromTop(0);
 
     // only track char or byte
     if (!FieldValue.shouldTrackType(stored.getType())) {

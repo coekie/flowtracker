@@ -6,7 +6,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
 /** The returning of a value of a method that may be instrumented with {@link Invocation} */
@@ -14,7 +13,7 @@ public class InvocationReturnStore extends Store {
   private final InsnNode returnInsn;
   private final InvocationTransformation invocation;
 
-  InvocationReturnStore(InsnNode returnInsn, Frame<BasicValue> frame,
+  InvocationReturnStore(InsnNode returnInsn, Frame<FlowValue> frame,
       InvocationTransformation invocation) {
     super(frame);
     this.returnInsn = returnInsn;
@@ -23,7 +22,7 @@ public class InvocationReturnStore extends Store {
 
   @Override
   void insertTrackStatements(FlowMethodAdapter methodNode) {
-    BasicValue returnedValue = getStackFromTop(0);
+    FlowValue returnedValue = getStackFromTop(0);
 
     // if we know where the value we are returning came from
     if (returnedValue instanceof TrackableValue) {

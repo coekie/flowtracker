@@ -18,7 +18,6 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
 public class FlowAnalyzingTransformer implements ClassAdapterFactory {
@@ -80,14 +79,14 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     private void doVisitEnd() throws AnalyzerException {
       super.visitEnd();
       FlowInterpreter interpreter = new FlowInterpreter(this);
-      Analyzer<BasicValue> analyzer = new Analyzer<>(interpreter);
-      Frame<BasicValue>[] frames = analyzer.analyze(owner, this);
+      Analyzer<FlowValue> analyzer = new Analyzer<>(interpreter);
+      Frame<FlowValue>[] frames = analyzer.analyze(owner, this);
 
       List<Store> stores = new ArrayList<>();
 
       for (int i = 0; i < instructions.size(); i++) {
         AbstractInsnNode insn = instructions.get(i);
-        Frame<BasicValue> frame = frames[i];
+        Frame<FlowValue> frame = frames[i];
         if (insn.getOpcode() == Opcodes.CASTORE) {
           stores.add(ArrayStore.createCharArrayStore((InsnNode) insn, frame));
         } else if (insn.getOpcode() == Opcodes.BASTORE

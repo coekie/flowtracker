@@ -1,20 +1,19 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
-import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
 /** Represents an instruction that stores a (possibly tracked) value in an object. */
 abstract class Store {
-  final Frame<BasicValue> frame;
+  final Frame<FlowValue> frame;
 
-  Store(Frame<BasicValue> frame) {
+  Store(Frame<FlowValue> frame) {
     this.frame = frame;
   }
 
   abstract void insertTrackStatements(FlowMethodAdapter methodNode);
 
-  BasicValue getStackFromTop(int indexFromTop) {
+  FlowValue getStackFromTop(int indexFromTop) {
     return frame.getStack(frame.getStackSize() - indexFromTop - 1);
   }
 }

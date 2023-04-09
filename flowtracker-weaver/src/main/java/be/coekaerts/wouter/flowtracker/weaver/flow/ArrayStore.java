@@ -6,7 +6,6 @@ import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
 /** The storing of a value in an array, e.g. a char in a char[]. */
@@ -16,14 +15,14 @@ class ArrayStore extends Store {
   /** Method in ArrayHook to call as a replacement for the array store operation */
   private final String hookMethod;
 
-  ArrayStore(InsnNode storeInsn, Frame<BasicValue> frame, String hookMethod) {
+  ArrayStore(InsnNode storeInsn, Frame<FlowValue> frame, String hookMethod) {
     super(frame);
     this.storeInsn = storeInsn;
     this.hookMethod = hookMethod;
   }
 
   void insertTrackStatements(FlowMethodAdapter methodNode) {
-    BasicValue stored = getStored();
+    FlowValue stored = getStored();
 
     InsnList toInsert = new InsnList();
 
@@ -56,16 +55,16 @@ class ArrayStore extends Store {
   }
 
   /** The value being stored */
-  private BasicValue getStored() {
+  private FlowValue getStored() {
     return getStackFromTop(0);
   }
 
-  static ArrayStore createCharArrayStore(InsnNode storeInsn, Frame<BasicValue> frame) {
+  static ArrayStore createCharArrayStore(InsnNode storeInsn, Frame<FlowValue> frame) {
     return new ArrayStore(storeInsn, frame,
         "void setChar(char[],int,char,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
   }
 
-  static ArrayStore createByteArrayStore(InsnNode storeInsn, Frame<BasicValue> frame) {
+  static ArrayStore createByteArrayStore(InsnNode storeInsn, Frame<FlowValue> frame) {
     return new ArrayStore(storeInsn, frame,
         "void setByte(byte[],int,byte,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
   }

@@ -12,28 +12,67 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicInterpreter;
 import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Interpreter;
 
-class FlowInterpreter extends BasicInterpreter {
+class FlowInterpreter extends Interpreter<FlowValue> {
+  /** A BasicInterpreter that we delegate to, to figure out types */
+  private final BasicInterpreter basicInterpreter = new BasicInterpreter(Opcodes.ASM9) {
+    @Override
+    public BasicValue newValue(Type type) {
+      return FlowInterpreter.this.newValue(type);
+    }
+  };
+
+  private FlowValue toFlowValue(BasicValue basicValue) {
+    return basicValue == null ? null : newValue(basicValue.getType());
+  }
 
   private final FlowMethodAdapter flowMethodAdapter;
 
-  public FlowInterpreter(FlowMethodAdapter flowMethodAdapter) {
+  FlowInterpreter(FlowMethodAdapter flowMethodAdapter) {
     super(Opcodes.ASM9);
     this.flowMethodAdapter = flowMethodAdapter;
   }
 
   @Override
-  public BasicValue newValue(Type type) {
-    // for char[] and byte[] remember the exact type
-    if (Types.CHAR_ARRAY.equals(type) || Types.BYTE_ARRAY.equals(type)) {
-      return new BasicValue(type);
+  public FlowValue newValue(Type type) {
+    if (type == null) {
+      return FlowValue.UNINITIALIZED_VALUE;
     }
-    // for others the exact type doesn't matter
-    return super.newValue(type);
+
+    // nit: this is inspired by BasicInterpreter, but we probably don't need all these cases
+    //   (see e.g. how SourceInterpreter only uses type.getSize())
+    switch (type.getSort()) {
+      case Type.VOID:
+        return null;
+      case Type.BOOLEAN:
+      case Type.CHAR:
+      case Type.BYTE:
+      case Type.SHORT:
+      case Type.INT:
+        return FlowValue.INT_VALUE;
+      case Type.FLOAT:
+        return FlowValue.FLOAT_VALUE;
+      case Type.LONG:
+        return FlowValue.LONG_VALUE;
+      case Type.DOUBLE:
+        return FlowValue.DOUBLE_VALUE;
+      case Type.ARRAY:
+      case Type.OBJECT:
+        // for char[] and byte[] remember the exact type
+        if (Types.CHAR_ARRAY.equals(type) || Types.BYTE_ARRAY.equals(type)) {
+          return new FlowValue(type);
+        } else {
+          // for others the exact type doesn't matter
+          return FlowValue.REFERENCE_VALUE;
+        }
+      default:
+        throw new AssertionError();
+    }
   }
 
   @Override
-  public BasicValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
+  public FlowValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
     switch (insn.getOpcode()) {
       case Opcodes.ICONST_M1:
       case Opcodes.ICONST_0:
@@ -46,11 +85,16 @@ class FlowInterpreter extends BasicInterpreter {
       case Opcodes.BIPUSH:
         return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, flowMethodAdapter.owner);
     }
-    return super.newOperation(insn);
+    return toFlowValue(basicInterpreter.newOperation(insn));
   }
 
   @Override
-  public BasicValue unaryOperation(AbstractInsnNode insn, BasicValue value)
+  public FlowValue copyOperation(AbstractInsnNode insn, FlowValue value) {
+    return value;
+  }
+
+  @Override
+  public FlowValue unaryOperation(AbstractInsnNode insn, FlowValue value)
       throws AnalyzerException {
     switch (insn.getOpcode()) {
       case Opcodes.I2B:
@@ -70,22 +114,22 @@ class FlowInterpreter extends BasicInterpreter {
         break;
     }
 
-    return super.unaryOperation(insn, value);
+    return toFlowValue(basicInterpreter.unaryOperation(insn, value));
   }
 
   @Override
-  public BasicValue binaryOperation(AbstractInsnNode aInsn, BasicValue value1, BasicValue value2)
+  public FlowValue binaryOperation(AbstractInsnNode aInsn, FlowValue value1, FlowValue value2)
       throws AnalyzerException {
     switch (aInsn.getOpcode()) {
-      case CALOAD: {
+      case Opcodes.CALOAD: {
         InsnNode insn = (InsnNode) aInsn;
         return new ArrayLoadValue(flowMethodAdapter, insn, Type.CHAR_TYPE, Types.CHAR_ARRAY);
       }
-      case BALOAD: {
+      case Opcodes.BALOAD: {
         InsnNode insn = (InsnNode) aInsn;
         return new ArrayLoadValue(flowMethodAdapter, insn, Type.BYTE_TYPE, Types.BYTE_ARRAY);
       }
-      case IAND: {
+      case Opcodes.IAND: {
         // treat `x & constant` as having the same source as x
         if (value2 instanceof ConstantValue) {
           return value1;
@@ -94,11 +138,17 @@ class FlowInterpreter extends BasicInterpreter {
         }
       }
     }
-    return super.binaryOperation(aInsn, value1, value2);
+    return toFlowValue(basicInterpreter.binaryOperation(aInsn, value1, value2));
   }
 
   @Override
-  public BasicValue naryOperation(AbstractInsnNode insn, List<? extends BasicValue> values)
+  public FlowValue ternaryOperation(AbstractInsnNode insn, FlowValue value1, FlowValue value2,
+      FlowValue value3) {
+    return null;
+  }
+
+  @Override
+  public FlowValue naryOperation(AbstractInsnNode insn, List<? extends FlowValue> values)
       throws AnalyzerException {
     if (insn instanceof MethodInsnNode) {
       MethodInsnNode mInsn = (MethodInsnNode) insn;
@@ -116,6 +166,18 @@ class FlowInterpreter extends BasicInterpreter {
         return values.get(0);
       }
     }
-    return super.naryOperation(insn, values);
+    return toFlowValue(basicInterpreter.naryOperation(insn, values));
+  }
+
+  @Override
+  public void returnOperation(AbstractInsnNode insn, FlowValue value, FlowValue expected) {
+  }
+
+  @Override
+  public FlowValue merge(FlowValue value1, FlowValue value2) {
+    if (!value1.equals(value2)) {
+      return FlowValue.UNINITIALIZED_VALUE;
+    }
+    return value1;
   }
 }

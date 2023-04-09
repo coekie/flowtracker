@@ -3,10 +3,9 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.analysis.BasicValue;
 
 /** A value of which we can track where it came from */
-abstract class TrackableValue extends BasicValue {
+abstract class TrackableValue extends FlowValue {
   final FlowMethodAdapter flowMethodAdapter;
   private boolean tracked;
 
