@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import be.coekaerts.wouter.flowtracker.weaver.Types;
 import java.util.Objects;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
@@ -25,7 +26,7 @@ class FlowValue extends BasicValue {
   static final FlowValue DOUBLE_VALUE = new FlowValue(Type.DOUBLE_TYPE);
 
   /** An object or array reference value. */
-  static final FlowValue REFERENCE_VALUE = new FlowValue(Type.getObjectType("java/lang/Object"));
+  static final FlowValue REFERENCE_VALUE = new FlowValue(Types.OBJECT);
 
   FlowValue(Type type) {
     super(type);

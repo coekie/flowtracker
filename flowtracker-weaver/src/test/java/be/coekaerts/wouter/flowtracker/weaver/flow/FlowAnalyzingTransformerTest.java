@@ -413,6 +413,49 @@ public class FlowAnalyzingTransformerTest {
             + "MAXLOCALS = 5\n");
   }
 
+  @Test
+  public void merge() {
+    testTransform(new Object() {
+                    @SuppressWarnings("unused")
+                    int read(boolean b) {
+                      return b ? myByteArray[0] : myByteArray[1];
+                    }
+                  },
+        "ILOAD 1\n"
+            + "IFEQ L0\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
+            + "ICONST_0\n"
+            + "CALOAD\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ I] []\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
+            + "ICONST_1\n"
+            + "CALOAD\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ I] [I]\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 2\n"
+            + "MAXLOCALS = 2\n",
+        "ILOAD 1\n"
+            + "IFEQ L0\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
+            + "ICONST_0\n"
+            + "CALOAD\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ I] []\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
+            + "ICONST_1\n"
+            + "CALOAD\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ I] [I]\n"
+            + "// Here is the MergedValue's merging\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 2\n"
+            + "MAXLOCALS = 2\n");
+  }
+
   /**
    * Given an object of a class that contains one method, tests if the code before and after
    * transformation are as expected;

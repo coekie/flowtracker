@@ -29,6 +29,13 @@ class FlowInterpreter extends Interpreter<FlowValue> {
 
   private final FlowMethodAdapter flowMethodAdapter;
 
+  /**
+   * Frame for which we are merging. That is, for which {@link #merge(FlowValue, FlowValue)}
+   * is being called. Ideally that would be an argument for the merge method, but that's not how
+   * asm works, so instead we set this field before merge is called.
+   */
+  private FlowFrame mergingFrame;
+
   FlowInterpreter(FlowMethodAdapter flowMethodAdapter) {
     super(Opcodes.ASM9);
     this.flowMethodAdapter = flowMethodAdapter;
@@ -173,6 +180,14 @@ class FlowInterpreter extends Interpreter<FlowValue> {
   public void returnOperation(AbstractInsnNode insn, FlowValue value, FlowValue expected) {
   }
 
+  void startMerge(FlowFrame mergingFrame) {
+    this.mergingFrame = mergingFrame;
+  }
+
+  void endMerge() {
+    this.mergingFrame = null;
+  }
+
   @Override
   public FlowValue merge(FlowValue value1, FlowValue value2) {
     if (value1.equals(value2)) {
@@ -180,6 +195,17 @@ class FlowInterpreter extends Interpreter<FlowValue> {
     } else {
       Type type1 = value1.getType();
       Type type2 = value2.getType();
+
+      // TODO we need to handle merging TrackableValue with MergedValue (WIP)
+      //  (because it does multiple passes?). see also SourceInterpreter.
+      // TODO (ideally we'd also do this if only one of the two is trackable)
+      if ((value1 instanceof TrackableValue || value1 instanceof MergedValue)
+          & (value2 instanceof TrackableValue || value2 instanceof MergedValue)) {
+        return new MergedValue(mergeTypes(type1, type2), mergingFrame);
+      }
+
+      // this is duplicating logic in mergeTypes; to avoid creating unnecessary extra FlowValue
+      // instances
       if (type1 == null || type2 == null) {
         return FlowValue.UNINITIALIZED_VALUE;
       } else if (type1.getSort() == Type.OBJECT && type2.getSort() == Type.OBJECT) {
@@ -187,6 +213,18 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       } else {
         return FlowValue.UNINITIALIZED_VALUE;
       }
+    }
+  }
+
+  private Type mergeTypes(Type type1, Type type2) {
+    if (type1 == null || type2 == null) {
+      return null;
+    } else if (type1.equals(type2)) {
+      return type1;
+    } else if (type1.getSort() == Type.OBJECT && type2.getSort() == Type.OBJECT) {
+      return Types.OBJECT;
+    } else {
+      return null; // like FlowValue.UNINITIALIZED_VALUE
     }
   }
 }

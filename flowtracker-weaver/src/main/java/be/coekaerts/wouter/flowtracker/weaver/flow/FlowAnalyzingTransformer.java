@@ -16,7 +16,6 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 
@@ -79,7 +78,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     private void doVisitEnd() throws AnalyzerException {
       super.visitEnd();
       FlowInterpreter interpreter = new FlowInterpreter(this);
-      Analyzer<FlowValue> analyzer = new Analyzer<>(interpreter);
+      FlowAnalyzer analyzer = new FlowAnalyzer(interpreter, this);
       Frame<FlowValue>[] frames = analyzer.analyze(owner, this);
 
       List<Store> stores = new ArrayList<>();
