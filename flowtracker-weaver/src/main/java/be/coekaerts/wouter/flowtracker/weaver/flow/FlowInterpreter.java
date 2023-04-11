@@ -200,8 +200,8 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       //  (because it does multiple passes?). see also SourceInterpreter.
       // TODO (ideally we'd also do this if only one of the two is trackable)
       if ((value1 instanceof TrackableValue || value1 instanceof MergedValue)
-          & (value2 instanceof TrackableValue || value2 instanceof MergedValue)) {
-        return new MergedValue(mergeTypes(type1, type2), mergingFrame);
+          && (value2 instanceof TrackableValue || value2 instanceof MergedValue)) {
+        return new MergedValue(mergeTypes(type1, type2), mergingFrame, value1, value2);
       }
 
       // this is duplicating logic in mergeTypes; to avoid creating unnecessary extra FlowValue
