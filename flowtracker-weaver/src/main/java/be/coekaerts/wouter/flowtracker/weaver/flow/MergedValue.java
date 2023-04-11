@@ -2,7 +2,10 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
 
 /**
  * A value that can come from more than one source due to control flow (e.g. due to if-statements or
@@ -20,6 +23,25 @@ public class MergedValue extends FlowValue {
     add(values, value1);
     add(values, value2);
     this.values = values;
+  }
+
+  @Override
+  boolean isTrackable() {
+    return false;
+  }
+
+  @Override
+  void ensureTracked() {
+  }
+
+  @Override
+  void loadSourceTracker(InsnList toInsert) {
+    toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+  }
+
+  @Override
+  void loadSourceIndex(InsnList toInsert) {
+    toInsert.add(new InsnNode(Opcodes.ICONST_0));
   }
 
   private static void add(Set<TrackableValue> values, FlowValue value) {

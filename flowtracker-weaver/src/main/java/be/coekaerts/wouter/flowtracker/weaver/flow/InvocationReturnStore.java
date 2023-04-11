@@ -25,17 +25,16 @@ public class InvocationReturnStore extends Store {
     FlowValue returnedValue = getStackFromTop(0);
 
     // if we know where the value we are returning came from
-    if (returnedValue instanceof TrackableValue) {
+    if (returnedValue.isTrackable()) {
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "begin InvocationReturnStore.insertTrackStatements");
 
-      TrackableValue trackableReturnValue = (TrackableValue) returnedValue;
-      trackableReturnValue.ensureTracked();
+      returnedValue.ensureTracked();
       invocation.ensureStarted(methodNode);
 
       toInsert.add(invocation.invocationLocal.load());
-      trackableReturnValue.loadSourceTracker(toInsert);
-      trackableReturnValue.loadSourceIndex(toInsert);
+      returnedValue.loadSourceTracker(toInsert);
+      returnedValue.loadSourceIndex(toInsert);
 
       toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
           "be/coekaerts/wouter/flowtracker/tracker/Invocation", "returning",

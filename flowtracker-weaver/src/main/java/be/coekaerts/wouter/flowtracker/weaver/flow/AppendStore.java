@@ -19,16 +19,14 @@ class AppendStore extends Store {
   void insertTrackStatements(FlowMethodAdapter methodNode) {
     FlowValue stored = getCharValue();
 
-    if (stored instanceof TrackableValue) { // if we know where the value we are storing came from
+    if (stored.isTrackable()) { // if we know where the value we are storing came from
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "begin AppendStore.insertTrackStatements: "
           + "AbstractStringBuilderHook.append(sb, c [already on stack], tracker, index");
 
-      TrackableValue trackedStored = (TrackableValue) stored;
-      trackedStored.ensureTracked();
-
-      trackedStored.loadSourceTracker(toInsert);
-      trackedStored.loadSourceIndex(toInsert);
+      stored.ensureTracked();
+      stored.loadSourceTracker(toInsert);
+      stored.loadSourceIndex(toInsert);
 
       methodNode.maxStack = Math.max(frame.getStackSize() + 2, methodNode.maxStack);
 

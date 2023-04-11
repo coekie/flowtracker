@@ -1,36 +1,49 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
-import be.coekaerts.wouter.flowtracker.weaver.Types;
 import java.util.Objects;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
-class FlowValue extends BasicValue {
-
-  /**
-   * An uninitialized value.
-   * @see BasicValue#UNINITIALIZED_VALUE
-   */
-  static final FlowValue UNINITIALIZED_VALUE = new FlowValue(null);
-
-  /** A byte, boolean, char, short, or int value. */
-  static final FlowValue INT_VALUE = new FlowValue(Type.INT_TYPE);
-
-  /** A float value. */
-  static final FlowValue FLOAT_VALUE = new FlowValue(Type.FLOAT_TYPE);
-
-  /** A long value. */
-  static final FlowValue LONG_VALUE = new FlowValue(Type.LONG_TYPE);
-
-  /** A double value. */
-  static final FlowValue DOUBLE_VALUE = new FlowValue(Type.DOUBLE_TYPE);
-
-  /** An object or array reference value. */
-  static final FlowValue REFERENCE_VALUE = new FlowValue(Types.OBJECT);
+/**
+ * A value in our flow analysis. That is, a representation of what we know about a certain value
+ * (on the stack or in a local variable) at a certain point in the execution of a method.
+ */
+abstract class FlowValue extends BasicValue {
 
   FlowValue(Type type) {
     super(type);
   }
+
+  /**
+   * Insert the statements needed to keep track of the origin of this value, if applicable.
+   * Idempotent: may be called multiple times; tracking should only be setup once.
+   */
+  abstract void ensureTracked();
+
+  /**
+   * Returns if we can know where this value came from.
+   * <p>
+   * If this is false, then {@link #loadSourceTracker(InsnList)} will always load {@code null}.
+   * If this return true, then that's no guarantee that {@link #loadSourceTracker(InsnList)} is
+   * never {@code null}.
+   */
+  abstract boolean isTrackable();
+
+  /**
+   * Add the tracker from which this value came on top of the stack.
+   * The instructions inserted should use maximum 2 stack entries.
+   *
+   * @param toInsert list of instructions where the needed statements are added to at the end
+   */
+  abstract void loadSourceTracker(InsnList toInsert);
+
+  /**
+   * Add the index from which this value came on top of the stack
+   *
+   * @param toInsert list of instructions where the needed statements are added to at the end
+   */
+  abstract void loadSourceIndex(InsnList toInsert);
 
   @Override
   public boolean equals(Object o) {

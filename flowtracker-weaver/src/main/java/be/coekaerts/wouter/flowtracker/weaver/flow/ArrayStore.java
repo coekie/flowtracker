@@ -29,16 +29,10 @@ class ArrayStore extends Store {
     methodNode.addComment(toInsert, "begin ArrayStore.insertTrackStatements: "
         + "ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)");
 
-    if (stored instanceof TrackableValue) { // if we know where the value we are storing came from
-      TrackableValue trackedStored = (TrackableValue) stored;
-      trackedStored.ensureTracked();
-
-      trackedStored.loadSourceTracker(toInsert);
-      trackedStored.loadSourceIndex(toInsert);
-    } else {
-      toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
-      toInsert.add(new InsnNode(Opcodes.ICONST_0));
-    }
+    // note: we do this even for UntrackableValues
+    stored.ensureTracked();
+    stored.loadSourceTracker(toInsert);
+    stored.loadSourceIndex(toInsert);
 
     methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
 

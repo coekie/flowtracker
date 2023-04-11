@@ -23,17 +23,16 @@ class TesterStore extends Store {
   void insertTrackStatements(FlowMethodAdapter methodNode) {
     FlowValue stored = getStackFromTop(valueStackIndexFromTop);
 
-    if (stored instanceof TrackableValue) { // if we know where the value we are storing came from
-      TrackableValue trackedStored = (TrackableValue) stored;
-      trackedStored.ensureTracked();
+    if (stored.isTrackable()) { // if we know where the value we are storing came from
+      stored.ensureTracked();
 
       // replace the call with a call to the $tracked_ method, with two extra arguments: the tracker
       // and the index
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "begin TesterStore.insertTrackStatements");
 
-      trackedStored.loadSourceTracker(toInsert);
-      trackedStored.loadSourceIndex(toInsert);
+      stored.loadSourceTracker(toInsert);
+      stored.loadSourceIndex(toInsert);
 
       methodNode.addComment(toInsert,
           "end TesterStore.insertTrackStatements. also replaced next invocation");

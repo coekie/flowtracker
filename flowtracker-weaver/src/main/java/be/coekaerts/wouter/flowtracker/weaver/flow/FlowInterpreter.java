@@ -44,7 +44,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
   @Override
   public FlowValue newValue(Type type) {
     if (type == null) {
-      return FlowValue.UNINITIALIZED_VALUE;
+      return UntrackableValue.UNINITIALIZED_VALUE;
     }
 
     // nit: this is inspired by BasicInterpreter, but we probably don't need all these cases
@@ -57,21 +57,21 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       case Type.BYTE:
       case Type.SHORT:
       case Type.INT:
-        return FlowValue.INT_VALUE;
+        return UntrackableValue.INT_VALUE;
       case Type.FLOAT:
-        return FlowValue.FLOAT_VALUE;
+        return UntrackableValue.FLOAT_VALUE;
       case Type.LONG:
-        return FlowValue.LONG_VALUE;
+        return UntrackableValue.LONG_VALUE;
       case Type.DOUBLE:
-        return FlowValue.DOUBLE_VALUE;
+        return UntrackableValue.DOUBLE_VALUE;
       case Type.ARRAY:
       case Type.OBJECT:
         // for char[] and byte[] remember the exact type
         if (Types.CHAR_ARRAY.equals(type) || Types.BYTE_ARRAY.equals(type)) {
-          return new FlowValue(type);
+          return new UntrackableValue(type);
         } else {
           // for others the exact type doesn't matter
-          return FlowValue.REFERENCE_VALUE;
+          return UntrackableValue.REFERENCE_VALUE;
         }
       default:
         throw new AssertionError();
@@ -207,11 +207,11 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       // this is duplicating logic in mergeTypes; to avoid creating unnecessary extra FlowValue
       // instances
       if (type1 == null || type2 == null) {
-        return FlowValue.UNINITIALIZED_VALUE;
+        return UntrackableValue.UNINITIALIZED_VALUE;
       } else if (type1.getSort() == Type.OBJECT && type2.getSort() == Type.OBJECT) {
-        return FlowValue.REFERENCE_VALUE;
+        return UntrackableValue.REFERENCE_VALUE;
       } else {
-        return FlowValue.UNINITIALIZED_VALUE;
+        return UntrackableValue.UNINITIALIZED_VALUE;
       }
     }
   }
