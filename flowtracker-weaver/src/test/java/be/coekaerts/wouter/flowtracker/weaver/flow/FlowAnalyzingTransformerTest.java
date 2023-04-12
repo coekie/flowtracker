@@ -200,7 +200,7 @@ public class FlowAnalyzingTransformerTest {
   }
 
   static char[] myCharArray;
-  static char[] myByteArray;
+  static byte[] myByteArray;
   static boolean myBoolean;
   static InputStream inputStream;
 
@@ -365,9 +365,9 @@ public class FlowAnalyzingTransformerTest {
                     }
                   },
         // original code
-        "GETSTATIC $THISTEST$.myByteArray : [C\n"
+        "GETSTATIC $THISTEST$.myByteArray : [B\n"
             + "ICONST_1\n"
-            + "CALOAD\n"
+            + "BALOAD\n"
             + "IRETURN\n"
             + "MAXSTACK = 2\n"
             + "MAXLOCALS = 1\n",
@@ -385,7 +385,7 @@ public class FlowAnalyzingTransformerTest {
             + "LDC \"read ()I\"\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.start (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
             + "ASTORE 4\n"
-            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
             + "ICONST_1\n"
             + "// begin ArrayLoadValue.insertTrackStatements\n"
             + "ISTORE 2\n"
@@ -397,7 +397,7 @@ public class FlowAnalyzingTransformerTest {
             + "ALOAD 1\n"
             + "ILOAD 2\n"
             + "// end ArrayLoadValue.insertTrackStatements\n"
-            + "CALOAD\n"
+            + "BALOAD\n"
             + "// begin InvocationReturnStore.insertTrackStatements\n"
             + "ALOAD 4\n"
             + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
@@ -414,7 +414,7 @@ public class FlowAnalyzingTransformerTest {
   }
 
   @Test
-  public void merge() {
+  public void mergeTrackableValues() {
     testTransform(new Object() {
                     @SuppressWarnings("unused")
                     int read(boolean b) {
@@ -423,15 +423,15 @@ public class FlowAnalyzingTransformerTest {
                   },
         "ILOAD 1\n"
             + "IFEQ L0\n"
-            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
             + "ICONST_0\n"
-            + "CALOAD\n"
+            + "BALOAD\n"
             + "GOTO L1\n"
             + "L0\n"
             + "FRAME FULL [$THIS$ I] []\n"
-            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
             + "ICONST_1\n"
-            + "CALOAD\n"
+            + "BALOAD\n"
             + "L1\n"
             + "FRAME FULL [$THIS$ I] [I]\n"
             + "IRETURN\n"
@@ -439,15 +439,15 @@ public class FlowAnalyzingTransformerTest {
             + "MAXLOCALS = 2\n",
         "ILOAD 1\n"
             + "IFEQ L0\n"
-            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
             + "ICONST_0\n"
-            + "CALOAD\n"
+            + "BALOAD\n"
             + "GOTO L1\n"
             + "L0\n"
             + "FRAME FULL [$THIS$ I] []\n"
-            + "GETSTATIC $THISTEST$.myByteArray : [C\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
             + "ICONST_1\n"
-            + "CALOAD\n"
+            + "BALOAD\n"
             + "L1\n"
             + "FRAME FULL [$THIS$ I] [I]\n"
             + "// Here is the MergedValue's merging\n"
