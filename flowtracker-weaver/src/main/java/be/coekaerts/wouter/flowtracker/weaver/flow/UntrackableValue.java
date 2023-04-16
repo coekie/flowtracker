@@ -52,4 +52,9 @@ class UntrackableValue extends FlowValue {
   void loadSourceIndex(InsnList toInsert) {
     toInsert.add(new InsnNode(Opcodes.ICONST_0));
   }
+
+  @Override
+  boolean hasMergeAt(FlowFrame mergingFrame) {
+    return false;
+  }
 }

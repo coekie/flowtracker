@@ -14,14 +14,11 @@ import org.objectweb.asm.tree.InsnNode;
 public class MergedValue extends FlowValue {
   final FlowFrame mergingFrame;
   // NICE: we could optimize this for small sets, like in SourceInterpreter with SmallSet
-  private final Set<TrackableValue> values;
+  private final Set<FlowValue> values;
 
-  MergedValue(Type type, FlowFrame mergingFrame, FlowValue value1, FlowValue value2) {
+  private MergedValue(Type type, FlowFrame mergingFrame, Set<FlowValue> values) {
     super(type);
     this.mergingFrame = mergingFrame;
-    Set<TrackableValue> values = new HashSet<>();
-    add(values, value1);
-    add(values, value2);
     this.values = values;
   }
 
@@ -44,12 +41,17 @@ public class MergedValue extends FlowValue {
     toInsert.add(new InsnNode(Opcodes.ICONST_0));
   }
 
-  private static void add(Set<TrackableValue> values, FlowValue value) {
-    if (value instanceof TrackableValue) {
-      values.add(((TrackableValue) value));
-    } else {
-      values.addAll(((MergedValue) value).values);
+  @Override
+  boolean hasMergeAt(FlowFrame mergingFrame) {
+    if (mergingFrame == this.mergingFrame) {
+      return true;
     }
+    for (FlowValue value : values) {
+      if (value.hasMergeAt(mergingFrame)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
@@ -61,5 +63,56 @@ public class MergedValue extends FlowValue {
     }
     MergedValue other = (MergedValue) o;
     return other.mergingFrame == this.mergingFrame && other.values.equals(this.values);
+  }
+
+  /** Add value into values, or return true if a loop is detected */
+  private static boolean addAndDetectLoop(Set<FlowValue> values, FlowValue value, FlowFrame mergingFrame) {
+    if (value instanceof MergedValue) {
+      MergedValue mergedValue = (MergedValue) value;
+      if (mergedValue.mergingFrame == mergingFrame) {
+        // if the merge is at the same frame, then the merging does not represent two code paths
+        // converging, it's us analyzing the same instruction twice, so just combine the results
+        values.addAll(mergedValue.values);
+        return false;
+      } else {
+        // avoid problems with loops in the data flow
+        if (mergedValue.hasMergeAt(mergingFrame)) {
+          return true;
+        }
+        // TODO we don't have a test case yet where we need a Merge of a Merge;
+        //  so for now we just always stop tracking here
+        return true;
+      }
+    }
+    values.add(value);
+    return false;
+  }
+
+  static MergedValue maybeMerge(Type type, FlowFrame mergingFrame, FlowValue value1,
+      FlowValue value2) {
+    // if one value is a subset of the other, then this is not two code paths converging; so keep
+    // the old MergedValue. Note that this means we keep the old mergingFrame.
+    if (value1 instanceof MergedValue) {
+      MergedValue mValue1 = (MergedValue) value1;
+      if (mValue1.values.contains(value2)) {
+        return mValue1;
+      }
+    }
+    if (value2 instanceof MergedValue) {
+      MergedValue mValue2 = (MergedValue) value2;
+      if (mValue2.values.contains(value1)) {
+        return mValue2;
+      }
+    }
+
+    Set<FlowValue> values = new HashSet<>();
+    if (addAndDetectLoop(values, value1, mergingFrame)) {
+      return null;
+    }
+    if (addAndDetectLoop(values, value2, mergingFrame)) {
+      return null;
+    }
+
+    return new MergedValue(type, mergingFrame, values);
   }
 }

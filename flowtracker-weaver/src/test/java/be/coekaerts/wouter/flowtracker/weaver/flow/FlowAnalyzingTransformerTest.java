@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.function.Consumer;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -277,10 +278,6 @@ public class FlowAnalyzingTransformerTest {
             + "MAXLOCALS = 4\n");
   }
 
-//  @Test public void tmp() {
-//    testTransformClass("org.objectweb.asm.tree.analysis.Subroutine", "", "");
-//  }
-
   /**
    * Storing in a boolean array also uses BASTORE; that should not be confused with storing in a
    * byte array
@@ -448,12 +445,164 @@ public class FlowAnalyzingTransformerTest {
             + "GETSTATIC $THISTEST$.myByteArray : [B\n"
             + "ICONST_1\n"
             + "BALOAD\n"
+            + "// Here is the MergedValue's merging\n"
             + "L1\n"
             + "FRAME FULL [$THIS$ I] [I]\n"
-            + "// Here is the MergedValue's merging\n"
             + "IRETURN\n"
             + "MAXSTACK = 2\n"
             + "MAXLOCALS = 2\n");
+  }
+
+  @Test
+  public void mergeCopyValues() {
+    testTransform(new Object() {
+                    @SuppressWarnings("unused")
+                    int read(boolean b) {
+                      byte x = myByteArray[0];
+                      byte y = myByteArray[1];
+                      return b ? x : y;
+                    }
+                  },
+        "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_0\n"
+            + "BALOAD\n"
+            + "ISTORE 2\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_1\n"
+            + "BALOAD\n"
+            + "ISTORE 3\n"
+            + "ILOAD 1\n"
+            + "IFEQ L0\n"
+            + "ILOAD 2\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ I I I] []\n"
+            + "ILOAD 3\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ I I I] [I]\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 2\n"
+            + "MAXLOCALS = 4\n",
+        "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_0\n"
+            + "BALOAD\n"
+            + "ISTORE 2\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_1\n"
+            + "BALOAD\n"
+            + "ISTORE 3\n"
+            + "ILOAD 1\n"
+            + "IFEQ L0\n"
+            + "ILOAD 2\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ I I I] []\n"
+            + "ILOAD 3\n"
+            + "// Here is the MergedValue's merging\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ I I I] [I]\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 2\n"
+            + "MAXLOCALS = 4\n");
+  }
+
+  @Test
+  public void simpleLoop() {
+    testTransform(new Object() {
+                    @SuppressWarnings("unused")
+                    void go() {
+                      byte x = myByteArray[0];
+                      byte y = myByteArray[1];
+                      for (int i = 0; i < 2; i++) {
+                        myByteArray[2] = x;
+                      }
+                    }
+                  },
+        "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_0\n"
+            + "BALOAD\n"
+            + "ISTORE 1\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_1\n"
+            + "BALOAD\n"
+            + "ISTORE 2\n"
+            + "ICONST_0\n"
+            + "ISTORE 3\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ I I I] []\n"
+            + "ILOAD 3\n"
+            + "ICONST_2\n"
+            + "IF_ICMPGE L1\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_2\n"
+            + "ILOAD 1\n"
+            + "BASTORE\n"
+            + "IINC 3 1\n"
+            + "GOTO L0\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ I I] []\n"
+            + "RETURN\n"
+            + "MAXSTACK = 3\n"
+            + "MAXLOCALS = 4\n",
+        "// Initialize newLocal ArrayLoadValue array\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 1\n"
+            + "// Initialize newLocal ArrayLoadValue index\n"
+            + "LDC -1\n"
+            + "ISTORE 2\n"
+            + "// Initialize newLocal ArrayLoadValue PointTracker\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 3\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_0\n"
+            + "// begin ArrayLoadValue.insertTrackStatements\n"
+            + "ISTORE 2\n"
+            + "ASTORE 1\n"
+            + "ALOAD 1\n"
+            + "ILOAD 2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook.getElementTracker (Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;\n"
+            + "ASTORE 3\n"
+            + "ALOAD 1\n"
+            + "ILOAD 2\n"
+            + "// end ArrayLoadValue.insertTrackStatements\n"
+            + "BALOAD\n"
+            + "ISTORE 4\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_1\n"
+            + "BALOAD\n"
+            + "ISTORE 5\n"
+            + "ICONST_0\n"
+            + "ISTORE 6\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ [B I be/coekaerts/wouter/flowtracker/tracker/TrackerPoint I I I] []\n"
+            + "ILOAD 6\n"
+            + "ICONST_2\n"
+            + "IF_ICMPGE L1\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_2\n"
+            + "ILOAD 4\n"
+            + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)\n"
+            + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
+            + "ALOAD 3\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "// ArrayLoadValue.loadSourceIndex: PointTracker.getIndex(pointTracker)\n"
+            + "ALOAD 3\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setByte ([BIBLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
+            + "// end ArrayStore.insertTrackStatements\n"
+            + "IINC 6 1\n"
+            + "GOTO L0\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ [B I be/coekaerts/wouter/flowtracker/tracker/TrackerPoint I I] []\n"
+            + "RETURN\n"
+            + "MAXSTACK = 6\n"
+            + "MAXLOCALS = 7\n");
+  }
+
+  @Test
+  public void complex() {
+    // not testing the result, just testing that it finished in a reasonable time
+    testTransformClass(ComplexFlow.class.getName(), c -> {}, c -> {});
   }
 
   /**
@@ -461,11 +610,13 @@ public class FlowAnalyzingTransformerTest {
    * transformation are as expected;
    */
   static void testTransform(Object o, String expectOriginalCode, String expectedTransformedCode) {
-    testTransformClass(o.getClass().getName(), expectOriginalCode, expectedTransformedCode);
+    testTransformClass(o.getClass().getName(),
+        originalCode -> assertEquals(expectOriginalCode, originalCode),
+        transformedCode -> assertEquals(expectedTransformedCode, transformedCode));
   }
 
-  static void testTransformClass(String className, String expectOriginalCode,
-      String expectedTransformedCode) {
+  static void testTransformClass(String className, Consumer<String> assertOriginalCode,
+      Consumer<String> assertTransformedCode) {
     ClassWriter classWriter = new ClassWriter(0);
     StringWriter verifyStringWriter = new StringWriter();
     PrintWriter verifyPrintWriter = new PrintWriter(verifyStringWriter);
@@ -500,8 +651,8 @@ public class FlowAnalyzingTransformerTest {
           + "\nTransformed code:\n" + afterVisitor.getCode(), e);
     }
 
-    assertEquals(expectOriginalCode, beforeVisitor.getCode());
-    assertEquals(expectedTransformedCode, afterVisitor.getCode());
+    assertOriginalCode.accept(beforeVisitor.getCode());
+    assertTransformedCode.accept(afterVisitor.getCode());
   }
 
   /**
@@ -564,6 +715,31 @@ public class FlowAnalyzingTransformerTest {
           .replace(thisName, "$THIS$")
           .replace("be/coekaerts/wouter/flowtracker/weaver/flow/FlowAnalyzingTransformerTest",
               "$THISTEST$");
+    }
+  }
+
+  /** A class with some complex flow, which at some point make the analyzer go crazy */
+  @SuppressWarnings("all")
+  private static class ComplexFlow {
+    private static void go(boolean bool) {
+      int c1 = 0;
+      for (int i = 0; i < 3; i++) {
+        if (bool) {
+          c1 = c1;
+        } else {
+          c1 = c1;
+        }
+        if (bool) {
+          c1 = c1;
+        } else {
+          c1 = c1;
+        }
+        if (bool || bool || bool || bool || bool || bool) {
+          c1 = c1;
+        } else {
+          c1 = c1;
+        }
+      }
     }
   }
 }

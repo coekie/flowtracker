@@ -97,7 +97,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
 
   @Override
   public FlowValue copyOperation(AbstractInsnNode insn, FlowValue value) {
-    return value;
+    return CopyValue.copy(value, insn);
   }
 
   @Override
@@ -196,16 +196,19 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       Type type1 = value1.getType();
       Type type2 = value2.getType();
 
-      // TODO we need to handle merging TrackableValue with MergedValue (WIP)
-      //  (because it does multiple passes?). see also SourceInterpreter.
-      // TODO (ideally we'd also do this if only one of the two is trackable)
-      if ((value1 instanceof TrackableValue || value1 instanceof MergedValue)
-          && (value2 instanceof TrackableValue || value2 instanceof MergedValue)) {
-        return new MergedValue(mergeTypes(type1, type2), mergingFrame, value1, value2);
+      // TODO ideally we'd also do this if only one of the two is trackable. for that to work, we
+      //  also need to know which instructions UntrackableValues came from
+      if ((value1 instanceof TrackableValue || value1 instanceof MergedValue || value1 instanceof CopyValue)
+          && (value2 instanceof TrackableValue || value2 instanceof MergedValue || value2 instanceof CopyValue)) {
+
+        MergedValue merged = MergedValue.maybeMerge(mergeTypes(type1, type2), mergingFrame, value1, value2);
+        if (merged != null) {
+          return merged;
+        }
       }
 
-      // this is duplicating logic in mergeTypes; to avoid creating unnecessary extra FlowValue
-      // instances
+      // this is duplicating logic in mergeTypes; to avoid creating unnecessary extra
+      // UntrackableValue instances
       if (type1 == null || type2 == null) {
         return UntrackableValue.UNINITIALIZED_VALUE;
       } else if (type1.getSort() == Type.OBJECT && type2.getSort() == Type.OBJECT) {

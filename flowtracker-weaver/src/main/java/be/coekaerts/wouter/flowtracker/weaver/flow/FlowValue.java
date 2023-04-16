@@ -60,4 +60,10 @@ abstract class FlowValue extends BasicValue {
   public int hashCode() {
     return getType() == null ? 0 : getType().hashCode();
   }
+
+  /**
+   * Returns if this value somewhere (through merges and copies) contains a MergeValue at the given
+   * mergingFrame. Used to detect loops in the data flow.
+   */
+  abstract boolean hasMergeAt(FlowFrame mergingFrame);
 }

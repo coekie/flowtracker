@@ -29,11 +29,6 @@ abstract class TrackableValue extends FlowValue {
     }
   }
 
-  @Override
-  public boolean equals(Object o) {
-    return o == this || (super.equals(o) && ((TrackableValue) o).insn == this.insn);
-  }
-
   /**
    * Insert the statements needed to keep track of the origin of this value.
    * <p>
@@ -41,4 +36,14 @@ abstract class TrackableValue extends FlowValue {
    * should be used, to ensure statements are not inserted more than once.
    */
   abstract void insertTrackStatements();
+
+  @Override
+  boolean hasMergeAt(FlowFrame mergingFrame) {
+    return false;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o == this || (super.equals(o) && ((TrackableValue) o).insn == this.insn);
+  }
 }
