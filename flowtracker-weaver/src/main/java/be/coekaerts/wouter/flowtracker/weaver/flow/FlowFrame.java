@@ -28,28 +28,20 @@ class FlowFrame extends Frame<FlowValue> {
 
   AbstractInsnNode getInsn() {
     if (insn == null) {
-      int index = findInsnIndex();
-      if (analyzer.methodAdapter.instructions.size() != analyzer.getFrames().length) {
-        throw new IllegalStateException("Cannot find insn after code has been changed");
-      }
-      insn = requireNonNull(analyzer.methodAdapter.instructions.get(index));
+      throw new IllegalStateException("FlowFrame.insn not initialized");
     }
     return insn;
   }
 
-  FlowMethodAdapter getFlowMethodAdapter() {
-    return analyzer.methodAdapter;
+  void initInsn(int insnIndex) {
+    if (analyzer.getFrames()[insnIndex] != this) {
+      throw new IllegalStateException("Wrong instruction index");
+    }
+    insn = requireNonNull(analyzer.methodAdapter.instructions.get(insnIndex));
   }
 
-  /** Find the index of the instruction that this frame is for */
-  private int findInsnIndex() {
-    Frame<FlowValue>[] frames = analyzer.getFrames();
-    for (int i = 0; i < frames.length; i++) {
-      if (frames[i] == this) {
-        return i;
-      }
-    }
-    throw new IllegalStateException("Cannot find this frame in analyzer");
+  FlowMethodAdapter getFlowMethodAdapter() {
+    return analyzer.methodAdapter;
   }
 
   @Override

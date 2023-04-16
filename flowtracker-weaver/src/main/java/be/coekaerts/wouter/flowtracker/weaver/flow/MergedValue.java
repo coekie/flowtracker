@@ -31,10 +31,7 @@ public class MergedValue extends FlowValue {
     if (cachedIsTrackable == -1) {
       cachedIsTrackable = calcIsTrackable() ? 1 : 0;
     }
-    // TODO MergedValue.isTrackable. requires fixing FlowFrame.getInsn() getting calculated too late
-    //  (when fixing this also remove case for this in InvocationReturnStore)
-    return false;
-//    return cachedIsTrackable == 1;
+    return cachedIsTrackable == 1;
   }
 
   private boolean calcIsTrackable() {
@@ -60,7 +57,7 @@ public class MergedValue extends FlowValue {
     }
     FlowMethodAdapter methodNode = mergingFrame.getFlowMethodAdapter();
     InsnList toInsert = new InsnList();
-    methodNode.addComment(toInsert, "MergedValue.insertTrackStatements");
+    methodNode.addComment(toInsert, "TODO MergedValue.insertTrackStatements");
     methodNode.instructions.insertBefore(mergingFrame.getInsn(), toInsert);
   }
 

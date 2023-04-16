@@ -1,7 +1,9 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 
 /** Extension of {@link Analyzer}, used for flow analysis */
@@ -21,5 +23,21 @@ class FlowAnalyzer extends Analyzer<FlowValue> {
   @Override
   protected Frame<FlowValue> newFrame(Frame<? extends FlowValue> frame) {
     return new FlowFrame(frame, this);
+  }
+
+  @Override
+  public Frame<FlowValue>[] analyze(String owner, MethodNode method) throws AnalyzerException {
+    Frame<FlowValue>[] frames = super.analyze(owner, method);
+
+    for (int i = 0; i < frames.length; i++) {
+      // note: if we need this to be initialized earlier, we could also override
+      // newControlFlowEdge & newControlFlowExceptionEdge and initialize it at that point
+      FlowFrame frame = (FlowFrame) frames[i];
+      if (frame != null) {
+        frame.initInsn(i);
+      }
+    }
+
+    return frames;
   }
 }
