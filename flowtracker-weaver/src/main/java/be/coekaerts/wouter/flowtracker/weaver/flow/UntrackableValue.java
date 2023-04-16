@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import be.coekaerts.wouter.flowtracker.weaver.Types;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
@@ -41,6 +42,11 @@ class UntrackableValue extends FlowValue {
 
   @Override
   void ensureTracked() {
+  }
+
+  @Override
+  AbstractInsnNode getInsn() {
+    return null;
   }
 
   @Override

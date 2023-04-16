@@ -1,9 +1,11 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import java.util.HashSet;
 import java.util.Set;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 
@@ -15,6 +17,8 @@ public class MergedValue extends FlowValue {
   final FlowFrame mergingFrame;
   // NICE: we could optimize this for small sets, like in SourceInterpreter with SmallSet
   private final Set<FlowValue> values;
+  private int cachedIsTrackable = -1;
+  private boolean tracked;
 
   private MergedValue(Type type, FlowFrame mergingFrame, Set<FlowValue> values) {
     super(type);
@@ -24,11 +28,45 @@ public class MergedValue extends FlowValue {
 
   @Override
   boolean isTrackable() {
+    if (cachedIsTrackable == -1) {
+      cachedIsTrackable = calcIsTrackable() ? 1 : 0;
+    }
+    // TODO MergedValue.isTrackable. requires fixing FlowFrame.getInsn() getting calculated too late
+    //  (when fixing this also remove case for this in InvocationReturnStore)
     return false;
+//    return cachedIsTrackable == 1;
+  }
+
+  private boolean calcIsTrackable() {
+    for (FlowValue value : values) {
+      if (!value.isTrackable() || value.getInsn() == null) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @Override
-  void ensureTracked() {
+  final void ensureTracked() {
+    if (!tracked) {
+      tracked = true;
+      insertTrackStatements();
+    }
+  }
+
+  private void insertTrackStatements() {
+    for (FlowValue value : values) {
+      value.ensureTracked();
+    }
+    FlowMethodAdapter methodNode = mergingFrame.getFlowMethodAdapter();
+    InsnList toInsert = new InsnList();
+    methodNode.addComment(toInsert, "MergedValue.insertTrackStatements");
+    methodNode.instructions.insertBefore(mergingFrame.getInsn(), toInsert);
+  }
+
+  @Override
+  AbstractInsnNode getInsn() {
+    return mergingFrame.getInsn();
   }
 
   @Override

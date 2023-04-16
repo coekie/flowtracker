@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import static java.util.Objects.requireNonNull;
 
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
@@ -28,9 +29,16 @@ class FlowFrame extends Frame<FlowValue> {
   AbstractInsnNode getInsn() {
     if (insn == null) {
       int index = findInsnIndex();
+      if (analyzer.methodAdapter.instructions.size() != analyzer.getFrames().length) {
+        throw new IllegalStateException("Cannot find insn after code has been changed");
+      }
       insn = requireNonNull(analyzer.methodAdapter.instructions.get(index));
     }
     return insn;
+  }
+
+  FlowMethodAdapter getFlowMethodAdapter() {
+    return analyzer.methodAdapter;
   }
 
   /** Find the index of the instruction that this frame is for */

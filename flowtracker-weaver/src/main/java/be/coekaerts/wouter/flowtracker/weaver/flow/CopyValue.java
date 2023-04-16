@@ -28,6 +28,11 @@ class CopyValue extends FlowValue {
   }
 
   @Override
+  AbstractInsnNode getInsn() {
+    return insn;
+  }
+
+  @Override
   void loadSourceTracker(InsnList toInsert) {
     original.loadSourceTracker(toInsert);
   }

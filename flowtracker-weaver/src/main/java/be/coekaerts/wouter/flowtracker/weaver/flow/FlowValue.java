@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import java.util.Objects;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
@@ -29,6 +30,12 @@ abstract class FlowValue extends BasicValue {
    * never {@code null}.
    */
   abstract boolean isTrackable();
+
+  /**
+   * The instruction at which this value was last touched (created, copied or merged), or null if
+   * unknown.
+   */
+  abstract AbstractInsnNode getInsn();
 
   /**
    * Add the tracker from which this value came on top of the stack.
