@@ -130,11 +130,11 @@ class FlowInterpreter extends Interpreter<FlowValue> {
     switch (aInsn.getOpcode()) {
       case Opcodes.CALOAD: {
         InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(flowMethodAdapter, insn, Type.CHAR_TYPE, Types.CHAR_ARRAY);
+        return new ArrayLoadValue(flowMethodAdapter, insn, Type.CHAR_TYPE);
       }
       case Opcodes.BALOAD: {
         InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(flowMethodAdapter, insn, Type.BYTE_TYPE, Types.BYTE_ARRAY);
+        return new ArrayLoadValue(flowMethodAdapter, insn, Type.BYTE_TYPE);
       }
       case Opcodes.IAND: {
         // treat `x & constant` as having the same source as x

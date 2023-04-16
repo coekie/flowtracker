@@ -12,24 +12,18 @@ import org.objectweb.asm.tree.MethodInsnNode;
 class ArrayLoadValue extends TrackableValue {
   /** The {@link Opcodes#CALOAD} call */
   private final InsnNode insn;
-  private final Type arrayType;
 
   /** Local variable storing the PointTracker for the loaded char or byte */
   private TrackLocal pointTrackerLocal;
 
-  ArrayLoadValue(FlowMethodAdapter flowMethodAdapter, InsnNode insn, Type type, Type arrayType) {
+  ArrayLoadValue(FlowMethodAdapter flowMethodAdapter, InsnNode insn, Type type) {
     super(flowMethodAdapter, type, insn);
     this.insn = insn;
-    this.arrayType = arrayType;
   }
 
   @Override void insertTrackStatements() {
     // on the stack before the CALOAD call: char[] target, int index
 
-    // Local variable storing the target char[] or byte[]
-    TrackLocal targetLocal = flowMethodAdapter.newLocalForObject(arrayType, "ArrayLoadValue array");
-    // Local variable storing the index
-    TrackLocal indexLocal = flowMethodAdapter.newLocalForIndex("ArrayLoadValue index");
     pointTrackerLocal = flowMethodAdapter.newLocalForObject(
         Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"),
         "ArrayLoadValue PointTracker");
@@ -37,13 +31,10 @@ class ArrayLoadValue extends TrackableValue {
     InsnList toInsert = new InsnList();
     flowMethodAdapter.addComment(toInsert, "begin ArrayLoadValue.insertTrackStatements");
 
-    // store target and index
-    toInsert.add(indexLocal.store());
-    toInsert.add(targetLocal.store());
-
     // insert code for: pointTracker = ArrayLoadHook.getElementTracker(target, index)
-    toInsert.add(targetLocal.load());
-    toInsert.add(indexLocal.load());
+    // use DUP2 to copy target and index for getElementTracker while leaving it on the stack for the
+    // actual CALOAD
+    toInsert.add(new InsnNode(Opcodes.DUP2));
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC,
             "be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook",
@@ -51,10 +42,9 @@ class ArrayLoadValue extends TrackableValue {
             "(Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;",
             false));
     toInsert.add(pointTrackerLocal.store());
+    flowMethodAdapter.maxStack = Math.max(flowMethodAdapter.maxStack,
+        getCreationFrame().getStackSize() + 2);
 
-    // put target and index back on the stack for the actual operation
-    toInsert.add(targetLocal.load());
-    toInsert.add(indexLocal.load());
     flowMethodAdapter.addComment(toInsert, "end ArrayLoadValue.insertTrackStatements");
 
     flowMethodAdapter.instructions.insertBefore(insn, toInsert);
