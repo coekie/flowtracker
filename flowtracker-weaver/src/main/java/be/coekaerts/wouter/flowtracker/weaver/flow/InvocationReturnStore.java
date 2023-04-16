@@ -43,12 +43,6 @@ public class InvocationReturnStore extends Store {
       methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
 
       methodNode.instructions.insertBefore(returnInsn, toInsert);
-    } else if (returnedValue instanceof MergedValue) {
-      // TODO this is just temporary for testing
-      MergedValue mergedValue = (MergedValue) returnedValue;
-      InsnList toInsert = new InsnList();
-      methodNode.addComment(toInsert, "Here is the MergedValue's merging");
-      methodNode.instructions.insertBefore(mergedValue.mergingFrame.getInsn(), toInsert);
     }
   }
 }
