@@ -33,6 +33,12 @@ class CopyValue extends FlowValue {
   }
 
   @Override
+  void initCreationFrame(FlowAnalyzer analyzer) {
+    super.initCreationFrame(analyzer);
+    original.initCreationFrame(analyzer);
+  }
+
+  @Override
   void loadSourceTracker(InsnList toInsert) {
     original.loadSourceTracker(toInsert);
   }

@@ -722,9 +722,25 @@ public class FlowAnalyzingTransformerTest {
             }
           }
         }.getClass().getName(),
-        c -> {
-        }, c -> {
-        });
+        c -> {},
+        c -> {});
+  }
+
+  @Test
+  public void fieldValueStack() {
+    // not testing the result, just testing that it finished in a reasonable time
+    testTransformClass(new Object() {
+          char myChar;
+
+          @SuppressWarnings("all")
+          int read() {
+            int result;
+            deepStack(1, 2, 3, 4, 5, 6, 7, result = myChar);
+            return result;
+          }
+        }.getClass().getName(),
+        c -> {},
+        c -> {});
   }
 
   /**
@@ -838,5 +854,10 @@ public class FlowAnalyzingTransformerTest {
           .replace("be/coekaerts/wouter/flowtracker/weaver/flow/FlowAnalyzingTransformerTest",
               "$THISTEST$");
     }
+  }
+
+  /** Dummy method with a lot of arguments, to test if maxStack is updated correctly */
+  @SuppressWarnings("all")
+  static void deepStack(int a, int b, int c, int d, int e, int f, int g, int h) {
   }
 }

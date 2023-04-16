@@ -51,6 +51,14 @@ public class MergedValue extends FlowValue {
     }
   }
 
+  @Override
+  void initCreationFrame(FlowAnalyzer analyzer) {
+    super.initCreationFrame(analyzer);
+    for (FlowValue value : values) {
+      value.initCreationFrame(analyzer);
+    }
+  }
+
   private void insertTrackStatements() {
     for (FlowValue value : values) {
       value.ensureTracked();

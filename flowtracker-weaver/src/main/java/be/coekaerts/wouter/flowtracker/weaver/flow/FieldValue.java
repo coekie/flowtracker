@@ -6,6 +6,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
@@ -25,8 +26,6 @@ class FieldValue extends TrackableValue {
   @Override void insertTrackStatements() {
     // on the stack before the GETFIELD call: target
 
-    TrackLocal targetLocal =
-        flowMethodAdapter.newLocalForObject(Type.getObjectType(insn.owner), "FieldValue target");
     pointTrackerLocal = flowMethodAdapter.newLocalForObject(
         Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"),
         "FieldValue PointTracker");
@@ -34,13 +33,9 @@ class FieldValue extends TrackableValue {
     InsnList toInsert = new InsnList();
     flowMethodAdapter.addComment(toInsert, "begin FieldValue.insertTrackStatements");
 
-    // store target
-    toInsert.add(targetLocal.store());
-
-    // if we had a way to increase maxStack here then we would use dup on the target; but we don't,
-    // so we use a local variable.
     // insert code for: pointTracker = FieldRepository.getPoint(target, fieldId)
-    toInsert.add(targetLocal.load());
+    // use DUP to copy target for getPoint while leaving it on the stack for the actual GETFIELD
+    toInsert.add(new InsnNode(Opcodes.DUP));
     toInsert.add(new LdcInsnNode(FieldRepository.fieldId(insn.owner, insn.name)));
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC,
@@ -51,8 +46,9 @@ class FieldValue extends TrackableValue {
             false));
     toInsert.add(pointTrackerLocal.store());
 
-    // put target back on the stack for the actual operation
-    toInsert.add(targetLocal.load());
+    flowMethodAdapter.maxStack = Math.max(flowMethodAdapter.maxStack,
+        getCreationFrame().getStackSize() + 2);
+
     flowMethodAdapter.addComment(toInsert, "end FieldValue.insertTrackStatements");
 
     flowMethodAdapter.instructions.insertBefore(insn, toInsert);
