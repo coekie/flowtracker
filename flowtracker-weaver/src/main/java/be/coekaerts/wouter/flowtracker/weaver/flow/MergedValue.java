@@ -88,6 +88,9 @@ public class MergedValue extends FlowValue {
     return false;
   }
 
+  /**
+   * Combine two values into a {@link MergedValue} when possible; else return null.
+   */
   static MergedValue maybeMerge(Type type, FlowFrame mergingFrame, FlowValue value1,
       FlowValue value2) {
     // if one value is a subset of the other, then this is not two code paths converging; so keep

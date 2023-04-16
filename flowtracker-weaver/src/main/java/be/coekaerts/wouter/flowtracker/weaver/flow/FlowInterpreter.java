@@ -198,10 +198,11 @@ class FlowInterpreter extends Interpreter<FlowValue> {
 
       // TODO ideally we'd also do this if only one of the two is trackable. for that to work, we
       //  also need to know which instructions UntrackableValues came from
-      if ((value1 instanceof TrackableValue || value1 instanceof MergedValue || value1 instanceof CopyValue)
-          && (value2 instanceof TrackableValue || value2 instanceof MergedValue || value2 instanceof CopyValue)) {
+      if ((value1.isTrackable() || value1 instanceof MergedValue)
+          && (value2.isTrackable() || value2 instanceof MergedValue)) {
 
-        MergedValue merged = MergedValue.maybeMerge(mergeTypes(type1, type2), mergingFrame, value1, value2);
+        MergedValue merged = MergedValue.maybeMerge(mergeTypes(type1, type2), mergingFrame,
+            value1, value2);
         if (merged != null) {
           return merged;
         }
