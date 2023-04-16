@@ -695,10 +695,36 @@ public class FlowAnalyzingTransformerTest {
             + "MAXLOCALS = 7\n");
   }
 
+  /** A class with some complex flow, which at some point make the analyzer go crazy */
   @Test
   public void complex() {
     // not testing the result, just testing that it finished in a reasonable time
-    testTransformClass(ComplexFlow.class.getName(), c -> {}, c -> {});
+    testTransformClass(new Object() {
+          @SuppressWarnings("all")
+          void go(boolean bool) {
+            int c1 = 0;
+            for (int i = 0; i < 3; i++) {
+              if (bool) {
+                c1 = c1;
+              } else {
+                c1 = c1;
+              }
+              if (bool) {
+                c1 = c1;
+              } else {
+                c1 = c1;
+              }
+              if (bool || bool || bool || bool || bool || bool) {
+                c1 = c1;
+              } else {
+                c1 = c1;
+              }
+            }
+          }
+        }.getClass().getName(),
+        c -> {
+        }, c -> {
+        });
   }
 
   /**
@@ -811,31 +837,6 @@ public class FlowAnalyzingTransformerTest {
           .replace(thisName, "$THIS$")
           .replace("be/coekaerts/wouter/flowtracker/weaver/flow/FlowAnalyzingTransformerTest",
               "$THISTEST$");
-    }
-  }
-
-  /** A class with some complex flow, which at some point make the analyzer go crazy */
-  @SuppressWarnings("all")
-  private static class ComplexFlow {
-    private static void go(boolean bool) {
-      int c1 = 0;
-      for (int i = 0; i < 3; i++) {
-        if (bool) {
-          c1 = c1;
-        } else {
-          c1 = c1;
-        }
-        if (bool) {
-          c1 = c1;
-        } else {
-          c1 = c1;
-        }
-        if (bool || bool || bool || bool || bool || bool) {
-          c1 = c1;
-        } else {
-          c1 = c1;
-        }
-      }
     }
   }
 }
