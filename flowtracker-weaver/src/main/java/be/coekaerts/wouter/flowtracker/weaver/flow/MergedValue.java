@@ -36,7 +36,7 @@ public class MergedValue extends FlowValue {
 
   private boolean calcIsTrackable() {
     for (FlowValue value : values) {
-      if (!value.isTrackable() || value.getInsn() == null) {
+      if (!value.isTrackable() || value.getCreationInsn() == null) {
         return false;
       }
     }
@@ -62,7 +62,7 @@ public class MergedValue extends FlowValue {
   }
 
   @Override
-  AbstractInsnNode getInsn() {
+  AbstractInsnNode getCreationInsn() {
     return mergingFrame.getInsn();
   }
 

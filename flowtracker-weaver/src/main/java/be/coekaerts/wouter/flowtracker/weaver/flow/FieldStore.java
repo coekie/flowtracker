@@ -8,23 +8,21 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.analysis.Frame;
 
 /** The storing of a value in a field. */
 // on the stack: Object target, [int|char|byte] value
 class FieldStore extends Store {
   private final FieldInsnNode storeInsn;
+  private final FlowValue storedValue = getStackFromTop(0);
 
-  FieldStore(FieldInsnNode storeInsn, Frame<FlowValue> frame) {
+  FieldStore(FieldInsnNode storeInsn, FlowFrame frame) {
     super(frame);
     this.storeInsn = storeInsn;
   }
 
   void insertTrackStatements(FlowMethodAdapter methodNode) {
-    FlowValue stored = getStackFromTop(0);
-
     // only track char or byte
-    if (!FieldValue.shouldTrackType(stored.getType())) {
+    if (!FieldValue.shouldTrackType(storedValue.getType())) {
       return;
     }
 
@@ -40,9 +38,9 @@ class FieldStore extends Store {
     toInsert.add(new LdcInsnNode(FieldRepository.fieldId(storeInsn.owner, storeInsn.name)));
 
     // note: we do this even for UntrackableValues
-    stored.ensureTracked();
-    stored.loadSourceTracker(toInsert);
-    stored.loadSourceIndex(toInsert);
+    storedValue.ensureTracked();
+    storedValue.loadSourceTracker(toInsert);
+    storedValue.loadSourceIndex(toInsert);
 
     methodNode.maxStack = Math.max(frame.getStackSize() + 5, methodNode.maxStack);
 

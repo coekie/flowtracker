@@ -85,7 +85,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 
       for (int i = 0; i < instructions.size(); i++) {
         AbstractInsnNode insn = instructions.get(i);
-        Frame<FlowValue> frame = frames[i];
+        FlowFrame frame = (FlowFrame) frames[i];
         if (insn.getOpcode() == Opcodes.CASTORE) {
           stores.add(ArrayStore.createCharArrayStore((InsnNode) insn, frame));
         } else if (insn.getOpcode() == Opcodes.BASTORE

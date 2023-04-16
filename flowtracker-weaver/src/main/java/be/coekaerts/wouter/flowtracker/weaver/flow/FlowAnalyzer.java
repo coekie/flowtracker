@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -39,5 +40,19 @@ class FlowAnalyzer extends Analyzer<FlowValue> {
     }
 
     return frames;
+  }
+
+  /**
+   * Gets the FlowFrame that represents the state of local variables and stack at the given
+   * instruction. This must be called after the analyzer ran, but before any changes have been
+   * made.
+   */
+  FlowFrame getFrame(AbstractInsnNode insn) {
+    int index = methodAdapter.instructions.indexOf(insn);
+    FlowFrame frame = (FlowFrame) getFrames()[index];
+    if (frame.getInsn() != insn) {
+      throw new IllegalStateException("Instruction and frame index don't match");
+    }
+    return frame;
   }
 }

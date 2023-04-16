@@ -28,7 +28,7 @@ class CopyValue extends FlowValue {
   }
 
   @Override
-  AbstractInsnNode getInsn() {
+  AbstractInsnNode getCreationInsn() {
     return insn;
   }
 

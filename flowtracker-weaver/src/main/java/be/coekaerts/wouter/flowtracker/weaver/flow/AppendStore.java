@@ -4,29 +4,27 @@ import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.Flow
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.analysis.Frame;
 
 /** Invocation of {@link StringBuilder#append(char)} or {@link StringBuffer#append(char)}. */
 // on the stack: StringBuffer/StringBuilder target, char c
 class AppendStore extends Store {
   private final MethodInsnNode invokeInsn;
+  private final FlowValue storedValue = getStackFromTop(0);
 
-  AppendStore(MethodInsnNode invokeInsn, Frame<FlowValue> frame) {
+  AppendStore(MethodInsnNode invokeInsn, FlowFrame frame) {
     super(frame);
     this.invokeInsn = invokeInsn;
   }
 
   void insertTrackStatements(FlowMethodAdapter methodNode) {
-    FlowValue stored = getCharValue();
-
-    if (stored.isTrackable()) { // if we know where the value we are storing came from
+    if (storedValue.isTrackable()) { // if we know where the value we are storing came from
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "begin AppendStore.insertTrackStatements: "
           + "AbstractStringBuilderHook.append(sb, c [already on stack], tracker, index");
 
-      stored.ensureTracked();
-      stored.loadSourceTracker(toInsert);
-      stored.loadSourceIndex(toInsert);
+      storedValue.ensureTracked();
+      storedValue.loadSourceTracker(toInsert);
+      storedValue.loadSourceIndex(toInsert);
 
       methodNode.maxStack = Math.max(frame.getStackSize() + 2, methodNode.maxStack);
 
@@ -48,10 +46,5 @@ class AppendStore extends Store {
       methodNode.instructions.insert(invokeInsn, toInsert);
       methodNode.instructions.remove(invokeInsn); // our hook takes care of the storing
     }
-  }
-
-  /** The value being stored */
-  private FlowValue getCharValue() {
-    return getStackFromTop(0);
   }
 }

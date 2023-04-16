@@ -11,6 +11,7 @@ import org.objectweb.asm.tree.analysis.BasicValue;
  * (on the stack or in a local variable) at a certain point in the execution of a method.
  */
 abstract class FlowValue extends BasicValue {
+  private FlowFrame creationFrame;
 
   FlowValue(Type type) {
     super(type);
@@ -35,7 +36,21 @@ abstract class FlowValue extends BasicValue {
    * The instruction at which this value was last touched (created, copied or merged), or null if
    * unknown.
    */
-  abstract AbstractInsnNode getInsn();
+  abstract AbstractInsnNode getCreationInsn();
+
+  /**
+   * The {@link FlowFrame} that the analyzer built for {@link #getCreationInsn()}
+   */
+  FlowFrame getCreationFrame() {
+    return creationFrame;
+  }
+
+  void initCreationFrame(FlowAnalyzer analyzer) {
+    AbstractInsnNode creationInsn = getCreationInsn();
+    if (creationInsn != null) {
+      creationFrame = analyzer.getFrame(creationInsn);
+    }
+  }
 
   /**
    * Add the tracker from which this value came on top of the stack.

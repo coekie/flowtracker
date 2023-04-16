@@ -11,7 +11,7 @@ import org.objectweb.asm.tree.analysis.Interpreter;
 /** {@link Frame} used in flow analysis */
 class FlowFrame extends Frame<FlowValue> {
   /** Analyzer that created this frame */
-  private final FlowAnalyzer analyzer;
+  final FlowAnalyzer analyzer;
 
   /** Instruction that this frame corresponds to */
   private AbstractInsnNode insn;

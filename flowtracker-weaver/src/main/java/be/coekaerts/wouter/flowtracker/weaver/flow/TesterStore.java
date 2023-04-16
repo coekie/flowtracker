@@ -3,7 +3,6 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.analysis.Frame;
 
 /**
  * Invocation of a method on FlowTester that receives a tracked value.
@@ -12,27 +11,25 @@ import org.objectweb.asm.tree.analysis.Frame;
 // on the stack: value, ...
 class TesterStore extends Store {
   private final MethodInsnNode invokeInsn;
-  private final int valueStackIndexFromTop;
+  private final FlowValue storedValue;
 
-  TesterStore(MethodInsnNode invokeInsn, Frame<FlowValue> frame, int valueStackIndexFromTop) {
+  TesterStore(MethodInsnNode invokeInsn, FlowFrame frame, int valueStackIndexFromTop) {
     super(frame);
     this.invokeInsn = invokeInsn;
-    this.valueStackIndexFromTop = valueStackIndexFromTop;
+    this.storedValue = getStackFromTop(valueStackIndexFromTop);
   }
 
   void insertTrackStatements(FlowMethodAdapter methodNode) {
-    FlowValue stored = getStackFromTop(valueStackIndexFromTop);
-
-    if (stored.isTrackable()) { // if we know where the value we are storing came from
-      stored.ensureTracked();
+    if (storedValue.isTrackable()) { // if we know where the value we are storing came from
+      storedValue.ensureTracked();
 
       // replace the call with a call to the $tracked_ method, with two extra arguments: the tracker
       // and the index
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "begin TesterStore.insertTrackStatements");
 
-      stored.loadSourceTracker(toInsert);
-      stored.loadSourceIndex(toInsert);
+      storedValue.loadSourceTracker(toInsert);
+      storedValue.loadSourceIndex(toInsert);
 
       methodNode.addComment(toInsert,
           "end TesterStore.insertTrackStatements. also replaced next invocation");

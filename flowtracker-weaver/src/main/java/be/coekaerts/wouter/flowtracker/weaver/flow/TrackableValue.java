@@ -30,7 +30,7 @@ abstract class TrackableValue extends FlowValue {
   }
 
   @Override
-  AbstractInsnNode getInsn() {
+  AbstractInsnNode getCreationInsn() {
     return insn;
   }
 

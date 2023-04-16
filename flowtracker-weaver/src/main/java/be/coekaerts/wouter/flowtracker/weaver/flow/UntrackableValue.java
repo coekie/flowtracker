@@ -45,7 +45,7 @@ class UntrackableValue extends FlowValue {
   }
 
   @Override
-  AbstractInsnNode getInsn() {
+  AbstractInsnNode getCreationInsn() {
     return null;
   }
 
