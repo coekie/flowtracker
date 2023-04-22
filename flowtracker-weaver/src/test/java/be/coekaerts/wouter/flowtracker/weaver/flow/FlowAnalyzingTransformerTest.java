@@ -545,6 +545,112 @@ public class FlowAnalyzingTransformerTest {
   }
 
   @Test
+  public void mergeCopyValuesLocalVar() {
+    testTransform(new Object() {
+                    @SuppressWarnings("unused")
+                    int read(boolean b) {
+                      byte x = myByteArray[0];
+                      byte y = myByteArray[1];
+                      byte r;
+                      if (b) {
+                        r = x;
+                      } else {
+                        r = y;
+                      }
+                      return r;
+                    }
+                  },
+        "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_0\n"
+            + "BALOAD\n"
+            + "ISTORE 2\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_1\n"
+            + "BALOAD\n"
+            + "ISTORE 3\n"
+            + "ILOAD 1\n"
+            + "IFEQ L0\n"
+            + "ILOAD 2\n"
+            + "ISTORE 4\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ I I I] []\n"
+            + "ILOAD 3\n"
+            + "ISTORE 4\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ I I I I] []\n"
+            + "ILOAD 4\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 2\n"
+            + "MAXLOCALS = 5\n",
+        "// Initialize newLocal MergedValue PointTracker\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 2\n"
+            + "// Initialize newLocal ArrayLoadValue PointTracker\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 3\n"
+            + "// Initialize newLocal ArrayLoadValue PointTracker\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 4\n"
+            + "// Initialize newLocal InvocationTransformation invocation\n"
+            + "LDC \"read (Z)I\"\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.start (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
+            + "ASTORE 5\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_0\n"
+            + "// begin ArrayLoadValue.insertTrackStatements\n"
+            + "DUP2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook.getElementTracker (Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;\n"
+            + "ASTORE 4\n"
+            + "// end ArrayLoadValue.insertTrackStatements\n"
+            + "BALOAD\n"
+            + "ISTORE 6\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_1\n"
+            + "// begin ArrayLoadValue.insertTrackStatements\n"
+            + "DUP2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook.getElementTracker (Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;\n"
+            + "ASTORE 3\n"
+            + "// end ArrayLoadValue.insertTrackStatements\n"
+            + "BALOAD\n"
+            + "ISTORE 7\n"
+            + "ILOAD 1\n"
+            + "IFEQ L0\n"
+            + "ILOAD 6\n"
+            + "ISTORE 8\n"
+            + "// MergedValue (TrackerPoint in 2)\n"
+            + "// ArrayLoadValue.loadSourcePoint\n"
+            + "ALOAD 4\n"
+            + "ASTORE 2\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ I be/coekaerts/wouter/flowtracker/tracker/TrackerPoint be/coekaerts/wouter/flowtracker/tracker/TrackerPoint be/coekaerts/wouter/flowtracker/tracker/TrackerPoint be/coekaerts/wouter/flowtracker/tracker/Invocation I I] []\n"
+            + "ILOAD 7\n"
+            + "ISTORE 8\n"
+            + "// MergedValue (TrackerPoint in 2)\n"
+            + "// ArrayLoadValue.loadSourcePoint\n"
+            + "ALOAD 3\n"
+            + "ASTORE 2\n"
+            + "// FYI MergedValue merges here (TrackerPoint in 2)\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ I be/coekaerts/wouter/flowtracker/tracker/TrackerPoint be/coekaerts/wouter/flowtracker/tracker/TrackerPoint be/coekaerts/wouter/flowtracker/tracker/TrackerPoint be/coekaerts/wouter/flowtracker/tracker/Invocation I I I] []\n"
+            + "ILOAD 8\n"
+            + "// begin InvocationReturnStore.insertTrackStatements\n"
+            + "ALOAD 5\n"
+            + "// MergedValue.loadSourceTracker\n"
+            + "ALOAD 2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "// MergedValue.loadSourceIndex\n"
+            + "ALOAD 2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.returning (Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
+            + "// end InvocationReturnStore.insertTrackStatements\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 4\n"
+            + "MAXLOCALS = 9\n");
+  }
+
+  @Test
   public void simpleLoop() {
     testTransform(new Object() {
                     @SuppressWarnings("unused")

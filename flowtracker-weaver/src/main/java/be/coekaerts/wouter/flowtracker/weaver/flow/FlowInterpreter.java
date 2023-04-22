@@ -97,7 +97,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
 
   @Override
   public FlowValue copyOperation(AbstractInsnNode insn, FlowValue value) {
-    return CopyValue.copy(value, insn);
+    return new CopyValue(value, insn);
   }
 
   @Override
@@ -201,7 +201,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       if ((value1.isTrackable() || value1 instanceof MergedValue)
           && (value2.isTrackable() || value2 instanceof MergedValue)) {
 
-        MergedValue merged = MergedValue.maybeMerge(mergeTypes(type1, type2), mergingFrame,
+        FlowValue merged = MergedValue.maybeMerge(mergeTypes(type1, type2), mergingFrame,
             value1, value2);
         if (merged != null) {
           return merged;

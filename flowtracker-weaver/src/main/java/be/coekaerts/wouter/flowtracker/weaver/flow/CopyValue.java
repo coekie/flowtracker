@@ -17,6 +17,10 @@ class CopyValue extends FlowValue {
     this.insn = insn;
   }
 
+  FlowValue getOriginal() {
+    return original;
+  }
+
   @Override
   void ensureTracked() {
     original.ensureTracked();
@@ -67,13 +71,5 @@ class CopyValue extends FlowValue {
     }
     CopyValue other = (CopyValue) o;
     return other.insn == insn && other.original.equals(original);
-  }
-
-  static FlowValue copy(FlowValue original, AbstractInsnNode insn) {
-    if (original instanceof CopyValue) {
-      return copy(((CopyValue) original).original, insn);
-    } else {
-      return new CopyValue(original, insn);
-    }
   }
 }

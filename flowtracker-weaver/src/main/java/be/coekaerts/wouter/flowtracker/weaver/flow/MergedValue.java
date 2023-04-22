@@ -158,21 +158,15 @@ public class MergedValue extends FlowValue {
   /**
    * Combine two values into a {@link MergedValue} when possible; else return null.
    */
-  static MergedValue maybeMerge(Type type, FlowFrame mergingFrame, FlowValue value1,
+  static FlowValue maybeMerge(Type type, FlowFrame mergingFrame, FlowValue value1,
       FlowValue value2) {
     // if one value is a subset of the other, then this is not two code paths converging; so keep
     // the old MergedValue. Note that this means we keep the old mergingFrame.
-    if (value1 instanceof MergedValue) {
-      MergedValue mValue1 = (MergedValue) value1;
-      if (mValue1.values.contains(value2)) {
-        return mValue1;
-      }
+    if (contains(value1, value2)) {
+      return value1;
     }
-    if (value2 instanceof MergedValue) {
-      MergedValue mValue2 = (MergedValue) value2;
-      if (mValue2.values.contains(value1)) {
-        return mValue2;
-      }
+    if (contains(value2, value1)) {
+      return value2;
     }
 
     Set<FlowValue> values = new HashSet<>();
@@ -184,5 +178,31 @@ public class MergedValue extends FlowValue {
     }
 
     return new MergedValue(type, mergingFrame, values);
+  }
+
+  /**
+   * Returns if value1 contains value2, either directly (when value1 is a MergedValue) or indirectly
+   * (nested into CopyValue)
+   */
+  static boolean contains(FlowValue value1, FlowValue value2) {
+    if (value1.equals(value2)) {
+      return true;
+    }
+
+    if (value1 instanceof MergedValue) {
+      for (FlowValue value : ((MergedValue) value1).values) {
+        if (contains(value, value2)) {
+          return true;
+        }
+      }
+    } else if (value1 instanceof CopyValue && value2 instanceof CopyValue) {
+      CopyValue cValue1 = (CopyValue) value1;
+      CopyValue cValue2 = (CopyValue) value2;
+      if (cValue1.getCreationInsn() == cValue2.getCreationInsn()) {
+        return contains(cValue1.getOriginal(), cValue2.getOriginal());
+      }
+    }
+
+    return false;
   }
 }
