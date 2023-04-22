@@ -129,8 +129,9 @@ public class CharFlowAnalysisTest {
     array[0] = secondLast;
     array[1] = last;
 
-    assertNull(getTracker(array));
-    // or, it would be nicer if: snapshotBuilder().stringPart(abc, 0, 2).assertTrackerOf(array)
+    snapshotBuilder().gap(1).trackString(abc, 1, 1).assertTrackerOf(array);
+    // if we would track secondLast through the loop, then this would be:
+    //   snapshotBuilder().trackString(abc, 0, 2).assertTrackerOf(array);
   }
 
   // we store the origin of a value before we actually call the method,
@@ -140,7 +141,7 @@ public class CharFlowAnalysisTest {
 
     char[] array = new char[10];
 
-    char x = 0;
+    char x = abc.charAt(1);
 
     try {
       x = abc.charAt(1000);
@@ -148,8 +149,8 @@ public class CharFlowAnalysisTest {
     }
     array[0] = x;
 
-    // we notice that it's not an easy case, so we don't track it
-    assertNull(getTracker(array));
+    // it still has the old value
+    snapshotBuilder().trackString(abc, 1, 1).assertTrackerOf(array);
   }
 
   @Test public void cast() {

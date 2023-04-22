@@ -142,7 +142,7 @@ abstract class FlowValue extends BasicValue {
         new MethodInsnNode(Opcodes.INVOKESTATIC,
             "be/coekaerts/wouter/flowtracker/tracker/TrackerPoint",
             "ofNullable",
-            "(Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;I)"
+            "(Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)"
                 + "Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
   }
 }

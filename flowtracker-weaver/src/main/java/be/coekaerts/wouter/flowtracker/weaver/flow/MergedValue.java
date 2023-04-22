@@ -3,11 +3,9 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import java.util.HashSet;
 import java.util.Set;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
 
 /**
  * A value that can come from more than one source due to control flow (e.g. due to if-statements or
@@ -74,10 +72,11 @@ public class MergedValue extends FlowValue {
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "MergedValue (TrackerPoint in %s)",
           pointTrackerLocal.getIndex());
-      // TODO copy to pointTrackerLocal
-      //value.loadSourcePoint(toInsert);
-      //toInsert.add(pointTrackerLocal.store());
-      methodNode.instructions.insertBefore(value.getCreationInsn(), toInsert);
+      // at the place the value came from, already store its source in our pointTrackerLocal, so
+      // that when we get to the point where they get merged, it already has the right TrackerPoint
+      value.loadSourcePoint(toInsert);
+      toInsert.add(pointTrackerLocal.store());
+      methodNode.instructions.insert(value.getCreationInsn(), toInsert);
     }
 
     InsnList toInsert = new InsnList();
@@ -93,17 +92,20 @@ public class MergedValue extends FlowValue {
 
   @Override
   void loadSourceTracker(InsnList toInsert) {
-    toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+    mergingFrame.getFlowMethodAdapter().addComment(toInsert, "MergedValue.loadSourceTracker");
+    doLoadSourceTrackerFromPoint(toInsert, pointTrackerLocal);
   }
 
   @Override
   void loadSourceIndex(InsnList toInsert) {
-    toInsert.add(new InsnNode(Opcodes.ICONST_0));
+    mergingFrame.getFlowMethodAdapter().addComment(toInsert, "MergedValue.loadSourceIndex");
+    doLoadSourceIndexFromPoint(toInsert, pointTrackerLocal);
   }
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
-    toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+    mergingFrame.getFlowMethodAdapter().addComment(toInsert, "MergedValue.loadSourcePoint");
+    toInsert.add(pointTrackerLocal.load());
   }
 
   @Override
