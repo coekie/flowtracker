@@ -20,6 +20,9 @@ public class MergedValue extends FlowValue {
   private int cachedIsTrackable = -1;
   private boolean tracked;
 
+  /** Local variable storing the PointTracker for the merged value */
+  private TrackLocal pointTrackerLocal;
+
   private MergedValue(Type type, FlowFrame mergingFrame, Set<FlowValue> values) {
     super(type);
     this.mergingFrame = mergingFrame;
@@ -60,12 +63,26 @@ public class MergedValue extends FlowValue {
   }
 
   private void insertTrackStatements() {
+    FlowMethodAdapter methodNode = mergingFrame.getFlowMethodAdapter();
+    pointTrackerLocal = methodNode.newLocalForObject(
+        Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"),
+        "MergedValue PointTracker");
+
     for (FlowValue value : values) {
       value.ensureTracked();
+
+      InsnList toInsert = new InsnList();
+      methodNode.addComment(toInsert, "MergedValue (TrackerPoint in %s)",
+          pointTrackerLocal.getIndex());
+      // TODO copy to pointTrackerLocal
+      //value.loadSourcePoint(toInsert);
+      //toInsert.add(pointTrackerLocal.store());
+      methodNode.instructions.insertBefore(value.getCreationInsn(), toInsert);
     }
-    FlowMethodAdapter methodNode = mergingFrame.getFlowMethodAdapter();
+
     InsnList toInsert = new InsnList();
-    methodNode.addComment(toInsert, "TODO MergedValue.insertTrackStatements");
+    methodNode.addComment(toInsert, "FYI MergedValue merges here (TrackerPoint in %s)",
+        pointTrackerLocal.getIndex());
     methodNode.instructions.insertBefore(mergingFrame.getInsn(), toInsert);
   }
 
@@ -86,7 +103,7 @@ public class MergedValue extends FlowValue {
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
-    doLoadSourcePointFromTrackerAndIndex(toInsert);
+    toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
   }
 
   @Override

@@ -36,6 +36,10 @@ class TrackLocal {
     return createVarInsnNode(type.getOpcode(Opcodes.ISTORE));
   }
 
+  int getIndex() {
+    return index;
+  }
+
   private VarInsnNode createVarInsnNode(int opcode) {
     return new VarInsnNode(opcode, index) {
       @Override
