@@ -5,7 +5,6 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
-import org.junit.Ignore;
 
 public class ByteArrayInputStreamTest extends AbstractInputStreamTest {
 
@@ -25,11 +24,6 @@ public class ByteArrayInputStreamTest extends AbstractInputStreamTest {
   void assertContentEquals(String expected, InputStream is) {
     // we don't track content for ByteArrayInputStream in a ByteOriginTracker
     // (because it's not an origin; its contents must come from somewhere else)
-  }
-
-  @Override
-  @Ignore // TODO read single byte in ByteArrayInputStream; "return b ? x : y;" problem
-  public void readSingleByte() {
   }
 
   static class MyByteArrayInputStream extends ByteArrayInputStream {
