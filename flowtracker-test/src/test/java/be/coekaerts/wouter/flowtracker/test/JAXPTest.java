@@ -2,11 +2,12 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static org.junit.Assert.assertNull;
 
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import java.io.ByteArrayInputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -16,7 +17,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 // test more like an integration test. perhaps it should live in a different module.
 public class JAXPTest {
-  @Ignore
+
   @Test
   public void test() throws Exception {
     SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -27,20 +28,33 @@ public class JAXPTest {
     MyHandler handler = new MyHandler();
     xmlReader.setContentHandler(handler);
 
-    String input = trackCopy("<test></test>");
+    String input = trackCopy("<test>hello</test>");
     xmlReader.parse(new InputSource(new ByteArrayInputStream(input.getBytes())));
 
-    snapshotBuilder().trackString(input, 1, 4).assertTrackerOf(handler.startedElement);
+    // in com.sun.org.apache.xerces.internal.util.SymbolTable, the names of tags are interned, which
+    // makes them very hard to track
+    assertNull(StringHook.getStringTracker(handler.startedElement));
+
+    // but content is tracked
+    snapshotBuilder().trackString(input, 6, 5)
+        .assertEquals(StringHook.getStringTracker(handler.characters));
   }
 
   private static class MyHandler extends DefaultHandler {
     String startedElement;
+    String characters;
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes)
         throws SAXException {
       startedElement = localName;
       super.startElement(uri, localName, qName, attributes);
+    }
+
+    @Override
+    public void characters(char[] ch, int start, int length) throws SAXException {
+      characters = new String(ch, start, length);
+      super.characters(ch, start, length);
     }
   }
 }

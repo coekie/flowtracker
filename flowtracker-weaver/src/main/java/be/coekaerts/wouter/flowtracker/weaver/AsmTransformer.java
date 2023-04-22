@@ -273,6 +273,7 @@ class AsmTransformer implements ClassFileTransformer {
         || className.equals("sun/nio/cs/UTF_8$Encoder")
         || className.equals("sun/nio/cs/UTF_8$Decoder")
         || className.equals("sun/nio/cs/StreamDecoder")
+        || className.startsWith("com/sun/org/apache/xerces")
     ) {
       return true;
     }
