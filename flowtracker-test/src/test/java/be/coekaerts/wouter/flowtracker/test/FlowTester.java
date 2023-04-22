@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +61,11 @@ class FlowTester {
   /** Index in {@link #theSource()} that we pretend our values in this tester come from */
   int theSourceIndex() {
     return 42;
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  TrackerPoint theSourcePoint() {
+    return TrackerPoint.of(theSource(), theSourceIndex());
   }
 
   /**

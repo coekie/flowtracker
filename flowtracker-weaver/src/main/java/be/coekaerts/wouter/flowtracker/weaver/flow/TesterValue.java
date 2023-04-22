@@ -46,8 +46,7 @@ class TesterValue extends TrackableValue {
           new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
               "be/coekaerts/wouter/flowtracker/test/FlowTester",
               "theSource",
-              "()Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;",
-              false));
+              "()Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;"));
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {
@@ -58,7 +57,18 @@ class TesterValue extends TrackableValue {
         new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
             "be/coekaerts/wouter/flowtracker/test/FlowTester",
             "theSourceIndex",
-            "()I",
-            false));
+            "()I"));
+  }
+
+  @Override
+  void loadSourcePoint(InsnList toInsert) {
+    flowMethodAdapter.addComment(toInsert,
+        "TesterValue.loadSourcePoint: testerLocal.theSourcePoint()");
+    toInsert.add(testerLocal.load());
+    toInsert.add(
+        new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            "be/coekaerts/wouter/flowtracker/test/FlowTester",
+            "theSourcePoint",
+            "()Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
   }
 }

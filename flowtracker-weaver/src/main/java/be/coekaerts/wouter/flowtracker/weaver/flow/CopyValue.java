@@ -49,6 +49,11 @@ class CopyValue extends FlowValue {
   }
 
   @Override
+  void loadSourcePoint(InsnList toInsert) {
+    original.loadSourcePoint(toInsert);
+  }
+
+  @Override
   boolean hasMergeAt(FlowFrame mergingFrame) {
     return original.hasMergeAt(mergingFrame);
   }

@@ -57,25 +57,19 @@ class FieldValue extends TrackableValue {
   @Override void loadSourceTracker(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert,
         "FieldValue.loadSourceTracker: PointTracker.getTracker(pointTracker)");
-    toInsert.add(pointTrackerLocal.load());
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/tracker/TrackerPoint",
-            "getTracker",
-            "(Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;",
-            false));
+    doLoadSourceTrackerFromPoint(toInsert,  pointTrackerLocal);
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert,
         "FieldValue.loadSourceIndex: PointTracker.getIndex(pointTracker)");
+    doLoadSourceIndexFromPoint(toInsert, pointTrackerLocal);
+  }
+
+  @Override
+  void loadSourcePoint(InsnList toInsert) {
+    flowMethodAdapter.addComment(toInsert, "FieldValue.loadSourcePoint");
     toInsert.add(pointTrackerLocal.load());
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/tracker/TrackerPoint",
-            "getIndex",
-            "(Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I",
-            false));
   }
 
   static boolean shouldTrackType(Type type) {

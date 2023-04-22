@@ -33,13 +33,18 @@ public class ConstantValue extends TrackableValue {
         new MethodInsnNode(Opcodes.INVOKESTATIC,
             "be/coekaerts/wouter/flowtracker/hook/ConstantHook",
             "constantTracker",
-            "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;",
-            false));
+            "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;"));
   }
 
   @Override
   void loadSourceIndex(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert, "ConstantValue.loadSourceIndex: 0");
     toInsert.add(new InsnNode(Opcodes.ICONST_0));
+  }
+
+  @Override
+  void loadSourcePoint(InsnList toInsert) {
+    // NICE the TrackerPoint could be a ConstantDynamic
+    doLoadSourcePointFromTrackerAndIndex(toInsert);
   }
 }

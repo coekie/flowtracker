@@ -37,8 +37,7 @@ class InvocationReturnValue extends TrackableValue {
         new MethodInsnNode(Opcodes.INVOKESTATIC,
             "be/coekaerts/wouter/flowtracker/tracker/Invocation",
             "calling",
-            "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;",
-            false));
+            "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"));
     toInsert.add(invocationLocal.store());
 
     flowMethodAdapter.instructions.insertBefore(mInsn, toInsert);
@@ -60,6 +59,16 @@ class InvocationReturnValue extends TrackableValue {
         "be/coekaerts/wouter/flowtracker/tracker/Invocation",
         "returnIndex",
         "I"));
+  }
+
+  @Override
+  void loadSourcePoint(InsnList toInsert) {
+    flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.loadSourcePoint");
+    toInsert.add(invocationLocal.load());
+    toInsert.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+        "be/coekaerts/wouter/flowtracker/tracker/Invocation",
+        "getReturnPoint",
+        "()Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
   }
 
   // TODO better conditions for when to track call

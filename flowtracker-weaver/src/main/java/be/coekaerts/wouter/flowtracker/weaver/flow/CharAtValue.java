@@ -67,4 +67,9 @@ class CharAtValue extends TrackableValue {
     flowMethodAdapter.addComment(toInsert, "CharAtValue.loadSourceIndex");
     toInsert.add(indexLocal.load());
   }
+
+  @Override
+  void loadSourcePoint(InsnList toInsert) {
+    doLoadSourcePointFromTrackerAndIndex(toInsert);
+  }
 }

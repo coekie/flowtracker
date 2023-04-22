@@ -22,6 +22,10 @@ public class TrackerPoint {
     return of(tracker, index, Growth.NONE);
   }
 
+  public static TrackerPoint ofNullable(Tracker tracker, int index) {
+    return tracker == null ? null : of(tracker, index);
+  }
+
   /**
    * Create a TrackerPoint containing the source of the element at {@code index} in {@code tracker}.
    */

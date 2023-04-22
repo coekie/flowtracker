@@ -85,6 +85,11 @@ public class MergedValue extends FlowValue {
   }
 
   @Override
+  void loadSourcePoint(InsnList toInsert) {
+    doLoadSourcePointFromTrackerAndIndex(toInsert);
+  }
+
+  @Override
   boolean hasMergeAt(FlowFrame mergingFrame) {
     if (mergingFrame == this.mergingFrame) {
       return true;

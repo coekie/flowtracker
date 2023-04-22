@@ -15,6 +15,11 @@ public class Invocation {
     this.signature = signature;
   }
 
+  @SuppressWarnings("unused") // invoked by instrumentation
+  TrackerPoint getReturnPoint() {
+    return TrackerPoint.ofNullable(returnTracker, returnIndex);
+  }
+
   /**
    * Sets the source tracker of a returned value
    */
