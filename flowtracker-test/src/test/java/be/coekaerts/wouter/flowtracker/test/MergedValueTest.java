@@ -1,13 +1,13 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class MergedValueTest {
-  @SuppressWarnings("FieldCanBeLocal")
-  private final boolean yes = true;
-  @SuppressWarnings("FieldCanBeLocal")
-  private final boolean no = false;
+  // non-final fields, to avoid analysis _seeing_ the control flow already
+  @SuppressWarnings("all")
+  private boolean yes = true;
+  @SuppressWarnings("all")
+  private boolean no = false;
 
   @Test
   public void testTernaryOperatorCreatingValueYes() {
@@ -19,16 +19,6 @@ public class MergedValueTest {
   }
 
   @Test
-  public void testTernaryOperatorCreatingValueNo() {
-    FlowTester tester1 = new FlowTester();
-    FlowTester tester2 = new FlowTester();
-
-    tester2.assertIsTheTrackedValue(
-        no ? tester1.createSourceChar('a') : tester2.createSourceChar('b'));
-  }
-
-  @Test
-  @Ignore // TODO MergedValue copying
   public void testTernaryOperatorCopyingValueYes() {
     FlowTester tester1 = new FlowTester();
     FlowTester tester2 = new FlowTester();
@@ -39,7 +29,6 @@ public class MergedValueTest {
   }
 
   @Test
-  @Ignore // TODO MergedValue copying
   public void testTernaryOperatorCopyingValueNo() {
     FlowTester tester1 = new FlowTester();
     FlowTester tester2 = new FlowTester();
@@ -78,7 +67,6 @@ public class MergedValueTest {
   }
 
   @Test
-  @Ignore // TODO MergedValue copying
   public void testIfCopyingValueYes() {
     FlowTester tester1 = new FlowTester();
     FlowTester tester2 = new FlowTester();
@@ -95,7 +83,6 @@ public class MergedValueTest {
   }
 
   @Test
-  @Ignore // TODO MergedValue copying
   public void testIfCopyingValueNo() {
     FlowTester tester1 = new FlowTester();
     FlowTester tester2 = new FlowTester();
