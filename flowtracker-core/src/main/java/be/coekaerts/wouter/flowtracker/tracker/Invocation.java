@@ -16,7 +16,7 @@ public class Invocation {
   }
 
   @SuppressWarnings("unused") // invoked by instrumentation
-  TrackerPoint getReturnPoint() {
+  public TrackerPoint getReturnPoint() {
     return TrackerPoint.ofNullable(returnTracker, returnIndex);
   }
 
