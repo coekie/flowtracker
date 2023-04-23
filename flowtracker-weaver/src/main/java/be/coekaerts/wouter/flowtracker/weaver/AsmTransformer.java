@@ -34,6 +34,7 @@ class AsmTransformer implements ClassFileTransformer {
   private final String[] packagesToInstrument;
   private final File dumpByteCodePath;
   private final File dumpTextPath;
+  private final String dumpTextPrefix;
   private final Map<String, String> config;
 
   public AsmTransformer(Map<String, String> config) {
@@ -46,6 +47,7 @@ class AsmTransformer implements ClassFileTransformer {
     dumpTextPath = config.containsKey("dumpText")
         ? new File(config.get("dumpText"))
         : null;
+    dumpTextPrefix = config.getOrDefault("dumpTextPrefix", "");
     this.config = config;
 
     ClassHookSpec outputStreamWriterSpec = new ClassHookSpec(
@@ -246,7 +248,7 @@ class AsmTransformer implements ClassFileTransformer {
     if (spec != null) {
       return spec;
     } else if (shouldAnalyze(className)) {
-      if (dumpTextPath == null) {
+      if (dumpTextPath == null || !className.startsWith(dumpTextPrefix)) {
         return new FlowAnalyzingTransformer();
       } else {
         // if we're dumping the text, then use RealCommentator to instrument it, so that the dumped
