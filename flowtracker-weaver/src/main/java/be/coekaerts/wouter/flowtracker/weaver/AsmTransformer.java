@@ -24,6 +24,7 @@ import java.util.Map;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.util.CheckClassAdapter;
 
@@ -199,9 +200,18 @@ class AsmTransformer implements ClassFileTransformer {
 
       ClassReader reader = new ClassReader(classfileBuffer);
       ClassWriter writer = new ClassWriter(0);
+      ClassVisitor adapter = writer;
+
       // NICE make checkAdapter optional; for development only
-      CheckClassAdapter checkAdapter = new CheckClassAdapter(writer);
-      ClassVisitor adapter = adapterFactory.createClassAdapter(checkAdapter);
+      // wrap with extra ClassVisitor as workaround for CheckClassAdapter (since ASM 9.4) having
+      // issues dealing with JDK classes that are being redefined but missing StackMapFrames because
+      // of https://bugs.openjdk.org/browse/JDK-8228604 .
+      // this avoids the "instanceof ClassWriter" check in CheckClassAdapter, so that is skips
+      // verifying the frames
+      adapter = new ClassVisitor(Opcodes.ASM9, adapter) {};
+      adapter = new CheckClassAdapter(adapter);
+
+      adapter = adapterFactory.createClassAdapter(adapter);
       if (className.equals("java/lang/String")) {
         adapter = new StringAdapter(adapter, config);
       }
