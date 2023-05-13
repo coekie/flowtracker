@@ -8,16 +8,30 @@ public class Invocation {
   private static final ThreadLocal<Invocation> pending = new ThreadLocal<>();
 
   private final String signature;
+
+  // tracker and index for the returned primitive value
   public Tracker returnTracker;
   public int returnIndex;
 
+  // tracker and index for the primitive value in the first argument
+  public Tracker arg0Tracker;
+  public int arg0Index;
+
   Invocation(String signature) {
     this.signature = signature;
+    this.arg0Tracker = null;
+    this.arg0Index = -1;
   }
 
   @SuppressWarnings("unused") // invoked by instrumentation
   public TrackerPoint getReturnPoint() {
     return TrackerPoint.ofNullable(returnTracker, returnIndex);
+  }
+
+  public Invocation setArg0(Tracker arg0Tracker, int arg0Index) {
+    this.arg0Tracker = arg0Tracker;
+    this.arg0Index = arg0Index;
+    return this;
   }
 
   /**

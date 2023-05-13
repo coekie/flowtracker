@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -21,6 +22,20 @@ public class InvocationTest {
 
     assertEquals(tracker, callingInvocation.returnTracker);
     assertEquals(2, callingInvocation.returnIndex);
+  }
+
+  @Test
+  public void testArgumentValue() {
+    Tracker tracker = new CharOriginTracker();
+
+    Invocation callingInvocation = Invocation.calling("write").setArg0(tracker, 2);
+    // inside the called write() method:
+    {
+      Invocation calledInvocation = requireNonNull(Invocation.start("write"));
+      assertSame(callingInvocation, calledInvocation);
+      assertEquals(tracker, calledInvocation.arg0Tracker);
+      assertEquals(2, calledInvocation.arg0Index);
+    }
   }
 
   @Test

@@ -6,6 +6,7 @@ import be.coekaerts.wouter.flowtracker.weaver.debug.CommentTextifier;
 import be.coekaerts.wouter.flowtracker.weaver.debug.RealCommentator;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.function.Consumer;
@@ -182,6 +183,7 @@ public class FlowAnalyzingTransformerTest {
   static byte[] myByteArray;
   static boolean myBoolean;
   static InputStream inputStream;
+  static OutputStream outputStream;
 
   @Test
   public void testFramesLoop() {
@@ -363,6 +365,55 @@ public class FlowAnalyzingTransformerTest {
             + "// end InvocationReturnStore.insertTrackStatements\n"
             + "IRETURN\n"
             + "MAXSTACK = 4\n"
+            + "MAXLOCALS = 3\n");
+  }
+
+  /** Test Instrumentation using {@link InvocationArgStore} */
+  @Test
+  public void invocationArgStore() {
+    testTransform(new Object() {
+                    @SuppressWarnings("unused")
+                    void t(byte[] bytes) throws IOException {
+                      outputStream.write(bytes[1]);
+                    }
+                  },
+        // original code
+        "GETSTATIC $THISTEST$.outputStream : Ljava/io/OutputStream;\n"
+            + "ALOAD 1\n"
+            + "ICONST_1\n"
+            + "BALOAD\n"
+            + "INVOKEVIRTUAL java/io/OutputStream.write (I)V\n"
+            + "RETURN\n"
+            + "MAXSTACK = 3\n"
+            + "MAXLOCALS = 2\n",
+        // transformed code
+        "// Initialize newLocal ArrayLoadValue PointTracker\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 2\n"
+            + "GETSTATIC $THISTEST$.outputStream : Ljava/io/OutputStream;\n"
+            + "ALOAD 1\n"
+            + "ICONST_1\n"
+            + "// begin ArrayLoadValue.insertTrackStatements\n"
+            + "DUP2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook.getElementTracker (Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;\n"
+            + "ASTORE 2\n"
+            + "// end ArrayLoadValue.insertTrackStatements\n"
+            + "BALOAD\n"
+            + "// begin InvocationArgStore.insertTrackStatements\n"
+            + "LDC \"write (I)V\"\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.calling (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
+            + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
+            + "ALOAD 2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "// ArrayLoadValue.loadSourceIndex: PointTracker.getIndex(pointTracker)\n"
+            + "ALOAD 2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
+            + "INVOKEVIRTUAL be/coekaerts/wouter/flowtracker/tracker/Invocation.setArg0 (Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
+            + "POP\n"
+            + "// end InvocationArgStore.insertTrackStatements\n"
+            + "INVOKEVIRTUAL java/io/OutputStream.write (I)V\n"
+            + "RETURN\n"
+            + "MAXSTACK = 5\n"
             + "MAXLOCALS = 3\n");
   }
 
@@ -732,7 +783,7 @@ public class FlowAnalyzingTransformerTest {
             + "MAXLOCALS = 5\n");
   }
 
-  /** A class with some complex flow, which at some point make the analyzer go crazy */
+  /** A class with some complex flow, which at some point made the analyzer go crazy */
   @Test
   public void complex() {
     // not testing the result, just testing that it finished in a reasonable time

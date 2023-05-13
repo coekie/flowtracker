@@ -23,8 +23,6 @@ class InvocationReturnValue extends TrackableValue {
   }
 
   @Override void insertTrackStatements() {
-    // on the stack before the charAt call: String target, int index
-
     invocationLocal = flowMethodAdapter.newLocalForObject(
         Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"),
         "InvocationReturnValue invocation");
