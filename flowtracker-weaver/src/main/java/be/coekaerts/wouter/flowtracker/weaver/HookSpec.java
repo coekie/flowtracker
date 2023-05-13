@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import java.util.ArrayList;
 import java.util.List;
 import org.objectweb.asm.MethodVisitor;
@@ -115,6 +116,18 @@ public class HookSpec {
   public static final HookArgument ARG2 = spec -> new ArgHookArgument(2);
   public static final HookArgument ARG3 = spec -> new ArgHookArgument(3);
 
+  /** The {@link Invocation} of invoking the hooked method */
+  public static final HookArgument INVOCATION = spec -> new OnEnterHookArgumentInstance(
+      Type.getType(Invocation.class)) {
+    @Override
+    void loadOnMethodEnter(GeneratorAdapter generator) {
+      generator.push(
+          Invocation.signature(spec.targetMethod.getName(), spec.targetMethod.getDescriptor()));
+      generator.invokeStatic(Type.getType(Invocation.class), Method.getMethod(
+          "be.coekaerts.wouter.flowtracker.tracker.Invocation start(String)"));
+    }
+  };
+
   private class HookMethodAdapter extends AdviceAdapter {
     private final boolean hasReturnType;
     private final List<HookArgumentInstance> argumentInstances;
@@ -157,6 +170,7 @@ public class HookSpec {
   }
 
   private final Type targetClass;
+  private final Method targetMethod;
   private final Class<?> hookClass;
   private final HookArgument[] hookArguments;
   private final Method hookMethod;
@@ -166,6 +180,7 @@ public class HookSpec {
       Class<?> hookClass, Method hookMethod, HookArgument... hookArguments) {
     super();
     this.targetClass = targetClass;
+    this.targetMethod = targetMethod;
     this.hookClass = hookClass;
     this.hookMethod = hookMethod;
     this.hookArguments = hookArguments;

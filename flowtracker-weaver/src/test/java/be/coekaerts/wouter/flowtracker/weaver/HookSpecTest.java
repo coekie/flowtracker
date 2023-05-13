@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.weaver;
 
 import static org.junit.Assert.assertEquals;
 
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.OnEnterHookArgumentInstance;
 import java.io.IOException;
@@ -64,6 +65,17 @@ public class HookSpecTest {
             arg0OnEnter, HookSpec.ARG0));
     assertEquals("withOnEnter originalArg 2\n"
         + "afterWithOnEnter originalArg updatedArg\n", log.toString());
+  }
+
+  @Test
+  public void testInvocation() throws ReflectiveOperationException {
+    Invocation.calling( "withInvocation ()V").setArg0(null, 777);
+    transformAndRun(new ClassHookSpec(Type.getType(HookedWithInvocation.class), MyHook.class)
+        .addMethodHookSpec("void withInvocation()",
+            "void afterWithInvocation(be.coekaerts.wouter.flowtracker.tracker.Invocation)",
+            HookSpec.INVOCATION));
+    assertEquals("withInvocation\n"
+        + "afterWithInvocation 777\n", log.toString());
   }
 
   @Test
@@ -170,6 +182,10 @@ public class HookSpecTest {
       log("afterWithOnEnter", argOnEnter, arg);
     }
 
+    public static void afterWithInvocation(Invocation invocation) {
+      log("afterWithInvocation", invocation.arg0Index);
+    }
+
     public static void afterWithField(int i) {
       log("afterWithField", i);
     }
@@ -216,6 +232,18 @@ class HookedWithOnEnter implements Runnable {
     i++;
     HookSpecTest.log("withOnEnter", arg, i);
     arg = "updatedArg";
+  }
+}
+
+class HookedWithInvocation implements Runnable {
+  @Override
+  public void run() {
+    withInvocation();
+  }
+
+  void withInvocation() {
+    Invocation.calling("something else");
+    HookSpecTest.log("withInvocation");
   }
 }
 
