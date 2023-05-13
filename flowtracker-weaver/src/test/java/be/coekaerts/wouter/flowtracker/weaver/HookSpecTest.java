@@ -3,7 +3,7 @@ package be.coekaerts.wouter.flowtracker.weaver;
 import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
-import be.coekaerts.wouter.flowtracker.weaver.HookSpec.OnEnterHookArgument;
+import be.coekaerts.wouter.flowtracker.weaver.HookSpec.OnEnterHookArgumentInstance;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -51,7 +51,7 @@ public class HookSpecTest {
 
   @Test
   public void testOnEnter() throws ReflectiveOperationException {
-    HookArgument arg0OnEnter = new OnEnterHookArgument(Type.getType(String.class), 2) {
+    HookArgument arg0OnEnter = spec -> new OnEnterHookArgumentInstance(Type.getType(String.class)) {
       @Override
       void loadOnMethodEnter(GeneratorAdapter generator) {
         generator.loadArg(0);
