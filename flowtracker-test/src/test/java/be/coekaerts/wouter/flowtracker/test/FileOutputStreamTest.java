@@ -44,23 +44,6 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
     }
   }
 
-  @Override
-  @Test
-  // TODO FileOutputStreamTest.writeSingleByte no tracking of single char write
-  public void writeSingleByte() throws IOException {
-    FlowTester flowTester0 = new FlowTester();
-    FlowTester flowTester1 = new FlowTester();
-    try (var os = createOutputStream()) {
-      os.write(flowTester0.createSourceChar('a'));
-      os.write(flowTester1.createSourceChar('b'));
-
-      assertContentEquals("ab", os);
-      snapshotBuilder()
-          .gap(2)
-          .assertEquals(getTracker(os));
-    }
-  }
-
   @Test
   public void channel() throws IOException {
     byte[] abc = trackedByteArray("abc");
