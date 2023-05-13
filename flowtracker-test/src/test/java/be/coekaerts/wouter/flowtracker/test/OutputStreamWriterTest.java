@@ -58,13 +58,19 @@ public class OutputStreamWriterTest {
   }
 
   @Test public void writeSingleChar() throws IOException {
-    writer.write('a');
+    FlowTester flowTester0 = new FlowTester();
+    FlowTester flowTester1 = new FlowTester();
+    writer.write(flowTester0.createSourceChar('a'));
     assertContentEquals("a");
-    writer.write('b');
+    writer.write(flowTester1.createSourceChar('b'));
     assertContentEquals("ab");
-    // tracking of source for write(char) not implemented
+    // tracking of source for write(char) not implemented for OutputStreamWriter
     snapshotBuilder().gap(2).assertTrackerOf(writer);
-    snapshotBuilder().gap(2).assertEquals(streamTracker);
+    // but it does work for the underlying OutputStream
+    snapshotBuilder()
+        .part(flowTester0.theSource(), flowTester0.theSourceIndex(), 1)
+        .part(flowTester1.theSource(), flowTester1.theSourceIndex(), 1)
+        .assertEquals(streamTracker);
   }
 
   @Test public void writeCharArray() throws IOException {

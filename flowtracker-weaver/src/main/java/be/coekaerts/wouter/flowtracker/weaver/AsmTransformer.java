@@ -254,22 +254,20 @@ class AsmTransformer implements ClassFileTransformer {
       return null;
     }
 
-    ClassHookSpec spec = getSpec(className);
-    if (spec != null) {
-      return spec;
-    } else if (shouldAnalyze(className)) {
+    ClassAdapterFactory result = getSpec(className);
+    if (shouldAnalyze(className)) {
       if (dumpTextPath == null || !className.startsWith(dumpTextPrefix)) {
-        return new FlowAnalyzingTransformer();
+        result = ClassAdapterFactory.and(result, new FlowAnalyzingTransformer());
       } else {
         // if we're dumping the text, then use RealCommentator to instrument it, so that the dumped
         // text includes comments
         FlowAnalyzingTransformer flowTransformer
             = new FlowAnalyzingTransformer(new RealCommentator());
-        return new DumpTextTransformer(flowTransformer, className, dumpTextPath);
+        result = ClassAdapterFactory.and(result,
+            new DumpTextTransformer(flowTransformer, className, dumpTextPath));
       }
-    } else {
-      return null;
     }
+    return result;
   }
 
   private boolean shouldAnalyze(String className) {
@@ -281,10 +279,12 @@ class AsmTransformer implements ClassFileTransformer {
         || className.equals("java/io/ByteArrayInputStream")
         || className.equals("java/io/ByteArrayOutputStream")
         || className.equals("java/io/InputStreamReader")
+        || className.equals("java/io/OutputStreamWriter")
         || className.equals("java/nio/HeapCharBuffer")
         || className.equals("sun/nio/cs/UTF_8$Encoder")
         || className.equals("sun/nio/cs/UTF_8$Decoder")
         || className.equals("sun/nio/cs/StreamDecoder")
+        || className.equals("sun/nio/cs/StreamEncoder")
         || className.startsWith("com/sun/org/apache/xerces")
     ) {
       return true;
