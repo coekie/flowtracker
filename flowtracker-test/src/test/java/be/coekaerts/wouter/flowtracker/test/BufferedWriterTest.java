@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.test.FlowTester.untrackedChar;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 
@@ -49,7 +50,7 @@ public class BufferedWriterTest {
   @Test public void gaps() throws IOException {
     String str = trackCopy("abcd");
     bw.write(str);
-    bw.write('e');
+    bw.write(untrackedChar('e'));
     bw.write(str);
     bw.flush();
     snapshotBuilder().trackString(str).gap(1).trackString(str).assertTrackerOf(out);
@@ -64,7 +65,7 @@ public class BufferedWriterTest {
     outerBw.write(str);
     // testing that a gap also gets properly written *out* of a BufferedWriter
     // (from outerBw into bw, overwriting the previous tracker there)
-    outerBw.write('c');
+    outerBw.write(untrackedChar('c'));
     outerBw.write(str);
     outerBw.flush();
     snapshotBuilder().trackString(str).trackString(str).trackString(str).gap(1).trackString(str)

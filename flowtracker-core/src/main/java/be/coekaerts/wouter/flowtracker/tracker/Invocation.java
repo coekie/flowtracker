@@ -19,8 +19,6 @@ public class Invocation {
 
   Invocation(String signature) {
     this.signature = signature;
-    this.arg0Tracker = null;
-    this.arg0Index = -1;
   }
 
   @SuppressWarnings("unused") // invoked by instrumentation
@@ -42,6 +40,23 @@ public class Invocation {
       invocation.returnTracker = tracker;
       invocation.returnIndex = index;
     }
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static TrackerPoint getArg0Point(Invocation invocation) {
+    return invocation == null
+        ? null
+        : TrackerPoint.ofNullable(invocation.arg0Tracker, invocation.arg0Index);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static Tracker getArg0Tracker(Invocation invocation) {
+    return invocation == null ? null : invocation.arg0Tracker;
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static int getArg0Index(Invocation invocation) {
+    return invocation == null ? -1 : invocation.arg0Index;
   }
 
   /**

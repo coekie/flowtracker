@@ -69,7 +69,7 @@ class FlowTester {
   }
 
   /**
-   * Assert that the the given value is tracked as coming from index {@code expectedIndex} in
+   * Assert that the given value is tracked as coming from index {@code expectedIndex} in
    * {@code expectedSource}.
    * Calls to this method should get replaced by
    * {@link #$tracked_assertTrackedValue(char, char, Tracker, int, Tracker, int)}.
@@ -113,7 +113,7 @@ class FlowTester {
   }
 
   /**
-   * Assert that the the given value is tracked as coming from this tester.
+   * Assert that the given value is tracked as coming from this tester.
    * Calls to this method should get replaced by
    * {@link #$tracked_assertIsTheTrackedValue(char, Tracker, int)}.
    */
@@ -122,7 +122,7 @@ class FlowTester {
   }
 
   /**
-   * Assert that the the given value is tracked as coming from this tester.
+   * Assert that the given value is tracked as coming from this tester.
    * Calls to this method should get replaced by
    * {@link #$tracked_assertIsTheTrackedValue(byte, Tracker, int)}.
    */
@@ -186,6 +186,10 @@ class FlowTester {
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   static int $tracked_getByteSourceIndex(byte b, Tracker tracker, int index) {
     return index;
+  }
+
+  static char untrackedChar(char c) {
+    return c;
   }
 
   private static AssertionError sourceNotTrackedError() {

@@ -417,6 +417,47 @@ public class FlowAnalyzingTransformerTest {
             + "MAXLOCALS = 3\n");
   }
 
+  /** Test Instrumentation using {@link InvocationArgValue} */
+  @Test
+  public void invocationArgValue() {
+    testTransform(new Object() {
+                    @SuppressWarnings("unused")
+                    void write(int b) {
+                      myByteArray[1] = (byte) b;
+                    }
+                  },
+        // original code
+        "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_1\n"
+            + "ILOAD 1\n"
+            + "I2B\n"
+            + "BASTORE\n"
+            + "RETURN\n"
+            + "MAXSTACK = 3\n"
+            + "MAXLOCALS = 2\n",
+        // transformed code
+        "// Initialize newLocal InvocationTransformation invocation\n"
+            + "LDC \"write (I)V\"\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.start (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
+            + "ASTORE 2\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_1\n"
+            + "ILOAD 1\n"
+            + "I2B\n"
+            + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)\n"
+            + "// InvocationArgValue.loadSourceTracker\n"
+            + "ALOAD 2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.getArg0Tracker (Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "// InvocationArgValue.loadSourceIndex\n"
+            + "ALOAD 2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.getArg0Index (Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;)I\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setByte ([BIBLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
+            + "// end ArrayStore.insertTrackStatements\n"
+            + "RETURN\n"
+            + "MAXSTACK = 6\n"
+            + "MAXLOCALS = 3\n");
+  }
+
   @Test
   public void mergeTrackableValues() {
     testTransform(new Object() {

@@ -59,7 +59,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     /** The next visitor in the chain after this one */
     private final TransparentLocalVariablesSorter varSorter;
     final InsnList intro = new InsnList();
-    private final InvocationTransformation invocation = new InvocationTransformation();
+    final InvocationTransformation invocation = new InvocationTransformation();
 
     public FlowMethodAdapter(MethodVisitor mv, String owner, int access, String name, String desc,
         String signature, String[] exceptions) {

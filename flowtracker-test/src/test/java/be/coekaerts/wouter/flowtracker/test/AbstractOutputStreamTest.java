@@ -14,18 +14,17 @@ import org.junit.Test;
 public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
 
   @Test public void writeSingleByte() throws IOException {
-    byte[] abc = trackedByteArray("abc");
+    FlowTester flowTester0 = new FlowTester();
+    FlowTester flowTester1 = new FlowTester();
     try (var os = createOutputStream()) {
-      os.write('x');
-      // also write a bytearray in this test so that there's something that's actually tracked, so
-      // that getTracker doesn't return null.
-      os.write(abc);
-      os.write('y');
-      os.write(abc);
+      os.write(flowTester0.createSourceChar('a'));
+      os.write(flowTester1.createSourceChar('b'));
 
-      // tracking source for write(int) not implemented, so it creates gaps
-      assertContentEquals("xabcyabc", os);
-      snapshotBuilder().gap(1).track(abc).gap(1).track(abc).assertEquals(getTracker(os));
+      assertContentEquals("ab", os);
+      snapshotBuilder()
+          .part(flowTester0.theSource(), flowTester0.theSourceIndex(), 1)
+          .part(flowTester1.theSource(), flowTester1.theSourceIndex(), 1)
+          .assertEquals(getTracker(os));
     }
   }
 

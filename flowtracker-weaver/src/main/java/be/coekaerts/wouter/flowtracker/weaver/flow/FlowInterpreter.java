@@ -180,6 +180,16 @@ class FlowInterpreter extends Interpreter<FlowValue> {
   public void returnOperation(AbstractInsnNode insn, FlowValue value, FlowValue expected) {
   }
 
+  @Override
+  public FlowValue newParameterValue(boolean isInstanceMethod, int local, Type type) {
+    if (local == (isInstanceMethod ? 1 : 0)
+        && InvocationArgStore.shouldInstrumentInvocationArg(flowMethodAdapter.name,
+        flowMethodAdapter.desc)) {
+      return new InvocationArgValue(flowMethodAdapter, null);
+    }
+    return super.newParameterValue(isInstanceMethod, local, type);
+  }
+
   void startMerge(FlowFrame mergingFrame) {
     this.mergingFrame = mergingFrame;
   }
