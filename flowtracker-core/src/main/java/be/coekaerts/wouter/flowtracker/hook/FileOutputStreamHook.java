@@ -21,10 +21,9 @@ public class FileOutputStreamHook {
     }
   }
 
-  public static void afterWrite1(FileDescriptor fd, int c) {
+  public static void afterWrite1(FileDescriptor fd, int c, Invocation invocation) {
     ByteSinkTracker tracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
     if (tracker != null) {
-      Invocation invocation = Invocation.start(WRITE1_SIGNATURE);
       Tracker sourceTracker = Invocation.getArg0Tracker(invocation);
       if (sourceTracker != null) {
         int sourceIndex = Invocation.getArg0Index(invocation);

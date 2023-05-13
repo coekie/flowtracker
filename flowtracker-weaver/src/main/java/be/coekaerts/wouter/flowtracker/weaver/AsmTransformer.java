@@ -84,7 +84,8 @@ class AsmTransformer implements ClassFileTransformer {
     fileInputStreamSpec.addMethodHookSpec("void <init>(java.io.File)",
         "void afterInit(java.io.FileDescriptor,java.io.File)", fileInputStreamFd, HookSpec.ARG0);
     fileInputStreamSpec.addMethodHookSpec("int read()",
-        "void afterRead1(int,java.io.FileDescriptor)", fileInputStreamFd);
+        "void afterRead1(int,java.io.FileDescriptor,be.coekaerts.wouter.flowtracker.tracker.Invocation)",
+        fileInputStreamFd, HookSpec.INVOCATION);
     fileInputStreamSpec.addMethodHookSpec("int read(byte[])",
         "void afterReadByteArray(int,java.io.FileDescriptor,byte[])",
         fileInputStreamFd, HookSpec.ARG0);
@@ -100,7 +101,8 @@ class AsmTransformer implements ClassFileTransformer {
     fileOutputStreamSpec.addMethodHookSpec("void <init>(java.io.File,boolean)",
         "void afterInit(java.io.FileDescriptor,java.io.File)", fileOutputStreamFd, HookSpec.ARG0);
     fileOutputStreamSpec.addMethodHookSpec("void write(int)",
-        "void afterWrite1(java.io.FileDescriptor,int)", fileOutputStreamFd, HookSpec.ARG0);
+        "void afterWrite1(java.io.FileDescriptor,int,be.coekaerts.wouter.flowtracker.tracker.Invocation)",
+        fileOutputStreamFd, HookSpec.ARG0, HookSpec.INVOCATION);
     fileOutputStreamSpec.addMethodHookSpec("void write(byte[])",
         "void afterWriteByteArray(java.io.FileDescriptor,byte[])",
         fileOutputStreamFd, HookSpec.ARG0);
@@ -153,8 +155,8 @@ class AsmTransformer implements ClassFileTransformer {
         "void afterReadByteArrayOffset(int,java.util.zip.InflaterInputStream,byte[],int)",
         HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
     inflaterInputStreamSpec.addMethodHookSpec("int read()",
-        "void afterRead1(int,java.util.zip.InflaterInputStream)",
-        HookSpec.THIS);
+        "void afterRead1(int,java.util.zip.InflaterInputStream,be.coekaerts.wouter.flowtracker.tracker.Invocation)",
+        HookSpec.THIS, HookSpec.INVOCATION);
     specs.put("java/util/zip/InflaterInputStream", inflaterInputStreamSpec);
 
     ClassHookSpec zipFileSpec = new ClassHookSpec(

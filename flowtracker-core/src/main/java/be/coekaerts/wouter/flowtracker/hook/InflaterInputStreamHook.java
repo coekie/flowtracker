@@ -36,11 +36,10 @@ public class InflaterInputStreamHook {
   // already added it to the tracker. here we just need to propagate the return value.
   // it would have been nice if that worked automatically; it doesn't, probably because of the
   // return with the ternary operator that isn't handled by our instrumentation
-  public static void afterRead1(int result, InflaterInputStream target) {
+  public static void afterRead1(int result, InflaterInputStream target, Invocation invocation) {
     if (result > 0) {
       Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
-        Invocation invocation = Invocation.start(InputStreamHook.READ1_SIGNATURE);
         Invocation.returning(invocation, tracker, tracker.getLength() - 1);
       }
     }

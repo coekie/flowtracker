@@ -20,11 +20,10 @@ public class FileInputStreamHook {
 
   // note: there is no hook for the constructor that takes a FileDescriptor
 
-  public static void afterRead1(int result, FileDescriptor fd) {
+  public static void afterRead1(int result, FileDescriptor fd, Invocation invocation) {
     if (result > 0) {
       ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
       if (tracker != null) {
-        Invocation invocation = Invocation.start(InputStreamHook.READ1_SIGNATURE);
         Invocation.returning(invocation, tracker, tracker.getLength());
         tracker.append((byte) result);
       }
