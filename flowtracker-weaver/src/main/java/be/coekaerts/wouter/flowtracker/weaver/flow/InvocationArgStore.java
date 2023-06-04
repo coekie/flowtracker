@@ -60,7 +60,7 @@ public class InvocationArgStore extends Store {
 
   // TODO better conditions for when to track call
   static boolean shouldInstrumentInvocationArg(String name, String desc) {
-    if (!name.startsWith("write")) {
+    if (!(name.startsWith("write") || name.startsWith("print"))) {
       return false;
     }
     Type[] args = Type.getArgumentTypes(desc);
