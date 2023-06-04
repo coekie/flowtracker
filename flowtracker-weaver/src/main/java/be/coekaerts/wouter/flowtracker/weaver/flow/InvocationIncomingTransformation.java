@@ -11,8 +11,12 @@ import org.objectweb.asm.tree.MethodInsnNode;
 /**
  * Manages transformation of a called method that may return a tracked value and/or have tracked
  * values as arguments
+ *
+ * @see InvocationReturnStore
+ * @see InvocationArgValue
+ * @see InvocationOutgoingTransformation
  */
-class InvocationTransformation {
+class InvocationIncomingTransformation {
   /** Local variable that represents the Invocation of the method we're in */
   TrackLocal invocationLocal;
 

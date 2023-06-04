@@ -11,8 +11,11 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 /**
- * Manages transformation of a method call for which we may track the return value, arguments, or
- * both. This makes {@link InvocationArgStore} and {@link InvocationReturnValue} work together.
+ * Manages transformation of a method call for which we may track the return value and/or arguments.
+ *
+ * @see InvocationArgStore
+ * @see InvocationReturnValue
+ * @see InvocationIncomingTransformation
  */
 class InvocationOutgoingTransformation {
   private final MethodInsnNode mInsn;

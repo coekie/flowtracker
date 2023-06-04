@@ -10,10 +10,10 @@ import org.objectweb.asm.tree.MethodInsnNode;
 /** The returning of a value of a method that may be instrumented with {@link Invocation} */
 public class InvocationReturnStore extends Store {
   private final InsnNode returnInsn;
-  private final InvocationTransformation invocation;
+  private final InvocationIncomingTransformation invocation;
   private final FlowValue returnedValue = getStackFromTop(0);
 
-  InvocationReturnStore(InsnNode returnInsn, FlowFrame frame, InvocationTransformation invocation) {
+  InvocationReturnStore(InsnNode returnInsn, FlowFrame frame, InvocationIncomingTransformation invocation) {
     super(frame);
     this.returnInsn = returnInsn;
     this.invocation = invocation;
