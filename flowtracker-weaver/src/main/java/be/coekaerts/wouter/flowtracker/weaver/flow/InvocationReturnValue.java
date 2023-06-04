@@ -6,20 +6,18 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /** Value returned from a called method, that we track using {@link Invocation} */
 class InvocationReturnValue extends TrackableValue {
-  /** The call */
-  private final MethodInsnNode mInsn;
+  final InvocationOutgoingTransformation transformation;
 
   /** Local variable storing the Invocation */
   private TrackLocal invocationLocal;
 
   InvocationReturnValue(FlowMethodAdapter flowMethodAdapter, MethodInsnNode mInsn) {
     super(flowMethodAdapter, Type.getReturnType(mInsn.desc), mInsn);
-    this.mInsn = mInsn;
+    this.transformation = new InvocationOutgoingTransformation(mInsn, flowMethodAdapter);
   }
 
   @Override void insertTrackStatements() {
@@ -27,18 +25,8 @@ class InvocationReturnValue extends TrackableValue {
         Type.getType("Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"),
         "InvocationReturnValue invocation");
 
-    InsnList toInsert = new InsnList();
-
-    flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.insertTrackStatements");
-    toInsert.add(new LdcInsnNode(Invocation.signature(mInsn.name, mInsn.desc)));
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-            "calling",
-            "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"));
-    toInsert.add(invocationLocal.store());
-
-    flowMethodAdapter.instructions.insertBefore(mInsn, toInsert);
+    transformation.ensureInstrumented();
+    transformation.storeInvocation(invocationLocal);
   }
 
   @Override void loadSourceTracker(InsnList toInsert) {
@@ -71,6 +59,7 @@ class InvocationReturnValue extends TrackableValue {
 
   // TODO better conditions for when to track call
   static boolean shouldInstrumentInvocation(String name, String desc) {
+    if (name.equals("flowtrackerTrackme")) return true;
     // heuristic guessing which methods are worth tracking the return value of, because that
     // probably is a char or byte read from somewhere
     return name.startsWith("read") && desc.endsWith("I")

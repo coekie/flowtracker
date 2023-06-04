@@ -5,8 +5,6 @@ import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.Flow
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /**
@@ -14,14 +12,29 @@ import org.objectweb.asm.tree.MethodInsnNode;
  * with {@link Invocation}.
  */
 public class InvocationArgStore extends Store {
-  /** The call */
-  private final MethodInsnNode mInsn;
   // for now, we only support calls with one argument
   private final FlowValue arg0 = getStackFromTop(0);
+  private final InvocationOutgoingTransformation transformation;
 
-  InvocationArgStore(MethodInsnNode mInsn, FlowFrame frame) {
+  InvocationArgStore(MethodInsnNode mInsn, FlowFrame frame, FlowFrame nextFrame) {
     super(frame);
-    this.mInsn = mInsn;
+    this.transformation = getOrCreateOutgoingTransformation(mInsn, frame, nextFrame);
+  }
+
+  /**
+   * Get the {@link InvocationOutgoingTransformation} created by the {@link InvocationReturnValue}
+   * for the same call if it exists; otherwise create a new one.
+   */
+  private static InvocationOutgoingTransformation getOrCreateOutgoingTransformation(
+      MethodInsnNode mInsn, FlowFrame frame, FlowFrame nextFrame) {
+    if (nextFrame != null && !mInsn.desc.endsWith(")V")) {
+      FlowValue value = nextFrame.getStack(nextFrame.getStackSize() - 1);
+      if (value instanceof InvocationReturnValue) {
+        InvocationReturnValue invocationReturnValue = ((InvocationReturnValue) value);
+        return invocationReturnValue.transformation;
+      }
+    }
+    return new InvocationOutgoingTransformation(mInsn, frame.getFlowMethodAdapter());
   }
 
   @Override
@@ -30,14 +43,10 @@ public class InvocationArgStore extends Store {
     if (arg0.isTrackable()) {
       arg0.ensureTracked();
 
+      // we add these instructions using insertInvocationPreparation, so Invocation is on top of the
+      // stack. setArg0 returns the Invocation, so it's on top of the stack again.
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "begin InvocationArgStore.insertTrackStatements");
-      toInsert.add(new LdcInsnNode(Invocation.signature(mInsn.name, mInsn.desc)));
-      toInsert.add(
-          new MethodInsnNode(Opcodes.INVOKESTATIC,
-              "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-              "calling",
-              "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"));
       arg0.loadSourceTracker(toInsert);
       arg0.loadSourceIndex(toInsert);
       toInsert.add(
@@ -46,20 +55,18 @@ public class InvocationArgStore extends Store {
               "setArg0",
               "(Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)"
                   + "Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"));
-      // don't need the Invocation anymore. (we would if we'd also want to track the return value,
-      // in InvocationReturnValue. but for now, we do not support both InvocationArgStore and
-      // InvocationReturnValue on the same invocation.
-      toInsert.add(new InsnNode(Opcodes.POP));
-
       methodNode.addComment(toInsert, "end InvocationArgStore.insertTrackStatements");
-      methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
 
-      methodNode.instructions.insertBefore(mInsn, toInsert);
+      transformation.ensureInstrumented();
+      transformation.insertInvocationPreparation(toInsert);
+
+      methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
     }
   }
 
   // TODO better conditions for when to track call
   static boolean shouldInstrumentInvocationArg(String name, String desc) {
+    if (name.equals("flowtrackerTrackme")) return true;
     if (!(name.startsWith("write") || name.startsWith("print"))) {
       return false;
     }

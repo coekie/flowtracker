@@ -301,10 +301,11 @@ public class FlowAnalyzingTransformerTest {
             + "ALOAD 1\n"
             + "ICONST_1\n"
             + "GETSTATIC $THISTEST$.inputStream : Ljava/io/InputStream;\n"
-            + "// InvocationReturnValue.insertTrackStatements\n"
+            + "// begin InvocationOutgoingTransformation.ensureInstrumented\n"
             + "LDC \"read ()I\"\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.calling (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
             + "ASTORE 2\n"
+            + "// end InvocationOutgoingTransformation.ensureInstrumented\n"
             + "INVOKEVIRTUAL java/io/InputStream.read ()I\n"
             + "I2B\n"
             + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)\n"
@@ -399,9 +400,10 @@ public class FlowAnalyzingTransformerTest {
             + "ASTORE 2\n"
             + "// end ArrayLoadValue.insertTrackStatements\n"
             + "BALOAD\n"
-            + "// begin InvocationArgStore.insertTrackStatements\n"
+            + "// begin InvocationOutgoingTransformation.ensureInstrumented\n"
             + "LDC \"write (I)V\"\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.calling (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
+            + "// begin InvocationArgStore.insertTrackStatements\n"
             + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
             + "ALOAD 2\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
@@ -409,8 +411,9 @@ public class FlowAnalyzingTransformerTest {
             + "ALOAD 2\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
             + "INVOKEVIRTUAL be/coekaerts/wouter/flowtracker/tracker/Invocation.setArg0 (Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
-            + "POP\n"
             + "// end InvocationArgStore.insertTrackStatements\n"
+            + "POP\n"
+            + "// end InvocationOutgoingTransformation.ensureInstrumented\n"
             + "INVOKEVIRTUAL java/io/OutputStream.write (I)V\n"
             + "RETURN\n"
             + "MAXSTACK = 5\n"
@@ -456,6 +459,73 @@ public class FlowAnalyzingTransformerTest {
             + "RETURN\n"
             + "MAXSTACK = 6\n"
             + "MAXLOCALS = 3\n");
+  }
+
+  /**
+   * Test instrumentation when both {@link InvocationReturnValue} and {@link InvocationArgStore}
+   * apply to the same invocation
+   */
+  @Test
+  public void invocationReturnAndArg() {
+    testTransform(new Object() {
+      @SuppressWarnings("unused")
+      void t(byte[] bytes) {
+        bytes[1] = flowtrackerTrackme(bytes[0]);
+      }
+    },
+        "ALOAD 1\n"
+            + "ICONST_1\n"
+            + "ALOAD 1\n"
+            + "ICONST_0\n"
+            + "BALOAD\n"
+            + "INVOKESTATIC $THISTEST$.flowtrackerTrackme (B)B\n"
+            + "BASTORE\n"
+            + "RETURN\n"
+            + "MAXSTACK = 4\n"
+            + "MAXLOCALS = 2\n",
+        "// Initialize newLocal ArrayLoadValue PointTracker\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 2\n"
+            + "// Initialize newLocal InvocationReturnValue invocation\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 3\n"
+            + "ALOAD 1\n"
+            + "ICONST_1\n"
+            + "ALOAD 1\n"
+            + "ICONST_0\n"
+            + "// begin ArrayLoadValue.insertTrackStatements\n"
+            + "DUP2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayLoadHook.getElementTracker (Ljava/lang/Object;I)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;\n"
+            + "ASTORE 2\n"
+            + "// end ArrayLoadValue.insertTrackStatements\n"
+            + "BALOAD\n"
+            + "// begin InvocationOutgoingTransformation.ensureInstrumented\n"
+            + "LDC \"flowtrackerTrackme (B)B\"\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.calling (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
+            + "// begin InvocationArgStore.insertTrackStatements\n"
+            + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
+            + "ALOAD 2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getTracker (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "// ArrayLoadValue.loadSourceIndex: PointTracker.getIndex(pointTracker)\n"
+            + "ALOAD 2\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/TrackerPoint.getIndex (Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I\n"
+            + "INVOKEVIRTUAL be/coekaerts/wouter/flowtracker/tracker/Invocation.setArg0 (Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
+            + "// end InvocationArgStore.insertTrackStatements\n"
+            + "ASTORE 3\n"
+            + "// end InvocationOutgoingTransformation.ensureInstrumented\n"
+            + "INVOKESTATIC $THISTEST$.flowtrackerTrackme (B)B\n"
+            + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)\n"
+            + "// InvocationReturnValue.loadSourceTracker\n"
+            + "ALOAD 3\n"
+            + "GETFIELD be/coekaerts/wouter/flowtracker/tracker/Invocation.returnTracker : Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;\n"
+            + "// InvocationReturnValue.loadSourceIndex\n"
+            + "ALOAD 3\n"
+            + "GETFIELD be/coekaerts/wouter/flowtracker/tracker/Invocation.returnIndex : I\n"
+            + "INVOKESTATIC be/coekaerts/wouter/flowtracker/hook/ArrayHook.setByte ([BIBLbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V\n"
+            + "// end ArrayStore.insertTrackStatements\n"
+            + "RETURN\n"
+            + "MAXSTACK = 6\n"
+            + "MAXLOCALS = 4\n");
   }
 
   @Test
@@ -988,5 +1058,10 @@ public class FlowAnalyzingTransformerTest {
   /** Dummy method with a lot of arguments, to test if maxStack is updated correctly */
   @SuppressWarnings("all")
   static void deepStack(int a, int b, int c, int d, int e, int f, int g, int h) {
+  }
+
+  // method name is special-cased in InvocationArgStore and InvocationReturnValue
+  static byte flowtrackerTrackme(byte in) {
+    return in;
   }
 }

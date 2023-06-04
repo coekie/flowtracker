@@ -113,7 +113,9 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
               && mInsn.desc.startsWith("(C)")) {
             stores.add(new AppendStore(mInsn, frame));
           } else if (shouldInstrumentInvocationArg(mInsn.name, mInsn.desc)) {
-            stores.add(new InvocationArgStore(mInsn, frame));
+            stores.add(new InvocationArgStore(mInsn, frame,
+                // next frame, might contain the return value of the call
+                i + 1 < frames.length ? (FlowFrame) frames[i+1] : null));
           } else if (mInsn.owner.equals("be/coekaerts/wouter/flowtracker/test/FlowTester")) {
             if (mInsn.name.equals("assertTrackedValue")) {
               stores.add(new TesterStore(mInsn, frame, 3));
