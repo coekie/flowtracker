@@ -470,7 +470,7 @@ public class FlowAnalyzingTransformerTest {
     testTransform(new Object() {
       @SuppressWarnings("unused")
       void t(byte[] bytes) {
-        bytes[1] = flowtrackerTrackme(bytes[0]);
+        bytes[1] = trackInAndOut(bytes[0]);
       }
     },
         "ALOAD 1\n"
@@ -478,7 +478,7 @@ public class FlowAnalyzingTransformerTest {
             + "ALOAD 1\n"
             + "ICONST_0\n"
             + "BALOAD\n"
-            + "INVOKESTATIC $THISTEST$.flowtrackerTrackme (B)B\n"
+            + "INVOKESTATIC $THISTEST$.trackInAndOut (B)B\n"
             + "BASTORE\n"
             + "RETURN\n"
             + "MAXSTACK = 4\n"
@@ -500,7 +500,7 @@ public class FlowAnalyzingTransformerTest {
             + "// end ArrayLoadValue.insertTrackStatements\n"
             + "BALOAD\n"
             + "// begin InvocationOutgoingTransformation.ensureInstrumented\n"
-            + "LDC \"flowtrackerTrackme (B)B\"\n"
+            + "LDC \"trackInAndOut (B)B\"\n"
             + "INVOKESTATIC be/coekaerts/wouter/flowtracker/tracker/Invocation.calling (Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;\n"
             + "// begin InvocationArgStore.insertTrackStatements\n"
             + "// ArrayLoadValue.loadSourceTracker: PointTracker.getTracker(pointTracker)\n"
@@ -513,7 +513,7 @@ public class FlowAnalyzingTransformerTest {
             + "// end InvocationArgStore.insertTrackStatements\n"
             + "ASTORE 3\n"
             + "// end InvocationOutgoingTransformation.ensureInstrumented\n"
-            + "INVOKESTATIC $THISTEST$.flowtrackerTrackme (B)B\n"
+            + "INVOKESTATIC $THISTEST$.trackInAndOut (B)B\n"
             + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)\n"
             + "// InvocationReturnValue.loadSourceTracker\n"
             + "ALOAD 3\n"
@@ -1060,8 +1060,8 @@ public class FlowAnalyzingTransformerTest {
   static void deepStack(int a, int b, int c, int d, int e, int f, int g, int h) {
   }
 
-  // method name is special-cased in InvocationArgStore and InvocationReturnValue
-  static byte flowtrackerTrackme(byte in) {
+  // method where both return value and argument value are tracked
+  static byte trackInAndOut(byte in) {
     return in;
   }
 }

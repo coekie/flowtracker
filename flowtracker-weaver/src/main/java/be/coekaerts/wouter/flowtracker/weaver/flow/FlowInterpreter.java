@@ -163,14 +163,14 @@ class FlowInterpreter extends Interpreter<FlowValue> {
           && ("java/lang/String".equals(mInsn.owner)
           || "java/lang/CharSequence".equals(mInsn.owner))) {
         return new CharAtValue(flowMethodAdapter, mInsn);
-      } else if (InvocationReturnValue.shouldInstrumentInvocation(mInsn.name, mInsn.desc)) {
-        return new InvocationReturnValue(flowMethodAdapter, mInsn);
       } else if ("be/coekaerts/wouter/flowtracker/test/FlowTester".equals(mInsn.owner)) {
         if ("createSourceChar".equals(mInsn.name) || "createSourceByte".equals(mInsn.name)) {
           return new TesterValue(flowMethodAdapter, mInsn);
         }
       } else if ("java/lang/Byte".equals(mInsn.owner) && "toUnsignedInt".equals(mInsn.name)) {
         return values.get(0);
+      } else if (InvocationReturnValue.shouldInstrumentInvocation(mInsn.name, mInsn.desc)) {
+        return new InvocationReturnValue(flowMethodAdapter, mInsn);
       }
     }
     return toFlowValue(basicInterpreter.naryOperation(insn, values));

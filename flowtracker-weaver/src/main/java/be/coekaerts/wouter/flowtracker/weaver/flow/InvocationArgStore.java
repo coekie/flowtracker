@@ -64,15 +64,16 @@ public class InvocationArgStore extends Store {
     }
   }
 
-  // TODO better conditions for when to track call
   static boolean shouldInstrumentInvocationArg(String name, String desc) {
-    if (name.equals("flowtrackerTrackme")) return true;
-    if (!(name.startsWith("write") || name.startsWith("print"))) {
+    Type[] args = Type.getArgumentTypes(desc);
+    if (args.length != 1) {
       return false;
     }
-    Type[] args = Type.getArgumentTypes(desc);
-    return args.length == 1
-        && (args[0].equals(Type.CHAR_TYPE) || args[0].equals(Type.BYTE_TYPE)
-        || args[0].equals(Type.INT_TYPE));
+
+    if (args[0].equals(Type.CHAR_TYPE) || args[0].equals(Type.BYTE_TYPE)) {
+      return true;
+    }
+
+    return args[0].equals(Type.INT_TYPE) && (name.startsWith("write") || name.startsWith("print"));
   }
 }
