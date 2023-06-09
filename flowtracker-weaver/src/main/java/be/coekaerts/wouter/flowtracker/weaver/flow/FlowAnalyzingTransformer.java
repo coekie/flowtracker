@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import static be.coekaerts.wouter.flowtracker.weaver.flow.InvocationArgStore.shouldInstrumentInvocationArg;
 
+import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.ClassAdapterFactory;
 import be.coekaerts.wouter.flowtracker.weaver.Types;
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 
 public class FlowAnalyzingTransformer implements ClassAdapterFactory {
+  private static final Logger logger = new Logger("AsmTransformer");
+
   private final Commentator commentator;
 
   public FlowAnalyzingTransformer() {
@@ -81,7 +84,18 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
       super.visitEnd();
       FlowInterpreter interpreter = new FlowInterpreter(this);
       FlowAnalyzer analyzer = new FlowAnalyzer(interpreter, this);
-      Frame<FlowValue>[] frames = analyzer.analyze(owner, this);
+      Frame<FlowValue>[] frames;
+
+      try {
+        frames = analyzer.analyze(owner, this);
+      } catch (Exception e) {
+        // up to this point we haven't made any changes yet, so we can handle failures somewhat
+        // gracefully by just outputting what we have now. that way at least the other methods in
+        // the same class can still get transformed.
+        logger.error(e, "Exception analyzing " + owner + " " + name + " " + desc);
+        this.accept(TransparentLocalVariablesSorter.bypass(varSorter));
+        return;
+      }
 
       List<Store> stores = new ArrayList<>();
 
