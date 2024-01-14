@@ -65,7 +65,7 @@ class InvocationReturnValue extends TrackableValue {
 
     // heuristic guessing which methods are worth tracking the return value of, because that
     // probably is a char or byte read from somewhere
-    return returnType.equals(Type.INT_TYPE) && name.startsWith("read")
+    return returnType.equals(Type.INT_TYPE) && (name.contains("read") || name.contains("Read"))
         // don't instrument methods where the output is going through a buffer passed into it as
         // parameter. for those, the returned value is probably the length
         && !desc.contains("[") && !desc.contains("Buffer");

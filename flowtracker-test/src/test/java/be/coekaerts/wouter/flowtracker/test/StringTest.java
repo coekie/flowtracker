@@ -52,6 +52,12 @@ public class StringTest {
         .assertEquals(getStringTracker(bar));
   }
 
+  @Test public void testGetBytes() {
+    String foobar = trackCopy("foobar");
+    snapshotBuilder().trackString(foobar, 0, 6)
+        .assertTrackerOf(foobar.getBytes());
+  }
+
   @Test public void testGetStringTracker() {
     char[] chars = trackedCharArray("abcd");
     String str = new String(chars, 1, 2); // create String "bc"

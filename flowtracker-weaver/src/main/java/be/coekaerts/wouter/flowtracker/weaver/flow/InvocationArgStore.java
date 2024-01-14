@@ -74,6 +74,7 @@ public class InvocationArgStore extends Store {
       return true;
     }
 
-    return args[0].equals(Type.INT_TYPE) && (name.startsWith("write") || name.startsWith("print"));
+    return args[0].equals(Type.INT_TYPE)
+        && (name.contains("write") || name.contains("Write") || name.contains("print"));
   }
 }

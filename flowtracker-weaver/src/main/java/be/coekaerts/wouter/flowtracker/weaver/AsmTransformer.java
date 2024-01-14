@@ -116,8 +116,14 @@ class AsmTransformer implements ClassFileTransformer {
         FileChannelImplHook.class);
     HookArgument fileChannelFd = HookSpec.field(Type.getType("Lsun/nio/ch/FileChannelImpl;"), "fd",
         Type.getType("Ljava/io/FileDescriptor;"));
+    // for JDK<=17
     fileChannelSpec.addMethodHookSpec("void <init>(java.io.FileDescriptor,java.lang.String,"
             + "boolean,boolean,boolean,java.lang.Object)",
+        "void afterInit(java.io.FileDescriptor,java.lang.String,boolean,boolean)",
+        fileChannelFd, HookSpec.ARG1, HookSpec.ARG2, HookSpec.ARG3);
+    // for JDK>=21
+    fileChannelSpec.addMethodHookSpec("void <init>(java.io.FileDescriptor,java.lang.String,"
+            + "boolean,boolean,boolean,java.io.Closeable)",
         "void afterInit(java.io.FileDescriptor,java.lang.String,boolean,boolean)",
         fileChannelFd, HookSpec.ARG1, HookSpec.ARG2, HookSpec.ARG3);
     specs.put("sun/nio/ch/FileChannelImpl", fileChannelSpec);
