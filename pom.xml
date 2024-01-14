@@ -14,7 +14,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <asm.version>9.5</asm.version>
+    <asm.version>9.6</asm.version>
     <java.version>11</java.version>
     <!--<flowtracker.extraAgentArgs/>-->
     <!--<flowtracker.extraAgentArgs>dumpByteCode=/tmp/bytecode</flowtracker.extraAgentArgs>-->
