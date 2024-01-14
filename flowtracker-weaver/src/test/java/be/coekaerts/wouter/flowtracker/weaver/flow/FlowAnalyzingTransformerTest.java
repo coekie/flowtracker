@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.weaver.debug.CommentTextifier;
 import be.coekaerts.wouter.flowtracker.weaver.debug.RealCommentator;
+import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.AnalysisListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -964,7 +965,8 @@ public class FlowAnalyzingTransformerTest {
     MethodPrintingClassVisitor afterVisitor =
         new MethodPrintingClassVisitor(new CheckClassAdapter(classWriter), thisName);
     ClassVisitor transformingVisitor =
-        new FlowAnalyzingTransformer(new RealCommentator()).createClassAdapter(afterVisitor);
+        new FlowAnalyzingTransformer(new RealCommentator(), new AnalysisListener())
+            .createClassAdapter(afterVisitor);
     // writes out original bytecode to text
     MethodPrintingClassVisitor beforeVisitor =
         new MethodPrintingClassVisitor(transformingVisitor, thisName);

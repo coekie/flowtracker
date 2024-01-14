@@ -19,26 +19,28 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 
 public class FlowAnalyzingTransformer implements ClassAdapterFactory {
   private static final Logger logger = new Logger("AsmTransformer");
 
   private final Commentator commentator;
+  private final AnalysisListener listener;
 
   public FlowAnalyzingTransformer() {
     this.commentator = new Commentator(); // noop Commentator
+    this.listener = new AnalysisListener(); // noop Listener
   }
 
-  public FlowAnalyzingTransformer(Commentator commentator) {
+  public FlowAnalyzingTransformer(Commentator commentator, AnalysisListener listener) {
     this.commentator = commentator;
+    this.listener = listener;
   }
 
   private class FlowClassAdapter extends ClassVisitor {
     private String name;
 
-    public FlowClassAdapter(ClassVisitor cv) {
+    private FlowClassAdapter(ClassVisitor cv) {
       super(Opcodes.ASM9, cv);
     }
 
@@ -64,7 +66,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     final InsnList intro = new InsnList();
     final InvocationIncomingTransformation invocation = new InvocationIncomingTransformation();
 
-    public FlowMethodAdapter(MethodVisitor mv, String owner, int access, String name, String desc,
+    private FlowMethodAdapter(MethodVisitor mv, String owner, int access, String name, String desc,
         String signature, String[] exceptions) {
       super(Opcodes.ASM9, access, name, desc, signature, exceptions);
       this.owner = owner;
@@ -80,7 +82,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
       }
     }
 
-    private void doVisitEnd() throws AnalyzerException {
+    private void doVisitEnd() {
       super.visitEnd();
       FlowInterpreter interpreter = new FlowInterpreter(this);
       FlowAnalyzer analyzer = new FlowAnalyzer(interpreter, this);
@@ -149,6 +151,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         }
       }
 
+      listener.analysed(this, frames, stores);
+
       for (Store store : stores) {
         store.insertTrackStatements(this);
       }
@@ -202,5 +206,11 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 
   public ClassVisitor createClassAdapter(ClassVisitor cv) {
     return new FlowClassAdapter(cv);
+  }
+
+  public static class AnalysisListener {
+    void analysed(FlowMethodAdapter flowMethodAdapter, Frame<FlowValue>[] frames,
+        List<Store> stores) {
+    }
   }
 }

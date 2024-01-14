@@ -14,7 +14,7 @@ import org.objectweb.asm.tree.InsnList;
 public class MergedValue extends FlowValue {
   final FlowFrame mergingFrame;
   // NICE: we could optimize this for small sets, like in SourceInterpreter with SmallSet
-  private final Set<FlowValue> values;
+  final Set<FlowValue> values;
   private int cachedIsTrackable = -1;
   private boolean tracked;
 
