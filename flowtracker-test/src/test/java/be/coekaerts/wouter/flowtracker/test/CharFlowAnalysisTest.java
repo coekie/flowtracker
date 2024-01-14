@@ -39,7 +39,7 @@ public class CharFlowAnalysisTest {
         .assertTrackerOf(array);
   }
 
-  @Test public void byteArray() {
+  @Test public void byteArrayLoadAndStore() {
     byte[] abc = trackedByteArray("abc");
 
     byte[] array = new byte[3];
@@ -49,6 +49,16 @@ public class CharFlowAnalysisTest {
 
     snapshotBuilder().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1)
         .assertTrackerOf(array);
+  }
+
+  @Test public void charArrayClone() {
+    char[] array = TrackTestHelper.trackedCharArrayWithLength(3);
+    snapshotBuilder().track(array).assertTrackerOf(array.clone());
+  }
+
+  @Test public void byteArrayClone() {
+    byte[] array = trackedByteArray("abc");
+    snapshotBuilder().track(array).assertTrackerOf(array.clone());
   }
 
   // regression test for NPE in analysis when byte[] type is null

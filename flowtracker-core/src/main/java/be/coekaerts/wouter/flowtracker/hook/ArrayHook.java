@@ -21,4 +21,18 @@ public class ArrayHook {
 
     TrackerUpdater.setSourceTracker(array, arrayIndex, 1, source, sourceIndex);
   }
+
+  /** Hook for calling clone() on a char[] */
+  public static char[] clone(char[] array) {
+    char[] result = array.clone();
+    TrackerUpdater.setSource(result, 0, array.length, array, 0);
+    return result;
+  }
+
+  /** Hook for calling clone() on a byte[] */
+  public static byte[] clone(byte[] array) {
+    byte[] result = array.clone();
+    TrackerUpdater.setSource(result, 0, array.length, array, 0);
+    return result;
+  }
 }

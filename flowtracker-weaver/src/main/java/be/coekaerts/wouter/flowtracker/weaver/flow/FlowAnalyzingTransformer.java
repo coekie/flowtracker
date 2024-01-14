@@ -123,6 +123,11 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
               // replace it with a call to our hook instead
               mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/SystemHook";
             }
+          } else if ("clone".equals(mInsn.name)
+              && (mInsn.owner.equals("[C") || mInsn.owner.equals("[B"))) {
+            mInsn.desc = mInsn.owner.equals("[C") ? "([C)[C" : "([B)[B";
+            mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/ArrayHook";
+            mInsn.setOpcode(Opcodes.INVOKESTATIC);
           } else if ("append".equals(mInsn.name)
               && ("java/lang/StringBuilder".equals(mInsn.owner)
               || "java/lang/StringBuffer".equals(mInsn.owner))
