@@ -218,14 +218,25 @@ class FlowInterpreter extends Interpreter<FlowValue> {
         }
       }
 
-      // this is duplicating logic in mergeTypes; to avoid creating unnecessary extra
+      // this is partially duplicating logic in mergeTypes; to avoid creating unnecessary extra
       // UntrackableValue instances
-      if (type1 == null || type2 == null) {
+      if (type1 == null || type2 == null || type1.getSort() != type2.getSort()) {
         return UntrackableValue.UNINITIALIZED_VALUE;
-      } else if (type1.getSort() == Type.OBJECT && type2.getSort() == Type.OBJECT) {
-        return UntrackableValue.REFERENCE_VALUE;
       } else {
-        return UntrackableValue.UNINITIALIZED_VALUE;
+        switch (type1.getSort()) {
+          case Type.INT:
+            return UntrackableValue.INT_VALUE;
+          case Type.FLOAT:
+            return UntrackableValue.FLOAT_VALUE;
+          case Type.LONG:
+            return UntrackableValue.LONG_VALUE;
+          case Type.DOUBLE:
+            return UntrackableValue.DOUBLE_VALUE;
+          case Type.OBJECT:
+            return UntrackableValue.REFERENCE_VALUE;
+          default:
+            return UntrackableValue.UNINITIALIZED_VALUE;
+        }
       }
     }
   }

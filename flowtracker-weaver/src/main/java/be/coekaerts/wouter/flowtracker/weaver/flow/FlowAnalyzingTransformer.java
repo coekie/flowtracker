@@ -5,6 +5,8 @@ import static be.coekaerts.wouter.flowtracker.weaver.flow.InvocationArgStore.sho
 import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.ClassAdapterFactory;
 import be.coekaerts.wouter.flowtracker.weaver.Types;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import org.objectweb.asm.ClassVisitor;
@@ -20,6 +22,8 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Frame;
+import org.objectweb.asm.util.ASMifier;
+import org.objectweb.asm.util.TraceMethodVisitor;
 
 public class FlowAnalyzingTransformer implements ClassAdapterFactory {
   private static final Logger logger = new Logger("AsmTransformer");
@@ -94,6 +98,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
         // up to this point we haven't made any changes yet, so we can handle failures somewhat
         // gracefully by just outputting what we have now. that way at least the other methods in
         // the same class can still get transformed.
+        // tip: to debug, using dumpAsm() here can be useful. (but not outputting that automatically
+        // because it's very verbose).
         logger.error(e, "Exception analyzing " + owner + " " + name + " " + desc);
         this.accept(TransparentLocalVariablesSorter.bypass(varSorter));
         return;
@@ -206,6 +212,24 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 
     void addComment(InsnList insnList, String comment, Object... commentArgs) {
       commentator.addComment(insnList, comment, commentArgs);
+    }
+
+    /**
+     * Dump ASM code to generate the currently analyzed method to stderr.
+     * This can be useful when debugging a problem with "real" code, to help extract a minimal test
+     * case.
+     */
+    @SuppressWarnings("unused") // can be called from a debugger
+    void dumpAsm() {
+      ASMifier asmifier = new ASMifier();
+      // only care about "owner" field, because that's all that FlowClassAdapter.visit cares about
+      asmifier.visit(0, 0, owner, null, null, new String[0]);
+      ASMifier methodASMifier = asmifier.visitMethod(access, name, desc, signature,
+          exceptions.toArray(String[]::new));
+      this.accept(new TraceMethodVisitor(methodASMifier));
+      StringWriter sw = new StringWriter();
+      asmifier.print(new PrintWriter(sw));
+      System.err.println(sw);
     }
   }
 

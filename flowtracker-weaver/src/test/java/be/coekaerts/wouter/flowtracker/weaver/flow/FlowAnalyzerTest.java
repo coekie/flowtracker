@@ -2,6 +2,9 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.IRETURN;
 
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.AnalysisListener;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
@@ -12,7 +15,9 @@ import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.Frame;
 
 public class FlowAnalyzerTest {
@@ -82,6 +87,41 @@ public class FlowAnalyzerTest {
     assertEquals(v.values.size(), 2);
   }
 
+  // this is a bit of a weird test case. this is testing if when two long values get merged, that
+  // we still retain the fact that they are longs (if not, we get an AnalyzerException
+  // "Cannot pop operand off an empty stack").
+  // This very rarely matters, but got triggered by "oldSum == (oldSum = checkSum)" in
+  // ForkJoinPool.tryTerminate.
+  @Test public void testMergeLongValues() {
+    FlowValue v = getReturnValue(FlowValue.class, new Object() {
+      @SuppressWarnings("unused")
+      long go(boolean bool, long a, long b) {
+        if (bool) {
+          b = 1;
+        }
+        return (a = b);
+      }
+    });
+    assertEquals(Type.LONG, v.getType().getSort());
+  }
+
+  // template for a test case that can be used with output of FlowMethodAdapter.dumpAsm, to test
+  // analysis/transformation of extracted bytecode.
+  @Test public void testAsm() {
+    ClassVisitor classVisitor = new FlowAnalyzingTransformer().createClassAdapter(
+        new ClassWriter(0));
+    classVisitor.visit(0, 0, "java/Example", null, null, null);
+    {
+      MethodVisitor methodVisitor =
+          classVisitor.visitMethod(ACC_PRIVATE, "example", "()Z", null, null);
+      methodVisitor.visitCode();
+      methodVisitor.visitInsn(ICONST_1);
+      methodVisitor.visitInsn(IRETURN);
+      methodVisitor.visitMaxs(1, 1);
+      methodVisitor.visitEnd();
+    }
+  }
+
   static <T extends FlowValue> T getReturnValue(Class<T> clazz, Object o) {
     return clazz.cast(getReturnValue(o));
   }
@@ -89,7 +129,8 @@ public class FlowAnalyzerTest {
   static FlowValue getReturnValue(Object o) {
     return Stream.of(getFrames(o))
         .map(f -> (FlowFrame) f)
-        .filter(f -> f.getInsn().getOpcode() == Opcodes.IRETURN)
+        .filter(f -> f.getInsn().getOpcode() >= Opcodes.IRETURN
+            && f.getInsn().getOpcode() <= Opcodes.ARETURN)
         .findFirst()
         .map(f -> f.getStack(0))
         .orElseThrow();
