@@ -58,6 +58,15 @@ public class StringTest {
         .assertTrackerOf(foobar.getBytes());
   }
 
+  @Test public void testGetChars() {
+    String foobar = trackCopy("foobar");
+    char[] dst = new char[6];
+    foobar.getChars(3, 6, dst, 1);
+    snapshotBuilder().gap(1).trackString(foobar, 3, 3)
+        .assertTrackerOf(dst);
+    // TODO test UTF-16 version
+  }
+
   @Test public void testGetStringTracker() {
     char[] chars = trackedCharArray("abcd");
     String str = new String(chars, 1, 2); // create String "bc"

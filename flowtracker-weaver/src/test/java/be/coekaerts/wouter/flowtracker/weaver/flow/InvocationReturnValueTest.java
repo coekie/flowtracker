@@ -12,9 +12,9 @@ public class InvocationReturnValueTest {
 
     // e.g. InputStream.read
     assertTrue(InvocationReturnValue.shouldInstrumentInvocation("read", "()I"));
-    // StreamDecoder.read0
+    // e.g. StreamDecoder.read0
     assertTrue(InvocationReturnValue.shouldInstrumentInvocation("read0", "()I"));
-    // StreamDecoder.lockedRead0
+    // e.g. StreamDecoder.lockedRead0
     assertTrue(InvocationReturnValue.shouldInstrumentInvocation("lockedRead0", "()I"));
 
     assertFalse(InvocationReturnValue.shouldInstrumentInvocation(

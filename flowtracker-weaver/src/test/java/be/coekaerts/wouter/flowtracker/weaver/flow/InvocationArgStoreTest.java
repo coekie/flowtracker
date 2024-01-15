@@ -11,9 +11,9 @@ public class InvocationArgStoreTest {
 
     // e.g. OutputStream.write
     assertTrue(InvocationArgStore.shouldInstrumentInvocationArg("write", "(I)V"));
-    // BufferedOutputStream.implWrite
+    // e.g. BufferedOutputStream.implWrite
     assertTrue(InvocationArgStore.shouldInstrumentInvocationArg("implWrite", "(I)V"));
-    // (I forgot where we needed this)
+    // e.g. PrintStream.print
     assertTrue(InvocationArgStore.shouldInstrumentInvocationArg("print", "(I)V"));
   }
 }
