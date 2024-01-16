@@ -16,6 +16,16 @@ import java.util.List;
  * their usage.
  */
 class FlowTester {
+  static {
+    // make sure the necessary classes are resolved in the current classloader, to avoid class
+    // loading triggering at the wrong time. (when we're in the middle of handling an "Invocation";
+    // class loading can screw up Invocation.pending).
+    // this is probably a bug we need to fix another way. should we pre-resolve these classes in the
+    // app classloader? (and hook creation of other classloaders and do the same there?)
+    new FixedOriginTracker(-1);
+    TrackerPoint.ofNullable(null, -1);
+  }
+
   private final List<Tracker> sources = new ArrayList<>();
 
   /**
