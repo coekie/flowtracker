@@ -17,7 +17,7 @@ abstract class Store {
     // this is a bit fragile/awkward. we call getStackFromTop in the constructor of Stores, and then
     // call initCreationFrame from here so that the FlowValue has a chance to find its corresponding
     // frame after analysis is over but before we start adding more instructions (which would make
-    // it harder to find the frame back). note that we're just using the frame as the store here to
+    // it harder to find the frame back). note that we're just using the frame of the store here to
     // get a reference to the analyzer; the frame that the value was created at is a different
     // frame.
     value.initCreationFrame(frame.analyzer);

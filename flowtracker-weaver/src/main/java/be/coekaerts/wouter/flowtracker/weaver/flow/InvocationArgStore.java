@@ -65,16 +65,32 @@ public class InvocationArgStore extends Store {
   }
 
   static boolean shouldInstrumentInvocationArg(String name, String desc) {
+    return argsToInstrument(name, desc) != null;
+  }
+
+  /** Determines which arguments should be instrumented. null if none of them should be. */
+  static boolean[] argsToInstrument(String name, String desc) {
     Type[] args = Type.getArgumentTypes(desc);
     if (args.length != 1) {
-      return false;
+      return null;
     }
 
-    if (args[0].equals(Type.CHAR_TYPE) || args[0].equals(Type.BYTE_TYPE)) {
-      return true;
-    }
+    boolean[] result = new boolean[args.length];
+    boolean any = false;
 
-    return args[0].equals(Type.INT_TYPE)
-        && (name.contains("write") || name.contains("Write") || name.contains("print"));
+    boolean eager = name.contains("write") || name.contains("Write") || name.contains("print");
+
+    for (int i = 0; i < args.length; i++) {
+      Type arg = args[i];
+      // instrument all char and byte args, because they're very likely to be relevant,
+      // but for int arguments only if we're eager to because the name of the method suggests it
+      // might be relevant.
+      if (arg.getSort() == Type.CHAR || arg.getSort() == Type.BYTE
+          || (eager && arg.getSort() == Type.INT)) {
+        result[i] = true;
+        any = true;
+      }
+    }
+    return any ? result : null;
   }
 }
