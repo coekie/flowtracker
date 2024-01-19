@@ -1,5 +1,7 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import java.util.Arrays;
+
 /**
  * Represents a method call, to both the caller and callee.
  * Facilitates tracking of primitive values through calls, for return values and parameters.
@@ -16,6 +18,8 @@ public class Invocation {
   // tracker and index for the primitive value in the first argument
   public Tracker arg0Tracker;
   public int arg0Index;
+  // tracks source for some primitive values in arguments. null for untracked arguments.
+  private TrackerPoint args[];
 
   Invocation(String signature) {
     this.signature = signature;
@@ -26,9 +30,26 @@ public class Invocation {
     return TrackerPoint.ofNullable(returnTracker, returnIndex);
   }
 
-  public Invocation setArg0(Tracker arg0Tracker, int arg0Index) {
-    this.arg0Tracker = arg0Tracker;
-    this.arg0Index = arg0Index;
+  // invoked by instrumentation
+  public Invocation setArg(int argNum, TrackerPoint trackerPoint) {
+    if (trackerPoint == null) {
+      return this;
+    }
+
+    if (args == null) {
+      args = new TrackerPoint[argNum + 1];
+    } else if (args.length < argNum + 1) {
+      // alternative: take the number of arguments as constructor parameter
+      args = Arrays.copyOf(args, Math.max(argNum + 1, args.length * 2));
+    }
+    args[argNum] = trackerPoint;
+
+    // TODO remove arg0Tracker and arg0Index
+    if (argNum == 0) {
+      arg0Tracker = trackerPoint.tracker;
+      arg0Index = trackerPoint.index;
+    }
+
     return this;
   }
 
@@ -57,6 +78,15 @@ public class Invocation {
   @SuppressWarnings("unused") // invoked by instrumentation
   public static int getArg0Index(Invocation invocation) {
     return invocation == null ? -1 : invocation.arg0Index;
+  }
+
+  // invoked by instrumentation
+  public static TrackerPoint getArgPoint(Invocation invocation, int argNum) {
+    if (invocation == null) {
+      return null;
+    }
+    TrackerPoint[] args = invocation.args;
+    return args != null && args.length > argNum ? args[argNum] : null;
   }
 
   /**

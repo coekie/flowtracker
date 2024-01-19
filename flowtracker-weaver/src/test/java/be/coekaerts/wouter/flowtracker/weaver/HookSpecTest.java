@@ -2,7 +2,9 @@ package be.coekaerts.wouter.flowtracker.weaver;
 
 import static org.junit.Assert.assertEquals;
 
+import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Invocation;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.OnEnterHookArgumentInstance;
 import java.io.IOException;
@@ -69,7 +71,8 @@ public class HookSpecTest {
 
   @Test
   public void testInvocation() throws ReflectiveOperationException {
-    Invocation.calling( "withInvocation ()V").setArg0(null, 777);
+    Invocation.calling("withInvocation ()V")
+        .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777));
     transformAndRun(new ClassHookSpec(Type.getType(HookedWithInvocation.class), MyHook.class)
         .addMethodHookSpec("void withInvocation()",
             "void afterWithInvocation(be.coekaerts.wouter.flowtracker.tracker.Invocation)",

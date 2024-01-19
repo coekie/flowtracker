@@ -28,11 +28,14 @@ public class InvocationTest {
   public void testArgumentValue() {
     Tracker tracker = new CharOriginTracker();
 
-    Invocation callingInvocation = Invocation.calling("write").setArg0(tracker, 2);
+    TrackerPoint trackerPoint = TrackerPoint.of(tracker, 2);
+    Invocation callingInvocation =
+        Invocation.calling("write").setArg(0, trackerPoint);
     // inside the called write() method:
     {
       Invocation calledInvocation = requireNonNull(Invocation.start("write"));
       assertSame(callingInvocation, calledInvocation);
+      assertSame(trackerPoint, Invocation.getArgPoint(calledInvocation, 0));
       assertEquals(tracker, calledInvocation.arg0Tracker);
       assertEquals(2, calledInvocation.arg0Index);
     }
