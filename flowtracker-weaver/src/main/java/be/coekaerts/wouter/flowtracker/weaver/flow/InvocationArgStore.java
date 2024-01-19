@@ -15,6 +15,12 @@ import org.objectweb.asm.tree.MethodInsnNode;
  * with {@link Invocation}.
  */
 public class InvocationArgStore extends Store {
+  // Two reasons we don't want to instrument arguments beyond this:
+  // - the ICONST_0 + i doesn't work for higher ones (we could fix that by using LdcInsNode, if we
+  //   cared)
+  // - methods with more arguments than that are probably not as likely to be worth instrumenting
+  private final int MAX_ARG_TO_INSTRUMENT = 5;
+
   // for now, we only support calls with one argument
   private final FlowValue[] args;
   private final InvocationOutgoingTransformation transformation;
@@ -49,29 +55,45 @@ public class InvocationArgStore extends Store {
 
   @Override
   void insertTrackStatements(FlowMethodAdapter methodNode) {
-    // if we know where the value passed in as argument came from
-    if (args[0].isTrackable()) {
-      args[0].ensureTracked();
-
-      // we add these instructions using insertInvocationPreparation, so Invocation is on top of the
-      // stack. setArg returns the Invocation, so it's on top of the stack again.
-      InsnList toInsert = new InsnList();
-      methodNode.addComment(toInsert, "begin InvocationArgStore.insertTrackStatements");
-      toInsert.add(new InsnNode(Opcodes.ICONST_0)); // TODO make it not always 0
-      args[0].loadSourcePoint(toInsert);
-      toInsert.add(
-          new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-              "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-              "setArg",
-              "(ILbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)"
-                  + "Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"));
-      methodNode.addComment(toInsert, "end InvocationArgStore.insertTrackStatements");
-
-      transformation.ensureInstrumented();
-      transformation.insertInvocationPreparation(toInsert);
-
-      methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
+    if (!anyArgIsTrackable()) {
+      return;
     }
+
+    // we add these instructions using insertInvocationPreparation, so Invocation is on top of the
+    // stack. setArg returns the Invocation, so it's on top of the stack again.
+    InsnList toInsert = new InsnList();
+    methodNode.addComment(toInsert, "begin InvocationArgStore.insertTrackStatements");
+
+    for (int i = 0; i < args.length; i++) {
+      FlowValue arg = args[i];
+      // if we know where the value passed in as argument came from
+      if (arg != null && arg.isTrackable()) {
+        arg.ensureTracked();
+        toInsert.add(new InsnNode(Opcodes.ICONST_0 + i)); // works up to ICONST_5
+        arg.loadSourcePoint(toInsert);
+        toInsert.add(
+            new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+                "be/coekaerts/wouter/flowtracker/tracker/Invocation",
+                "setArg",
+                "(ILbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)"
+                    + "Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"));
+      }
+    }
+    methodNode.addComment(toInsert, "end InvocationArgStore.insertTrackStatements");
+
+    transformation.ensureInstrumented();
+    transformation.insertInvocationPreparation(toInsert);
+
+    methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
+  }
+
+  private boolean anyArgIsTrackable() {
+    for (FlowValue arg : args) {
+      if (arg != null && arg.isTrackable()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static boolean shouldInstrumentInvocationArg(String name, String desc) {
@@ -81,7 +103,7 @@ public class InvocationArgStore extends Store {
   /** Determines which arguments should be instrumented. null if none of them should be. */
   static boolean[] argsToInstrument(String name, String desc) {
     Type[] args = Type.getArgumentTypes(desc);
-    if (args.length != 1) {
+    if (args.length != 1) { // TODO replace with args.length > MAX_ARG_TO_INSTRUMENT
       return null;
     }
 
