@@ -16,10 +16,10 @@ import org.objectweb.asm.tree.MethodInsnNode;
  */
 public class InvocationArgStore extends Store {
   // Two reasons we don't want to instrument arguments beyond this:
-  // - the ICONST_0 + i doesn't work for higher ones (we could fix that by using LdcInsNode, if we
-  //   cared)
+  // - the ICONST_0 + i doesn't work for higher ones (we could fix that by using LdcInsNode)
+  // - in Invocation we have getArg0Tracker/getArg0Index methods up to arg 5
   // - methods with more arguments than that are probably not as likely to be worth instrumenting
-  private final int MAX_ARG_TO_INSTRUMENT = 5;
+  static final int MAX_ARG_TO_INSTRUMENT = 5;
 
   // for now, we only support calls with one argument
   private final FlowValue[] args;

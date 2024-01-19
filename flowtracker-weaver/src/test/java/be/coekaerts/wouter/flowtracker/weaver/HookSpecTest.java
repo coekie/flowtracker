@@ -186,7 +186,7 @@ public class HookSpecTest {
     }
 
     public static void afterWithInvocation(Invocation invocation) {
-      log("afterWithInvocation", invocation.arg0Index);
+      log("afterWithInvocation", Invocation.getArgPoint(invocation, 0).index);
     }
 
     public static void afterWithField(int i) {

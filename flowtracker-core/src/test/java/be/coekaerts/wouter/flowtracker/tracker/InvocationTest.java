@@ -36,8 +36,6 @@ public class InvocationTest {
       Invocation calledInvocation = requireNonNull(Invocation.start("write"));
       assertSame(callingInvocation, calledInvocation);
       assertSame(trackerPoint, Invocation.getArgPoint(calledInvocation, 0));
-      assertEquals(tracker, calledInvocation.arg0Tracker);
-      assertEquals(2, calledInvocation.arg0Index);
     }
   }
 

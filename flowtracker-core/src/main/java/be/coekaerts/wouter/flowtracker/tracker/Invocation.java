@@ -15,11 +15,8 @@ public class Invocation {
   public Tracker returnTracker;
   public int returnIndex;
 
-  // tracker and index for the primitive value in the first argument
-  public Tracker arg0Tracker;
-  public int arg0Index;
   // tracks source for some primitive values in arguments. null for untracked arguments.
-  private TrackerPoint args[];
+  private TrackerPoint[] args;
 
   Invocation(String signature) {
     this.signature = signature;
@@ -44,12 +41,6 @@ public class Invocation {
     }
     args[argNum] = trackerPoint;
 
-    // TODO remove arg0Tracker and arg0Index
-    if (argNum == 0) {
-      arg0Tracker = trackerPoint.tracker;
-      arg0Index = trackerPoint.index;
-    }
-
     return this;
   }
 
@@ -63,21 +54,74 @@ public class Invocation {
     }
   }
 
-  @SuppressWarnings("unused") // invoked by instrumentation
-  public static TrackerPoint getArg0Point(Invocation invocation) {
-    return invocation == null
-        ? null
-        : TrackerPoint.ofNullable(invocation.arg0Tracker, invocation.arg0Index);
+  public static Tracker getArgTracker(Invocation invocation, int argNum) {
+    TrackerPoint trackerPoint = getArgPoint(invocation, argNum);
+    return trackerPoint == null ? null : trackerPoint.tracker;
+  }
+
+  public static int getArgIndex(Invocation invocation, int argNum) {
+    TrackerPoint trackerPoint = getArgPoint(invocation, argNum);
+    return trackerPoint == null ? -1 : trackerPoint.index;
   }
 
   @SuppressWarnings("unused") // invoked by instrumentation
   public static Tracker getArg0Tracker(Invocation invocation) {
-    return invocation == null ? null : invocation.arg0Tracker;
+    return getArgTracker(invocation, 0);
   }
 
   @SuppressWarnings("unused") // invoked by instrumentation
   public static int getArg0Index(Invocation invocation) {
-    return invocation == null ? -1 : invocation.arg0Index;
+    return getArgIndex(invocation, 0);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static Tracker getArg1Tracker(Invocation invocation) {
+    return getArgTracker(invocation, 1);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static int getArg1Index(Invocation invocation) {
+    return getArgIndex(invocation, 1);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static Tracker getArg2Tracker(Invocation invocation) {
+    return getArgTracker(invocation, 2);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static int getArg2Index(Invocation invocation) {
+    return getArgIndex(invocation, 2);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static Tracker getArg3Tracker(Invocation invocation) {
+    return getArgTracker(invocation, 3);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static int getArg3Index(Invocation invocation) {
+    return getArgIndex(invocation, 3);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static Tracker getArg4Tracker(Invocation invocation) {
+    return getArgTracker(invocation, 4);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static int getArg4Index(Invocation invocation) {
+    return getArgIndex(invocation, 4);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static Tracker getArg5Tracker(Invocation invocation) {
+    return getArgTracker(invocation, 5);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public static int getArg5Index(Invocation invocation) {
+    return getArgIndex(invocation, 5);
   }
 
   // invoked by instrumentation

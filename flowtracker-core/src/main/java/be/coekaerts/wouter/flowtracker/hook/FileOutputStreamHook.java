@@ -4,6 +4,7 @@ import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.File;
@@ -24,10 +25,9 @@ public class FileOutputStreamHook {
   public static void afterWrite1(FileDescriptor fd, int c, Invocation invocation) {
     ByteSinkTracker tracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
     if (tracker != null) {
-      Tracker sourceTracker = Invocation.getArg0Tracker(invocation);
-      if (sourceTracker != null) {
-        int sourceIndex = Invocation.getArg0Index(invocation);
-        tracker.setSource(tracker.getLength(), 1, sourceTracker, sourceIndex);
+      TrackerPoint sourcePoint = Invocation.getArgPoint(invocation, 0);
+      if (sourcePoint != null) {
+        tracker.setSource(tracker.getLength(), 1, sourcePoint.tracker, sourcePoint.index);
       }
       tracker.append((byte) c);
     }

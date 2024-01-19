@@ -182,10 +182,11 @@ class FlowInterpreter extends Interpreter<FlowValue> {
 
   @Override
   public FlowValue newParameterValue(boolean isInstanceMethod, int local, Type type) {
-    if (local == (isInstanceMethod ? 1 : 0)
+    int argNum = local - (isInstanceMethod ? 1 : 0);
+    if (argNum == 0
         && InvocationArgStore.shouldInstrumentInvocationArg(flowMethodAdapter.name,
         flowMethodAdapter.desc)) {
-      return new InvocationArgValue(flowMethodAdapter, null);
+      return new InvocationArgValue(flowMethodAdapter, null, argNum);
     }
     return super.newParameterValue(isInstanceMethod, local, type);
   }
