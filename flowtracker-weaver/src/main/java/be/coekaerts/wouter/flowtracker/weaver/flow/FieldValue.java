@@ -54,18 +54,6 @@ class FieldValue extends TrackableValue {
     flowMethodAdapter.instructions.insertBefore(insn, toInsert);
   }
 
-  @Override void loadSourceTracker(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert,
-        "FieldValue.loadSourceTracker: PointTracker.getTracker(pointTracker)");
-    doLoadSourceTrackerFromPoint(toInsert,  pointTrackerLocal);
-  }
-
-  @Override void loadSourceIndex(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert,
-        "FieldValue.loadSourceIndex: PointTracker.getIndex(pointTracker)");
-    doLoadSourceIndexFromPoint(toInsert, pointTrackerLocal);
-  }
-
   @Override
   void loadSourcePoint(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert, "FieldValue.loadSourcePoint");

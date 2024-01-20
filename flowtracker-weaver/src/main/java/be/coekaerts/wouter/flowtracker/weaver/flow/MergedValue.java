@@ -91,18 +91,6 @@ public class MergedValue extends FlowValue {
   }
 
   @Override
-  void loadSourceTracker(InsnList toInsert) {
-    mergingFrame.getFlowMethodAdapter().addComment(toInsert, "MergedValue.loadSourceTracker");
-    doLoadSourceTrackerFromPoint(toInsert, pointTrackerLocal);
-  }
-
-  @Override
-  void loadSourceIndex(InsnList toInsert) {
-    mergingFrame.getFlowMethodAdapter().addComment(toInsert, "MergedValue.loadSourceIndex");
-    doLoadSourceIndexFromPoint(toInsert, pointTrackerLocal);
-  }
-
-  @Override
   void loadSourcePoint(InsnList toInsert) {
     mergingFrame.getFlowMethodAdapter().addComment(toInsert, "MergedValue.loadSourcePoint");
     toInsert.add(pointTrackerLocal.load());

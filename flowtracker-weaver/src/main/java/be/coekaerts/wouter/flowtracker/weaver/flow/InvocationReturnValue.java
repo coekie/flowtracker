@@ -29,24 +29,6 @@ class InvocationReturnValue extends TrackableValue {
     transformation.storeInvocation(invocationLocal);
   }
 
-  @Override void loadSourceTracker(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.loadSourceTracker");
-    toInsert.add(invocationLocal.load());
-    toInsert.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-            "getReturnTracker",
-            "()Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;"));
-  }
-
-  @Override void loadSourceIndex(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.loadSourceIndex");
-    toInsert.add(invocationLocal.load());
-    toInsert.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-        "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-        "getReturnIndex",
-        "()I"));
-  }
-
   @Override
   void loadSourcePoint(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.loadSourcePoint");

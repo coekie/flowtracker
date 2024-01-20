@@ -43,16 +43,6 @@ class CopyValue extends FlowValue {
   }
 
   @Override
-  void loadSourceTracker(InsnList toInsert) {
-    original.loadSourceTracker(toInsert);
-  }
-
-  @Override
-  void loadSourceIndex(InsnList toInsert) {
-    original.loadSourceIndex(toInsert);
-  }
-
-  @Override
   void loadSourcePoint(InsnList toInsert) {
     original.loadSourcePoint(toInsert);
   }

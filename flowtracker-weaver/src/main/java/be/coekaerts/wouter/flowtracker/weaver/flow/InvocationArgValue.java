@@ -24,27 +24,6 @@ class InvocationArgValue extends TrackableValue {
     flowMethodAdapter.invocation.ensureStarted(flowMethodAdapter);
   }
 
-  @Override void loadSourceTracker(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert, "InvocationArgValue.loadSourceTracker");
-    toInsert.add(flowMethodAdapter.invocation.invocationLocal.load());
-    toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-        "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-        "getArg" + argNum + "Tracker",
-        "(Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;)Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;"));
-  }
-
-  @Override void loadSourceIndex(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert, "InvocationArgValue.loadSourceIndex");
-    toInsert.add(flowMethodAdapter.invocation.invocationLocal.load());
-    toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
-        "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-        // one reason we put this in the method name instead of using a different argument for it
-        // is to avoid increasing maxStack, which would require changes in more places that make
-        // assumptions about that
-        "getArg" + argNum + "Index",
-        "(Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;)I"));
-  }
-
   @Override
   void loadSourcePoint(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert, "InvocationArgValue.loadSourcePoint");

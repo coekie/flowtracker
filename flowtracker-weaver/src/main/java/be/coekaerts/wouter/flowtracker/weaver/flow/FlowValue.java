@@ -2,11 +2,9 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import java.util.Objects;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
 /**
@@ -56,27 +54,8 @@ abstract class FlowValue extends BasicValue {
   }
 
   /**
-   * Add the tracker from which this value came on top of the stack.
-   * The instructions inserted should use maximum 2 stack entries.
-   *
-   * @param toInsert list of instructions where the needed statements are added to at the end
-   */
-  abstract void loadSourceTracker(InsnList toInsert);
-
-  /**
-   * Add the index from which this value came on top of the stack
-   *
-   * @param toInsert list of instructions where the needed statements are added to at the end
-   */
-  abstract void loadSourceIndex(InsnList toInsert);
-
-  /**
    * Add the {@link TrackerPoint} from which this value came on top of the stack.
    * The instructions inserted should use maximum 2 stack entries.
-   * <p>
-   * For some values this is implemented using {@link #loadSourceTracker(InsnList)} and
-   * {@link #loadSourceIndex(InsnList)}, and for some values, that store a {@link TrackerPoint}
-   * themselves, it's the other way around.
    *
    * @param toInsert list of instructions where the needed statements are added to at the end
    */
@@ -103,31 +82,4 @@ abstract class FlowValue extends BasicValue {
    * mergingFrame. Used to detect loops in the data flow.
    */
   abstract boolean hasMergeAt(FlowFrame mergingFrame);
-
-  /**
-   * Implementation for {@link #loadSourceTracker(InsnList)} for when the {@link TrackerPoint} is
-   * stored in a local variable.
-   */
-  void doLoadSourceTrackerFromPoint(InsnList toInsert, TrackLocal pointTrackerLocal) {
-    toInsert.add(pointTrackerLocal.load());
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/tracker/TrackerPoint",
-            "getTracker",
-            "(Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)"
-                + "Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;"));
-  }
-
-  /**
-   * Implementation for {@link #loadSourceIndex(InsnList)} for when the {@link TrackerPoint} is
-   * stored in a local variable.
-   */
-  void doLoadSourceIndexFromPoint(InsnList toInsert, TrackLocal pointTrackerLocal) {
-    toInsert.add(pointTrackerLocal.load());
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/tracker/TrackerPoint",
-            "getIndex",
-            "(Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I"));
-  }
 }

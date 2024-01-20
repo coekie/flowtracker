@@ -38,28 +38,6 @@ class TesterValue extends TrackableValue {
     flowMethodAdapter.instructions.insertBefore(mInsn, toInsert);
   }
 
-  @Override void loadSourceTracker(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert,
-        "TesterValue.loadSourceTracker: testerLocal.theSource()");
-    toInsert.add(testerLocal.load());
-      toInsert.add(
-          new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-              "be/coekaerts/wouter/flowtracker/test/FlowTester",
-              "theSource",
-              "()Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;"));
-  }
-
-  @Override void loadSourceIndex(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert,
-        "TesterValue.loadSourceIndex: testerLocal.theSourceIndex()");
-    toInsert.add(testerLocal.load());
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-            "be/coekaerts/wouter/flowtracker/test/FlowTester",
-            "theSourceIndex",
-            "()I"));
-  }
-
   @Override
   void loadSourcePoint(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert,
