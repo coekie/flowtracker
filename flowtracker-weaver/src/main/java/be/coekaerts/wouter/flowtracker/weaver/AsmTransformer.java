@@ -228,7 +228,7 @@ class AsmTransformer implements ClassFileTransformer {
       adapter = new ClassVisitor(Opcodes.ASM9, adapter) {};
       adapter = new CheckClassAdapter(adapter);
 
-      adapter = adapterFactory.createClassAdapter(adapter);
+      adapter = adapterFactory.createClassAdapter(className, adapter);
       if (className.equals("java/lang/String")) {
         adapter = new StringAdapter(adapter, config);
       }
@@ -281,7 +281,7 @@ class AsmTransformer implements ClassFileTransformer {
         FlowAnalyzingTransformer flowTransformer
             = new FlowAnalyzingTransformer(new RealCommentator(), new AnalysisListener());
         result = ClassAdapterFactory.and(result,
-            new DumpTextTransformer(flowTransformer, className, dumpTextPath));
+            new DumpTextTransformer(flowTransformer, dumpTextPath));
       }
     }
     return result;

@@ -12,17 +12,15 @@ import org.objectweb.asm.util.TraceClassVisitor;
 /** Dumps instrumented code in text format. Enabled using the dumpText option */
 public class DumpTextTransformer implements ClassAdapterFactory {
   private final ClassAdapterFactory delegate;
-  private final String className;
   private final File dumpTextPath;
 
-  public DumpTextTransformer(ClassAdapterFactory delegate, String className, File dumpTextPath) {
+  public DumpTextTransformer(ClassAdapterFactory delegate, File dumpTextPath) {
     this.delegate = delegate;
-    this.className = className;
     this.dumpTextPath = dumpTextPath;
   }
 
   @Override
-  public ClassVisitor createClassAdapter(ClassVisitor cv) {
+  public ClassVisitor createClassAdapter(String className, ClassVisitor cv) {
     try {
       String fileName = className.replaceAll("[/.$]", "_") + ".asm";
       FileOutputStream out = new FileOutputStream(new File(dumpTextPath, fileName));
@@ -35,7 +33,7 @@ public class DumpTextTransformer implements ClassAdapterFactory {
           pw.close();
         }
       };
-      return delegate.createClassAdapter(closingVisitor);
+      return delegate.createClassAdapter(className, closingVisitor);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

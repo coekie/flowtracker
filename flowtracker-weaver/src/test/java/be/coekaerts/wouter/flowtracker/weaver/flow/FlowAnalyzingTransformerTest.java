@@ -951,17 +951,17 @@ public class FlowAnalyzingTransformerTest {
     StringWriter verifyStringWriter = new StringWriter();
     PrintWriter verifyPrintWriter = new PrintWriter(verifyStringWriter);
 
-    String thisName = className.replace('.', '/');
+    String classInternalName = className.replace('.', '/');
 
     // writes out bytecode to text after transformation
     MethodPrintingClassVisitor afterVisitor =
-        new MethodPrintingClassVisitor(new CheckClassAdapter(classWriter), thisName);
+        new MethodPrintingClassVisitor(new CheckClassAdapter(classWriter), classInternalName);
     ClassVisitor transformingVisitor =
         new FlowAnalyzingTransformer(new RealCommentator(), new AnalysisListener())
-            .createClassAdapter(afterVisitor);
+            .createClassAdapter(classInternalName, afterVisitor);
     // writes out original bytecode to text
     MethodPrintingClassVisitor beforeVisitor =
-        new MethodPrintingClassVisitor(transformingVisitor, thisName);
+        new MethodPrintingClassVisitor(transformingVisitor, classInternalName);
 
     try {
       new ClassReader(className)

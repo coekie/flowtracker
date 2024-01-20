@@ -57,7 +57,7 @@ public class ClassHookSpec implements ClassAdapterFactory {
     return this;
   }
 
-  public ClassVisitor createClassAdapter(ClassVisitor cv) {
+  public ClassVisitor createClassAdapter(String className, ClassVisitor cv) {
     return new HookClassAdapter(cv);
   }
 

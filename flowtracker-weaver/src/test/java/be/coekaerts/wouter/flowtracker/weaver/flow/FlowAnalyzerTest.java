@@ -109,7 +109,7 @@ public class FlowAnalyzerTest {
   // analysis/transformation of extracted bytecode.
   @Test public void testAsm() {
     ClassVisitor classVisitor = new FlowAnalyzingTransformer().createClassAdapter(
-        new ClassWriter(0));
+        "java/Example", new ClassWriter(0));
     classVisitor.visit(0, 0, "java/Example", null, null, null);
     {
       MethodVisitor methodVisitor =
@@ -142,7 +142,7 @@ public class FlowAnalyzerTest {
 
     ClassVisitor transformer =
         new FlowAnalyzingTransformer(new Commentator(), listener)
-            .createClassAdapter(new ClassWriter(0));
+            .createClassAdapter(Type.getInternalName(o.getClass()), new ClassWriter(0));
 
     try {
       new ClassReader(className)

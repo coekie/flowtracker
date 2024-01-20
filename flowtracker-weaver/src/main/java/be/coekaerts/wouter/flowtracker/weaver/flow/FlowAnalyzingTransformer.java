@@ -42,24 +42,27 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
   }
 
   private class FlowClassAdapter extends ClassVisitor {
-    private String name;
+    private final String className;
 
-    private FlowClassAdapter(ClassVisitor cv) {
+    private FlowClassAdapter(String className, ClassVisitor cv) {
       super(Opcodes.ASM9, cv);
+      this.className = className;
     }
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName,
         String[] interfaces) {
       super.visit(version, access, name, signature, superName, interfaces);
-      this.name = name;
+      if (!className.equals(name)) {
+        throw new IllegalStateException("Class name mismatch: " + name + " != " + className);
+      }
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature,
         String[] exceptions) {
       MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-      return new FlowMethodAdapter(mv, this.name, access, name, desc, signature, exceptions);
+      return new FlowMethodAdapter(mv, className, access, name, desc, signature, exceptions);
     }
   }
 
@@ -233,8 +236,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     }
   }
 
-  public ClassVisitor createClassAdapter(ClassVisitor cv) {
-    return new FlowClassAdapter(cv);
+  public ClassVisitor createClassAdapter(String className, ClassVisitor cv) {
+    return new FlowClassAdapter(className, cv);
   }
 
   public static class AnalysisListener {

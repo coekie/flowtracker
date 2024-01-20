@@ -135,7 +135,7 @@ public class HookSpecTest {
     TraceClassVisitor afterVisitor =
         new TraceClassVisitor(new CheckClassAdapter(classWriter), afterPrintWriter);
     ClassVisitor transformingVisitor =
-        classHookSpec.createClassAdapter(afterVisitor);
+        classHookSpec.createClassAdapter(className, afterVisitor);
     // writes out original bytecode to text
     TraceClassVisitor beforeVisitor =
         new TraceClassVisitor(transformingVisitor, beforePrintWriter);
