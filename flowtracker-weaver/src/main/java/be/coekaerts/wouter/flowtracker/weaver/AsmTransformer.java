@@ -8,6 +8,7 @@ import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
 import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import be.coekaerts.wouter.flowtracker.weaver.debug.DumpTextTransformer;
@@ -172,6 +173,13 @@ class AsmTransformer implements ClassFileTransformer {
         "void afterGetInputStream(java.io.InputStream,java.util.zip.ZipFile,java.util.zip.ZipEntry)",
         HookSpec.THIS, HookSpec.ARG0);
     specs.put("java/util/zip/ZipFile", zipFileSpec);
+
+    ClassHookSpec classLoaderSpec = new ClassHookSpec(
+        Type.getType("Ljava/lang/ClassLoader;"), Invocation.class);
+    classLoaderSpec.addMethodHookSpec("java.lang.Class loadClass(java.lang.String)",
+        "void unsuspend(be.coekaerts.wouter.flowtracker.tracker.Invocation)",
+        HookSpec.SUSPENDED_INVOCATION);
+    specs.put("java/lang/ClassLoader", classLoaderSpec);
   }
 
   private ClassHookSpec getSpec(String className) {

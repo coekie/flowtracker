@@ -189,4 +189,38 @@ public class Invocation {
   public static String signature(String name, String desc) {
     return name + " " + desc;
   }
+
+  /**
+   * Removes the current pending Invocation from the thread-local, to be restored later with
+   * {@link #unsuspend(Invocation)}.
+   * <p>
+   * This is used to solve a problem caused by class loading and initialization triggered by a
+   * method invocation.
+   * The problem is that the loading and initialization can happen between when the caller calls
+   * {@link #calling(String)} and when the callee calls {@link #start(String)}. And it may involve
+   * other method calls that use Invocation. Since we only keep track of one pending call, this
+   * means class loading would make us forget about the pending call.
+   * We solve that by, when class loading is triggered, removing the current pending call, and
+   * restoring it when class loading has finished.
+   */
+  public static Invocation suspend() {
+    Invocation invocation = pending.get();
+    if (invocation != null) {
+      pending.remove();
+    }
+    return invocation;
+  }
+
+  /** @see #suspend() */
+  public static void unsuspend(Invocation invocation) {
+    if (invocation == null) {
+      pending.remove();
+    } else {
+      pending.set(invocation);
+    }
+  }
+
+  public static Invocation peekPending() {
+    return pending.get();
+  }
 }

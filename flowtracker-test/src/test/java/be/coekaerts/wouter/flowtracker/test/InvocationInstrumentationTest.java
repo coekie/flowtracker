@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -88,6 +89,33 @@ public class InvocationInstrumentationTest {
         flowTester4.createSourceByte((byte) 1),
         flowTester5.createSourceByte((byte) 1));
     assertTrue(sink.called);
+  }
+
+  @Test
+  public void loadClassAtInvocation() {
+    FlowTester flowTester = new FlowTester();
+    // sanity check: StaticSink should not have loaded yet
+    assertFalse(staticSinkInitialized);
+    // this call to go with first trigger class loading and initialization before it goes through
+    byte result1 = StaticSink.go(flowTester.createSourceByte((byte) 1));
+    assertTrue(StaticSink.called);
+    // assert that class loading and initialization didn't disrupt the tracking of the invocation
+    flowTester.assertIsTheTrackedValue(result1);
+  }
+
+  static boolean staticSinkInitialized = false;
+  static class StaticSink {
+    static boolean called;
+    static {
+      // TODO suspend invocation during class initialization
+      //go((byte) 0); // irrelevant call to check that it doesn't "distract" Invocation
+      staticSinkInitialized = true;
+    }
+
+    static byte go(byte b) {
+      called = true;
+      return b;
+    }
   }
 
   static class Source {
