@@ -11,7 +11,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 public class HookSpec {
-  public interface HookArgument {
+  interface HookArgument {
     HookArgumentInstance applyTo(HookSpec hookSpec);
   }
 
@@ -28,7 +28,7 @@ public class HookSpec {
     Type getType(HookSpec hookSpec);
   }
 
-  public static final HookArgument THIS = spec -> new HookArgumentInstance() {
+  static final HookArgument THIS = spec -> new HookArgumentInstance() {
     @Override public void load(GeneratorAdapter generator) {
       generator.loadThis();
     }
@@ -41,7 +41,7 @@ public class HookSpec {
   private static class ArgHookArgument implements HookArgumentInstance {
     private final int index;
 
-    public ArgHookArgument(int index) {
+    ArgHookArgument(int index) {
       this.index = index;
     }
 
@@ -55,7 +55,7 @@ public class HookSpec {
     }
   }
 
-  public static HookArgument field(Type owner, String name, Type type) {
+  static HookArgument field(Type owner, String name, Type type) {
     return spec -> new HookArgumentInstance() {
       @Override
       public void load(GeneratorAdapter generator) {
@@ -111,13 +111,13 @@ public class HookSpec {
     }
   }
 
-  public static final HookArgument ARG0 = spec -> new ArgHookArgument(0);
-  public static final HookArgument ARG1 = spec -> new ArgHookArgument(1);
-  public static final HookArgument ARG2 = spec -> new ArgHookArgument(2);
-  public static final HookArgument ARG3 = spec -> new ArgHookArgument(3);
+  static final HookArgument ARG0 = spec -> new ArgHookArgument(0);
+  static final HookArgument ARG1 = spec -> new ArgHookArgument(1);
+  static final HookArgument ARG2 = spec -> new ArgHookArgument(2);
+  static final HookArgument ARG3 = spec -> new ArgHookArgument(3);
 
   /** The {@link Invocation} of invoking the hooked method */
-  public static final HookArgument INVOCATION = spec -> new OnEnterHookArgumentInstance(
+  static final HookArgument INVOCATION = spec -> new OnEnterHookArgumentInstance(
       Type.getType(Invocation.class)) {
     @Override
     void loadOnMethodEnter(GeneratorAdapter generator) {
@@ -176,7 +176,7 @@ public class HookSpec {
   private final Method hookMethod;
   private final Type[] cacheTargetMethodArgumentTypes;
 
-  public HookSpec(Type targetClass, Method targetMethod,
+  HookSpec(Type targetClass, Method targetMethod,
       Class<?> hookClass, Method hookMethod, HookArgument... hookArguments) {
     super();
     this.targetClass = targetClass;
@@ -191,7 +191,7 @@ public class HookSpec {
     return hookMethod;
   }
 
-  public MethodVisitor createMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
+  MethodVisitor createMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
     return new HookMethodAdapter(mv, access, name, desc);
   }
 }

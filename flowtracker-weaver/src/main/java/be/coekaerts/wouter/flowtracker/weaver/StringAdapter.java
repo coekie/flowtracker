@@ -3,22 +3,16 @@ package be.coekaerts.wouter.flowtracker.weaver;
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import java.util.Map;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
-import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 /**
  * Instrumentation for {@link String}.
- *
- * Adds a hack to make it possible for {@link StringHook} to get the tracker based on the
- * String.value and String.offset.
  */
-public class StringAdapter extends ClassVisitor {
+class StringAdapter extends ClassVisitor {
   private final boolean debugUntracked;
 
   public StringAdapter(ClassVisitor cv, Map<String, String> config) {
@@ -39,7 +33,7 @@ public class StringAdapter extends ClassVisitor {
 
   private static class StringConstructorAdapter extends AdviceAdapter {
 
-    public StringConstructorAdapter(MethodVisitor mv, int access, String name, String desc) {
+    StringConstructorAdapter(MethodVisitor mv, int access, String name, String desc) {
       super(Opcodes.ASM9, mv, access, name, desc);
     }
 

@@ -10,7 +10,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
-public class ClassHookSpec implements ClassAdapterFactory {
+class ClassHookSpec implements ClassAdapterFactory {
   private static final Logger logger = new Logger("ClassHookSpec");
 
   private class HookClassAdapter extends ClassVisitor {
@@ -39,17 +39,17 @@ public class ClassHookSpec implements ClassAdapterFactory {
 
   private final Map<Method, HookSpec> methodHookSpecs = new HashMap<>();
 
-  public ClassHookSpec(Type targetClass, Class<?> hookClass) {
+  ClassHookSpec(Type targetClass, Class<?> hookClass) {
     this.targetClass = targetClass;
     this.hookClass = hookClass;
   }
 
-  public ClassHookSpec addMethodHookSpec(String targetMethod, String hookMethod,
+  ClassHookSpec addMethodHookSpec(String targetMethod, String hookMethod,
       HookArgument... hookArguments) {
     return addMethodHookSpec(Method.getMethod(targetMethod), Method.getMethod(hookMethod), hookArguments);
   }
 
-  public ClassHookSpec addMethodHookSpec(Method targetMethod, Method hookMethod,
+  ClassHookSpec addMethodHookSpec(Method targetMethod, Method hookMethod,
       HookArgument... hookArguments) {
     HookSpec hookSpec =
         new HookSpec(targetClass, targetMethod, hookClass, hookMethod, hookArguments);

@@ -94,7 +94,7 @@ public class FlowAnalyzerTest {
   // ForkJoinPool.tryTerminate.
   @Test public void testMergeLongValues() {
     FlowValue v = getReturnValue(FlowValue.class, new Object() {
-      @SuppressWarnings("unused")
+      @SuppressWarnings("all")
       long go(boolean bool, long a, long b) {
         if (bool) {
           b = 1;

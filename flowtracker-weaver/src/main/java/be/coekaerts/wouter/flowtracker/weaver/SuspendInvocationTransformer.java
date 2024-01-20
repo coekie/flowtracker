@@ -15,7 +15,7 @@ import org.objectweb.asm.commons.Method;
 class SuspendInvocationTransformer implements ClassAdapterFactory {
   private final boolean applyToAllForTesting;
 
-  public SuspendInvocationTransformer() {
+  SuspendInvocationTransformer() {
     this(false);
   }
 
