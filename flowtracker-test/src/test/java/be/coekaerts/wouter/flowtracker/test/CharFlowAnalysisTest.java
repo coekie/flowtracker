@@ -77,19 +77,6 @@ public class CharFlowAnalysisTest {
     assertNull(getTracker(bytes));
   }
 
-  @Test public void charAt() {
-    String abc = trackCopy("abc");
-    FlowTester.assertTrackedValue(abc.charAt(1), 'b', getStringTracker(abc), 1);
-  }
-
-  @SuppressWarnings("UnnecessaryLocalVariable") // we want its type to be a CharSequence
-  @Test public void charSequenceCharAt() {
-    String str = trackCopy("abc");
-    CharSequence abc = str;
-
-    FlowTester.assertTrackedValue(abc.charAt(1), 'b', getStringTracker(str), 1);
-  }
-
   @Test public void stringBuilderAppendChar() {
     String abc = trackCopy("abc");
     StringBuilder sb = new StringBuilder();

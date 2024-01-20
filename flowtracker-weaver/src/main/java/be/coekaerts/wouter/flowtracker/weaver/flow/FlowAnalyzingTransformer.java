@@ -18,7 +18,6 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Frame;
@@ -175,14 +174,6 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
 
       // send the result to the next MethodVisitor
       this.accept(varSorter);
-    }
-
-    /**
-     * Create a new local variable for storing the index of a tracker, that is an int initialized
-     * to -1
-     */
-    TrackLocal newLocalForIndex(String sourceForComment) {
-      return newLocal(Type.INT_TYPE, List.of(new LdcInsnNode(-1)), sourceForComment);
     }
 
     /** Create a new local variable for storing an object, initialized to null */

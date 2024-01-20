@@ -20,15 +20,6 @@ public class StringHook {
     return TrackerRepository.getTracker(getValueArray(str));
   }
 
-  @SuppressWarnings("unused") // used by instrumented code
-  public static Tracker getCharSequenceTracker(CharSequence cs) {
-    // for now we only support Strings (when we support more this should move somewhere else).
-    // note: mutable CharSequence implementations should also be instrumented differently (like
-    // ArrayLoadValue, not like CharAtValue which assumes there's been no mutation between charAt
-    // all and use).
-    return cs instanceof String ? getStringTracker((String) cs) : null;
-  }
-
   public static void createFixedOriginTracker(String str) {
     TrackerRepository.createFixedOriginTracker(getValueArray(str), str.length());
   }

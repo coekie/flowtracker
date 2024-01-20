@@ -42,16 +42,6 @@ public class FlowAnalyzerTest {
   }
 
   @Test
-  public void testCharAtValue() {
-    getReturnValue(CharAtValue.class, new Object() {
-      @SuppressWarnings("unused")
-      char go(String s) {
-        return s.charAt(0);
-      }
-    });
-  }
-
-  @Test
   public void testInvocationArgValue() {
     CopyValue v = getReturnValue(CopyValue.class, new Object() {
       @SuppressWarnings("unused")

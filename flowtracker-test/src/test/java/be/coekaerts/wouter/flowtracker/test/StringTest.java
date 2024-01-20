@@ -51,6 +51,11 @@ public class StringTest {
         .assertEquals(getStringTracker(bar));
   }
 
+  @Test public void testCharAt() {
+    String abc = trackCopy("abc");
+    FlowTester.assertTrackedValue(abc.charAt(1), 'b', getStringTracker(abc), 1);
+  }
+
   @Test public void testGetBytes() {
     String foobar = trackCopy("foobar");
     snapshotBuilder().trackString(foobar, 0, 6)
