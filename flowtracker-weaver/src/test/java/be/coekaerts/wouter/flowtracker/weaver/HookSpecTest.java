@@ -2,7 +2,6 @@ package be.coekaerts.wouter.flowtracker.weaver;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Invocation;
@@ -69,20 +68,6 @@ public class HookSpecTest {
             HookSpec.INVOCATION));
     assertEquals("withInvocation\n"
         + "afterWithInvocation 777\n", log.toString());
-  }
-
-  @Test
-  public void testSuspendedInvocation() throws ReflectiveOperationException {
-    Invocation suspendedInvocation = Invocation.calling("should get suspended")
-        .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777));
-    transformAndRun(new ClassHookSpec(Type.getType(HookedWithSuspendedInvocation.class), MyHook.class)
-        .addMethodHookSpec("void withSuspendedInvocation()",
-            "void afterWithSuspendedInvocation(be.coekaerts.wouter.flowtracker.tracker.Invocation)",
-            HookSpec.SUSPENDED_INVOCATION));
-    // invocation should have been restored
-    assertSame(suspendedInvocation, Invocation.peekPending());
-    assertEquals("withSuspendedInvocation\n"
-        + "afterWithSuspendedInvocation 777\n", log.toString());
   }
 
   @Test
@@ -191,18 +176,6 @@ class HookedWithInvocation implements Runnable {
   void withInvocation() {
     Invocation.calling("something else");
     HookSpecTest.log("withInvocation");
-  }
-}
-
-class HookedWithSuspendedInvocation implements Runnable {
-  @Override
-  public void run() {
-    withSuspendedInvocation();
-  }
-
-  void withSuspendedInvocation() {
-    assertNull(Invocation.peekPending()); // test that the active invocation was suspended
-    HookSpecTest.log("withSuspendedInvocation");
   }
 }
 

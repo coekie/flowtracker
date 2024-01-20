@@ -91,6 +91,7 @@ public class InvocationInstrumentationTest {
     assertTrue(sink.called);
   }
 
+  /** Tests SuspendInvocationTransformer */
   @Test
   public void loadClassAtInvocation() {
     FlowTester flowTester = new FlowTester();
@@ -107,8 +108,7 @@ public class InvocationInstrumentationTest {
   static class StaticSink {
     static boolean called;
     static {
-      // TODO suspend invocation during class initialization
-      //go((byte) 0); // irrelevant call to check that it doesn't "distract" Invocation
+      go((byte) 0); // irrelevant call to check that it doesn't "distract" Invocation
       staticSinkInitialized = true;
     }
 

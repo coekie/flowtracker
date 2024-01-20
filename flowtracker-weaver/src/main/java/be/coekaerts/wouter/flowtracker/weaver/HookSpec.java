@@ -128,20 +128,6 @@ public class HookSpec {
     }
   };
 
-  /**
-   * The {@link Invocation} that was active when this method was invoked.
-   * Having this is an argument to a hook causes the invocation to get suspended.
-   * @see Invocation#suspend()
-   */
-  public static final HookArgument SUSPENDED_INVOCATION = spec -> new OnEnterHookArgumentInstance(
-      Type.getType(Invocation.class)) {
-    @Override
-    void loadOnMethodEnter(GeneratorAdapter generator) {
-      generator.invokeStatic(Type.getType(Invocation.class), Method.getMethod(
-          "be.coekaerts.wouter.flowtracker.tracker.Invocation suspend()"));
-    }
-  };
-
   private class HookMethodAdapter extends AdviceAdapter {
     private final boolean hasReturnType;
     private final List<HookArgumentInstance> argumentInstances;
