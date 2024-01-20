@@ -25,12 +25,11 @@ class ArrayStore extends Store {
     InsnList toInsert = new InsnList();
 
     methodNode.addComment(toInsert, "begin ArrayStore.insertTrackStatements: "
-        + "ArrayHook.set*(array, arrayIndex, value [already on stack], source, sourceIndex)");
+        + "ArrayHook.set*(array, arrayIndex, value [already on stack], sourcePoint)");
 
     // note: we do this even for UntrackableValues
     storedValue.ensureTracked();
-    storedValue.loadSourceTracker(toInsert);
-    storedValue.loadSourceIndex(toInsert);
+    storedValue.loadSourcePoint(toInsert);
 
     methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
 
@@ -48,11 +47,11 @@ class ArrayStore extends Store {
 
   static ArrayStore createCharArrayStore(InsnNode storeInsn, FlowFrame frame) {
     return new ArrayStore(storeInsn, frame,
-        "void setChar(char[],int,char,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
+        "void setChar(char[],int,char,be.coekaerts.wouter.flowtracker.tracker.TrackerPoint)");
   }
 
   static ArrayStore createByteArrayStore(InsnNode storeInsn, FlowFrame frame) {
     return new ArrayStore(storeInsn, frame,
-        "void setByte(byte[],int,byte,be.coekaerts.wouter.flowtracker.tracker.Tracker,int)");
+        "void setByte(byte[],int,byte,be.coekaerts.wouter.flowtracker.tracker.TrackerPoint)");
   }
 }

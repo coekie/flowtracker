@@ -21,4 +21,13 @@ public class TrackerUpdater {
     }
     targetTracker.setSource(targetIndex, length, sourceTracker, sourceIndex);
   }
+
+  public static void setSourceTrackerPoint(Object target, int targetIndex, int length,
+      TrackerPoint sourcePoint) {
+    if (sourcePoint == null) {
+      setSourceTracker(target, targetIndex, length, null, -1);
+    } else {
+      setSourceTracker(target, targetIndex, length, sourcePoint.tracker, sourcePoint.index);
+    }
+  }
 }

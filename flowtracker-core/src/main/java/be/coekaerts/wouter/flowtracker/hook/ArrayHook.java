@@ -1,25 +1,21 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
-import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 
 /** Hook methods for operations on arrays */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class ArrayHook {
   /** Store a value in a char[] */
-  public static void setChar(char[] array, int arrayIndex, char value, Tracker source,
-      int sourceIndex) {
+  public static void setChar(char[] array, int arrayIndex, char value, TrackerPoint source) {
     array[arrayIndex] = value;
-
-    TrackerUpdater.setSourceTracker(array, arrayIndex, 1, source, sourceIndex);
+    TrackerUpdater.setSourceTrackerPoint(array, arrayIndex, 1, source);
   }
 
   /** Store a value in a byte[] */
-  public static void setByte(byte[] array, int arrayIndex, byte value, Tracker source,
-      int sourceIndex) {
+  public static void setByte(byte[] array, int arrayIndex, byte value, TrackerPoint source) {
     array[arrayIndex] = value;
-
-    TrackerUpdater.setSourceTracker(array, arrayIndex, 1, source, sourceIndex);
+    TrackerUpdater.setSourceTrackerPoint(array, arrayIndex, 1, source);
   }
 
   /** Hook for calling clone() on a char[] */
