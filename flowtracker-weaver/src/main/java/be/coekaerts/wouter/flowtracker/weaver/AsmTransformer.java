@@ -284,6 +284,8 @@ class AsmTransformer implements ClassFileTransformer {
     if (className.equals("java/util/Arrays")
         || className.startsWith("java/lang/String") // String and friends like StringLatin1
         || className.equals("java/lang/AbstractStringBuilder")
+        || className.equals("java/lang/StringBuilder")
+        || className.equals("java/lang/StringBuffer")
         || className.equals("java/io/BufferedWriter")
         || className.equals("java/io/BufferedOutputStream")
         || className.equals("java/io/ByteArrayInputStream")

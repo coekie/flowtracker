@@ -101,7 +101,7 @@ public class InvocationArgStore extends Store {
   /** Determines which arguments should be instrumented. null if none of them should be. */
   static boolean[] argsToInstrument(String name, String desc) {
     Type[] args = Type.getArgumentTypes(desc);
-    if (args.length > MAX_ARG_NUM_TO_INSTRUMENT + 1) {
+    if (args.length > MAX_ARG_NUM_TO_INSTRUMENT + 1 || name.equals("<init>")) {
       return null;
     }
 

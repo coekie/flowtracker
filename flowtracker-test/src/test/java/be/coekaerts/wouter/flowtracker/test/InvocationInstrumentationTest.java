@@ -37,6 +37,15 @@ public class InvocationInstrumentationTest {
     assertTrue(sink.called);
   }
 
+  /** Test call using super.method(), that is using INVOKESPECIAL */
+  @Test
+  public void superCall() {
+    FlowTester flowTester = new FlowTester();
+    SubSink sink = new SubSink(flowTester);
+    sink.writeSuper(flowTester.createSourceByte((byte) 1));
+    assertTrue(sink.called);
+  }
+
   @Test
   public void twoArgs() {
     FlowTester flowTester0 = new FlowTester();
@@ -151,6 +160,17 @@ public class InvocationInstrumentationTest {
     void writeInt(int i) {
       flowTester.assertIsTheTrackedValue((char) i);
       called = true;
+    }
+  }
+
+  static class SubSink extends Sink {
+
+    SubSink(FlowTester flowTester) {
+      super(flowTester);
+    }
+
+    void writeSuper(byte b) {
+      super.writeByte(b);
     }
   }
 }

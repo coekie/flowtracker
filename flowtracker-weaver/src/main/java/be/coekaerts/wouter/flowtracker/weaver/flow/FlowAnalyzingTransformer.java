@@ -118,7 +118,8 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
             && Types.BYTE_ARRAY.equals(frame.getStack(frame.getStackSize() - 3).getType())) {
           stores.add(ArrayStore.createByteArrayStore((InsnNode) insn, frame));
         } else if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL
-            || insn.getOpcode() == Opcodes.INVOKESTATIC) {
+            || insn.getOpcode() == Opcodes.INVOKESTATIC
+            || insn.getOpcode() == Opcodes.INVOKESPECIAL) {
           MethodInsnNode mInsn = (MethodInsnNode) insn;
 
           if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
@@ -136,11 +137,6 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
             mInsn.desc = mInsn.owner.equals("[C") ? "([C)[C" : "([B)[B";
             mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/ArrayHook";
             mInsn.setOpcode(Opcodes.INVOKESTATIC);
-          } else if ("append".equals(mInsn.name)
-              && ("java/lang/StringBuilder".equals(mInsn.owner)
-              || "java/lang/StringBuffer".equals(mInsn.owner))
-              && mInsn.desc.startsWith("(C)")) {
-            stores.add(new AppendStore(mInsn, frame));
           } else if (mInsn.owner.equals("be/coekaerts/wouter/flowtracker/test/FlowTester")) {
             if (mInsn.name.equals("assertTrackedValue")) {
               stores.add(new TesterStore(mInsn, frame, 3));
