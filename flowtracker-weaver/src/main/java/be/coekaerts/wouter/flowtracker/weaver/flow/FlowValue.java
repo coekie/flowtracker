@@ -29,8 +29,8 @@ abstract class FlowValue extends BasicValue {
   /**
    * Returns if we can know where this value came from.
    * <p>
-   * If this is false, then {@link #loadSourceTracker(InsnList)} will always load {@code null}.
-   * If this return true, then that's no guarantee that {@link #loadSourceTracker(InsnList)} is
+   * If this is false, then {@link #loadSourcePoint(InsnList)} will always load {@code null}.
+   * If this return true, then that's no guarantee that {@link #loadSourcePoint(InsnList)} is
    * never {@code null}.
    */
   abstract boolean isTrackable();

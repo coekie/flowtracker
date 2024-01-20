@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.hook;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
@@ -40,7 +41,7 @@ public class InflaterInputStreamHook {
     if (result > 0) {
       Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
-        Invocation.returning(invocation, tracker, tracker.getLength() - 1);
+        Invocation.returning(invocation, TrackerPoint.of(tracker, tracker.getLength() - 1));
       }
     }
   }

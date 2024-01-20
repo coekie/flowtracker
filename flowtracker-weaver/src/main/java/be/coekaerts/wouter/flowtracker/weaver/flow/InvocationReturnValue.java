@@ -32,29 +32,29 @@ class InvocationReturnValue extends TrackableValue {
   @Override void loadSourceTracker(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.loadSourceTracker");
     toInsert.add(invocationLocal.load());
-    toInsert.add(new FieldInsnNode(Opcodes.GETFIELD,
-        "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-        "returnTracker",
-        "Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;"));
+    toInsert.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+            "be/coekaerts/wouter/flowtracker/tracker/Invocation",
+            "getReturnTracker",
+            "()Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;"));
   }
 
   @Override void loadSourceIndex(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.loadSourceIndex");
     toInsert.add(invocationLocal.load());
-    toInsert.add(new FieldInsnNode(Opcodes.GETFIELD,
+    toInsert.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
         "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-        "returnIndex",
-        "I"));
+        "getReturnIndex",
+        "()I"));
   }
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
     flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.loadSourcePoint");
     toInsert.add(invocationLocal.load());
-    toInsert.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+    toInsert.add(new FieldInsnNode(Opcodes.GETFIELD,
         "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-        "getReturnPoint",
-        "()Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
+        "returnPoint",
+        "Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
   }
 
   static boolean shouldInstrumentInvocation(String name, String desc) {

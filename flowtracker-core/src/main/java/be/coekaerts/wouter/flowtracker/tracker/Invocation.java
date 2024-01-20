@@ -12,8 +12,7 @@ public class Invocation {
   private final String signature;
 
   // tracker and index for the returned primitive value
-  public Tracker returnTracker;
-  public int returnIndex;
+  public TrackerPoint returnPoint;
 
   // tracks source for some primitive values in arguments. null for untracked arguments.
   private TrackerPoint[] args;
@@ -23,8 +22,13 @@ public class Invocation {
   }
 
   @SuppressWarnings("unused") // invoked by instrumentation
-  public TrackerPoint getReturnPoint() {
-    return TrackerPoint.ofNullable(returnTracker, returnIndex);
+  public Tracker getReturnTracker() {
+    return returnPoint == null ? null : returnPoint.tracker;
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public int getReturnIndex() {
+    return returnPoint == null ? -1 : returnPoint.index;
   }
 
   @SuppressWarnings("unused") // invoked by instrumentation
@@ -76,10 +80,9 @@ public class Invocation {
   /**
    * Sets the source tracker of a returned value
    */
-  public static void returning(Invocation invocation, Tracker tracker, int index) {
+  public static void returning(Invocation invocation, TrackerPoint returnPoint) {
     if (invocation != null) {
-      invocation.returnTracker = tracker;
-      invocation.returnIndex = index;
+      invocation.returnPoint = returnPoint;
     }
   }
 

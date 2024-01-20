@@ -30,13 +30,12 @@ public class InvocationReturnStore extends Store {
       invocation.ensureStarted(methodNode);
 
       toInsert.add(invocation.invocationLocal.load());
-      returnedValue.loadSourceTracker(toInsert);
-      returnedValue.loadSourceIndex(toInsert);
+      returnedValue.loadSourcePoint(toInsert);
 
       toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
           "be/coekaerts/wouter/flowtracker/tracker/Invocation", "returning",
           "(Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"
-              + "Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V",
+              + "Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)V",
           false));
 
       methodNode.addComment(toInsert, "end InvocationReturnStore.insertTrackStatements");
