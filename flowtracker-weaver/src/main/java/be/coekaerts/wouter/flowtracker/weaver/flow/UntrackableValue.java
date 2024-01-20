@@ -60,11 +60,6 @@ class UntrackableValue extends FlowValue {
   }
 
   @Override
-  void doLoadSourcePointFromTrackerAndIndex(InsnList toInsert) {
-    toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
-  }
-
-  @Override
   void loadSourcePoint(InsnList toInsert) {
     toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
   }

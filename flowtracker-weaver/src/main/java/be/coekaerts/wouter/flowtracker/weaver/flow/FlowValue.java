@@ -130,19 +130,4 @@ abstract class FlowValue extends BasicValue {
             "getIndex",
             "(Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)I"));
   }
-
-  /**
-   * Implementation for {@link #loadSourcePoint(InsnList)} that uses
-   * {@link #loadSourceTracker(InsnList)} and {@link #loadSourceIndex(InsnList)}.
-   */
-  void doLoadSourcePointFromTrackerAndIndex(InsnList toInsert) {
-    loadSourceTracker(toInsert);
-    loadSourceIndex(toInsert);
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/tracker/TrackerPoint",
-            "ofNullable",
-            "(Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)"
-                + "Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
-  }
 }

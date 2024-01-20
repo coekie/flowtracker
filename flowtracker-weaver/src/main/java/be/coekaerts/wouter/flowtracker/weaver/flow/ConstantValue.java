@@ -45,6 +45,13 @@ public class ConstantValue extends TrackableValue {
   @Override
   void loadSourcePoint(InsnList toInsert) {
     // NICE the TrackerPoint could be a ConstantDynamic
-    doLoadSourcePointFromTrackerAndIndex(toInsert);
+    flowMethodAdapter.addComment(toInsert,
+        "ConstantValue.loadSourcePoint: ConstantHook.loadSourcePoint(\"%s\")", descriptor);
+    toInsert.add(new LdcInsnNode(descriptor));
+    toInsert.add(
+        new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "be/coekaerts/wouter/flowtracker/hook/ConstantHook",
+            "constantPoint",
+            "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
   }
 }
