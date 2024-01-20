@@ -36,6 +36,60 @@ public class InvocationInstrumentationTest {
     assertTrue(sink.called);
   }
 
+  @Test
+  public void twoArgs() {
+    FlowTester flowTester0 = new FlowTester();
+    FlowTester flowTester1 = new FlowTester();
+    class MultiSink {
+      boolean called;
+
+      void write(byte b0, byte b1) {
+        flowTester0.assertIsTheTrackedValue(b0);
+        flowTester1.assertIsTheTrackedValue(b1);
+        called = true;
+      }
+    }
+
+    MultiSink sink = new MultiSink();
+    sink.write(
+        flowTester0.createSourceByte((byte) 1),
+        flowTester1.createSourceByte((byte) 1));
+    assertTrue(sink.called);
+  }
+
+  @Test
+  public void manyArgs() {
+    FlowTester flowTester0 = new FlowTester();
+    FlowTester flowTester1 = new FlowTester();
+    FlowTester flowTester2 = new FlowTester();
+    FlowTester flowTester3 = new FlowTester();
+    FlowTester flowTester4 = new FlowTester();
+    FlowTester flowTester5 = new FlowTester();
+    class MultiSink {
+      boolean called;
+
+      void write(byte b0, byte b1, byte b2, byte b3, byte b4, byte b5) {
+        flowTester0.assertIsTheTrackedValue(b0);
+        flowTester1.assertIsTheTrackedValue(b1);
+        flowTester2.assertIsTheTrackedValue(b2);
+        flowTester3.assertIsTheTrackedValue(b3);
+        flowTester4.assertIsTheTrackedValue(b4);
+        flowTester5.assertIsTheTrackedValue(b5);
+        called = true;
+      }
+    }
+
+    MultiSink sink = new MultiSink();
+    sink.write(
+        flowTester0.createSourceByte((byte) 1),
+        flowTester1.createSourceByte((byte) 1),
+        flowTester2.createSourceByte((byte) 1),
+        flowTester3.createSourceByte((byte) 1),
+        flowTester4.createSourceByte((byte) 1),
+        flowTester5.createSourceByte((byte) 1));
+    assertTrue(sink.called);
+  }
+
   static class Source {
     final FlowTester flowTester;
 

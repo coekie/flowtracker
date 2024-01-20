@@ -14,7 +14,7 @@ class InvocationArgValue extends TrackableValue {
   private final int argNum;
   InvocationArgValue(FlowMethodAdapter flowMethodAdapter, AbstractInsnNode insn, int argNum) {
     super(flowMethodAdapter, Type.getArgumentTypes(flowMethodAdapter.desc)[argNum], insn);
-    if (argNum > InvocationArgStore.MAX_ARG_TO_INSTRUMENT) {
+    if (argNum > InvocationArgStore.MAX_ARG_NUM_TO_INSTRUMENT + 1) {
       throw new IllegalArgumentException();
     }
     this.argNum = argNum;

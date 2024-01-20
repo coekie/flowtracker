@@ -27,7 +27,36 @@ public class Invocation {
     return TrackerPoint.ofNullable(returnTracker, returnIndex);
   }
 
-  // invoked by instrumentation
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public Invocation setArg0(TrackerPoint trackerPoint) {
+    return setArg(0, trackerPoint);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public Invocation setArg1(TrackerPoint trackerPoint) {
+    return setArg(1, trackerPoint);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public Invocation setArg2(TrackerPoint trackerPoint) {
+    return setArg(2, trackerPoint);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public Invocation setArg3(TrackerPoint trackerPoint) {
+    return setArg(3, trackerPoint);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public Invocation setArg4(TrackerPoint trackerPoint) {
+    return setArg(4, trackerPoint);
+  }
+
+  @SuppressWarnings("unused") // invoked by instrumentation
+  public Invocation setArg5(TrackerPoint trackerPoint) {
+    return setArg(5, trackerPoint);
+  }
+
   public Invocation setArg(int argNum, TrackerPoint trackerPoint) {
     if (trackerPoint == null) {
       return this;

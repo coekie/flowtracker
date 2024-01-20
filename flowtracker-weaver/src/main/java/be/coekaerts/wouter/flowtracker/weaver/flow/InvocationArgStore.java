@@ -7,7 +7,6 @@ import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.Flow
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /**
@@ -19,7 +18,7 @@ public class InvocationArgStore extends Store {
   // - the ICONST_0 + i doesn't work for higher ones (we could fix that by using LdcInsNode)
   // - in Invocation we have getArg0Tracker/getArg0Index methods up to arg 5
   // - methods with more arguments than that are probably not as likely to be worth instrumenting
-  static final int MAX_ARG_TO_INSTRUMENT = 5;
+  static final int MAX_ARG_NUM_TO_INSTRUMENT = 5;
 
   // for now, we only support calls with one argument
   private final FlowValue[] args;
@@ -69,13 +68,12 @@ public class InvocationArgStore extends Store {
       // if we know where the value passed in as argument came from
       if (arg != null && arg.isTrackable()) {
         arg.ensureTracked();
-        toInsert.add(new InsnNode(Opcodes.ICONST_0 + i)); // works up to ICONST_5
         arg.loadSourcePoint(toInsert);
         toInsert.add(
             new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
                 "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-                "setArg",
-                "(ILbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)"
+                "setArg" + i,
+                "(Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)"
                     + "Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"));
       }
     }
@@ -103,7 +101,7 @@ public class InvocationArgStore extends Store {
   /** Determines which arguments should be instrumented. null if none of them should be. */
   static boolean[] argsToInstrument(String name, String desc) {
     Type[] args = Type.getArgumentTypes(desc);
-    if (args.length != 1) { // TODO replace with args.length > MAX_ARG_TO_INSTRUMENT
+    if (args.length > MAX_ARG_NUM_TO_INSTRUMENT + 1) {
       return null;
     }
 
