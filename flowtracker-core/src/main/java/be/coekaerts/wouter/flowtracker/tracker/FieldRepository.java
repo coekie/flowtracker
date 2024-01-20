@@ -16,12 +16,6 @@ public class FieldRepository {
   }
 
   @SuppressWarnings("unused") // invoked from FieldStore
-  public static void setPoint(Object target, String fieldId, Tracker tracker, int index) {
-    if (tracker != null) {
-      setPoint(target, fieldId, TrackerPoint.of(tracker, index));
-    }
-  }
-
   public static void setPoint(Object target, String fieldId, TrackerPoint point) {
     if (target != null) {
       Map<String, TrackerPoint> fieldMap =

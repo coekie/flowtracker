@@ -39,14 +39,13 @@ class FieldStore extends Store {
 
     // note: we do this even for UntrackableValues
     storedValue.ensureTracked();
-    storedValue.loadSourceTracker(toInsert);
-    storedValue.loadSourceIndex(toInsert);
+    storedValue.loadSourcePoint(toInsert);
 
     methodNode.maxStack = Math.max(frame.getStackSize() + 5, methodNode.maxStack);
 
     toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
         "be/coekaerts/wouter/flowtracker/tracker/FieldRepository", "setPoint",
-        "(Ljava/lang/Object;Ljava/lang/String;Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)V",
+        "(Ljava/lang/Object;Ljava/lang/String;Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)V",
         false));
 
     methodNode.addComment(toInsert, "end FieldStore.insertTrackStatements");
