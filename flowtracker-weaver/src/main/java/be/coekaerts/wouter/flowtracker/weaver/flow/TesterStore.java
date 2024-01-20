@@ -28,8 +28,7 @@ class TesterStore extends Store {
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "begin TesterStore.insertTrackStatements");
 
-      storedValue.loadSourceTracker(toInsert);
-      storedValue.loadSourceIndex(toInsert);
+      storedValue.loadSourcePoint(toInsert);
 
       methodNode.addComment(toInsert,
           "end TesterStore.insertTrackStatements. also replaced next invocation");
@@ -38,7 +37,7 @@ class TesterStore extends Store {
 
       invokeInsn.name = "$tracked_" + invokeInsn.name;
       invokeInsn.desc =
-          invokeInsn.desc.replace(")", "Lbe/coekaerts/wouter/flowtracker/tracker/Tracker;I)");
+          invokeInsn.desc.replace(")", "Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;)");
 
       methodNode.instructions.insertBefore(invokeInsn, toInsert);
     }

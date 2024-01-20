@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
@@ -63,7 +64,6 @@ class FlowTester {
     return 42;
   }
 
-  @SuppressWarnings("unused") // invoked by instrumentation
   TrackerPoint theSourcePoint() {
     return TrackerPoint.of(theSource(), theSourceIndex());
   }
@@ -72,7 +72,7 @@ class FlowTester {
    * Assert that the given value is tracked as coming from index {@code expectedIndex} in
    * {@code expectedSource}.
    * Calls to this method should get replaced by
-   * {@link #$tracked_assertTrackedValue(char, char, Tracker, int, Tracker, int)}.
+   * {@link #$tracked_assertTrackedValue(char, char, Tracker, int, TrackerPoint)}.
    */
   static void assertTrackedValue(@SuppressWarnings("unused") char c,
       @SuppressWarnings("unused") char expected,
@@ -85,7 +85,7 @@ class FlowTester {
    * Assert that the given value is tracked as coming from index {@code expectedIndex} in
    * {@code expectedSource}.
    * Calls to this method should get replaced by
-   * {@link #$tracked_assertTrackedValue(byte, byte, Tracker, int, Tracker, int)}.
+   * {@link #$tracked_assertTrackedValue(byte, byte, Tracker, int, TrackerPoint)}.
    */
   static void assertTrackedValue(@SuppressWarnings("unused") byte b,
       @SuppressWarnings("unused") byte expected,
@@ -97,25 +97,27 @@ class FlowTester {
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   static void $tracked_assertTrackedValue(char c, char expected,
       Tracker expectedTracker, int expectedIndex,
-      Tracker actualTracker, int actualIndex) {
+      TrackerPoint actual) {
     assertEquals(expected, c);
-    assertEquals(expectedTracker, actualTracker);
-    assertEquals(expectedIndex, actualIndex);
+    assertNotNull(actual);
+    assertEquals(expectedTracker, actual.tracker);
+    assertEquals(expectedIndex, actual.index);
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   static void $tracked_assertTrackedValue(byte b, byte expected,
       Tracker expectedTracker, int expectedIndex,
-      Tracker actualTracker, int actualIndex) {
+      TrackerPoint actual) {
     assertEquals(expected, b);
-    assertEquals(expectedTracker, actualTracker);
-    assertEquals(expectedIndex, actualIndex);
+    assertNotNull(actual);
+    assertEquals(expectedTracker, actual.tracker);
+    assertEquals(expectedIndex, actual.index);
   }
 
   /**
    * Assert that the given value is tracked as coming from this tester.
    * Calls to this method should get replaced by
-   * {@link #$tracked_assertIsTheTrackedValue(char, Tracker, int)}.
+   * {@link #$tracked_assertIsTheTrackedValue(char, TrackerPoint)}.
    */
   void assertIsTheTrackedValue(@SuppressWarnings("unused") char c) {
     throw valueNotTrackedError();
@@ -124,22 +126,20 @@ class FlowTester {
   /**
    * Assert that the given value is tracked as coming from this tester.
    * Calls to this method should get replaced by
-   * {@link #$tracked_assertIsTheTrackedValue(byte, Tracker, int)}.
+   * {@link #$tracked_assertIsTheTrackedValue(byte, TrackerPoint)}.
    */
   void assertIsTheTrackedValue(@SuppressWarnings("unused") byte b) {
     throw valueNotTrackedError();
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
-  void $tracked_assertIsTheTrackedValue(char c, Tracker actualTracker, int actualIndex) {
-    assertEquals(theSource(), actualTracker);
-    assertEquals(theSourceIndex(), actualIndex);
+  void $tracked_assertIsTheTrackedValue(char c, TrackerPoint actual) {
+    assertEquals(theSourcePoint(), actual);
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
-  void $tracked_assertIsTheTrackedValue(byte b, Tracker actualTracker, int actualIndex) {
-    assertEquals(theSource(), actualTracker);
-    assertEquals(theSourceIndex(), actualIndex);
+  void $tracked_assertIsTheTrackedValue(byte b, TrackerPoint actual) {
+    assertEquals(theSourcePoint(), actual);
   }
 
   /** Returns the Tracker from which the value is tracked as coming */
@@ -153,20 +153,20 @@ class FlowTester {
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
-  static Tracker $tracked_getCharSourceTracker(char value, Tracker tracker, int index) {
-    return tracker;
+  static Tracker $tracked_getCharSourceTracker(char value, TrackerPoint point) {
+    return point == null ? null : point.tracker;
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
-  static Tracker $tracked_getByteSourceTracker(byte value, Tracker tracker, int index) {
-    return tracker;
+  static Tracker $tracked_getByteSourceTracker(byte value, TrackerPoint point) {
+    return point == null ? null : point.tracker;
   }
 
   /**
    * Returns the index in {@link #getCharSourceTracker(char)} that the value is tracked as coming
    * from
    */
-  static int getCharSourceIndex(@SuppressWarnings("unused") char c) {
+  static TrackerPoint getCharSourcePoint(@SuppressWarnings("unused") char c) {
     throw valueNotTrackedError();
   }
 
@@ -174,18 +174,18 @@ class FlowTester {
    * Returns the index in {@link #getByteSourceTracker(byte)} that the value is tracked as coming
    * from
    */
-  static int getByteSourceIndex(@SuppressWarnings("unused") byte b) {
+  static TrackerPoint getByteSourcePoint(@SuppressWarnings("unused") byte b) {
     throw valueNotTrackedError();
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
-  static int $tracked_getCharSourceIndex(char c, Tracker tracker, int index) {
-    return index;
+  static TrackerPoint $tracked_getCharSourcePoint(char c, TrackerPoint point) {
+    return point;
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
-  static int $tracked_getByteSourceIndex(byte b, Tracker tracker, int index) {
-    return index;
+  static TrackerPoint $tracked_getByteSourcePoint(byte b, TrackerPoint point) {
+    return point;
   }
 
   static char untrackedChar(char c) {

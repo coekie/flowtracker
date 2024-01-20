@@ -142,9 +142,9 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
               stores.add(new TesterStore(mInsn, frame, 3));
             } else if (mInsn.name.equals("assertIsTheTrackedValue")
                 || mInsn.name.equals("getCharSourceTracker")
-                || mInsn.name.equals("getCharSourceIndex")
+                || mInsn.name.equals("getCharSourcePoint")
                 || mInsn.name.equals("getByteSourceTracker")
-                || mInsn.name.equals("getByteSourceIndex")) {
+                || mInsn.name.equals("getByteSourcePoint")) {
               stores.add(new TesterStore(mInsn, frame, 0));
             }
           } else if (shouldInstrumentInvocationArg(mInsn.name, mInsn.desc)) {

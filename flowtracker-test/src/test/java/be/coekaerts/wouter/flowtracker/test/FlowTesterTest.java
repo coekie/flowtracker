@@ -52,13 +52,13 @@ public class FlowTesterTest {
   public void testGetTracker_char() {
     char a = ft.createSourceChar('a');
     assertEquals(ft.theSource(), FlowTester.getCharSourceTracker(a));
-    assertEquals(ft.theSourceIndex(), FlowTester.getCharSourceIndex(a));
+    assertEquals(ft.theSourcePoint(), FlowTester.getCharSourcePoint(a));
   }
 
   @Test
   public void testGetTracker_byte() {
     byte a = ft.createSourceByte((byte) 'a');
     assertEquals(ft.theSource(), FlowTester.getByteSourceTracker(a));
-    assertEquals(ft.theSourceIndex(), FlowTester.getByteSourceIndex(a));
+    assertEquals(ft.theSourcePoint(), FlowTester.getByteSourcePoint(a));
   }
 }

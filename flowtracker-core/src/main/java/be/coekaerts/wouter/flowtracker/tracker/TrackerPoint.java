@@ -1,5 +1,7 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import java.util.Objects;
+
 /** A position in a tracker, representing a single value being tracked, e.g. one byte or one char */
 public class TrackerPoint {
   private static final TrackerDepth depth = TrackerDepth.CONTENT_IMMUTABLE;
@@ -12,6 +14,24 @@ public class TrackerPoint {
     this.tracker = tracker;
     this.index = index;
     this.growth = growth;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof TrackerPoint)) {
+      return false;
+    }
+    TrackerPoint that = (TrackerPoint) o;
+    return index == that.index && Objects.equals(tracker, that.tracker)
+        && Objects.equals(growth, that.growth);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(tracker, index, growth);
   }
 
   /**
