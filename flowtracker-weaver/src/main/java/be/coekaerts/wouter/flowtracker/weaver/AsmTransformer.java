@@ -48,7 +48,7 @@ class AsmTransformer implements ClassFileTransformer {
       Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
       byte[] classfileBuffer) {
     try {
-      ClassAdapterFactory adapterFactory = getAdapterFactory(loader, className);
+      Transformer adapterFactory = getAdapterFactory(loader, className);
       if (adapterFactory == null) {
         return null;
       }
@@ -63,7 +63,7 @@ class AsmTransformer implements ClassFileTransformer {
       // verifying the frames
       ClassVisitor wrappedWriter = new CheckClassAdapter(new ClassVisitor(Opcodes.ASM9, writer) {});
 
-      ClassVisitor adapter = adapterFactory.createClassAdapter(className, wrappedWriter);
+      ClassVisitor adapter = adapterFactory.transform(className, wrappedWriter);
       if (className.equals("java/lang/String")) {
         adapter = new StringAdapter(adapter, config);
       }
@@ -90,13 +90,13 @@ class AsmTransformer implements ClassFileTransformer {
     if (!instrumentation.isModifiableClass(clazz)) {
       return false;
     }
-    ClassAdapterFactory transformer =
+    Transformer transformer =
         getAdapterFactory(clazz.getClassLoader(), Type.getInternalName(clazz));
     return transformer != null
-        && transformer.createClassAdapter(Type.getInternalName(clazz), null) != null;
+        && transformer.transform(Type.getInternalName(clazz), null) != null;
   }
 
-  private ClassAdapterFactory getAdapterFactory(ClassLoader classLoader, String className) {
+  private Transformer getAdapterFactory(ClassLoader classLoader, String className) {
     // don't transform classes without a name,
     // e.g. classes created at runtime through Unsafe.defineAnonymousClass
     if (className == null) {
@@ -117,17 +117,17 @@ class AsmTransformer implements ClassFileTransformer {
       return null;
     }
 
-    ClassAdapterFactory result = hookSpecTransformer;
+    Transformer result = hookSpecTransformer;
     if (shouldAnalyze(className)) {
-      result = ClassAdapterFactory.and(result, new SuspendInvocationTransformer());
+      result = Transformer.and(result, new SuspendInvocationTransformer());
       if (dumpTextPath == null || !className.startsWith(dumpTextPrefix)) {
-        result = ClassAdapterFactory.and(result, new FlowAnalyzingTransformer());
+        result = Transformer.and(result, new FlowAnalyzingTransformer());
       } else {
         // if we're dumping the text, then use RealCommentator to instrument it, so that the dumped
         // text includes comments
         FlowAnalyzingTransformer flowTransformer
             = new FlowAnalyzingTransformer(new RealCommentator(), new AnalysisListener());
-        result = ClassAdapterFactory.and(result,
+        result = Transformer.and(result,
             new DumpTextTransformer(flowTransformer, dumpTextPath));
       }
     }

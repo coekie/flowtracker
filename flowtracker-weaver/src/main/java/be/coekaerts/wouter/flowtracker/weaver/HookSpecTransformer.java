@@ -14,7 +14,7 @@ import java.util.Map;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Type;
 
-class HookSpecTransformer implements ClassAdapterFactory {
+class HookSpecTransformer implements Transformer {
   private final Map<String, ClassHookSpec> specs = new HashMap<>();
 
   HookSpecTransformer() {
@@ -165,8 +165,8 @@ class HookSpecTransformer implements ClassAdapterFactory {
 //  }
 
   @Override
-  public ClassVisitor createClassAdapter(String className, ClassVisitor cv) {
+  public ClassVisitor transform(String className, ClassVisitor cv) {
     ClassHookSpec spec = getSpec(className);
-    return spec == null ? cv : spec.createClassAdapter(className, cv);
+    return spec == null ? cv : spec.transform(className, cv);
   }
 }

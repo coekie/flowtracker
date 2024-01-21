@@ -98,7 +98,7 @@ public class FlowAnalyzerTest {
   // template for a test case that can be used with output of FlowMethodAdapter.dumpAsm, to test
   // analysis/transformation of extracted bytecode.
   @Test public void testAsm() {
-    ClassVisitor classVisitor = new FlowAnalyzingTransformer().createClassAdapter(
+    ClassVisitor classVisitor = new FlowAnalyzingTransformer().transform(
         "java/Example", new ClassWriter(0));
     classVisitor.visit(0, 0, "java/Example", null, null, null);
     {
@@ -132,7 +132,7 @@ public class FlowAnalyzerTest {
 
     ClassVisitor transformer =
         new FlowAnalyzingTransformer(new Commentator(), listener)
-            .createClassAdapter(Type.getInternalName(o.getClass()), new ClassWriter(0));
+            .transform(Type.getInternalName(o.getClass()), new ClassWriter(0));
 
     try {
       new ClassReader(className)

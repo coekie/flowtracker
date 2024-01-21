@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.debug;
 
-import be.coekaerts.wouter.flowtracker.weaver.ClassAdapterFactory;
+import be.coekaerts.wouter.flowtracker.weaver.Transformer;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,17 +10,17 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.util.TraceClassVisitor;
 
 /** Dumps instrumented code in text format. Enabled using the dumpText option */
-public class DumpTextTransformer implements ClassAdapterFactory {
-  private final ClassAdapterFactory delegate;
+public class DumpTextTransformer implements Transformer {
+  private final Transformer delegate;
   private final File dumpTextPath;
 
-  public DumpTextTransformer(ClassAdapterFactory delegate, File dumpTextPath) {
+  public DumpTextTransformer(Transformer delegate, File dumpTextPath) {
     this.delegate = delegate;
     this.dumpTextPath = dumpTextPath;
   }
 
   @Override
-  public ClassVisitor createClassAdapter(String className, ClassVisitor cv) {
+  public ClassVisitor transform(String className, ClassVisitor cv) {
     try {
       String fileName = className.replaceAll("[/.$]", "_") + ".asm";
       FileOutputStream out = new FileOutputStream(new File(dumpTextPath, fileName));
@@ -33,7 +33,7 @@ public class DumpTextTransformer implements ClassAdapterFactory {
           pw.close();
         }
       };
-      return delegate.createClassAdapter(className, closingVisitor);
+      return delegate.transform(className, closingVisitor);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

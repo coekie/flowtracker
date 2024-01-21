@@ -3,7 +3,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import static be.coekaerts.wouter.flowtracker.weaver.flow.InvocationArgStore.shouldInstrumentInvocationArg;
 
 import be.coekaerts.wouter.flowtracker.util.Logger;
-import be.coekaerts.wouter.flowtracker.weaver.ClassAdapterFactory;
+import be.coekaerts.wouter.flowtracker.weaver.Transformer;
 import be.coekaerts.wouter.flowtracker.weaver.Types;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -24,7 +24,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
-public class FlowAnalyzingTransformer implements ClassAdapterFactory {
+public class FlowAnalyzingTransformer implements Transformer {
   private static final Logger logger = new Logger("AsmTransformer");
 
   private final Commentator commentator;
@@ -223,7 +223,7 @@ public class FlowAnalyzingTransformer implements ClassAdapterFactory {
     }
   }
 
-  public ClassVisitor createClassAdapter(String className, ClassVisitor cv) {
+  public ClassVisitor transform(String className, ClassVisitor cv) {
     return new FlowClassAdapter(className, cv);
   }
 

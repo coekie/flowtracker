@@ -918,7 +918,7 @@ public class FlowAnalyzingTransformerTest {
         new MethodPrintingClassVisitor(new CheckClassAdapter(classWriter), classInternalName);
     ClassVisitor transformingVisitor =
         new FlowAnalyzingTransformer(new RealCommentator(), new AnalysisListener())
-            .createClassAdapter(classInternalName, afterVisitor);
+            .transform(classInternalName, afterVisitor);
     // writes out original bytecode to text
     MethodPrintingClassVisitor beforeVisitor =
         new MethodPrintingClassVisitor(transformingVisitor, classInternalName);

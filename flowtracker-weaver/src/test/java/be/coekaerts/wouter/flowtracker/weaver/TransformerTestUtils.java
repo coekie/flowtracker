@@ -20,7 +20,7 @@ class TransformerTestUtils {
   /**
    * Transform the class with the transformer, invoke its constructor and {@link Runnable#run()}
    */
-  static void transformAndRun(ClassAdapterFactory transformer, Type className,
+  static void transformAndRun(Transformer transformer, Type className,
       Object... constructArgs)
       throws ReflectiveOperationException {
     Class<?> clazz = transformClass(transformer, className);
@@ -30,7 +30,7 @@ class TransformerTestUtils {
     ((Runnable) instance).run();
   }
 
-  private static Class<?> transformClass(ClassAdapterFactory transformer, Type classType) {
+  private static Class<?> transformClass(Transformer transformer, Type classType) {
     String suffix = "2"; // transformed class named className + suffix
 
     ClassWriter classWriter = new ClassWriter(0);
@@ -45,7 +45,7 @@ class TransformerTestUtils {
     TraceClassVisitor afterVisitor =
         new TraceClassVisitor(new CheckClassAdapter(classWriter), afterPrintWriter);
     ClassVisitor transformingVisitor =
-        transformer.createClassAdapter(classType.getInternalName(), afterVisitor);
+        transformer.transform(classType.getInternalName(), afterVisitor);
     // writes out original bytecode to text
     TraceClassVisitor beforeVisitor =
         new TraceClassVisitor(transformingVisitor, beforePrintWriter);

@@ -3,15 +3,14 @@ package be.coekaerts.wouter.flowtracker.weaver;
 import org.objectweb.asm.ClassVisitor;
 
 /** Creates adapters by wrapping a {@link ClassVisitor} */
-public interface ClassAdapterFactory {
+public interface Transformer {
   /** Wrap the given {@link ClassVisitor} in an adapter. */
-  ClassVisitor createClassAdapter(String className, ClassVisitor cv);
+  ClassVisitor transform(String className, ClassVisitor cv);
 
   /** Combine two ClassAdapterFactories */
-  static ClassAdapterFactory and(ClassAdapterFactory first, ClassAdapterFactory andThen) {
+  static Transformer and(Transformer first, Transformer andThen) {
     if (first == null) return andThen;
     if (andThen == null) return first;
-    return (className, cv) -> andThen.createClassAdapter(className,
-        first.createClassAdapter(className, cv));
+    return (className, cv) -> andThen.transform(className, first.transform(className, cv));
   }
 }

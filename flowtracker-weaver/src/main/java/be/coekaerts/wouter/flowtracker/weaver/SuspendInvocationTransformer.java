@@ -12,7 +12,7 @@ import org.objectweb.asm.commons.Method;
  *
  * @see Invocation#suspend()
  */
-class SuspendInvocationTransformer implements ClassAdapterFactory {
+class SuspendInvocationTransformer implements Transformer {
   private final boolean applyToAllForTesting;
 
   SuspendInvocationTransformer() {
@@ -24,7 +24,7 @@ class SuspendInvocationTransformer implements ClassAdapterFactory {
   }
 
   @Override
-  public ClassVisitor createClassAdapter(String className, ClassVisitor cv) {
+  public ClassVisitor transform(String className, ClassVisitor cv) {
     return new SuspendInvocationClassVisitor(className, cv);
   }
 

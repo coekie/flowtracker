@@ -10,7 +10,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
-class ClassHookSpec implements ClassAdapterFactory {
+class ClassHookSpec implements Transformer {
   private static final Logger logger = new Logger("ClassHookSpec");
 
   private class HookClassAdapter extends ClassVisitor {
@@ -57,7 +57,7 @@ class ClassHookSpec implements ClassAdapterFactory {
     return this;
   }
 
-  public ClassVisitor createClassAdapter(String className, ClassVisitor cv) {
+  public ClassVisitor transform(String className, ClassVisitor cv) {
     return new HookClassAdapter(cv);
   }
 
