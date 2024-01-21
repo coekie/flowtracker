@@ -51,7 +51,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
     //   (see e.g. how SourceInterpreter only uses type.getSize())
     switch (type.getSort()) {
       case Type.VOID:
-        return null;
+        return UntrackableValue.VOID_VALUE;
       case Type.BOOLEAN:
       case Type.CHAR:
       case Type.BYTE:
@@ -174,6 +174,14 @@ class FlowInterpreter extends Interpreter<FlowValue> {
 
   @Override
   public void returnOperation(AbstractInsnNode insn, FlowValue value, FlowValue expected) {
+  }
+
+  @Override
+  public FlowValue newReturnTypeValue(Type type) {
+    if (type.getSort() == Type.VOID) {
+      return null;
+    }
+    return super.newReturnTypeValue(type);
   }
 
   @Override

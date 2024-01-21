@@ -31,6 +31,9 @@ class UntrackableValue extends FlowValue {
   /** An object or array reference value. */
   static final FlowValue REFERENCE_VALUE = new UntrackableValue(Types.OBJECT);
 
+  /** A void value (?!?), used at least for representing return address for JSR instructions */
+  static final FlowValue VOID_VALUE = new UntrackableValue(Type.VOID_TYPE);
+
   UntrackableValue(Type type) {
     super(type);
   }

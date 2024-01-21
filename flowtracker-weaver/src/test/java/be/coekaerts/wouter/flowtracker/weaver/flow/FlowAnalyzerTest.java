@@ -3,8 +3,12 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.ICONST_1;
 import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.JSR;
+import static org.objectweb.asm.Opcodes.RET;
+import static org.objectweb.asm.Opcodes.RETURN;
 
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.AnalysisListener;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
@@ -15,10 +19,12 @@ import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.Frame;
+
 
 public class FlowAnalyzerTest {
   @Test
@@ -98,7 +104,8 @@ public class FlowAnalyzerTest {
   // template for a test case that can be used with output of FlowMethodAdapter.dumpAsm, to test
   // analysis/transformation of extracted bytecode.
   @Test public void testAsm() {
-    ClassVisitor classVisitor = new FlowAnalyzingTransformer().transform(
+    TestAnalysisListener listener = new TestAnalysisListener();
+    ClassVisitor classVisitor = new FlowAnalyzingTransformer(listener).transform(
         "java/Example", new ClassWriter(0));
     classVisitor.visit(0, 0, "java/Example", null, null, null);
     {
@@ -110,6 +117,34 @@ public class FlowAnalyzerTest {
       methodVisitor.visitMaxs(1, 1);
       methodVisitor.visitEnd();
     }
+    listener.checkSuccess();
+  }
+
+  // basic (not really produced by a compiler) example using old JSR instruction.
+  // JSR is only used by code compiled for older java versions.
+  @Test public void testJsr() {
+    TestAnalysisListener listener = new TestAnalysisListener();
+    ClassVisitor classVisitor = new FlowAnalyzingTransformer(listener).transform(
+        "java/Example", new ClassWriter(0));
+    classVisitor.visit(0, 0, "java/Example", null, null, null);
+    {
+      MethodVisitor methodVisitor =
+          classVisitor.visitMethod(ACC_PRIVATE, "example", "()V", null, null);
+      methodVisitor.visitCode();
+
+      Label label = new Label();
+      methodVisitor.visitJumpInsn(JSR, label);
+      methodVisitor.visitInsn(RETURN);
+
+      methodVisitor.visitLabel(label);
+      methodVisitor.visitVarInsn(ASTORE, 1);
+      methodVisitor.visitVarInsn(RET, 1);
+
+      methodVisitor.visitMaxs(2, 2);
+      methodVisitor.visitEnd();
+    }
+
+    listener.checkSuccess();
   }
 
   static <T extends FlowValue> T getReturnValue(Class<T> clazz, Object o) {
@@ -131,7 +166,7 @@ public class FlowAnalyzerTest {
     TestAnalysisListener listener = new TestAnalysisListener();
 
     ClassVisitor transformer =
-        new FlowAnalyzingTransformer(new Commentator(), listener)
+        new FlowAnalyzingTransformer(listener)
             .transform(Type.getInternalName(o.getClass()), new ClassWriter(0));
 
     try {
@@ -147,6 +182,7 @@ public class FlowAnalyzerTest {
   static class TestAnalysisListener extends AnalysisListener {
     Frame<FlowValue>[] frames;
     List<Store> stores;
+    Throwable error;
 
     @Override
     void analysed(FlowMethodAdapter flowMethodAdapter, Frame<FlowValue>[] frames,
@@ -156,6 +192,20 @@ public class FlowAnalyzerTest {
       }
       this.frames = frames;
       this.stores = stores;
+    }
+
+    @Override
+    void error(Throwable t) {
+      error = t;
+    }
+
+    void checkSuccess() {
+      if (error != null) {
+        throw new AssertionError("Analysis failed", error);
+      }
+      if (frames == null || stores == null) {
+        throw new AssertionError("Analysis did not succeed");
+      }
     }
   }
 }

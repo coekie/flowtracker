@@ -40,6 +40,11 @@ public class FlowAnalyzingTransformer implements Transformer {
     this.listener = listener;
   }
 
+  public FlowAnalyzingTransformer(AnalysisListener listener) {
+    this.commentator = new Commentator(); // noop Commentator
+    this.listener = listener;
+  }
+
   private class FlowClassAdapter extends ClassVisitor {
     private final String className;
 
@@ -103,6 +108,7 @@ public class FlowAnalyzingTransformer implements Transformer {
         // tip: to debug, using dumpAsm() here can be useful. (but not outputting that automatically
         // because it's very verbose).
         logger.error(e, "Exception analyzing " + owner + " " + name + " " + desc);
+        listener.error(e);
         this.accept(TransparentLocalVariablesSorter.bypass(varSorter));
         return;
       }
@@ -230,6 +236,9 @@ public class FlowAnalyzingTransformer implements Transformer {
   public static class AnalysisListener {
     void analysed(FlowMethodAdapter flowMethodAdapter, Frame<FlowValue>[] frames,
         List<Store> stores) {
+    }
+
+    void error(Throwable t) {
     }
   }
 }
