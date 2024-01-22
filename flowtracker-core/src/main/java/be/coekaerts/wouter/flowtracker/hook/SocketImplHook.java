@@ -38,4 +38,8 @@ public class SocketImplHook {
   public static void afterTryRead(int read, FileDescriptor fd, byte[] buf, int offset) {
     FileInputStreamHook.afterReadByteArrayOffset(read, fd, buf, offset);
   }
+
+  public static void afterTryWrite(int written, FileDescriptor fd, byte[] buf, int off) {
+    FileOutputStreamHook.afterWriteByteArrayOffset(fd, buf, off, written);
+  }
 }

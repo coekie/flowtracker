@@ -5,6 +5,12 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.junit.Test;
 
+/**
+ * Test descriptor / registration in FileDescriptorTrackerRepository for sockets.
+ *
+ * @see SocketInputStreamTest
+ * @see SocketOutputStreamTest
+ */
 public class SocketTest {
   @Test public void testClient() throws IOException {
     try (SocketTester tester = SocketTester.createConnected()) {

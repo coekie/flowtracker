@@ -45,7 +45,8 @@ public class SocketInputStreamTest extends AbstractInputStreamTest {
   @Override
   Tracker getStreamTracker(InputStream is) {
     try {
-      assertSame(tester.client.getInputStream(), is);
+      assertSame("this test only supports the one InputStream",
+          tester.client.getInputStream(), is);
       return SocketTester.getReadTracker(tester.client);
     } catch (IOException e) {
       throw new RuntimeException(e);

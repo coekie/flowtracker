@@ -12,8 +12,6 @@ import java.io.FileDescriptor;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class FileOutputStreamHook {
-  private static final String WRITE1_SIGNATURE = Invocation.signature("write", "(I)V");
-
   public static void afterInit(FileDescriptor fd, File file) {
     if (Trackers.isActive()) {
       FileDescriptorTrackerRepository.createTracker(fd,
