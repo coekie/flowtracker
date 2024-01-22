@@ -120,8 +120,8 @@ class HookSpecTransformer implements Transformer {
     specs.put("sun/nio/ch/IOUtil", ioUtilSpec);
 
     // JDK 17+
-    ClassHookSpec nioSocketImplSpec = new ClassHookSpec(Type.getType("Lsun/nio/ch/NioSocketImpl;"),
-        SocketImplHook.class);
+    ClassHookSpec nioSocketImplSpec =
+        new ClassHookSpec(Type.getType("Lsun/nio/ch/NioSocketImpl;"), SocketImplHook.class);
     HookArgument socketImplFd = HookSpec.field(Type.getType("Ljava/net/SocketImpl;"), "fd",
         Type.getType("Ljava/io/FileDescriptor;"));
     HookArgument socketImplLocalport = HookSpec.field(Type.getType("Ljava/net/SocketImpl;"),
@@ -130,15 +130,23 @@ class HookSpecTransformer implements Transformer {
         "void connect(java.net.SocketAddress,int)",
         "void afterConnect(java.io.FileDescriptor,java.net.SocketAddress,int)",
         socketImplFd, HookSpec.ARG0, socketImplLocalport);
+    nioSocketImplSpec.addMethodHookSpec(
+        "void accept(java.net.SocketImpl)",
+        "void afterAccept(java.net.SocketImpl,int)",
+        HookSpec.ARG0, socketImplLocalport);
     specs.put("sun/nio/ch/NioSocketImpl", nioSocketImplSpec);
 
     // JDK 11
-    ClassHookSpec apSocketImplSpec = new ClassHookSpec(Type.getType("Ljava/net/AbstractPlainSocketImpl;"),
-        SocketImplHook.class);
+    ClassHookSpec apSocketImplSpec =
+        new ClassHookSpec(Type.getType("Ljava/net/AbstractPlainSocketImpl;"), SocketImplHook.class);
     apSocketImplSpec.addMethodHookSpec(
         "void connect(java.net.SocketAddress,int)",
         "void afterConnect(java.io.FileDescriptor,java.net.SocketAddress,int)",
         socketImplFd, HookSpec.ARG0, socketImplLocalport);
+    apSocketImplSpec.addMethodHookSpec(
+        "void accept(java.net.SocketImpl)",
+        "void afterAccept(java.net.SocketImpl,int)",
+        HookSpec.ARG0, socketImplLocalport);
     specs.put("java/net/AbstractPlainSocketImpl", apSocketImplSpec);
 
     ClassHookSpec inflaterInputStreamSpec = new ClassHookSpec(

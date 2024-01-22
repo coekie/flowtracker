@@ -26,4 +26,9 @@ public class Reflection {
     long offset = unsafe.objectFieldOffset(f);
     return unsafe.getObject(o, offset);
   }
+
+  public static int getInt(Object o, Field f) {
+    long offset = unsafe.objectFieldOffset(f);
+    return unsafe.getInt(o, offset);
+  }
 }
