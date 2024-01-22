@@ -6,6 +6,7 @@ import be.coekaerts.wouter.flowtracker.hook.FileOutputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.IOUtilHook;
 import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
+import be.coekaerts.wouter.flowtracker.hook.SocketImplHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
 import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
@@ -117,6 +118,28 @@ class HookSpecTransformer implements Transformer {
           HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
     }
     specs.put("sun/nio/ch/IOUtil", ioUtilSpec);
+
+    // JDK 17+
+    ClassHookSpec nioSocketImplSpec = new ClassHookSpec(Type.getType("Lsun/nio/ch/NioSocketImpl;"),
+        SocketImplHook.class);
+    HookArgument socketImplFd = HookSpec.field(Type.getType("Ljava/net/SocketImpl;"), "fd",
+        Type.getType("Ljava/io/FileDescriptor;"));
+    HookArgument socketImplLocalport = HookSpec.field(Type.getType("Ljava/net/SocketImpl;"),
+        "localport", Type.INT_TYPE);
+    nioSocketImplSpec.addMethodHookSpec(
+        "void connect(java.net.SocketAddress,int)",
+        "void afterConnect(java.io.FileDescriptor,java.net.SocketAddress,int)",
+        socketImplFd, HookSpec.ARG0, socketImplLocalport);
+    specs.put("sun/nio/ch/NioSocketImpl", nioSocketImplSpec);
+
+    // JDK 11
+    ClassHookSpec apSocketImplSpec = new ClassHookSpec(Type.getType("Ljava/net/AbstractPlainSocketImpl;"),
+        SocketImplHook.class);
+    apSocketImplSpec.addMethodHookSpec(
+        "void connect(java.net.SocketAddress,int)",
+        "void afterConnect(java.io.FileDescriptor,java.net.SocketAddress,int)",
+        socketImplFd, HookSpec.ARG0, socketImplLocalport);
+    specs.put("java/net/AbstractPlainSocketImpl", apSocketImplSpec);
 
     ClassHookSpec inflaterInputStreamSpec = new ClassHookSpec(
         Type.getType("Ljava/util/zip/InflaterInputStream;"), InflaterInputStreamHook.class);

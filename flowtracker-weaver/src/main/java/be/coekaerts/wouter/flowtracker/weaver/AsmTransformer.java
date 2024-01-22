@@ -134,25 +134,32 @@ class AsmTransformer implements ClassFileTransformer {
     return result;
   }
 
+  private String outerName(String className) {
+    int index = className.indexOf('$');
+    return index == -1 ? className : className.substring(0, index);
+  }
+
   private boolean shouldAnalyze(String className) {
-    if (className.equals("java/util/Arrays")
-        || className.startsWith("java/lang/String") // String and friends like StringLatin1
-        || className.equals("java/lang/AbstractStringBuilder")
-        || className.equals("java/lang/StringBuilder")
-        || className.equals("java/lang/StringBuffer")
-        || className.equals("java/io/BufferedWriter")
-        || className.equals("java/io/BufferedOutputStream")
-        || className.equals("java/io/ByteArrayInputStream")
-        || className.equals("java/io/ByteArrayOutputStream")
-        || className.equals("java/io/InputStreamReader")
-        || className.equals("java/io/OutputStreamWriter")
-        || className.equals("java/nio/HeapCharBuffer")
-        || className.equals("sun/nio/cs/UTF_8$Encoder")
-        || className.equals("sun/nio/cs/UTF_8$Decoder")
-        || className.equals("sun/nio/cs/StreamDecoder")
-        || className.equals("sun/nio/cs/StreamEncoder")
-        || className.equals("java/lang/ClassLoader")
-        || className.startsWith("com/sun/org/apache/xerces")
+    String outerName = outerName(className);
+
+    if (outerName.equals("java/util/Arrays")
+        || outerName.startsWith("java/lang/String") // String and friends like StringLatin1
+        || outerName.equals("java/lang/AbstractStringBuilder")
+        || outerName.equals("java/lang/StringBuilder")
+        || outerName.equals("java/lang/StringBuffer")
+        || outerName.equals("java/io/BufferedWriter")
+        || outerName.equals("java/io/BufferedOutputStream")
+        || outerName.equals("java/io/ByteArrayInputStream")
+        || outerName.equals("java/io/ByteArrayOutputStream")
+        || outerName.equals("java/io/InputStreamReader")
+        || outerName.equals("java/io/OutputStreamWriter")
+        || outerName.equals("java/nio/HeapCharBuffer")
+        || outerName.equals("sun/nio/cs/UTF_8")
+        || outerName.equals("sun/nio/cs/StreamDecoder")
+        || outerName.equals("sun/nio/cs/StreamEncoder")
+        || outerName.equals("sun/nio/ch/NioSocketImpl")
+        || outerName.equals("java/lang/ClassLoader")
+        || outerName.startsWith("com/sun/org/apache/xerces")
     ) {
       return true;
     }
