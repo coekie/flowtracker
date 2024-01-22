@@ -5,6 +5,7 @@ import be.coekaerts.wouter.flowtracker.hook.FileInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.FileOutputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.IOUtilHook;
 import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
+import be.coekaerts.wouter.flowtracker.hook.NetSocketInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
 import be.coekaerts.wouter.flowtracker.hook.SocketImplHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
@@ -134,6 +135,10 @@ class HookSpecTransformer implements Transformer {
         "void accept(java.net.SocketImpl)",
         "void afterAccept(java.net.SocketImpl,int)",
         HookSpec.ARG0, socketImplLocalport);
+    nioSocketImplSpec.addMethodHookSpec(
+        "int tryRead(java.io.FileDescriptor,byte[],int,int)",
+        "void afterTryRead(int,java.io.FileDescriptor,byte[],int)",
+        HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
     specs.put("sun/nio/ch/NioSocketImpl", nioSocketImplSpec);
 
     // JDK 11
@@ -148,6 +153,16 @@ class HookSpecTransformer implements Transformer {
         "void afterAccept(java.net.SocketImpl,int)",
         HookSpec.ARG0, socketImplLocalport);
     specs.put("java/net/AbstractPlainSocketImpl", apSocketImplSpec);
+
+    // JDK 11
+    ClassHookSpec netSocketInputStreamSpec =
+        new ClassHookSpec(Type.getType("Ljava/net/SocketInputStream;"),
+            NetSocketInputStreamHook.class);
+    netSocketInputStreamSpec.addMethodHookSpec(
+        "int socketRead(java.io.FileDescriptor,byte[],int,int,int)",
+        "void afterSocketRead(int,java.io.FileDescriptor,byte[],int)",
+        HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+    specs.put("java/net/SocketInputStream", netSocketInputStreamSpec);
 
     ClassHookSpec inflaterInputStreamSpec = new ClassHookSpec(
         Type.getType("Ljava/util/zip/InflaterInputStream;"), InflaterInputStreamHook.class);

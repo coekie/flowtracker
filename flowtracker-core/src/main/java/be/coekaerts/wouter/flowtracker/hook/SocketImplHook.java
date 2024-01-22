@@ -34,4 +34,8 @@ public class SocketImplHook {
           "Server socket to " + localport + " from " + address + ":" + port, true, true);
     }
   }
+
+  public static void afterTryRead(int read, FileDescriptor fd, byte[] buf, int offset) {
+    FileInputStreamHook.afterReadByteArrayOffset(read, fd, buf, offset);
+  }
 }

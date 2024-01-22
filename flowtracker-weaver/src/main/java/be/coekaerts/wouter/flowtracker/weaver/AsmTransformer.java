@@ -158,6 +158,8 @@ class AsmTransformer implements ClassFileTransformer {
         || outerName.equals("sun/nio/cs/StreamDecoder")
         || outerName.equals("sun/nio/cs/StreamEncoder")
         || outerName.equals("sun/nio/ch/NioSocketImpl")
+        || outerName.equals("java/net/SocketInputStream") // JDK 11
+        || outerName.equals("java/net/Socket")
         || outerName.equals("java/lang/ClassLoader")
         || outerName.startsWith("com/sun/org/apache/xerces")
     ) {
