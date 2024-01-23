@@ -23,9 +23,9 @@ class SocketTester implements Closeable {
   }
 
   static SocketTester createConnected() {
-    try (ServerSocket serverSocket = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
-      Socket client = new Socket(serverSocket.getInetAddress(), serverSocket.getLocalPort());
-      Socket server = serverSocket.accept();
+    try (ServerSocket listenSocket = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
+      Socket client = new Socket(listenSocket.getInetAddress(), listenSocket.getLocalPort());
+      Socket server = listenSocket.accept();
       return new SocketTester(server, client);
     } catch (IOException e) {
       throw new RuntimeException(e);

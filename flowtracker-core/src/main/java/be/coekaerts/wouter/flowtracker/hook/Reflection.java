@@ -12,6 +12,14 @@ import sun.misc.Unsafe;
 public class Reflection {
   private static final Unsafe unsafe = Unsafe.getUnsafe();
 
+  public static Field getDeclaredField(String className, String name) {
+    try {
+      return getDeclaredField(Class.forName(className, false, null), name);
+    } catch (ClassNotFoundException e) {
+      throw new Error("Cannot find " + className, e);
+    }
+  }
+
   public static Field getDeclaredField(Class<?> clazz, String name) {
     try {
       return clazz.getDeclaredField(name);

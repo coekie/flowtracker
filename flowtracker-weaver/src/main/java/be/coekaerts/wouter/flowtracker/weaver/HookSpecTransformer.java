@@ -8,6 +8,7 @@ import be.coekaerts.wouter.flowtracker.hook.InflaterInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.NetSocketInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.NetSocketOutputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.OutputStreamWriterHook;
+import be.coekaerts.wouter.flowtracker.hook.SocketChannelImplHook;
 import be.coekaerts.wouter.flowtracker.hook.SocketImplHook;
 import be.coekaerts.wouter.flowtracker.hook.URLConnectionHook;
 import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
@@ -21,6 +22,8 @@ class HookSpecTransformer implements Transformer {
   private final Map<String, ClassHookSpec> specs = new HashMap<>();
 
   HookSpecTransformer() {
+    int version = jdkVersion();
+
     ClassHookSpec outputStreamWriterSpec = new ClassHookSpec(
         Type.getType("Ljava/io/OutputStreamWriter;"), OutputStreamWriterHook.class);
     outputStreamWriterSpec.addMethodHookSpec("void <init>(java.io.OutputStream)",
@@ -179,6 +182,33 @@ class HookSpecTransformer implements Transformer {
         HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
     specs.put("java/net/SocketOutputStream", netSocketOutputStreamSpec);
 
+    ClassHookSpec socketChannelImplSpec =
+        new ClassHookSpec(Type.getType("Lsun/nio/ch/SocketChannelImpl;"),
+            SocketChannelImplHook.class);
+    HookArgument socketChannelImplFd = HookSpec.field(
+        Type.getType("Lsun/nio/ch/SocketChannelImpl;"), "fd",
+        Type.getType("Ljava/io/FileDescriptor;"));
+    socketChannelImplSpec.addMethodHookSpec(
+        "boolean connect(java.net.SocketAddress)",
+        "void afterConnect(boolean,java.nio.channels.SocketChannel,java.io.FileDescriptor)",
+        HookSpec.THIS, socketChannelImplFd);
+    specs.put("sun/nio/ch/SocketChannelImpl", socketChannelImplSpec);
+
+    ClassHookSpec serverSocketChannelImplSpec =
+        new ClassHookSpec(Type.getType("Lsun/nio/ch/ServerSocketChannelImpl;"),
+            SocketChannelImplHook.class);
+    if (version > 11) {
+      serverSocketChannelImplSpec.addMethodHookSpec(
+          "java.nio.channels.SocketChannel finishAccept(java.io.FileDescriptor,java.net.SocketAddress)",
+          "void afterFinishAccept(java.nio.channels.SocketChannel,java.io.FileDescriptor)",
+          HookSpec.ARG0);
+    } else {
+      serverSocketChannelImplSpec.addMethodHookSpec(
+          "java.nio.channels.SocketChannel accept()",
+          "void afterAccept(java.nio.channels.SocketChannel)");
+    }
+    specs.put("sun/nio/ch/ServerSocketChannelImpl", serverSocketChannelImplSpec);
+
     ClassHookSpec inflaterInputStreamSpec = new ClassHookSpec(
         Type.getType("Ljava/util/zip/InflaterInputStream;"), InflaterInputStreamHook.class);
     inflaterInputStreamSpec.addMethodHookSpec(
@@ -229,5 +259,10 @@ class HookSpecTransformer implements Transformer {
   public ClassVisitor transform(String className, ClassVisitor cv) {
     ClassHookSpec spec = getSpec(className);
     return spec == null ? cv : spec.transform(className, cv);
+  }
+
+  private static int jdkVersion() {
+    String version = System.getProperty("java.version");
+    return Integer.parseInt(version.substring(0, version.indexOf('.')));
   }
 }
