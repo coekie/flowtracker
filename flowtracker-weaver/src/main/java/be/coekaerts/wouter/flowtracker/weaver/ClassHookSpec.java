@@ -39,6 +39,10 @@ class ClassHookSpec implements Transformer {
 
   private final Map<Method, HookSpec> methodHookSpecs = new HashMap<>();
 
+  ClassHookSpec(String targetClass, Class<?> hookClass) {
+    this(Type.getObjectType(targetClass), hookClass);
+  }
+
   ClassHookSpec(Type targetClass, Class<?> hookClass) {
     this.targetClass = targetClass;
     this.hookClass = hookClass;

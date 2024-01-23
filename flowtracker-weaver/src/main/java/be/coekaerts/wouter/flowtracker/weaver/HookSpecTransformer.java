@@ -1,5 +1,12 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG0;
+import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG1;
+import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG2;
+import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG3;
+import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.INVOCATION;
+import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.THIS;
+
 import be.coekaerts.wouter.flowtracker.hook.FileChannelImplHook;
 import be.coekaerts.wouter.flowtracker.hook.FileInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.FileOutputStreamHook;
@@ -22,111 +29,110 @@ class HookSpecTransformer implements Transformer {
   private final Map<String, ClassHookSpec> specs = new HashMap<>();
 
   HookSpecTransformer() {
-    int version = jdkVersion();
+    int version = Runtime.version().feature();
 
     ClassHookSpec outputStreamWriterSpec = new ClassHookSpec(
-        Type.getType("Ljava/io/OutputStreamWriter;"), OutputStreamWriterHook.class);
+        "java/io/OutputStreamWriter", OutputStreamWriterHook.class);
     outputStreamWriterSpec.addMethodHookSpec("void <init>(java.io.OutputStream)",
         "void afterInit(java.io.OutputStreamWriter,java.io.OutputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
+        THIS, ARG0);
     outputStreamWriterSpec.addMethodHookSpec("void <init>(java.io.OutputStream,java.lang.String)",
         "void afterInit(java.io.OutputStreamWriter,java.io.OutputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
+        THIS, ARG0);
     outputStreamWriterSpec.addMethodHookSpec(
         "void <init>(java.io.OutputStream,java.nio.charset.Charset)",
         "void afterInit(java.io.OutputStreamWriter,java.io.OutputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
+        THIS, ARG0);
     outputStreamWriterSpec.addMethodHookSpec(
         "void <init>(java.io.OutputStream,java.nio.charset.CharsetEncoder)",
         "void afterInit(java.io.OutputStreamWriter,java.io.OutputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
+        THIS, ARG0);
     outputStreamWriterSpec.addMethodHookSpec("void write(int)",
-        "void afterWrite1(java.io.OutputStreamWriter, int)", HookSpec.THIS, HookSpec.ARG0);
+        "void afterWrite1(java.io.OutputStreamWriter, int)", THIS, ARG0);
     outputStreamWriterSpec.addMethodHookSpec("void write(char[],int,int)",
         "void afterWriteCharArrayOffset(java.io.OutputStreamWriter,char[],int,int)",
-        HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+        THIS, ARG0, ARG1, ARG2);
     outputStreamWriterSpec.addMethodHookSpec("void write(java.lang.String,int,int)",
         "void afterWriteStringOffset(java.io.OutputStreamWriter,java.lang.String,int,int)",
-        HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
-    specs.put("java/io/OutputStreamWriter", outputStreamWriterSpec);
+        THIS, ARG0, ARG1, ARG2);
+    register(outputStreamWriterSpec);
 
-    ClassHookSpec fileInputStreamSpec = new ClassHookSpec(Type.getType("Ljava/io/FileInputStream;"),
-        FileInputStreamHook.class);
+    ClassHookSpec fileInputStreamSpec = new ClassHookSpec(
+        "java/io/FileInputStream", FileInputStreamHook.class);
     HookArgument fileInputStreamFd = HookSpec.field(Type.getType("Ljava/io/FileInputStream;"), "fd",
         Type.getType("Ljava/io/FileDescriptor;"));
     fileInputStreamSpec.addMethodHookSpec("void <init>(java.io.File)",
-        "void afterInit(java.io.FileDescriptor,java.io.File)", fileInputStreamFd, HookSpec.ARG0);
+        "void afterInit(java.io.FileDescriptor,java.io.File)", fileInputStreamFd, ARG0);
     fileInputStreamSpec.addMethodHookSpec("int read()",
         "void afterRead1(int,java.io.FileDescriptor,be.coekaerts.wouter.flowtracker.tracker.Invocation)",
-        fileInputStreamFd, HookSpec.INVOCATION);
+        fileInputStreamFd, INVOCATION);
     fileInputStreamSpec.addMethodHookSpec("int read(byte[])",
         "void afterReadByteArray(int,java.io.FileDescriptor,byte[])",
-        fileInputStreamFd, HookSpec.ARG0);
+        fileInputStreamFd, ARG0);
     fileInputStreamSpec.addMethodHookSpec("int read(byte[],int,int)",
         "void afterReadByteArrayOffset(int,java.io.FileDescriptor,byte[],int)",
-        fileInputStreamFd, HookSpec.ARG0, HookSpec.ARG1);
-    specs.put("java/io/FileInputStream", fileInputStreamSpec);
+        fileInputStreamFd, ARG0, ARG1);
+    register(fileInputStreamSpec);
 
-    ClassHookSpec fileOutputStreamSpec =
-        new ClassHookSpec(Type.getType("Ljava/io/FileOutputStream;"), FileOutputStreamHook.class);
+    ClassHookSpec fileOutputStreamSpec = new ClassHookSpec(
+        "java/io/FileOutputStream", FileOutputStreamHook.class);
     HookArgument fileOutputStreamFd = HookSpec.field(Type.getType("Ljava/io/FileOutputStream;"),
         "fd", Type.getType("Ljava/io/FileDescriptor;"));
     fileOutputStreamSpec.addMethodHookSpec("void <init>(java.io.File,boolean)",
-        "void afterInit(java.io.FileDescriptor,java.io.File)", fileOutputStreamFd, HookSpec.ARG0);
+        "void afterInit(java.io.FileDescriptor,java.io.File)", fileOutputStreamFd, ARG0);
     fileOutputStreamSpec.addMethodHookSpec("void write(int)",
         "void afterWrite1(java.io.FileDescriptor,int,be.coekaerts.wouter.flowtracker.tracker.Invocation)",
-        fileOutputStreamFd, HookSpec.ARG0, HookSpec.INVOCATION);
+        fileOutputStreamFd, ARG0, INVOCATION);
     fileOutputStreamSpec.addMethodHookSpec("void write(byte[])",
         "void afterWriteByteArray(java.io.FileDescriptor,byte[])",
-        fileOutputStreamFd, HookSpec.ARG0);
+        fileOutputStreamFd, ARG0);
     fileOutputStreamSpec.addMethodHookSpec("void write(byte[],int,int)",
         "void afterWriteByteArrayOffset(java.io.FileDescriptor,byte[],int,int)",
-        fileOutputStreamFd, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
-    specs.put("java/io/FileOutputStream", fileOutputStreamSpec);
+        fileOutputStreamFd, ARG0, ARG1, ARG2);
+    register(fileOutputStreamSpec);
 
-    ClassHookSpec fileChannelSpec = new ClassHookSpec(Type.getType("Lsun/nio/ch/FileChannelImpl;"),
-        FileChannelImplHook.class);
+    ClassHookSpec fileChannelSpec = new ClassHookSpec(
+        "sun/nio/ch/FileChannelImpl", FileChannelImplHook.class);
     HookArgument fileChannelFd = HookSpec.field(Type.getType("Lsun/nio/ch/FileChannelImpl;"), "fd",
         Type.getType("Ljava/io/FileDescriptor;"));
     // for JDK<=17
     fileChannelSpec.addMethodHookSpec("void <init>(java.io.FileDescriptor,java.lang.String,"
             + "boolean,boolean,boolean,java.lang.Object)",
         "void afterInit(java.io.FileDescriptor,java.lang.String,boolean,boolean)",
-        fileChannelFd, HookSpec.ARG1, HookSpec.ARG2, HookSpec.ARG3);
+        fileChannelFd, ARG1, ARG2, ARG3);
     // for JDK>=21
     fileChannelSpec.addMethodHookSpec("void <init>(java.io.FileDescriptor,java.lang.String,"
             + "boolean,boolean,boolean,java.io.Closeable)",
         "void afterInit(java.io.FileDescriptor,java.lang.String,boolean,boolean)",
-        fileChannelFd, HookSpec.ARG1, HookSpec.ARG2, HookSpec.ARG3);
-    specs.put("sun/nio/ch/FileChannelImpl", fileChannelSpec);
+        fileChannelFd, ARG1, ARG2, ARG3);
+    register(fileChannelSpec);
 
-    ClassHookSpec ioUtilSpec = new ClassHookSpec(Type.getType("Lsun/nio/ch/IOUtil;"),
-        IOUtilHook.class);
+    ClassHookSpec ioUtilSpec = new ClassHookSpec("sun/nio/ch/IOUtil", IOUtilHook.class);
     // between JDK 11 and 17 an extra argument "async" was added
-    if (Runtime.version().feature() >= 17) {
+    if (version >= 17) {
       ioUtilSpec.addMethodHookSpec("int read(java.io.FileDescriptor,java.nio.ByteBuffer,long,"
               + "boolean,boolean,int,sun.nio.ch.NativeDispatcher)",
           "void afterReadByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
-          HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+          ARG0, ARG1, ARG2);
       ioUtilSpec.addMethodHookSpec("int write(java.io.FileDescriptor,java.nio.ByteBuffer,long,"
               + "boolean,boolean,int,sun.nio.ch.NativeDispatcher)",
           "void afterWriteByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
-          HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+          ARG0, ARG1, ARG2);
     } else {
       ioUtilSpec.addMethodHookSpec("int read(java.io.FileDescriptor,java.nio.ByteBuffer,long,"
               + "boolean,int,sun.nio.ch.NativeDispatcher)",
           "void afterReadByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
-          HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+          ARG0, ARG1, ARG2);
       ioUtilSpec.addMethodHookSpec("int write(java.io.FileDescriptor,java.nio.ByteBuffer,long,"
               + "boolean,int,sun.nio.ch.NativeDispatcher)",
           "void afterWriteByteBuffer(int,java.io.FileDescriptor,java.nio.ByteBuffer,long)",
-          HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+          ARG0, ARG1, ARG2);
     }
-    specs.put("sun/nio/ch/IOUtil", ioUtilSpec);
+    register(ioUtilSpec);
 
     // JDK 17+
     ClassHookSpec nioSocketImplSpec =
-        new ClassHookSpec(Type.getType("Lsun/nio/ch/NioSocketImpl;"), SocketImplHook.class);
+        new ClassHookSpec("sun/nio/ch/NioSocketImpl", SocketImplHook.class);
     HookArgument socketImplFd = HookSpec.field(Type.getType("Ljava/net/SocketImpl;"), "fd",
         Type.getType("Ljava/io/FileDescriptor;"));
     HookArgument socketImplLocalport = HookSpec.field(Type.getType("Ljava/net/SocketImpl;"),
@@ -134,101 +140,101 @@ class HookSpecTransformer implements Transformer {
     nioSocketImplSpec.addMethodHookSpec(
         "void connect(java.net.SocketAddress,int)",
         "void afterConnect(java.io.FileDescriptor,java.net.SocketAddress,int)",
-        socketImplFd, HookSpec.ARG0, socketImplLocalport);
+        socketImplFd, ARG0, socketImplLocalport);
     nioSocketImplSpec.addMethodHookSpec(
         "void accept(java.net.SocketImpl)",
         "void afterAccept(java.net.SocketImpl,int)",
-        HookSpec.ARG0, socketImplLocalport);
+        ARG0, socketImplLocalport);
     nioSocketImplSpec.addMethodHookSpec(
         "int tryRead(java.io.FileDescriptor,byte[],int,int)",
         "void afterTryRead(int,java.io.FileDescriptor,byte[],int)",
-        HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
+        ARG0, ARG1, ARG2);
     nioSocketImplSpec.addMethodHookSpec(
         "int tryWrite(java.io.FileDescriptor,byte[],int,int)",
         "void afterTryWrite(int,java.io.FileDescriptor,byte[],int)",
-        HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
-    specs.put("sun/nio/ch/NioSocketImpl", nioSocketImplSpec);
+        ARG0, ARG1, ARG2);
+    register(nioSocketImplSpec);
 
     // JDK 11
     ClassHookSpec apSocketImplSpec =
-        new ClassHookSpec(Type.getType("Ljava/net/AbstractPlainSocketImpl;"), SocketImplHook.class);
+        new ClassHookSpec("java/net/AbstractPlainSocketImpl", SocketImplHook.class);
     apSocketImplSpec.addMethodHookSpec(
         "void connect(java.net.SocketAddress,int)",
         "void afterConnect(java.io.FileDescriptor,java.net.SocketAddress,int)",
-        socketImplFd, HookSpec.ARG0, socketImplLocalport);
+        socketImplFd, ARG0, socketImplLocalport);
     apSocketImplSpec.addMethodHookSpec(
         "void accept(java.net.SocketImpl)",
         "void afterAccept(java.net.SocketImpl,int)",
-        HookSpec.ARG0, socketImplLocalport);
-    specs.put("java/net/AbstractPlainSocketImpl", apSocketImplSpec);
+        ARG0, socketImplLocalport);
+    register(apSocketImplSpec);
 
     // JDK 11
     ClassHookSpec netSocketInputStreamSpec =
-        new ClassHookSpec(Type.getType("Ljava/net/SocketInputStream;"),
-            NetSocketInputStreamHook.class);
+        new ClassHookSpec("java/net/SocketInputStream", NetSocketInputStreamHook.class);
     netSocketInputStreamSpec.addMethodHookSpec(
         "int socketRead(java.io.FileDescriptor,byte[],int,int,int)",
         "void afterSocketRead(int,java.io.FileDescriptor,byte[],int)",
-        HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
-    specs.put("java/net/SocketInputStream", netSocketInputStreamSpec);
+        ARG0, ARG1, ARG2);
+    register(netSocketInputStreamSpec);
 
     // JDK 11
-    ClassHookSpec netSocketOutputStreamSpec =
-        new ClassHookSpec(Type.getType("Ljava/net/SocketOutputStream;"),
-            NetSocketOutputStreamHook.class);
+    ClassHookSpec netSocketOutputStreamSpec = new ClassHookSpec(
+        "java/net/SocketOutputStream", NetSocketOutputStreamHook.class);
     netSocketOutputStreamSpec.addMethodHookSpec(
         "void socketWrite(byte[],int,int)",
         "void afterSocketWrite(java.io.FileOutputStream,byte[],int,int)",
-        HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1, HookSpec.ARG2);
-    specs.put("java/net/SocketOutputStream", netSocketOutputStreamSpec);
+        THIS, ARG0, ARG1, ARG2);
+    register(netSocketOutputStreamSpec);
 
-    ClassHookSpec socketChannelImplSpec =
-        new ClassHookSpec(Type.getType("Lsun/nio/ch/SocketChannelImpl;"),
-            SocketChannelImplHook.class);
+    ClassHookSpec socketChannelImplSpec = new ClassHookSpec(
+        "sun/nio/ch/SocketChannelImpl", SocketChannelImplHook.class);
     HookArgument socketChannelImplFd = HookSpec.field(
         Type.getType("Lsun/nio/ch/SocketChannelImpl;"), "fd",
         Type.getType("Ljava/io/FileDescriptor;"));
     socketChannelImplSpec.addMethodHookSpec(
         "boolean connect(java.net.SocketAddress)",
         "void afterConnect(boolean,java.nio.channels.SocketChannel,java.io.FileDescriptor)",
-        HookSpec.THIS, socketChannelImplFd);
-    specs.put("sun/nio/ch/SocketChannelImpl", socketChannelImplSpec);
+        THIS, socketChannelImplFd);
+    register(socketChannelImplSpec);
 
-    ClassHookSpec serverSocketChannelImplSpec =
-        new ClassHookSpec(Type.getType("Lsun/nio/ch/ServerSocketChannelImpl;"),
-            SocketChannelImplHook.class);
+    ClassHookSpec serverSocketChannelImplSpec = new ClassHookSpec(
+        "sun/nio/ch/ServerSocketChannelImpl", SocketChannelImplHook.class);
     if (version > 11) {
       serverSocketChannelImplSpec.addMethodHookSpec(
           "java.nio.channels.SocketChannel finishAccept(java.io.FileDescriptor,java.net.SocketAddress)",
           "void afterFinishAccept(java.nio.channels.SocketChannel,java.io.FileDescriptor)",
-          HookSpec.ARG0);
+          ARG0);
     } else {
       serverSocketChannelImplSpec.addMethodHookSpec(
           "java.nio.channels.SocketChannel accept()",
           "void afterAccept(java.nio.channels.SocketChannel)");
     }
-    specs.put("sun/nio/ch/ServerSocketChannelImpl", serverSocketChannelImplSpec);
+    register(serverSocketChannelImplSpec);
 
     ClassHookSpec inflaterInputStreamSpec = new ClassHookSpec(
-        Type.getType("Ljava/util/zip/InflaterInputStream;"), InflaterInputStreamHook.class);
+        "java/util/zip/InflaterInputStream", InflaterInputStreamHook.class);
     inflaterInputStreamSpec.addMethodHookSpec(
         "void <init>(java.io.InputStream,java.util.zip.Inflater,int)",
         "void afterInit(java.util.zip.InflaterInputStream,java.io.InputStream)",
-        HookSpec.THIS, HookSpec.ARG0);
+        THIS, ARG0);
     inflaterInputStreamSpec.addMethodHookSpec("int read(byte[],int,int)",
         "void afterReadByteArrayOffset(int,java.util.zip.InflaterInputStream,byte[],int)",
-        HookSpec.THIS, HookSpec.ARG0, HookSpec.ARG1);
+        THIS, ARG0, ARG1);
     inflaterInputStreamSpec.addMethodHookSpec("int read()",
         "void afterRead1(int,java.util.zip.InflaterInputStream,be.coekaerts.wouter.flowtracker.tracker.Invocation)",
-        HookSpec.THIS, HookSpec.INVOCATION);
-    specs.put("java/util/zip/InflaterInputStream", inflaterInputStreamSpec);
+        THIS, INVOCATION);
+    register(inflaterInputStreamSpec);
 
     ClassHookSpec zipFileSpec = new ClassHookSpec(
-        Type.getType("Ljava/util/zip/ZipFile;"), ZipFileHook.class);
+        "java/util/zip/ZipFile", ZipFileHook.class);
     zipFileSpec.addMethodHookSpec("java.io.InputStream getInputStream(java.util.zip.ZipEntry)",
         "void afterGetInputStream(java.io.InputStream,java.util.zip.ZipFile,java.util.zip.ZipEntry)",
-        HookSpec.THIS, HookSpec.ARG0);
-    specs.put("java/util/zip/ZipFile", zipFileSpec);
+        THIS, ARG0);
+    register(zipFileSpec);
+  }
+
+  private void register(ClassHookSpec spec) {
+    specs.put(spec.getTargetClass().getInternalName(), spec);
   }
 
   private ClassHookSpec getSpec(String className) {
@@ -240,16 +246,15 @@ class HookSpecTransformer implements Transformer {
 
   private ClassHookSpec urlConnectionHook(String urlConnectionSubclass) {
     ClassHookSpec spec = new ClassHookSpec(
-        Type.getType('L' + urlConnectionSubclass.replace('.', '/') + ';'), URLConnectionHook.class);
+        urlConnectionSubclass.replace('.', '/'), URLConnectionHook.class);
     spec.addMethodHookSpec("java.io.InputStream getInputStream()",
-        "void afterGetInputStream(java.io.InputStream,java.net.URLConnection)", HookSpec.THIS);
+        "void afterGetInputStream(java.io.InputStream,java.net.URLConnection)", THIS);
     return spec;
   }
 
   // not used yet, see CharsetEncoderTest
 //  private ClassHookSpec charsetEncoderSpec() {
-//    return new ClassHookSpec(Type.getType("Ljava/nio/charset/CharsetEncoder;"),
-//            CharsetEncoderHook.class)
+//    return new ClassHookSpec("java/nio/charset/CharsetEncoder", CharsetEncoderHook.class)
 //        .addMethodHookSpec(
 //            "java.nio.charset.CoderResult encode(java.nio.CharBuffer,java.nio.ByteBuffer,boolean)",
 //            "void afterEncode(int,int,java.nio.CharBuffer,java.nio.ByteBuffer)", ...);
@@ -259,10 +264,5 @@ class HookSpecTransformer implements Transformer {
   public ClassVisitor transform(String className, ClassVisitor cv) {
     ClassHookSpec spec = getSpec(className);
     return spec == null ? cv : spec.transform(className, cv);
-  }
-
-  private static int jdkVersion() {
-    String version = System.getProperty("java.version");
-    return Integer.parseInt(version.substring(0, version.indexOf('.')));
   }
 }

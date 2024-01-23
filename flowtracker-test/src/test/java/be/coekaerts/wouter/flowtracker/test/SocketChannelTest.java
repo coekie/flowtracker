@@ -71,7 +71,7 @@ public class SocketChannelTest extends AbstractChannelTest<SocketChannel> {
   }
 
   @Override
-  SocketChannel openForWrite() throws IOException {
+  SocketChannel openForWrite() {
     return client;
   }
 
