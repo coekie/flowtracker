@@ -158,7 +158,7 @@ public class HookSpec {
         for (HookArgumentInstance argumentInstance : argumentInstances) {
           argumentInstance.load(this);
         }
-        invokeStatic(Type.getType(hookClass), getHookMethod());
+        invokeStatic(hookClass, hookMethod);
       }
     }
 
@@ -171,24 +171,19 @@ public class HookSpec {
 
   private final Type targetClass;
   private final Method targetMethod;
-  private final Class<?> hookClass;
+  private final Type hookClass;
   private final HookArgument[] hookArguments;
   private final Method hookMethod;
   private final Type[] cacheTargetMethodArgumentTypes;
 
   HookSpec(Type targetClass, Method targetMethod,
-      Class<?> hookClass, Method hookMethod, HookArgument... hookArguments) {
-    super();
+      Type hookClass, Method hookMethod, HookArgument... hookArguments) {
     this.targetClass = targetClass;
     this.targetMethod = targetMethod;
     this.hookClass = hookClass;
     this.hookMethod = hookMethod;
     this.hookArguments = hookArguments;
     this.cacheTargetMethodArgumentTypes = targetMethod.getArgumentTypes();
-  }
-
-  private Method getHookMethod() {
-    return hookMethod;
   }
 
   MethodVisitor createMethodAdapter(MethodVisitor mv, int access, String name, String desc) {

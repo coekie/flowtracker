@@ -1,5 +1,7 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
+import be.coekaerts.wouter.flowtracker.annotation.Arg;
+import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import java.io.FileDescriptor;
 
 /**
@@ -7,7 +9,11 @@ import java.io.FileDescriptor;
  */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class NetSocketInputStreamHook {
-  public static void afterSocketRead(int read, FileDescriptor fd, byte[] buf, int offset) {
+  @Hook(target = "java.net.SocketInputStream",
+      condition = "version < 17",
+      method = "int socketRead(java.io.FileDescriptor,byte[],int,int,int)")
+  public static void afterSocketRead(int read, @Arg("ARG0") FileDescriptor fd,
+      @Arg("ARG1") byte[] buf, @Arg("ARG2") int offset) {
     FileInputStreamHook.afterReadByteArrayOffset(read, fd, buf, offset);
   }
 }

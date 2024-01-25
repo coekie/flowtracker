@@ -1,5 +1,7 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
+import be.coekaerts.wouter.flowtracker.annotation.Arg;
+import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Invocation;
@@ -11,7 +13,11 @@ import java.io.FileDescriptor;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class FileInputStreamHook {
-  public static void afterInit(FileDescriptor fd, File file) {
+
+  @Hook(target = "java.io.FileInputStream",
+      method = "void <init>(java.io.File)")
+  public static void afterInit(@Arg("FileInputStream_fd") FileDescriptor fd,
+      @Arg("ARG0") File file) {
     if (Trackers.isActive()) {
       FileDescriptorTrackerRepository.createTracker(fd,
           "FileInputStream for " + file.getAbsolutePath(),
@@ -21,7 +27,10 @@ public class FileInputStreamHook {
 
   // note: there is no hook for the constructor that takes a FileDescriptor
 
-  public static void afterRead1(int result, FileDescriptor fd, Invocation invocation) {
+  @Hook(target = "java.io.FileInputStream",
+      method = "int read()")
+  public static void afterRead1(int result, @Arg("FileInputStream_fd") FileDescriptor fd,
+      @Arg("INVOCATION") Invocation invocation) {
     if (result > 0) {
       ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
       if (tracker != null) {
@@ -31,7 +40,10 @@ public class FileInputStreamHook {
     }
   }
 
-  public static void afterReadByteArray(int read, FileDescriptor fd, byte[] buf) {
+  @Hook(target = "java.io.FileInputStream",
+      method = "int read(byte[])")
+  public static void afterReadByteArray(int read, @Arg("FileInputStream_fd") FileDescriptor fd,
+      @Arg("ARG0") byte[] buf) {
     if (read > 0) {
       ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
       if (tracker != null) {
@@ -41,8 +53,11 @@ public class FileInputStreamHook {
     }
   }
 
-  public static void afterReadByteArrayOffset(int read, FileDescriptor fd, byte[] buf,
-      int offset) {
+  @Hook(target = "java.io.FileInputStream",
+      method = "int read(byte[],int,int)")
+  public static void afterReadByteArrayOffset(int read,
+      @Arg("FileInputStream_fd") FileDescriptor fd, @Arg("ARG0") byte[] buf,
+      @Arg("ARG1") int offset) {
     if (read > 0) {
       ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
       if (tracker != null) {

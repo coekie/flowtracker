@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
 
 public class HookSpecTest {
   public static StringBuilder log;
@@ -25,18 +26,20 @@ public class HookSpecTest {
 
   @Test
   public void test() throws ReflectiveOperationException {
-    transformAndRun(new ClassHookSpec(Type.getType(Foo.class), MyHook.class)
-        .addMethodHookSpec("void bar(int)",
-        "void afterBar(java.lang.Object,int)", HookSpec.THIS, HookSpec.ARG0));
+    ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(Foo.class));
+    transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void bar(int)"),
+        Type.getType(MyHook.class), Method.getMethod("void afterBar(java.lang.Object,int)"),
+        HookSpec.THIS, HookSpec.ARG0));
     assertEquals("bar 5\n"
         + "afterBar Foo2 5\n", log.toString());
   }
 
   @Test
   public void testReturnValue() throws ReflectiveOperationException {
-    transformAndRun(new ClassHookSpec(Type.getType(WithReturnValue.class), MyHook.class)
-        .addMethodHookSpec("String withReturnValue(int)",
-            "void afterWithReturnValue(java.lang.String,int)", HookSpec.ARG0));
+    ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(WithReturnValue.class));
+    transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("String withReturnValue(int)"),
+        Type.getType(MyHook.class),
+        Method.getMethod("void afterWithReturnValue(java.lang.String,int)"), HookSpec.ARG0));
     assertEquals("withReturnValue 5\n"
         + "afterWithReturnValue retVal 5\n", log.toString());
   }
@@ -50,9 +53,11 @@ public class HookSpecTest {
       }
     };
 
-    transformAndRun(new ClassHookSpec(Type.getType(HookedWithOnEnter.class), MyHook.class)
-        .addMethodHookSpec("void withOnEnter(java.lang.String)",
-            "void afterWithOnEnter(java.lang.String,java.lang.String)",
+    ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(HookedWithOnEnter.class));
+    transformAndRun(
+        classHookSpec.addMethodHookSpec(Method.getMethod("void withOnEnter(java.lang.String)"),
+            Type.getType(MyHook.class),
+            Method.getMethod("void afterWithOnEnter(java.lang.String,java.lang.String)"),
             arg0OnEnter, HookSpec.ARG0));
     assertEquals("withOnEnter originalArg 2\n"
         + "afterWithOnEnter originalArg updatedArg\n", log.toString());
@@ -62,21 +67,22 @@ public class HookSpecTest {
   public void testInvocation() throws ReflectiveOperationException {
     Invocation.calling("withInvocation ()V")
         .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777));
-    transformAndRun(new ClassHookSpec(Type.getType(HookedWithInvocation.class), MyHook.class)
-        .addMethodHookSpec("void withInvocation()",
-            "void afterWithInvocation(be.coekaerts.wouter.flowtracker.tracker.Invocation)",
-            HookSpec.INVOCATION));
+    ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(HookedWithInvocation.class));
+    transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void withInvocation()"),
+        Type.getType(MyHook.class), Method.getMethod(
+            "void afterWithInvocation(be.coekaerts.wouter.flowtracker.tracker.Invocation)"),
+        HookSpec.INVOCATION));
     assertEquals("withInvocation\n"
         + "afterWithInvocation 777\n", log.toString());
   }
 
   @Test
   public void testField() throws ReflectiveOperationException {
-    transformAndRun(new ClassHookSpec(Type.getType(WithField.class), MyHook.class)
-        .addMethodHookSpec("void withField()",
-            "void afterWithField(int)",
-            HookSpec.field(Type.getType("Lbe/coekaerts/wouter/flowtracker/weaver/WithField2;"),
-                "i", Type.getType(int.class))));
+    ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(WithField.class));
+    HookArgument[] hookArguments = new HookArgument[]{HookSpec.field(Type.getType("Lbe/coekaerts/wouter/flowtracker/weaver/WithField2;"),
+        "i", Type.getType(int.class))};
+    transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void withField()"),
+        Type.getType(MyHook.class), Method.getMethod("void afterWithField(int)"), hookArguments));
     assertEquals("afterWithField 10\n", log.toString());
   }
 

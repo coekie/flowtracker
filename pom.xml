@@ -23,6 +23,7 @@
   <modules>
     <module>flowtracker-agent</module>
     <module>flowtracker-core</module>
+    <module>flowtracker-generator</module>
     <module>flowtracker-weaver</module>
     <module>flowtracker-web</module>
     <module>flowtracker-test</module>

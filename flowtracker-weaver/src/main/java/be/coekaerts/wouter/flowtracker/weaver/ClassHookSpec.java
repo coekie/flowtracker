@@ -35,25 +35,13 @@ class ClassHookSpec implements Transformer {
   }
 
   private final Type targetClass;
-  private final Class<?> hookClass;
-
   private final Map<Method, HookSpec> methodHookSpecs = new HashMap<>();
 
-  ClassHookSpec(String targetClass, Class<?> hookClass) {
-    this(Type.getObjectType(targetClass), hookClass);
-  }
-
-  ClassHookSpec(Type targetClass, Class<?> hookClass) {
+  ClassHookSpec(Type targetClass) {
     this.targetClass = targetClass;
-    this.hookClass = hookClass;
   }
 
-  ClassHookSpec addMethodHookSpec(String targetMethod, String hookMethod,
-      HookArgument... hookArguments) {
-    return addMethodHookSpec(Method.getMethod(targetMethod), Method.getMethod(hookMethod), hookArguments);
-  }
-
-  ClassHookSpec addMethodHookSpec(Method targetMethod, Method hookMethod,
+  ClassHookSpec addMethodHookSpec(Method targetMethod, Type hookClass, Method hookMethod,
       HookArgument... hookArguments) {
     HookSpec hookSpec =
         new HookSpec(targetClass, targetMethod, hookClass, hookMethod, hookArguments);

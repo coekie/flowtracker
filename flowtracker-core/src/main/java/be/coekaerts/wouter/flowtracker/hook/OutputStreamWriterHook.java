@@ -1,5 +1,7 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
+import be.coekaerts.wouter.flowtracker.annotation.Arg;
+import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
@@ -14,8 +16,16 @@ import java.io.OutputStreamWriter;
  */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class OutputStreamWriterHook {
-
-  public static void afterInit(OutputStreamWriter target, OutputStream stream) {
+  @Hook(target = "java.io.OutputStreamWriter",
+      method = "void <init>(java.io.OutputStream)")
+  @Hook(target = "java.io.OutputStreamWriter",
+      method = "void <init>(java.io.OutputStream,java.lang.String)")
+  @Hook(target = "java.io.OutputStreamWriter",
+      method = "void <init>(java.io.OutputStream,java.nio.charset.Charset)")
+  @Hook(target = "java.io.OutputStreamWriter",
+      method = "void <init>(java.io.OutputStream,java.nio.charset.CharsetEncoder)")
+  public static void afterInit(@Arg("THIS") OutputStreamWriter target,
+      @Arg("ARG0") OutputStream stream) {
     if (Trackers.isActive()) {
       createOutputStreamWriterTracker(target).initDescriptor("OutputStreamWriter",
           TrackerRepository.getTracker(stream));
@@ -28,7 +38,9 @@ public class OutputStreamWriterHook {
     return tracker;
   }
 
-  public static void afterWrite1(OutputStreamWriter target, int c) {
+  @Hook(target = "java.io.OutputStreamWriter",
+      method = "void write(int)")
+  public static void afterWrite1(@Arg("THIS") OutputStreamWriter target, @Arg("ARG0") int c) {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
       ((CharSinkTracker) tracker).append((char) c);
@@ -36,8 +48,10 @@ public class OutputStreamWriterHook {
     }
   }
 
-  public static void afterWriteCharArrayOffset(OutputStreamWriter target, char[] cbuf, int off,
-      int len) {
+  @Hook(target = "java.io.OutputStreamWriter",
+      method = "void write(char[],int,int)")
+  public static void afterWriteCharArrayOffset(@Arg("THIS") OutputStreamWriter target,
+      @Arg("ARG0") char[] cbuf, @Arg("ARG1") int off, @Arg("ARG2") int len) {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
       Tracker sourceTracker = TrackerRepository.getTracker(cbuf);
@@ -48,8 +62,10 @@ public class OutputStreamWriterHook {
     }
   }
 
-  public static void afterWriteStringOffset(OutputStreamWriter target, String str, int off,
-      int len) {
+  @Hook(target = "java.io.OutputStreamWriter",
+      method = "void write(java.lang.String,int,int)")
+  public static void afterWriteStringOffset(@Arg("THIS") OutputStreamWriter target,
+      @Arg("ARG0") String str, @Arg("ARG1") int off, @Arg("ARG2") int len) {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
       Tracker sourceTracker = StringHook.getStringTracker(str);

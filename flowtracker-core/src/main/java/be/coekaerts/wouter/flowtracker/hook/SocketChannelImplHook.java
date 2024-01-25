@@ -1,5 +1,7 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
+import be.coekaerts.wouter.flowtracker.annotation.Arg;
+import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
@@ -16,7 +18,10 @@ public class SocketChannelImplHook {
   private static final Field fdField =
       Reflection.getDeclaredField("sun.nio.ch.SocketChannelImpl", "fd");
 
-  public static void afterConnect(boolean result, SocketChannel channel, FileDescriptor fd) {
+  @Hook(target = "sun.nio.ch.SocketChannelImpl",
+      method = "boolean connect(java.net.SocketAddress)")
+  public static void afterConnect(boolean result, @Arg("THIS") SocketChannel channel,
+      @Arg("SocketChannelImpl_fd") FileDescriptor fd) {
     if (Trackers.isActive()) {
       SocketAddress remoteAddress =
           (SocketAddress) Reflection.getFieldValue(channel, remoteAddressField);
@@ -27,8 +32,10 @@ public class SocketChannelImplHook {
     }
   }
 
-  // this actually hooks a method in ServerSocketChannelImpl
-  public static void afterFinishAccept(SocketChannel channel, FileDescriptor fd) {
+  @Hook(target = "sun.nio.ch.ServerSocketChannelImpl", // not SocketChannelImpl
+      condition = "version > 11",
+      method = "java.nio.channels.SocketChannel finishAccept(java.io.FileDescriptor,java.net.SocketAddress)")
+  public static void afterFinishAccept(SocketChannel channel, @Arg("ARG0") FileDescriptor fd) {
     if (Trackers.isActive()) {
       SocketAddress remoteAddress =
           (SocketAddress) Reflection.getFieldValue(channel, remoteAddressField);
@@ -39,8 +46,9 @@ public class SocketChannelImplHook {
     }
   }
 
-  // this actually hooks a method in ServerSocketChannelImpl
-  // for JDK 11
+  @Hook(target = "sun.nio.ch.ServerSocketChannelImpl", // not SocketChannelImpl
+      condition = "version <= 11",
+      method = "java.nio.channels.SocketChannel accept()")
   public static void afterAccept(SocketChannel channel) {
     if (Trackers.isActive()) {
       SocketAddress remoteAddress =

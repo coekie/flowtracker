@@ -41,7 +41,7 @@ class AsmTransformer implements ClassFileTransformer {
         : null;
     dumpTextPrefix = config.getOrDefault("dumpTextPrefix", "");
     this.config = config;
-    hookSpecTransformer = new HookSpecTransformer();
+    hookSpecTransformer = GeneratedHookSpecs.createTransformer();
   }
 
   public byte[] transform(ClassLoader loader, String className,

@@ -1,5 +1,7 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
+import be.coekaerts.wouter.flowtracker.annotation.Arg;
+import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
@@ -18,14 +20,28 @@ public class SocketImplHook {
       = Reflection.getDeclaredField(SocketImpl.class, "address");
   private static final Field portField = Reflection.getDeclaredField(SocketImpl.class, "port");
 
-  public static void afterConnect(FileDescriptor fd, SocketAddress remote, int localport) {
+  @Hook(target = "sun.nio.ch.NioSocketImpl",
+      condition = "version >= 17",
+      method = "void connect(java.net.SocketAddress,int)")
+  @Hook(target = "java.net.AbstractPlainSocketImpl",
+      condition = "version < 17",
+      method = "void connect(java.net.SocketAddress,int)")
+  public static void afterConnect(@Arg("SocketImpl_fd") FileDescriptor fd,
+      @Arg("ARG0") SocketAddress remote, @Arg("SocketImpl_localport") int localport) {
     if (Trackers.isActive()) {
       FileDescriptorTrackerRepository.createTracker(fd,
           "Client socket to " + remote + " from " + localport, true, true);
     }
   }
 
-  public static void afterAccept(SocketImpl si, int localport) {
+  @Hook(target = "sun.nio.ch.NioSocketImpl",
+      condition = "version >= 17",
+      method = "void accept(java.net.SocketImpl)")
+  @Hook(target = "java.net.AbstractPlainSocketImpl",
+      condition = "version < 17",
+      method = "void accept(java.net.SocketImpl)")
+  public static void afterAccept(@Arg("ARG0") SocketImpl si,
+      @Arg("SocketImpl_localport") int localport) {
     if (Trackers.isActive()) {
       FileDescriptor fd = (FileDescriptor) Reflection.getFieldValue(si, fdField);
       InetAddress address = (InetAddress) Reflection.getFieldValue(si, addressField);
@@ -35,11 +51,19 @@ public class SocketImplHook {
     }
   }
 
-  public static void afterTryRead(int read, FileDescriptor fd, byte[] buf, int offset) {
+  @Hook(target = "sun.nio.ch.NioSocketImpl",
+      condition = "version >= 17",
+      method = "int tryRead(java.io.FileDescriptor,byte[],int,int)")
+  public static void afterTryRead(int read, @Arg("ARG0") FileDescriptor fd,
+      @Arg("ARG1") byte[] buf, @Arg("ARG2") int offset) {
     FileInputStreamHook.afterReadByteArrayOffset(read, fd, buf, offset);
   }
 
-  public static void afterTryWrite(int written, FileDescriptor fd, byte[] buf, int off) {
+  @Hook(target = "sun.nio.ch.NioSocketImpl",
+      condition = "version >= 17",
+      method = "int tryWrite(java.io.FileDescriptor,byte[],int,int)")
+  public static void afterTryWrite(int written, @Arg("ARG0") FileDescriptor fd,
+      @Arg("ARG1") byte[] buf, @Arg("ARG2") int off) {
     FileOutputStreamHook.afterWriteByteArrayOffset(fd, buf, off, written);
   }
 }
