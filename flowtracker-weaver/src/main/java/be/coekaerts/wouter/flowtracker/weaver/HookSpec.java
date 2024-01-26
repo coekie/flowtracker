@@ -166,8 +166,7 @@ public class HookSpec {
 
     @Override
     public void visitMaxs(int maxStack, int maxLocals) {
-      // pessimistic upper limit
-      super.visitMaxs(maxStack + hookArguments.length, maxLocals);
+      super.visitMaxs(Math.max(maxStack, hookArguments.length + 1), maxLocals);
     }
   }
 
