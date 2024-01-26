@@ -13,8 +13,8 @@ import java.util.zip.ZipFile;
 public class ZipFileHook {
   @Hook(target = "java.util.zip.ZipFile",
       method = "java.io.InputStream getInputStream(java.util.zip.ZipEntry)")
-  public static void afterGetInputStream(InputStream result, @Arg("THIS") ZipFile target,
-      @Arg("ARG0") ZipEntry zipEntry) {
+  public static void afterGetInputStream(@Arg("RETURN") InputStream result,
+      @Arg("THIS") ZipFile target, @Arg("ARG0") ZipEntry zipEntry) {
     if (Trackers.isActive()) {
       Tracker tracker = TrackerRepository.getTracker(result);
       // shouldn't be null because InflaterInputStream constructor is instrumented

@@ -38,6 +38,17 @@ public class HookSpec {
     }
   };
 
+  /** Return value. Only works as first argument; assumes the return value is on top of the stack */
+  static final HookArgument RETURN = spec -> new HookArgumentInstance() {
+    @Override public void load(GeneratorAdapter generator) {
+      generator.dup();
+    }
+
+    @Override public Type getType(HookSpec hookSpec) {
+      return spec.targetMethod.getReturnType();
+    }
+  };
+
   private static class ArgHookArgument implements HookArgumentInstance {
     private final int index;
 
@@ -129,12 +140,10 @@ public class HookSpec {
   };
 
   private class HookMethodAdapter extends AdviceAdapter {
-    private final boolean hasReturnType;
     private final List<HookArgumentInstance> argumentInstances;
 
     private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
       super(Opcodes.ASM9, mv, access, name, desc);
-      hasReturnType = desc.charAt(desc.indexOf(')') + 1) != 'V';
       argumentInstances = new ArrayList<>();
       for (var hookArgument : hookArguments) {
         argumentInstances.add(hookArgument.applyTo(HookSpec.this));
@@ -152,9 +161,6 @@ public class HookSpec {
     @Override
     protected void onMethodExit(int opcode) {
       if (opcode != ATHROW) {
-        if (hasReturnType) {
-          dup(); // copy result; one for the hook, one to return
-        }
         for (HookArgumentInstance argumentInstance : argumentInstances) {
           argumentInstance.load(this);
         }
@@ -164,8 +170,8 @@ public class HookSpec {
 
     @Override
     public void visitMaxs(int maxStack, int maxLocals) {
-      // pessimistic upper limit: we push hookArguments on the stack + optionally dup return value
-      super.visitMaxs(maxStack + hookArguments.length + (hasReturnType ? 1 : 0), maxLocals);
+      // pessimistic upper limit
+      super.visitMaxs(maxStack + hookArguments.length, maxLocals);
     }
   }
 

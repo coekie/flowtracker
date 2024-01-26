@@ -29,8 +29,8 @@ public class InflaterInputStreamHook {
 
   @Hook(target = "java.util.zip.InflaterInputStream",
       method = "int read(byte[],int,int)")
-  public static void afterReadByteArrayOffset(int read, @Arg("THIS") InflaterInputStream target,
-      @Arg("ARG0") byte[] buf, @Arg("ARG1") int offset) {
+  public static void afterReadByteArrayOffset(@Arg("RETURN") int read,
+      @Arg("THIS") InflaterInputStream target, @Arg("ARG0") byte[] buf, @Arg("ARG1") int offset) {
     if (read > 0) {
       Tracker tracker = TrackerRepository.getTracker(target);
       if (tracker != null) {
@@ -46,7 +46,7 @@ public class InflaterInputStreamHook {
   // return with the ternary operator that isn't handled by our instrumentation
   @Hook(target = "java.util.zip.InflaterInputStream",
       method = "int read()")
-  public static void afterRead1(int result, @Arg("THIS") InflaterInputStream target,
+  public static void afterRead1(@Arg("RETURN") int result, @Arg("THIS") InflaterInputStream target,
       @Arg("INVOCATION") Invocation invocation) {
     if (result > 0) {
       Tracker tracker = TrackerRepository.getTracker(target);

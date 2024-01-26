@@ -29,8 +29,8 @@ public class FileInputStreamHook {
 
   @Hook(target = "java.io.FileInputStream",
       method = "int read()")
-  public static void afterRead1(int result, @Arg("FileInputStream_fd") FileDescriptor fd,
-      @Arg("INVOCATION") Invocation invocation) {
+  public static void afterRead1(@Arg("RETURN") int result,
+      @Arg("FileInputStream_fd") FileDescriptor fd, @Arg("INVOCATION") Invocation invocation) {
     if (result > 0) {
       ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
       if (tracker != null) {
@@ -42,8 +42,8 @@ public class FileInputStreamHook {
 
   @Hook(target = "java.io.FileInputStream",
       method = "int read(byte[])")
-  public static void afterReadByteArray(int read, @Arg("FileInputStream_fd") FileDescriptor fd,
-      @Arg("ARG0") byte[] buf) {
+  public static void afterReadByteArray(@Arg("RETURN") int read,
+      @Arg("FileInputStream_fd") FileDescriptor fd, @Arg("ARG0") byte[] buf) {
     if (read > 0) {
       ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
       if (tracker != null) {
@@ -55,7 +55,7 @@ public class FileInputStreamHook {
 
   @Hook(target = "java.io.FileInputStream",
       method = "int read(byte[],int,int)")
-  public static void afterReadByteArrayOffset(int read,
+  public static void afterReadByteArrayOffset(@Arg("RETURN") int read,
       @Arg("FileInputStream_fd") FileDescriptor fd, @Arg("ARG0") byte[] buf,
       @Arg("ARG1") int offset) {
     if (read > 0) {

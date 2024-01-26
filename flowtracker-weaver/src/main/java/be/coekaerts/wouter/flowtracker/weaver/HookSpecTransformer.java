@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.RETURN;
 import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.THIS;
 
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
@@ -38,7 +39,7 @@ class HookSpecTransformer implements Transformer {
     spec.addMethodHookSpec(new Method("getInputStream", "()Ljava.io.InputStream;"),
         Type.getObjectType("be/coekaerts/wouter/flowtracker/hook/URLConnectionHook"),
         new Method("afterGetInputStream", "(Ljava/io/InputStream;Ljava/net/URLConnection;)V"),
-        THIS);
+        RETURN, THIS);
     return spec;
   }
 

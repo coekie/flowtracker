@@ -39,7 +39,8 @@ public class HookSpecTest {
     ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(WithReturnValue.class));
     transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("String withReturnValue(int)"),
         Type.getType(MyHook.class),
-        Method.getMethod("void afterWithReturnValue(java.lang.String,int)"), HookSpec.ARG0));
+        Method.getMethod("void afterWithReturnValue(java.lang.String,int)"),
+        HookSpec.RETURN, HookSpec.ARG0));
     assertEquals("withReturnValue 5\n"
         + "afterWithReturnValue retVal 5\n", log.toString());
   }

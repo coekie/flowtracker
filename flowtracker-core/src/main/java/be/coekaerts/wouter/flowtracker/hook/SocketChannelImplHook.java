@@ -20,7 +20,7 @@ public class SocketChannelImplHook {
 
   @Hook(target = "sun.nio.ch.SocketChannelImpl",
       method = "boolean connect(java.net.SocketAddress)")
-  public static void afterConnect(boolean result, @Arg("THIS") SocketChannel channel,
+  public static void afterConnect(@Arg("RETURN") boolean result, @Arg("THIS") SocketChannel channel,
       @Arg("SocketChannelImpl_fd") FileDescriptor fd) {
     if (Trackers.isActive()) {
       SocketAddress remoteAddress =
@@ -35,7 +35,8 @@ public class SocketChannelImplHook {
   @Hook(target = "sun.nio.ch.ServerSocketChannelImpl", // not SocketChannelImpl
       condition = "version > 11",
       method = "java.nio.channels.SocketChannel finishAccept(java.io.FileDescriptor,java.net.SocketAddress)")
-  public static void afterFinishAccept(SocketChannel channel, @Arg("ARG0") FileDescriptor fd) {
+  public static void afterFinishAccept(@Arg("RETURN") SocketChannel channel,
+      @Arg("ARG0") FileDescriptor fd) {
     if (Trackers.isActive()) {
       SocketAddress remoteAddress =
           (SocketAddress) Reflection.getFieldValue(channel, remoteAddressField);
@@ -49,7 +50,7 @@ public class SocketChannelImplHook {
   @Hook(target = "sun.nio.ch.ServerSocketChannelImpl", // not SocketChannelImpl
       condition = "version <= 11",
       method = "java.nio.channels.SocketChannel accept()")
-  public static void afterAccept(SocketChannel channel) {
+  public static void afterAccept(@Arg("RETURN") SocketChannel channel) {
     if (Trackers.isActive()) {
       SocketAddress remoteAddress =
           (SocketAddress) Reflection.getFieldValue(channel, remoteAddressField);

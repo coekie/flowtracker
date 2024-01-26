@@ -21,7 +21,7 @@ public class IOUtilHook {
   @Hook(target = "sun.nio.ch.IOUtil",
       condition = "version < 17",
       method = "int read(java.io.FileDescriptor,java.nio.ByteBuffer,long,boolean,int,sun.nio.ch.NativeDispatcher)")
-  public static void afterReadByteBuffer(int result, @Arg("ARG0") FileDescriptor fd,
+  public static void afterReadByteBuffer(@Arg("RETURN") int result, @Arg("ARG0") FileDescriptor fd,
       @Arg("ARG1") ByteBuffer dst, @Arg("ARG2") long position) {
     // TODO do something with position (seeking)
     ByteOriginTracker fdTracker = FileDescriptorTrackerRepository.getReadTracker(fd);
@@ -38,7 +38,7 @@ public class IOUtilHook {
   @Hook(target = "sun.nio.ch.IOUtil",
       condition = "version < 17",
       method = "int write(java.io.FileDescriptor,java.nio.ByteBuffer,long,boolean,int,sun.nio.ch.NativeDispatcher)")
-  public static void afterWriteByteBuffer(int result, @Arg("ARG0") FileDescriptor fd,
+  public static void afterWriteByteBuffer(@Arg("RETURN") int result, @Arg("ARG0") FileDescriptor fd,
       @Arg("ARG1") ByteBuffer src, @Arg("ARG2") long position) {
     // TODO do something with position (seeking)
     ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(fd);

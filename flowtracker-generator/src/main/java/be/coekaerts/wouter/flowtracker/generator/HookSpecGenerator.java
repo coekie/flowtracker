@@ -3,15 +3,14 @@ package be.coekaerts.wouter.flowtracker.generator;
 import be.coekaerts.wouter.flowtracker.annotation.Arg;
 import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -48,6 +47,7 @@ public class HookSpecGenerator {
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG2;\n"
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG3;\n"
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.INVOCATION;\n"
+        + "import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.RETURN;\n"
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.THIS;\n"
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookArgs.*;\n"
         + "\n"
@@ -96,21 +96,13 @@ public class HookSpecGenerator {
         str(hookMethod.getName()),
         str(hookMethod.getDescriptor()));
 
-    List<String> varArgs = new ArrayList<>();
-
-    int i = 0;
-    if (!annotation.method().startsWith("void ")) {
-      i++;
-    }
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-    for (; i < method.getParameterCount(); i++) {
-      Arg arg = Stream.of(parameterAnnotations[i])
-          .filter(a -> a instanceof Arg)
-          .map(a -> (Arg) a)
-          .findFirst()
-          .orElseThrow();
-      varArgs.add(arg.value());
-    }
+    List<String> varArgs = Stream.of(method.getParameterAnnotations())
+        .map(parameterAnnotation -> Stream.of(parameterAnnotation)
+            .filter(a -> a instanceof Arg)
+            .map(a -> ((Arg) a).value())
+            .findFirst()
+            .orElseThrow())
+        .collect(Collectors.toList());
 
     sb.append("    ");
     if (!annotation.condition().isEmpty()) {

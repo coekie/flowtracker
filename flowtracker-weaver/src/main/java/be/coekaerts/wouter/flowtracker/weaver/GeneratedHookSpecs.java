@@ -11,6 +11,7 @@ import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG1;
 import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG2;
 import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG3;
 import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.INVOCATION;
+import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.RETURN;
 import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.THIS;
 
 import javax.annotation.processing.Generated;
@@ -47,21 +48,21 @@ class GeneratedHookSpecs {
       "be/coekaerts/wouter/flowtracker/hook/FileInputStreamHook",
       "afterRead1",
       "(ILjava/io/FileDescriptor;Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;)V",
-      FileInputStream_fd, INVOCATION);
+      RETURN, FileInputStream_fd, INVOCATION);
     t.register("java/io/FileInputStream",
       "read",
       "([B)I",
       "be/coekaerts/wouter/flowtracker/hook/FileInputStreamHook",
       "afterReadByteArray",
       "(ILjava/io/FileDescriptor;[B)V",
-      FileInputStream_fd, ARG0);
+      RETURN, FileInputStream_fd, ARG0);
     t.register("java/io/FileInputStream",
       "read",
       "([BII)I",
       "be/coekaerts/wouter/flowtracker/hook/FileInputStreamHook",
       "afterReadByteArrayOffset",
       "(ILjava/io/FileDescriptor;[BI)V",
-      FileInputStream_fd, ARG0, ARG1);
+      RETURN, FileInputStream_fd, ARG0, ARG1);
     t.register("java/io/FileOutputStream",
       "<init>",
       "(Ljava/io/File;Z)V",
@@ -96,28 +97,28 @@ class GeneratedHookSpecs {
       "be/coekaerts/wouter/flowtracker/hook/IOUtilHook",
       "afterReadByteBuffer",
       "(ILjava/io/FileDescriptor;Ljava/nio/ByteBuffer;J)V",
-      ARG0, ARG1, ARG2);
+      RETURN, ARG0, ARG1, ARG2);
     if (version < 17) t.register("sun/nio/ch/IOUtil",
       "read",
       "(Ljava/io/FileDescriptor;Ljava/nio/ByteBuffer;JZILsun/nio/ch/NativeDispatcher;)I",
       "be/coekaerts/wouter/flowtracker/hook/IOUtilHook",
       "afterReadByteBuffer",
       "(ILjava/io/FileDescriptor;Ljava/nio/ByteBuffer;J)V",
-      ARG0, ARG1, ARG2);
+      RETURN, ARG0, ARG1, ARG2);
     if (version >= 17) t.register("sun/nio/ch/IOUtil",
       "write",
       "(Ljava/io/FileDescriptor;Ljava/nio/ByteBuffer;JZZILsun/nio/ch/NativeDispatcher;)I",
       "be/coekaerts/wouter/flowtracker/hook/IOUtilHook",
       "afterWriteByteBuffer",
       "(ILjava/io/FileDescriptor;Ljava/nio/ByteBuffer;J)V",
-      ARG0, ARG1, ARG2);
+      RETURN, ARG0, ARG1, ARG2);
     if (version < 17) t.register("sun/nio/ch/IOUtil",
       "write",
       "(Ljava/io/FileDescriptor;Ljava/nio/ByteBuffer;JZILsun/nio/ch/NativeDispatcher;)I",
       "be/coekaerts/wouter/flowtracker/hook/IOUtilHook",
       "afterWriteByteBuffer",
       "(ILjava/io/FileDescriptor;Ljava/nio/ByteBuffer;J)V",
-      ARG0, ARG1, ARG2);
+      RETURN, ARG0, ARG1, ARG2);
     t.register("java/util/zip/InflaterInputStream",
       "<init>",
       "(Ljava/io/InputStream;Ljava/util/zip/Inflater;I)V",
@@ -131,21 +132,21 @@ class GeneratedHookSpecs {
       "be/coekaerts/wouter/flowtracker/hook/InflaterInputStreamHook",
       "afterRead1",
       "(ILjava/util/zip/InflaterInputStream;Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;)V",
-      THIS, INVOCATION);
+      RETURN, THIS, INVOCATION);
     t.register("java/util/zip/InflaterInputStream",
       "read",
       "([BII)I",
       "be/coekaerts/wouter/flowtracker/hook/InflaterInputStreamHook",
       "afterReadByteArrayOffset",
       "(ILjava/util/zip/InflaterInputStream;[BI)V",
-      THIS, ARG0, ARG1);
+      RETURN, THIS, ARG0, ARG1);
     if (version < 17) t.register("java/net/SocketInputStream",
       "socketRead",
       "(Ljava/io/FileDescriptor;[BIII)I",
       "be/coekaerts/wouter/flowtracker/hook/NetSocketInputStreamHook",
       "afterSocketRead",
       "(ILjava/io/FileDescriptor;[BI)V",
-      ARG0, ARG1, ARG2);
+      RETURN, ARG0, ARG1, ARG2);
     if (version < 17) t.register("java/net/SocketOutputStream",
       "socketWrite",
       "([BII)V",
@@ -207,21 +208,22 @@ class GeneratedHookSpecs {
       "()Ljava/nio/channels/SocketChannel;",
       "be/coekaerts/wouter/flowtracker/hook/SocketChannelImplHook",
       "afterAccept",
-      "(Ljava/nio/channels/SocketChannel;)V");
+      "(Ljava/nio/channels/SocketChannel;)V",
+      RETURN);
     t.register("sun/nio/ch/SocketChannelImpl",
       "connect",
       "(Ljava/net/SocketAddress;)Z",
       "be/coekaerts/wouter/flowtracker/hook/SocketChannelImplHook",
       "afterConnect",
       "(ZLjava/nio/channels/SocketChannel;Ljava/io/FileDescriptor;)V",
-      THIS, SocketChannelImpl_fd);
+      RETURN, THIS, SocketChannelImpl_fd);
     if (version > 11) t.register("sun/nio/ch/ServerSocketChannelImpl",
       "finishAccept",
       "(Ljava/io/FileDescriptor;Ljava/net/SocketAddress;)Ljava/nio/channels/SocketChannel;",
       "be/coekaerts/wouter/flowtracker/hook/SocketChannelImplHook",
       "afterFinishAccept",
       "(Ljava/nio/channels/SocketChannel;Ljava/io/FileDescriptor;)V",
-      ARG0);
+      RETURN, ARG0);
     if (version >= 17) t.register("sun/nio/ch/NioSocketImpl",
       "accept",
       "(Ljava/net/SocketImpl;)V",
@@ -256,21 +258,21 @@ class GeneratedHookSpecs {
       "be/coekaerts/wouter/flowtracker/hook/SocketImplHook",
       "afterTryRead",
       "(ILjava/io/FileDescriptor;[BI)V",
-      ARG0, ARG1, ARG2);
+      RETURN, ARG0, ARG1, ARG2);
     if (version >= 17) t.register("sun/nio/ch/NioSocketImpl",
       "tryWrite",
       "(Ljava/io/FileDescriptor;[BII)I",
       "be/coekaerts/wouter/flowtracker/hook/SocketImplHook",
       "afterTryWrite",
       "(ILjava/io/FileDescriptor;[BI)V",
-      ARG0, ARG1, ARG2);
+      RETURN, ARG0, ARG1, ARG2);
     t.register("java/util/zip/ZipFile",
       "getInputStream",
       "(Ljava/util/zip/ZipEntry;)Ljava/io/InputStream;",
       "be/coekaerts/wouter/flowtracker/hook/ZipFileHook",
       "afterGetInputStream",
       "(Ljava/io/InputStream;Ljava/util/zip/ZipFile;Ljava/util/zip/ZipEntry;)V",
-      THIS, ARG0);
+      RETURN, THIS, ARG0);
     return t;
   }
 }

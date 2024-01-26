@@ -54,7 +54,7 @@ public class SocketImplHook {
   @Hook(target = "sun.nio.ch.NioSocketImpl",
       condition = "version >= 17",
       method = "int tryRead(java.io.FileDescriptor,byte[],int,int)")
-  public static void afterTryRead(int read, @Arg("ARG0") FileDescriptor fd,
+  public static void afterTryRead(@Arg("RETURN") int read, @Arg("ARG0") FileDescriptor fd,
       @Arg("ARG1") byte[] buf, @Arg("ARG2") int offset) {
     FileInputStreamHook.afterReadByteArrayOffset(read, fd, buf, offset);
   }
@@ -62,7 +62,7 @@ public class SocketImplHook {
   @Hook(target = "sun.nio.ch.NioSocketImpl",
       condition = "version >= 17",
       method = "int tryWrite(java.io.FileDescriptor,byte[],int,int)")
-  public static void afterTryWrite(int written, @Arg("ARG0") FileDescriptor fd,
+  public static void afterTryWrite(@Arg("RETURN") int written, @Arg("ARG0") FileDescriptor fd,
       @Arg("ARG1") byte[] buf, @Arg("ARG2") int off) {
     FileOutputStreamHook.afterWriteByteArrayOffset(fd, buf, off, written);
   }
