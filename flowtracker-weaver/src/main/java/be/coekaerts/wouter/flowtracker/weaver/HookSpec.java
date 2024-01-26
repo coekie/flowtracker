@@ -140,14 +140,10 @@ public class HookSpec {
   };
 
   private class HookMethodAdapter extends AdviceAdapter {
-    private final List<HookArgumentInstance> argumentInstances;
+    private final List<HookArgumentInstance> argumentInstances = createArgumentInstance();
 
     private HookMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
       super(Opcodes.ASM9, mv, access, name, desc);
-      argumentInstances = new ArrayList<>();
-      for (var hookArgument : hookArguments) {
-        argumentInstances.add(hookArgument.applyTo(HookSpec.this));
-      }
     }
 
     @Override
@@ -194,5 +190,61 @@ public class HookSpec {
 
   MethodVisitor createMethodAdapter(MethodVisitor mv, int access, String name, String desc) {
     return new HookMethodAdapter(mv, access, name, desc);
+  }
+
+  private List<HookArgumentInstance> createArgumentInstance() {
+    List<HookArgumentInstance> result = new ArrayList<>();
+    for (var hookArgument : hookArguments) {
+      result.add(hookArgument.applyTo(HookSpec.this));
+    }
+    return result;
+  }
+
+  /**
+   * Check if the hook method can be called with the configured arguments
+   * This is actually loading the classes, so we don't do this at runtime all the time, but only in
+   * tests.
+   */
+  void typeCheck() {
+    List<HookArgumentInstance> argumentInstances = createArgumentInstance();
+    Type[] hookArgTypes = hookMethod.getArgumentTypes();
+    if (hookArgTypes.length != argumentInstances.size()) {
+      throw new IllegalStateException("Argument count mismatch on " + this);
+    }
+    for (int i = 0; i < argumentInstances.size(); i++) {
+      Type givenType = argumentInstances.get(i).getType(this);
+      if (!canAssign(givenType, hookArgTypes[i])) {
+        throw new IllegalStateException("Cannot assign " + givenType + " to " + hookArgTypes[i]
+            + " for " + this + " arg " + i);
+      };
+    }
+  }
+
+  private boolean canAssign(Type givenType, Type requiredType) {
+    if (requiredType.equals(givenType)) {
+      return true;
+    }
+    if (requiredType.getSort() == Type.OBJECT && givenType.getSort() == Type.OBJECT) {
+      try {
+        // this is actually loading the classes. this is why we don't do this at runtime all the
+        // time, but only in tests
+        Class<?> requiredClass = Class.forName(requiredType.getClassName());
+        Class<?> givenClass = Class.forName(givenType.getClassName());
+        return requiredClass.isAssignableFrom(givenClass);
+      } catch (ClassNotFoundException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public String toString() {
+    return "HookSpec{" +
+        "targetClass=" + targetClass +
+        ", targetMethod=" + targetMethod +
+        ", hookClass=" + hookClass +
+        ", hookMethod=" + hookMethod +
+        '}';
   }
 }

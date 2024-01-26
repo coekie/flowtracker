@@ -48,4 +48,10 @@ class HookSpecTransformer implements Transformer {
     ClassHookSpec spec = getSpec(className);
     return spec == null ? cv : spec.transform(className, cv);
   }
+
+  void typeCheck() {
+    for (ClassHookSpec classHookSpec : specs.values()) {
+      classHookSpec.typeCheck();
+    }
+  }
 }

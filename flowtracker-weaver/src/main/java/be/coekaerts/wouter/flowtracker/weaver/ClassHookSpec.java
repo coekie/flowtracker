@@ -56,4 +56,10 @@ class ClassHookSpec implements Transformer {
   Type getTargetClass() {
     return targetClass;
   }
+
+  void typeCheck() {
+    for (HookSpec hookSpec : methodHookSpecs.values()) {
+      hookSpec.typeCheck();
+    }
+  }
 }
