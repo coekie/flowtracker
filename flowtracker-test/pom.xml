@@ -10,6 +10,9 @@
   </parent>
   <artifactId>flowtracker-test</artifactId>
   <name>${artifactId}</name>
+  <properties>
+    <java.version>11</java.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>be.coekaerts.wouter.flowtracker</groupId>
