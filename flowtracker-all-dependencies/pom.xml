@@ -10,7 +10,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-all-dependencies</artifactId>
-  <name>flowtracker-all-dependencies</name>
+  <name>${artifactId}</name>
 
   <dependencies>
     <dependency>

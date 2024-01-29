@@ -89,6 +89,15 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>test-all</id>
+      <modules>
+        <module>flowtracker-test-full</module>
+      </modules>
+    </profile>
+  </profiles>
+
   <prerequisites>
     <maven>3.1.0</maven>
   </prerequisites>

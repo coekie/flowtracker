@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-test-jdk21</artifactId>
-  <name>flowtracker-test-jdk21</name>
+  <name>${artifactId}</name>
   <properties>
     <java.version>21</java.version>
   </properties>

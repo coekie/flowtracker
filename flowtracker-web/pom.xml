@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-web</artifactId>
-  <name>flowtracker-web</name>
+  <name>${artifactId}</name>
   <dependencies>
     <dependency>
       <groupId>be.coekaerts.wouter.flowtracker</groupId>

@@ -8,7 +8,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>flowtracker-demo</name>
+  <name>${artifactId}</name>
   <url>http://wouter.coekaerts.be/</url>
 
   <parent>

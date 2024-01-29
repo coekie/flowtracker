@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-agent</artifactId>
-  <name>flowtracker-agent</name>
+  <name>${artifactId}</name>
 
   <dependencies>
     <dependency>
