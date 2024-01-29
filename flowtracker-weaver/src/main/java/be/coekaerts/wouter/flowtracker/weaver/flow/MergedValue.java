@@ -3,9 +3,11 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import java.util.HashSet;
 import java.util.Set;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
 
 /**
  * A value that can come from more than one source due to control flow (e.g. due to if-statements or
@@ -46,7 +48,7 @@ public class MergedValue extends FlowValue {
 
   @Override
   final void ensureTracked() {
-    if (!tracked) {
+    if (!tracked && isTrackable()) {
       tracked = true;
       insertTrackStatements();
     }
@@ -93,7 +95,11 @@ public class MergedValue extends FlowValue {
   @Override
   void loadSourcePoint(InsnList toInsert) {
     mergingFrame.getFlowMethodAdapter().addComment(toInsert, "MergedValue.loadSourcePoint");
-    toInsert.add(pointTrackerLocal.load());
+    if (isTrackable()) {
+      toInsert.add(pointTrackerLocal.load());
+    } else {
+      toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+    }
   }
 
   @Override

@@ -150,6 +150,40 @@ public class CharFlowAnalysisTest {
     snapshotBuilder().trackString(abc, 1, 1).assertTrackerOf(array);
   }
 
+  char[] chars = new char[]{FlowTester.untrackedChar('.')};
+
+  // TODO handle MergedValue coming from InvocationArgValue; doesn't work because
+  //  MergedValue.getCreationInsn is null, so MergedValue.isTrackable() is false
+  @Test public void mergeWithParamSwitch() {
+    doMergeWithParamSwitch(ft.createSourceChar('a'), 1);
+    assertNull(FlowTester.getCharSourcePoint(chars[0]));
+  }
+
+  @SuppressWarnings("all")
+  void doMergeWithParamSwitch(char c, int i) {
+    switch (i) {
+      case 2:
+        c = 'x';
+    }
+    chars[0] = c;
+  }
+
+  // see mergeWithParamSwitch. for some reason if statements and switch statements end up with
+  // different set of merges, which in tests made them behave a bit differently; so we're testing
+  // both.
+  @Test public void mergeWithParamIf() {
+    doMergeWithParamIf(ft.createSourceChar('a'), false);
+    assertNull(FlowTester.getCharSourcePoint(chars[0]));
+  }
+
+  @SuppressWarnings("all")
+  void doMergeWithParamIf(char c, boolean b) {
+    if (b) {
+      c = 'x';
+    }
+    chars[0] = c;
+  }
+
   @Test public void cast() {
     int i = ft.createSourceByte((byte) 'a');
     ft.assertIsTheTrackedValue((byte) i);
