@@ -50,7 +50,7 @@ public class WebModule {
   private static Connector createConnector(Server server) {
     ServerConnector connector = new ServerConnector(server);
     connector.setHost("127.0.0.1");
-    connector.setPort(8080);
+    connector.setPort(8011);
     return connector;
   }
 
