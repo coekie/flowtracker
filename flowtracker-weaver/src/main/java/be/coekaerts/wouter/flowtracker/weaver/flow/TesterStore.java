@@ -33,7 +33,7 @@ class TesterStore extends Store {
       methodNode.addComment(toInsert,
           "end TesterStore.insertTrackStatements. also replaced next invocation");
 
-      methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
+      methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
 
       invokeInsn.name = "$tracked_" + invokeInsn.name;
       invokeInsn.desc =

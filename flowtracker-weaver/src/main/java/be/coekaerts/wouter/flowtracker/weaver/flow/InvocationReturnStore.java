@@ -39,7 +39,7 @@ public class InvocationReturnStore extends Store {
           false));
 
       methodNode.addComment(toInsert, "end InvocationReturnStore.insertTrackStatements");
-      methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
+      methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
 
       methodNode.instructions.insertBefore(returnInsn, toInsert);
     }

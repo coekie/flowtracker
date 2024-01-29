@@ -31,7 +31,7 @@ class ArrayStore extends Store {
     storedValue.ensureTracked();
     storedValue.loadSourcePoint(toInsert);
 
-    methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
+    methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
 
     Method hook = Method.getMethod(hookMethod);
 

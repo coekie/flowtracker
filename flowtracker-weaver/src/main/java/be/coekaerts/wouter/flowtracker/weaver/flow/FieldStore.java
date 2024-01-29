@@ -41,7 +41,7 @@ class FieldStore extends Store {
     storedValue.ensureTracked();
     storedValue.loadSourcePoint(toInsert);
 
-    methodNode.maxStack = Math.max(frame.getStackSize() + 5, methodNode.maxStack);
+    methodNode.maxStack = Math.max(frame.fullStackSize() + 5, methodNode.maxStack);
 
     toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
         "be/coekaerts/wouter/flowtracker/tracker/FieldRepository", "setPoint",

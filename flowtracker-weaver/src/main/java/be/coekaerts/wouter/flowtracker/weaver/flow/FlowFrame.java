@@ -44,6 +44,15 @@ class FlowFrame extends Frame<FlowValue> {
     return analyzer.methodAdapter;
   }
 
+  /** Stack size as should be reported in byte code, counting long and double as two */
+  int fullStackSize() {
+    int stackSize = 0;
+    for (int i = 0; i < getStackSize(); ++i) {
+      stackSize += getStack(i).getSize();
+    }
+    return stackSize;
+  }
+
   @Override
   public boolean merge(Frame<? extends FlowValue> frame, Interpreter<FlowValue> interpreter)
       throws AnalyzerException {

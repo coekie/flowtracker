@@ -895,6 +895,41 @@ public class FlowAnalyzingTransformerTest {
         c -> {});
   }
 
+  // regression test for how we calculate maxStack for invocation instrumentation.
+  // longs take two stack slots!
+  @Test
+  public void invocationArgMaxStack() {
+    // not testing the result, just testing that it finishes successfully
+    testTransformClass(new Object() {
+          @SuppressWarnings("all")
+          void write(byte x, long a, long b, long c, long d) {
+            write(x, a, b, c, d);
+          }
+        }.getClass().getName(),
+        c -> {},
+        c -> {});
+  }
+
+  // regression test for how we calculate maxStack for invocation instrumentation.
+  // longs take two stack slots!
+  @Test
+  public void invocationReturnMaxStack() {
+    // not testing the result, just testing that it finishes successfully
+    testTransformClass(new Object() {
+          @SuppressWarnings("all")
+          byte go() {
+            return read(1, 2, 3);
+          }
+
+          @SuppressWarnings("all")
+          byte read(long a, long b, long c) {
+            return 0;
+          }
+        }.getClass().getName(),
+        c -> {},
+        c -> {});
+  }
+
   /**
    * Given an object of a class that contains one method, tests if the code before and after
    * transformation are as expected;

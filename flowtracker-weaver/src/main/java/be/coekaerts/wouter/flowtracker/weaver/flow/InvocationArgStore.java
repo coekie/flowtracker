@@ -82,7 +82,8 @@ public class InvocationArgStore extends Store {
     transformation.ensureInstrumented();
     transformation.insertInvocationPreparation(toInsert);
 
-    methodNode.maxStack = Math.max(frame.getStackSize() + 3, methodNode.maxStack);
+    // +3: 1 for the Invocation + 2 for loadSourcePoint
+    methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
   }
 
   private boolean anyArgIsTrackable() {

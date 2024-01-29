@@ -47,7 +47,7 @@ class FieldValue extends TrackableValue {
     toInsert.add(pointTrackerLocal.store());
 
     flowMethodAdapter.maxStack = Math.max(flowMethodAdapter.maxStack,
-        getCreationFrame().getStackSize() + 2);
+        getCreationFrame().fullStackSize() + 2);
 
     flowMethodAdapter.addComment(toInsert, "end FieldValue.insertTrackStatements");
 
