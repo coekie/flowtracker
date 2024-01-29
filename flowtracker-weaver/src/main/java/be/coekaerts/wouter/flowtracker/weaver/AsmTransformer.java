@@ -32,7 +32,7 @@ class AsmTransformer implements ClassFileTransformer {
   public AsmTransformer(Map<String, String> config) {
     this.packagesToInstrument = config.containsKey("packages")
         ? config.get("packages").split(",")
-        : new String[0];
+        : new String[]{""}; // by default instrument everything
     dumpByteCodePath = config.containsKey("dumpByteCode")
         ? new File(config.get("dumpByteCode"))
         : null;
