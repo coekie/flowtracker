@@ -111,7 +111,7 @@ public class Invocation {
   public static Invocation start(String signature) {
     Invocation invocation = pending.get();
     if (invocation != null) {
-      pending.remove();
+      clear();
       if (signature.equals(invocation.signature)) {
         return invocation;
       }
@@ -139,18 +139,21 @@ public class Invocation {
   public static Invocation suspend() {
     Invocation invocation = pending.get();
     if (invocation != null) {
-      pending.remove();
+      clear();
     }
     return invocation;
   }
 
   /** @see #suspend() */
   public static void unsuspend(Invocation invocation) {
-    if (invocation == null) {
-      pending.remove();
-    } else {
-      pending.set(invocation);
-    }
+    pending.set(invocation);
+  }
+
+  // deliberately not using ThreadLocal.clear(), because constantly adding and removing from the
+  // map is slower than updating an existing entry.
+  @SuppressWarnings("ThreadLocalSetWithNull")
+  private static void clear() {
+    pending.set(null);
   }
 
   public static Invocation peekPending() {
