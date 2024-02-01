@@ -21,6 +21,20 @@ class GeneratedHookSpecs {
   static HookSpecTransformer createTransformer() {
     int version = Runtime.version().feature();
     HookSpecTransformer t = new HookSpecTransformer();
+    if (version < 17) t.register("java/nio/DirectByteBuffer",
+      "get",
+      "([BII)Ljava/nio/ByteBuffer;",
+      "be/coekaerts/wouter/flowtracker/hook/ByteBufferHook",
+      "afterDirectBufferGet",
+      "([BII)V",
+      ARG0, ARG1, ARG2);
+    if (version > 11) t.register("java/nio/ByteBuffer",
+      "putBuffer",
+      "(ILjava/nio/ByteBuffer;II)V",
+      "be/coekaerts/wouter/flowtracker/hook/ByteBufferHook",
+      "afterPutBuffer",
+      "(Ljava/nio/ByteBuffer;ILjava/nio/ByteBuffer;II)V",
+      THIS, ARG0, ARG1, ARG2, ARG3);
     t.register("sun/nio/ch/FileChannelImpl",
       "<init>",
       "(Ljava/io/FileDescriptor;Ljava/lang/String;ZZZLjava/lang/Object;)V",

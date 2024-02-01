@@ -6,6 +6,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
+import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
@@ -16,8 +17,8 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 public class TrackTestHelper {
 
   /**
-   * Returns a copy of the given String, which will be tracked.
-   *
+   * Returns a copy of the given String, which will be tracked (by a {@link FixedOriginTracker}).
+   * <p>
    * We create a copy to avoid interference from other usage of the same (interned) String.
    */
   public static String trackCopy(String str) {
@@ -26,21 +27,21 @@ public class TrackTestHelper {
     return str;
   }
 
-  /** Create a tracked char array, with the given length */
+  /** Create a tracked char array, with the given length (by a {@link FixedOriginTracker}) */
   public static char[] trackedCharArrayWithLength(int length) {
     char[] result = new char[length];
     TrackerRepository.createFixedOriginTracker(result, length);
     return result;
   }
 
-  /** Create a tracked char array */
+  /** Create a tracked char array (by a {@link FixedOriginTracker}) */
   public static char[] trackedCharArray(String str) {
     char[] result = str.toCharArray();
     TrackerRepository.createFixedOriginTracker(result, result.length);
     return result;
   }
 
-  /** Create a char array without tracking */
+  /** Create a char array without tracking (by a {@link FixedOriginTracker}) */
   public static char[] untrackedCharArray(String str) {
     char[] result = str.toCharArray();
     if (TrackerRepository.getTracker(result) != null) {
@@ -49,7 +50,7 @@ public class TrackTestHelper {
     return result;
   }
 
-  /** Create a tracked byte array */
+  /** Create a tracked byte array (by a {@link FixedOriginTracker}) */
   public static byte[] trackedByteArray(String str) {
     byte[] result = str.getBytes();
     TrackerRepository.createFixedOriginTracker(result, result.length);

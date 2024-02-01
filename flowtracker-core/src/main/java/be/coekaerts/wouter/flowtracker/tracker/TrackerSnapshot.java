@@ -162,7 +162,11 @@ public class TrackerSnapshot {
 
     /** Append a part for which the source tracker is unknown */
     public Builder gap(int length) {
-      return doPart(length,null, -1, Growth.NONE);
+      if (length == 0) {
+        return this;
+      } else {
+        return doPart(length, null, -1, Growth.NONE);
+      }
     }
 
     private Builder doPart(int length, Tracker source, int sourceIndex, Growth growth) {

@@ -153,6 +153,8 @@ class AsmTransformer implements ClassFileTransformer {
         || outerName.equals("java/io/ByteArrayOutputStream")
         || outerName.equals("java/io/InputStreamReader")
         || outerName.equals("java/io/OutputStreamWriter")
+        || outerName.equals("java/nio/ByteBuffer")
+        || outerName.equals("java/nio/HeapByteBuffer")
         || outerName.equals("java/nio/HeapCharBuffer")
         || outerName.equals("sun/nio/cs/UTF_8")
         || outerName.equals("sun/nio/cs/StreamDecoder")
