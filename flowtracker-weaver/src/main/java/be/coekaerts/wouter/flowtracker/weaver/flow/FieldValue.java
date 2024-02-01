@@ -60,6 +60,23 @@ class FieldValue extends TrackableValue {
     toInsert.add(pointTrackerLocal.load());
   }
 
+  static boolean shouldTrack(Type type, FieldInsnNode node) {
+    if (!shouldTrackType(type)) {
+      return false;
+    }
+    switch (node.owner) {
+      // optimization: don't track String.coder
+      case "java/lang/String":
+      case "java/lang/AbstractStringBuilder":
+        if (node.name.equals("coder")) {
+          return false;
+        }
+        break;
+    }
+
+    return true;
+  }
+
   static boolean shouldTrackType(Type type) {
     if (type == null) {
       return false;

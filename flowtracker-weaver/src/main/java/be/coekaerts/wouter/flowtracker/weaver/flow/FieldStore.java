@@ -22,7 +22,7 @@ class FieldStore extends Store {
 
   void insertTrackStatements(FlowMethodAdapter methodNode) {
     // only track char or byte
-    if (!FieldValue.shouldTrackType(storedValue.getType())) {
+    if (!FieldValue.shouldTrack(storedValue.getType(), storeInsn)) {
       return;
     }
 

@@ -115,7 +115,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       case Opcodes.GETFIELD:
         FieldInsnNode fieldInsn = (FieldInsnNode) insn;
         Type fieldType = Type.getType(((FieldInsnNode) insn).desc);
-        if (FieldValue.shouldTrackType(fieldType)) {
+        if (FieldValue.shouldTrack(fieldType, fieldInsn)) {
           return new FieldValue(flowMethodAdapter, fieldInsn, fieldType);
         }
         break;
