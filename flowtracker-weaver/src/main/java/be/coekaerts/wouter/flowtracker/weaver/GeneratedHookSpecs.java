@@ -287,6 +287,13 @@ class GeneratedHookSpecs {
       "afterGetInputStream",
       "(Ljava/io/InputStream;Ljava/util/zip/ZipFile;Ljava/util/zip/ZipEntry;)V",
       RETURN, THIS, ARG0);
+    t.register("org/springframework/boot/loader/jar/NestedJarFile",
+      "getInputStream",
+      "(Ljava/util/zip/ZipEntry;)Ljava/io/InputStream;",
+      "be/coekaerts/wouter/flowtracker/hook/ZipFileHook",
+      "afterGetInputStream",
+      "(Ljava/io/InputStream;Ljava/util/zip/ZipFile;Ljava/util/zip/ZipEntry;)V",
+      RETURN, THIS, ARG0);
     return t;
   }
 }

@@ -13,6 +13,8 @@ import java.util.zip.ZipFile;
 public class ZipFileHook {
   @Hook(target = "java.util.zip.ZipFile",
       method = "java.io.InputStream getInputStream(java.util.zip.ZipEntry)")
+  @Hook(target = "org.springframework.boot.loader.jar.NestedJarFile",
+      method = "java.io.InputStream getInputStream(java.util.zip.ZipEntry)")
   public static void afterGetInputStream(@Arg("RETURN") InputStream result,
       @Arg("THIS") ZipFile target, @Arg("ARG0") ZipEntry zipEntry) {
     if (Trackers.isActive()) {

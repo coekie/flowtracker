@@ -212,6 +212,9 @@ public class HookSpec {
     }
     for (int i = 0; i < argumentInstances.size(); i++) {
       Type givenType = argumentInstances.get(i).getType(this);
+      if (givenType.getClassName().startsWith("org.springframework")) {
+        continue; // TODO generic way to exclude some hook arguments from type checks
+      }
       if (!canAssign(givenType, hookArgTypes[i])) {
         throw new IllegalStateException("Cannot assign " + givenType + " to " + hookArgTypes[i]
             + " for " + this + " arg " + i);
