@@ -22,7 +22,15 @@ public class InflaterInputStreamHook {
       @Arg("ARG0") InputStream in) {
     if (Trackers.isActive()) {
       var tracker = new ByteOriginTracker();
-      tracker.initDescriptor(DESCRIPTOR, InputStreamHook.getInputStreamTracker(in));
+      Tracker inTracker = InputStreamHook.getInputStreamTracker(in);
+      if (inTracker != null) {
+        tracker.initDescriptor("InflaterInputStream for " + inTracker.getDescriptor());
+      } else {
+        tracker.initDescriptor(DESCRIPTOR);
+      }
+      if (inTracker != null && inTracker.getNode() != null) {
+        tracker.addTo(inTracker.getNode().node("Inflater"));
+      }
       TrackerRepository.setTracker(target, tracker);
     }
   }

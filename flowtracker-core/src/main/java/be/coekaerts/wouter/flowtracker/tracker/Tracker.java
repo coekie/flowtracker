@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Tracker implements WritableTracker {
@@ -8,6 +9,7 @@ public abstract class Tracker implements WritableTracker {
 
   private String descriptor;
   private Tracker descriptorTracker;
+  private TrackerTree.Node node;
 
   Tracker() {
   }
@@ -69,17 +71,27 @@ public abstract class Tracker implements WritableTracker {
 
   /** Initializes {@link #getDescriptor()} and {@link #getDescriptorTracker()} */
   public void initDescriptor(String descriptor, Tracker descriptorTracker) {
+    initDescriptor(descriptor);
+    this.descriptorTracker = descriptorTracker;
+  }
+
+  /** Initializes {@link #getDescriptor()} */
+  public Tracker initDescriptor(String descriptor) {
     if (this.descriptor != null) {
       throw new IllegalStateException("Descriptor already initialized: " + this.descriptor);
     }
     this.descriptor = descriptor;
-    this.descriptorTracker = descriptorTracker;
+    return this;
   }
 
-  /** Replaces {@link #getDescriptor()} and {@link #getDescriptorTracker()} */
-  public void replaceDescriptor(String descriptor, Tracker descriptorTracker) {
+  public Tracker addTo(Node node) {
+    node.internalAddTracker(this);
+    return this;
+  }
+
+  /** Replaces {@link #getDescriptor()} */
+  public void replaceDescriptor(String descriptor) {
     this.descriptor = descriptor;
-    this.descriptorTracker = descriptorTracker;
   }
 
   /** Description of what kind of object is being tracked and/or where it got created from */
@@ -93,5 +105,13 @@ public abstract class Tracker implements WritableTracker {
    */
   public Tracker getDescriptorTracker() {
     return descriptorTracker;
+  }
+
+  public TrackerTree.Node getNode() {
+    return node;
+  }
+
+  void initNode(Node node) {
+    this.node = node;
   }
 }

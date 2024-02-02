@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.test;
 import be.coekaerts.wouter.flowtracker.tracker.TagTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,19 +39,24 @@ public class InflaterInputStreamTest extends AbstractInputStreamTest {
   @Test
   public void descriptor() throws IOException {
     ByteArrayInputStream src = new ByteArrayInputStream(deflated);
-    TagTracker srcTracker = new TagTracker("src");
-    TrackerRepository.setTracker(src, srcTracker);
+    TrackerRepository.setTracker(src, new TagTracker("src").addTo(TrackerTree.node("src")));
 
     try (InputStream is = new InflaterInputStream(src)) {
-      TrackTestHelper.assertDescriptor(is, "InflaterInputStream", srcTracker);
+      TrackTestHelper.assertThatTracker(is)
+          .hasDescriptor("InflaterInputStream for src")
+          .hasNode("src", "Inflater");
     }
 
     try (InputStream is = new InflaterInputStream(src, new Inflater())) {
-      TrackTestHelper.assertDescriptor(is, "InflaterInputStream", srcTracker);
+      TrackTestHelper.assertThatTracker(is)
+          .hasDescriptor("InflaterInputStream for src")
+          .hasNode("src", "Inflater");
     }
 
     try (InputStream is = new InflaterInputStream(src, new Inflater(), 512)) {
-      TrackTestHelper.assertDescriptor(is, "InflaterInputStream", srcTracker);
+      TrackTestHelper.assertThatTracker(is)
+          .hasDescriptor("InflaterInputStream for src")
+          .hasNode("src", "Inflater");
     }
   }
 }

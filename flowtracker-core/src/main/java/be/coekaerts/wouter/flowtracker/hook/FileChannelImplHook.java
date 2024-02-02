@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.hook;
 import be.coekaerts.wouter.flowtracker.annotation.Arg;
 import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
 
@@ -19,7 +20,7 @@ public class FileChannelImplHook {
     if (Trackers.isActive()) {
       if (!FileDescriptorTrackerRepository.hasTracker(fd)) {
         FileDescriptorTrackerRepository.createTracker(fd, "FileChannel for " + path, readable,
-            writeable);
+            writeable, TrackerTree.fileNode(path));
       }
     }
   }

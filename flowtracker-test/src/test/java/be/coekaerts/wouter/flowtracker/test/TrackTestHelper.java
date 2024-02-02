@@ -2,14 +2,18 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
-import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Helper methods for testing Trackers
@@ -66,28 +70,52 @@ public class TrackTestHelper {
     return result;
   }
 
-  /**
-   * Assert that the given object is in the InterestRepository and has a descriptor with the given
-   * message and object
-   */
-  static void assertInterestAndDescriptor(Object sut, String expectedDescriptor,
-      Object expectedDescriptorObj) {
-    assertDescriptor(sut, expectedDescriptor, expectedDescriptorObj);
-    assertTrue(InterestRepository.getTrackers().contains(tracker(sut)));
+  /** Fluent API to assert stuff about trackers */
+  public static TrackerAssertions assertThatTracker(Object sut) {
+    return new TrackerAssertions(tracker(sut));
   }
 
-  static void assertDescriptor(Object sut, String expectedDescriptor,
-      Object expectedDescriptorObj) {
-    Tracker tracker = tracker(sut);
-    assertNotNull(tracker);
-    assertEquals(expectedDescriptor, tracker.getDescriptor());
-    Tracker expectedTracker = expectedDescriptorObj instanceof Tracker
-        ? (Tracker) expectedDescriptorObj
-        : TrackerRepository.getTracker(expectedDescriptorObj);
-    assertSame(expectedTracker, tracker.getDescriptorTracker());
+  private static List<String> nodePath(Node node) {
+    List<String> result = new ArrayList<>();
+    while (node != null && node.parent != null) {
+      result.add(node.name);
+      node = node.parent;
+    }
+    Collections.reverse(result);
+    return result;
   }
 
   private static Tracker tracker(Object o) {
     return o instanceof Tracker ? (Tracker) o : TrackerRepository.getTracker(o);
+  }
+
+  /** @see #assertThatTracker(Object) */
+  public static class TrackerAssertions {
+    private final Tracker tracker;
+
+    private TrackerAssertions(Tracker tracker) {
+      assertNotNull(tracker);
+      this.tracker = tracker;
+    }
+
+    public TrackerAssertions hasDescriptor(String expectedDescriptor) {
+      assertEquals(expectedDescriptor, tracker.getDescriptor());
+      return this;
+    }
+
+    public TrackerAssertions hasDescriptorMatching(Predicate<String> predicate) {
+      assertTrue(predicate.test(tracker.getDescriptor()));
+      return this;
+    }
+
+    public TrackerAssertions hasNode(String... expectedNodePath) {
+      assertEquals(Arrays.asList(expectedNodePath), nodePath(tracker.getNode()));
+      return this;
+    }
+
+    public TrackerAssertions hasNodeMatching(Predicate<List<String>> predicate) {
+      assertTrue(predicate.test(nodePath(tracker.getNode())));
+      return this;
+    }
   }
 }

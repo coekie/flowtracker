@@ -4,6 +4,7 @@ import be.coekaerts.wouter.flowtracker.annotation.Arg;
 import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
@@ -25,8 +26,10 @@ public class ZipFileHook {
       }
 
       if (InflaterInputStreamHook.DESCRIPTOR.equals(tracker.getDescriptor())) {
-        tracker.replaceDescriptor("Unzipped " + target.getName() + " file " + zipEntry.getName(),
-            null);
+        tracker.replaceDescriptor("Unzipped " + target.getName() + " file " + zipEntry.getName());
+      }
+      if (tracker.getNode() == null) {
+        tracker.addTo(TrackerTree.fileNode(target.getName()).node(zipEntry.getName()));
       }
     }
   }

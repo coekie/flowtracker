@@ -34,13 +34,15 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
 
   @Test public void descriptor() throws IOException {
     try (var fosFromFile = new FileOutputStream(file)) {
-      TrackTestHelper.assertDescriptor(getTracker(fosFromFile),
-          "FileOutputStream for " + file.getPath(), null);
+      TrackTestHelper.assertThatTracker(getTracker(fosFromFile))
+          .hasDescriptor("FileOutputStream for " + file.getPath())
+          .hasNode("Files", file.getPath());
     }
 
     try (var fosFromName = new FileOutputStream(file.getPath())) {
-      TrackTestHelper.assertDescriptor(getTracker(fosFromName),
-          "FileOutputStream for " + file.getPath(), null);
+      TrackTestHelper.assertThatTracker(getTracker(fosFromName))
+          .hasDescriptor("FileOutputStream for " + file.getPath())
+          .hasNode("Files", file.getPath());
     }
   }
 

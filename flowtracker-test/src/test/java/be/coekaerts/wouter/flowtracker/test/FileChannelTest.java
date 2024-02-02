@@ -50,9 +50,9 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
   @Test
   public void descriptor() throws IOException {
     try (FileChannel channel = openForRead()) {
-      TrackTestHelper.assertInterestAndDescriptor(
-          getReadTracker(channel),
-          "FileChannel for " + fileToRead.getPath(), null);
+      TrackTestHelper.assertThatTracker(getReadTracker(channel))
+          .hasDescriptor("FileChannel for " + fileToRead.getPath())
+          .hasNode("Files", fileToRead.getAbsolutePath());
     }
   }
 

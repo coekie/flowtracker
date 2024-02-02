@@ -29,9 +29,10 @@ public class OutputStreamWriterTest {
   private OutputStreamWriter writer;
   private FileOutputStream stream;
   private ByteSinkTracker streamTracker;
+  private File file;
 
   @Before public void setupWriter() throws IOException {
-    File file = File.createTempFile("OutputStreamWriterTest", "");
+    file = File.createTempFile("OutputStreamWriterTest", "");
     stream = new FileOutputStream(file);
     writer = new OutputStreamWriter(stream);
     streamTracker = requireNonNull(FileDescriptorTrackerRepository.getWriteTracker(stream.getFD()));
@@ -130,11 +131,11 @@ public class OutputStreamWriterTest {
   }
 
   @SuppressWarnings("CharsetObjectCanBeUsed")
-  @Test public void interestAndDescriptor() throws IOException {
-    assertInterestAndDescriptor(writer);
-    assertInterestAndDescriptor(new OutputStreamWriter(stream, "UTF-8"));
-    assertInterestAndDescriptor(new OutputStreamWriter(stream, StandardCharsets.UTF_8));
-    assertInterestAndDescriptor(new OutputStreamWriter(stream,
+  @Test public void descriptorAndNode() throws IOException {
+    assertDescriptorAndNode(writer);
+    assertDescriptorAndNode(new OutputStreamWriter(stream, "UTF-8"));
+    assertDescriptorAndNode(new OutputStreamWriter(stream, StandardCharsets.UTF_8));
+    assertDescriptorAndNode(new OutputStreamWriter(stream,
         new CharsetEncoder(StandardCharsets.UTF_8, 1, 1) {
           @Override protected CoderResult encodeLoop(CharBuffer in, ByteBuffer out) {
             return null;
@@ -142,7 +143,9 @@ public class OutputStreamWriterTest {
         }));
   }
 
-  private void assertInterestAndDescriptor(OutputStreamWriter writer) {
-    TrackTestHelper.assertInterestAndDescriptor(writer, "OutputStreamWriter", stream);
+  private void assertDescriptorAndNode(OutputStreamWriter writer) {
+    TrackTestHelper.assertThatTracker(writer)
+        .hasDescriptor("OutputStreamWriter to FileOutputStream for " + file.getAbsolutePath())
+        .hasNode("Files", file.getAbsolutePath(), "Writer");
   }
 }

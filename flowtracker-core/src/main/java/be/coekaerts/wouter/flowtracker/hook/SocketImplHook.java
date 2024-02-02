@@ -3,10 +3,12 @@ package be.coekaerts.wouter.flowtracker.hook;
 import be.coekaerts.wouter.flowtracker.annotation.Arg;
 import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketImpl;
 
@@ -30,7 +32,8 @@ public class SocketImplHook {
       @Arg("ARG0") SocketAddress remote, @Arg("SocketImpl_localport") int localport) {
     if (Trackers.isActive()) {
       FileDescriptorTrackerRepository.createTracker(fd,
-          "Client socket to " + remote + " from " + localport, true, true);
+          "Client socket to " + remote + " from " + localport, true, true,
+          clientSocketNode(remote));
     }
   }
 
@@ -47,7 +50,8 @@ public class SocketImplHook {
       InetAddress address = (InetAddress) Reflection.getFieldValue(si, addressField);
       int port = Reflection.getInt(si, portField);
       FileDescriptorTrackerRepository.createTracker(fd,
-          "Server socket to " + localport + " from " + address + ":" + port, true, true);
+          "Server socket to " + localport + " from " + address + ":" + port, true, true,
+          serverSocketNode(Integer.toString(localport), address + ":" + port));
     }
   }
 
@@ -65,5 +69,26 @@ public class SocketImplHook {
   public static void afterTryWrite(@Arg("RETURN") int written, @Arg("ARG0") FileDescriptor fd,
       @Arg("ARG1") byte[] buf, @Arg("ARG2") int off) {
     FileOutputStreamHook.afterWriteByteArrayOffset(fd, buf, off, written);
+  }
+
+  static TrackerTree.Node serverSocketNode(SocketAddress localAddress, SocketAddress remote) {
+    if (localAddress instanceof InetSocketAddress) {
+      return serverSocketNode(Integer.toString(((InetSocketAddress) localAddress).getPort()),
+          remote.toString());
+    } else { // e.g. unix domain sockets? not really tested/supported yet
+      return serverSocketNode(localAddress.toString(), remote.toString());
+    }
+  }
+
+  static TrackerTree.Node serverSocketNode(String localPort, String remote) {
+    return TrackerTree.node("Server socket").node(localPort).node(remote);
+  }
+
+  static TrackerTree.Node clientSocketNode(SocketAddress remote) {
+    return clientSocketNode(remote.toString());
+  }
+
+  static TrackerTree.Node clientSocketNode(String remote) {
+    return TrackerTree.node("Client socket").node(remote);
   }
 }

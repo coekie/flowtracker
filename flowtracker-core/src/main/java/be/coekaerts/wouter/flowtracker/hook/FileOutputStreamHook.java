@@ -8,6 +8,7 @@ import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -22,7 +23,7 @@ public class FileOutputStreamHook {
     if (Trackers.isActive()) {
       FileDescriptorTrackerRepository.createTracker(fd,
           "FileOutputStream for " + file.getAbsolutePath(),
-          false, true);
+          false, true, TrackerTree.fileNode(file.getAbsolutePath()));
     }
   }
 

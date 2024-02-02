@@ -3,9 +3,13 @@ package be.coekaerts.wouter.flowtracker.hook;
 import be.coekaerts.wouter.flowtracker.annotation.Arg;
 import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
+import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
@@ -27,15 +31,19 @@ public class OutputStreamWriterHook {
   public static void afterInit(@Arg("THIS") OutputStreamWriter target,
       @Arg("ARG0") OutputStream stream) {
     if (Trackers.isActive()) {
-      createOutputStreamWriterTracker(target).initDescriptor("OutputStreamWriter",
-          TrackerRepository.getTracker(stream));
+      createOutputStreamWriterTracker(target, stream);
     }
   }
 
-  static CharSinkTracker createOutputStreamWriterTracker(OutputStreamWriter target) {
+  static void createOutputStreamWriterTracker(OutputStreamWriter target,
+      OutputStream stream) {
+    Tracker streamTracker = getOutputStreamTracker(stream);
     CharSinkTracker tracker = new CharSinkTracker();
+    tracker
+        .initDescriptor(streamTracker == null ? "OutputStreamWriter"
+            : "OutputStreamWriter to " + streamTracker.getDescriptor())
+        .addTo(TrackerTree.nodeOrUnknown(streamTracker).node("Writer"));
     TrackerRepository.setInterestTracker(target, tracker);
-    return tracker;
   }
 
   @Hook(target = "java.io.OutputStreamWriter",
@@ -74,5 +82,16 @@ public class OutputStreamWriterHook {
       }
       ((CharSinkTracker) tracker).append(str, off, len);
     }
+  }
+
+  private static Tracker getOutputStreamTracker(OutputStream os) {
+    if (os instanceof FileOutputStream) {
+      try {
+        return FileDescriptorTrackerRepository.getWriteTracker(((FileOutputStream) os).getFD());
+      } catch (IOException e) {
+        return null;
+      }
+    }
+    return null;
   }
 }
