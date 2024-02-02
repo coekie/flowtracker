@@ -8,7 +8,7 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 public class ConstantHook {
   public static Tracker constantTracker(String descriptor) {
     Tracker result = new FixedOriginTracker(1);
-    result.initDescriptor(descriptor, null);
+    result.initDescriptor(descriptor);
     return result;
   }
 

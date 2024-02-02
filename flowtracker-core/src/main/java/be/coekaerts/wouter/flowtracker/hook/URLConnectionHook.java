@@ -15,7 +15,7 @@ public class URLConnectionHook {
     // (since ZipFile is hooked, the case where existingTracker or descriptor is null is untested)
     if (existingTracker != null) {
       if (existingTracker.getDescriptor() == null) {
-        existingTracker.initDescriptor("InputStream from " + connection.getURL(), null);
+        existingTracker.initDescriptor("InputStream from " + connection.getURL());
       }
     } else {
       TrackerRepository.setTracker(result,

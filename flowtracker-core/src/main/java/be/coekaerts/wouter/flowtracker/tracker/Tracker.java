@@ -8,7 +8,6 @@ public abstract class Tracker implements WritableTracker {
   private final long trackerId = idGenerator.getAndIncrement();
 
   private String descriptor;
-  private Tracker descriptorTracker;
   private TrackerTree.Node node;
 
   Tracker() {
@@ -69,12 +68,6 @@ public abstract class Tracker implements WritableTracker {
     throw new UnsupportedOperationException();
   }
 
-  /** Initializes {@link #getDescriptor()} and {@link #getDescriptorTracker()} */
-  public void initDescriptor(String descriptor, Tracker descriptorTracker) {
-    initDescriptor(descriptor);
-    this.descriptorTracker = descriptorTracker;
-  }
-
   /** Initializes {@link #getDescriptor()} */
   public Tracker initDescriptor(String descriptor) {
     if (this.descriptor != null) {
@@ -97,14 +90,6 @@ public abstract class Tracker implements WritableTracker {
   /** Description of what kind of object is being tracked and/or where it got created from */
   public String getDescriptor() {
     return descriptor;
-  }
-
-  /**
-   * Tracker of object used to created the target of this tracker. E.g. if this is a tracker for
-   * an InputStreamReader, the tracker for the InputStream is returned
-   */
-  public Tracker getDescriptorTracker() {
-    return descriptorTracker;
   }
 
   public TrackerTree.Node getNode() {

@@ -46,7 +46,7 @@ public class TrackerResource {
 
     private TrackerResponse(Tracker tracker) {
       id = tracker.getTrackerId();
-      description = getRecursiveDescription(tracker);
+      description = tracker.getDescriptor();
     }
 
     public long getId() {
@@ -56,12 +56,6 @@ public class TrackerResource {
     public String getDescription() {
       return description;
     }
-  }
-
-  private static String getRecursiveDescription(Tracker tracker) {
-    return tracker.getDescriptorTracker() == null ? tracker.getDescriptor()
-        : tracker.getDescriptor() + " from "
-            + getRecursiveDescription(tracker.getDescriptorTracker());
   }
 
   @SuppressWarnings({"UnusedDeclaration", "MismatchedQueryAndUpdateOfCollection"}) // json

@@ -11,7 +11,6 @@ import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
-import be.coekaerts.wouter.flowtracker.tracker.TagTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import org.junit.Before;
@@ -26,12 +25,12 @@ public class TrackerResourceTest {
 
   @Test public void list() {
     Tracker tracker = new DefaultTracker();
-    tracker.initDescriptor("myTracker", new TagTracker("descriptorTracker"));
+    tracker.initDescriptor("myTracker");
     TrackerRepository.setInterestTracker(new Object(), tracker);
 
     for (TrackerResponse t : trackerResource.list()) {
       if (t.getId() == tracker.getTrackerId()) {
-        assertEquals("myTracker from descriptorTracker", t.getDescription());
+        assertEquals("myTracker", t.getDescription());
         return;
       }
     }
