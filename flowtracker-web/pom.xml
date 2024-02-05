@@ -10,6 +10,13 @@
   </parent>
   <artifactId>flowtracker-web</artifactId>
   <name>${artifactId}</name>
+  <build>
+    <resources>
+      <resource>
+        <directory>../flowtracker-ui/dist</directory>
+      </resource>
+    </resources>
+  </build>
   <dependencies>
     <dependency>
       <groupId>be.coekaerts.wouter.flowtracker</groupId>

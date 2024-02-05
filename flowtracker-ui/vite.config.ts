@@ -9,5 +9,8 @@ export default defineConfig({
       '/tracker' : 'http://localhost:8011',
       '/settings' : 'http://localhost:8011',
     }
+  },
+  build: {
+    outDir: 'dist/static'
   }
 })
