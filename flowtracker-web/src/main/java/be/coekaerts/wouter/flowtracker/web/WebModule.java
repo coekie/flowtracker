@@ -29,7 +29,7 @@ public class WebModule {
     server.setHandler(context);
 
     ResourceConfig resourceConfig =
-        new ResourceConfig(TrackerResource.class, SettingsResource.class)
+        new ResourceConfig(TrackerResource.class, TreeResource.class, SettingsResource.class)
             .property(ServletProperties.FILTER_FORWARD_ON_404, true)
             .register(JacksonFeature.class);
     ServletContainer servletContainer = new ServletContainer(resourceConfig);

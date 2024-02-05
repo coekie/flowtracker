@@ -1,13 +1,14 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /** Tree of interesting trackers, for the UI */
 public class TrackerTree {
-  private static final Node ROOT = new Node(null, "<root>");
+  public static final Node ROOT = new Node(null, "<root>");
 
   public static Node node(String name) {
     return ROOT.node(name);
@@ -51,6 +52,14 @@ public class TrackerTree {
     synchronized void internalAddTracker(Tracker tracker) {
       trackers.add(tracker);
       tracker.initNode(this);
+    }
+
+    public synchronized Collection<Node> children() {
+      return new ArrayList<>(children.values());
+    }
+
+    public synchronized Collection<Tracker> trackers() {
+      return new ArrayList<>(trackers);
     }
   }
 }

@@ -44,7 +44,7 @@ public class TrackerResource {
     private final long id;
     private final String description;
 
-    private TrackerResponse(Tracker tracker) {
+    TrackerResponse(Tracker tracker) {
       id = tracker.getTrackerId();
       description = tracker.getDescriptor();
     }
