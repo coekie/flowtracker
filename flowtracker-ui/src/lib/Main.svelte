@@ -1,10 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Settings from './Settings.svelte'
+  import type { Tracker, TrackerDetail, TrackerPart } from '../javatypes'
 
-  let trackersPromise = new Promise(() => {});
-  let selectedTracker;
-  let trackerDetailPromise = new Promise(() => {});
+  let trackersPromise: Promise<Tracker[]> = new Promise(() => {});
+  let selectedTracker: Tracker;
+  let trackerDetailPromise: Promise<TrackerDetail> = new Promise(() => {});
 
   const fetchTrackers = async () => {
     const response = await fetch('/tracker')
@@ -12,19 +13,19 @@
 		return response.json()
   }
 
-  const selectTracker = async (tracker) => {
+  const selectTracker = (tracker: Tracker) => {
     console.log("selected: ", tracker)
     selectedTracker = tracker
     trackerDetailPromise = fetchTrackerDetail(tracker)
   }
 
-  const fetchTrackerDetail = async (tracker) => {
+  const fetchTrackerDetail = async (tracker:Tracker) => {
     const response = await fetch('/tracker/' + tracker.id)
-		if (!response.ok) throw new Error(response)
+		if (!response.ok) throw new Error(response.statusText)
 		return response.json()
   }
 
-  const tooltip = (part) => {
+  const tooltip = (part: TrackerPart) => {
     return 'source=' + (part.source?.description || 'unknown') + '\n' +
       'sourceOffset=' + part.sourceOffset + '\n' +
       'context=' + part.sourceContext;
@@ -43,7 +44,7 @@
       {#each trackers as tracker (tracker.id)}
         <div class="trackerListItem"
             class:trackerListItemSelected={tracker === selectedTracker}
-            on:click={selectTracker(tracker)}>
+            on:click={() => selectTracker(tracker)}>
           {tracker.description}
         </div>
       {/each}
@@ -53,7 +54,6 @@
   </div>
   {#await trackerDetailPromise then trackerDetail}
     <pre class="trackerDetail">{#each trackerDetail.parts as part}<span class="trackerDetailPart"
-                                     ng-repeat="part in selectedTrackerDetail.parts track by $index"
                                      title={tooltip(part)}>{part.content}</span>{/each}</pre>
    {/await}
 </div>

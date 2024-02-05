@@ -1,10 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  let settings;
+  import type { Settings } from '../javatypes'
+  let settings : Settings;
 
   const initSettings = async () => {
     const response = await fetch('/settings')
-    if (!response.ok) throw new Error(response)
+    if (!response.ok) throw new Error(response.statusText)
     settings = await response.json()
     console.log('Loaded settings: ', response, settings);
   }
