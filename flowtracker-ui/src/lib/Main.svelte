@@ -1,25 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Settings from './Settings.svelte'
+  import TrackerList from './TrackerList.svelte'
   import type { Tracker, TrackerDetail, TrackerPart } from '../javatypes'
 
-  let trackersPromise: Promise<Tracker[]> = new Promise(() => {});
   let selectedTracker: Tracker;
-  let trackerDetailPromise: Promise<TrackerDetail> = new Promise(() => {});
-
-  const fetchTrackers = async () => {
-    const response = await fetch('/tracker')
-    if (!response.ok) return Promise.reject(response)
-		return response.json()
-  }
-
-  const selectTracker = (tracker: Tracker) => {
-    console.log("selected: ", tracker)
-    selectedTracker = tracker
-    trackerDetailPromise = fetchTrackerDetail(tracker)
-  }
+  let trackerDetailPromise: Promise<TrackerDetail>;
+  $: trackerDetailPromise = fetchTrackerDetail(selectedTracker);
 
   const fetchTrackerDetail = async (tracker:Tracker) => {
+    if (!tracker) {
+      return new Promise(() => {})
+    }
     const response = await fetch('/tracker/' + tracker.id)
 		if (!response.ok) throw new Error(response.statusText)
 		return response.json()
@@ -30,28 +22,10 @@
       'sourceOffset=' + part.sourceOffset + '\n' +
       'context=' + part.sourceContext;
   }
-
-  onMount(() => {
-    trackersPromise = fetchTrackers();
-  })
 </script>
 
 <div class="trackersWrapper">
-  <div class="trackerList">
-    {#await trackersPromise}
-      <p>Loading...</p>
-    {:then trackers}
-      {#each trackers as tracker (tracker.id)}
-        <div class="trackerListItem"
-            class:trackerListItemSelected={tracker === selectedTracker}
-            on:click={() => selectTracker(tracker)}>
-          {tracker.description}
-        </div>
-      {/each}
-    {:catch error}
-      <p style="color: red">{error.message}</p>
-    {/await}
-  </div>
+  <TrackerList bind:selectedTracker={selectedTracker}/>
   {#await trackerDetailPromise then trackerDetail}
     <pre class="trackerDetail">{#each trackerDetail.parts as part}<span class="trackerDetailPart"
                                      title={tooltip(part)}>{part.content}</span>{/each}</pre>
@@ -65,12 +39,6 @@
     top: 0;
     bottom: 50px;
     width: 100%;
-  }
-  .trackerList {
-    float: left;
-    width: 50%;
-    height: 100%;
-    overflow-y: auto;
   }
   .trackerDetail {
     float: right;
@@ -87,11 +55,5 @@
     /* undo border */
     margin-right: 0;
     border-right: 0;
-  }
-  .trackerListItem {
-    border: 1px solid gray;
-  }
-  .trackerListItemSelected {
-    background-color: lightblue;
   }
 </style>
