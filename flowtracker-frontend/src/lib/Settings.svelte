@@ -1,0 +1,45 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  let settings;
+
+  const initSettings = async () => {
+    const response = await fetch('/settings')
+    if (!response.ok) throw new Error(response)
+    settings = await response.json()
+    console.log('Loaded settings: ', response, settings);
+  }
+
+  const save = () => {
+    console.log('Saving settings: ', settings);
+    fetch('/settings', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(settings)
+    })
+  }
+
+  onMount(() => {
+    initSettings();
+  })
+</script>
+
+{#if settings}
+  <div class="settingsWrapper">
+    <b>Settings:</b>
+    <form>
+      <label><input type="checkbox" bind:checked={settings.suspendShutdown}>Suspend shutdown</label>
+      <button type="button" on:click={save}>Save</button>
+    </form>
+  </div>
+{/if}
+
+
+<style>
+  .settingsWrapper {
+    position: absolute;
+    bottom: 0;
+    height: 50px;
+  }
+</style>
