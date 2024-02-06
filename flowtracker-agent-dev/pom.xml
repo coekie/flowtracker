@@ -8,15 +8,15 @@
     <groupId>be.coekaerts.wouter.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>flowtracker-agent</artifactId>
+  <artifactId>flowtracker-agent-dev</artifactId>
   <name>${artifactId}</name>
+  <description>Agent jar to be used for development</description>
 
   <dependencies>
     <dependency>
       <groupId>be.coekaerts.wouter.flowtracker</groupId>
-      <artifactId>flowtracker-core</artifactId>
+      <artifactId>flowtracker-agent</artifactId>
       <version>${project.version}</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
   <build>
@@ -30,6 +30,10 @@
               <Premain-Class>be.coekaerts.wouter.flowtracker.agent.FlowTrackAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
+              <Boot-Class-Path>
+                ../../flowtracker-agent/target/classes
+                ../../flowtracker-core/target/classes
+              </Boot-Class-Path>
             </manifestEntries>
           </archive>
         </configuration>

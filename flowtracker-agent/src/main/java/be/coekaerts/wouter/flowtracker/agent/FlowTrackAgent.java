@@ -77,7 +77,12 @@ public class FlowTrackAgent {
     // all other flowtracker and dependencies jars
     List<URL> spiderClasspath = new ArrayList<>();
 
-    if (!config.containsKey("core")) { // paths not explicitly configured
+    if (config.containsKey("spiderClasspath")) {
+      coreJar = config.containsKey("core") ? new JarFile(config.get("core")) : null;
+      for (String path : getConfig("spiderClasspath").split(",")) {
+        spiderClasspath.add(new File(path).toURI().toURL());
+      }
+    } else { // paths not explicitly configured
       // assume we're running from flowtracker-all jar with nested jars in it
       File expandDir = createExpandDir();
       JarFile jar = getThisJar();
@@ -97,17 +102,14 @@ public class FlowTrackAgent {
         throw new IllegalStateException("Could not find flowtracker-core jar in "
             + jar.getName());
       }
-    } else {
-      coreJar = new JarFile(getConfig("core"));
-      for (String path : getConfig("spiderClasspath").split(",")) {
-        spiderClasspath.add(new File(path).toURI().toURL());
-      }
     }
 
     // make the instrumented JDK classes find the hook class
-    inst.appendToBootstrapClassLoaderSearch(coreJar);
+    if (coreJar != null) {
+      inst.appendToBootstrapClassLoaderSearch(coreJar);
+    }
 
-    return new URLClassLoader(spiderClasspath.toArray(new URL[0]));
+    return new URLClassLoader(spiderClasspath.toArray(new URL[0]), null);
   }
 
   // NICE: generic plugin system would be cleaner

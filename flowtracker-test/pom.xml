@@ -18,8 +18,25 @@
       <groupId>be.coekaerts.wouter.flowtracker</groupId>
       <artifactId>flowtracker-core</artifactId>
       <version>${project.version}</version>
-      <scope>compile</scope>
     </dependency>
+    <!--
+      this "runtime" dependency is only added to make maven build it before this one.
+      we remove it from the runtime classpath below.
+      the agent uses it in a separate classloader.
+    -->
+    <dependency>
+      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <artifactId>flowtracker-weaver</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -35,12 +52,13 @@
           <!-- For cleaner debugging environment, but slower: -->
           <!--<reuseForks>false</reuseForks>-->
           <argLine>
-            -javaagent:${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-agent/${project.version}/flowtracker-agent-${project.version}.jar=core=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-core/${project.version}/flowtracker-core-${project.version}.jar;spiderClasspath=${settings.localRepository}/be/coekaerts/wouter/flowtracker/flowtracker-weaver/${project.version}/flowtracker-weaver-${project.version}.jar,${settings.localRepository}/org/ow2/asm/asm/${asm.version}/asm-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-util/${asm.version}/asm-util-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-commons/${asm.version}/asm-commons-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-analysis/${asm.version}/asm-analysis-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-tree/${asm.version}/asm-tree-${asm.version}.jar;packages=be/coekaerts/wouter/flowtracker/test/;${flowtracker.extraAgentArgs}
+            -javaagent:../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=spiderClasspath=${project.basedir}/../flowtracker-weaver/target/classes,${settings.localRepository}/org/ow2/asm/asm/${asm.version}/asm-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-util/${asm.version}/asm-util-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-commons/${asm.version}/asm-commons-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-analysis/${asm.version}/asm-analysis-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-tree/${asm.version}/asm-tree-${asm.version}.jar;packages=be/coekaerts/wouter/flowtracker/test/;${flowtracker.extraAgentArgs}
             -XX:-UseStringDeduplication -XX:+UnlockDiagnosticVMOptions -XX:DisableIntrinsic=_copyOf -XX:DisableIntrinsic=_copyOfRange -XX:DisableIntrinsic=_String_String -XX:DisableIntrinsic=_StringBuilder_String -XX:DisableIntrinsic=_StringBuilder_append_char -XX:DisableIntrinsic=_StringBuilder_append_String -XX:DisableIntrinsic=_StringBuilder_toString -XX:DisableIntrinsic=_inflateStringC -XX:DisableIntrinsic=_inflateStringB -XX:DisableIntrinsic=_toBytesStringU -XX:DisableIntrinsic=_getCharsStringU -XX:DisableIntrinsic=_getCharStringU -XX:DisableIntrinsic=_putCharStringU -XX:DisableIntrinsic=_compressStringC -XX:DisableIntrinsic=_compressStringB -XX:DisableIntrinsic=_encodeByteISOArray
           </argLine>
-          <!-- This should only be a compile-time dependency; when running tests the agent should take care of getting this on the (bootstrap) classpath -->
+          <!-- These should not be on the app classpath; the agent should take care of getting this on the classpath (bootstrap classpath and for spider classloader) -->
           <classpathDependencyExcludes>
             <classpathDependencyExclude>be.coekaerts.wouter.flowtracker:flowtracker-core</classpathDependencyExclude>
+            <classpathDependencyExclude>be.coekaerts.wouter.flowtracker:flowtracker-weaver</classpathDependencyExclude>
           </classpathDependencyExcludes>
         </configuration>
       </plugin>
