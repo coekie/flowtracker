@@ -72,13 +72,10 @@ public class FlowTrackAgent {
    * classpath of the application.
    */
   private static ClassLoader initClassLoaders(Instrumentation inst) throws IOException {
-    // flowtracker-core jar, to be added to the bootstrap classpath
-    JarFile coreJar = null;
     // all other flowtracker and dependencies jars
     List<URL> spiderClasspath = new ArrayList<>();
 
     if (config.containsKey("spiderClasspath")) {
-      coreJar = config.containsKey("core") ? new JarFile(config.get("core")) : null;
       for (String path : getConfig("spiderClasspath").split(",")) {
         spiderClasspath.add(new File(path).toURI().toURL());
       }
@@ -86,27 +83,18 @@ public class FlowTrackAgent {
       // assume we're running from flowtracker-all jar with nested jars in it
       File expandDir = createExpandDir();
       JarFile jar = getThisJar();
+
+      // make the instrumented JDK classes find the hook class
+      inst.appendToBootstrapClassLoaderSearch(jar);
+
       for (JarEntry entry : Collections.list(jar.entries())) {
         if (entry.getName().startsWith("flowtracker/") && entry.getName().endsWith(".jar")) {
           String subJarName = entry.getName().substring("flowtracker/".length());
           File outFile = new File(expandDir, subJarName);
           copy(jar.getInputStream(entry), outFile);
-          if (subJarName.contains("flowtracker-core")) {
-            coreJar = new JarFile(outFile);
-          } else {
-            spiderClasspath.add(outFile.toURI().toURL());
-          }
+          spiderClasspath.add(outFile.toURI().toURL());
         }
       }
-      if (coreJar == null) {
-        throw new IllegalStateException("Could not find flowtracker-core jar in "
-            + jar.getName());
-      }
-    }
-
-    // make the instrumented JDK classes find the hook class
-    if (coreJar != null) {
-      inst.appendToBootstrapClassLoaderSearch(coreJar);
     }
 
     return new URLClassLoader(spiderClasspath.toArray(new URL[0]), null);

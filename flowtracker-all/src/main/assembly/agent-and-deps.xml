@@ -12,6 +12,7 @@
       <outputDirectory>/flowtracker/</outputDirectory>
       <excludes>
         <exclude>*:flowtracker-agent</exclude>
+        <exclude>*:flowtracker-core</exclude>
       </excludes>
     </dependencySet>
     <dependencySet>
@@ -20,6 +21,7 @@
       <unpack>true</unpack>
       <includes>
         <include>*:flowtracker-agent</include>
+        <include>*:flowtracker-core</include>
       </includes>
     </dependencySet>
   </dependencySets>

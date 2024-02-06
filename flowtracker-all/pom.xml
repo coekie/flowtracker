@@ -52,7 +52,6 @@
           <archive>
             <manifestEntries>
               <Premain-Class>be.coekaerts.wouter.flowtracker.agent.FlowTrackAgent</Premain-Class>
-              <Agent-Class>be.coekaerts.wouter.flowtracker.agent.FlowTrackAgent</Agent-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
             </manifestEntries>
