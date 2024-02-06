@@ -7,14 +7,7 @@
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
   <dependencySets>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/flowtracker/</outputDirectory>
-      <excludes>
-        <exclude>*:flowtracker-agent</exclude>
-        <exclude>*:flowtracker-core</exclude>
-      </excludes>
-    </dependencySet>
+    <!-- agent and core go directly into the jar, get put on bootclasspath -->
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
       <outputDirectory>/</outputDirectory>
@@ -23,6 +16,17 @@
         <include>*:flowtracker-agent</include>
         <include>*:flowtracker-core</include>
       </includes>
+    </dependencySet>
+
+    <!-- other dependencies are in subdirectory, loaded by SpiderClassLoader -->
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <outputDirectory>/flowtracker-spider/</outputDirectory>
+      <unpack>true</unpack>
+      <excludes>
+        <exclude>*:flowtracker-agent</exclude>
+        <exclude>*:flowtracker-core</exclude>
+      </excludes>
     </dependencySet>
   </dependencySets>
 </assembly>

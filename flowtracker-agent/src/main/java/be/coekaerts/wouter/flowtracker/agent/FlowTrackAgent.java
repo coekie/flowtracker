@@ -6,19 +6,14 @@ import be.coekaerts.wouter.flowtracker.CoreInitializer;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import be.coekaerts.wouter.flowtracker.util.Logger;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class FlowTrackAgent {
@@ -79,25 +74,15 @@ public class FlowTrackAgent {
       for (String path : getConfig("spiderClasspath").split(",")) {
         spiderClasspath.add(new File(path).toURI().toURL());
       }
+      return new URLClassLoader(spiderClasspath.toArray(new URL[0]), null);
     } else { // paths not explicitly configured
-      // assume we're running from flowtracker-all jar with nested jars in it
-      File expandDir = createExpandDir();
       JarFile jar = getThisJar();
 
       // make the instrumented JDK classes find the hook class
       inst.appendToBootstrapClassLoaderSearch(jar);
 
-      for (JarEntry entry : Collections.list(jar.entries())) {
-        if (entry.getName().startsWith("flowtracker/") && entry.getName().endsWith(".jar")) {
-          String subJarName = entry.getName().substring("flowtracker/".length());
-          File outFile = new File(expandDir, subJarName);
-          copy(jar.getInputStream(entry), outFile);
-          spiderClasspath.add(outFile.toURI().toURL());
-        }
-      }
+      return new SpiderClassLoader(jar);
     }
-
-    return new URLClassLoader(spiderClasspath.toArray(new URL[0]), null);
   }
 
   // NICE: generic plugin system would be cleaner
@@ -136,36 +121,5 @@ public class FlowTrackAgent {
       throw new IllegalStateException("Flowtracker not launched from jar file: " + url);
     }
     return new JarFile(path.substring("file:".length(), path.indexOf("!")));
-  }
-
-  /** Create temporary directory that we expand ourselves into */
-  private static File createExpandDir() {
-    Random rnd = new Random();
-    for (int counter = 0; counter < 1000; counter++) {
-      File tempDir = new File(System.getProperty("java.io.tmpdir"), "flowtracker-" + Math.abs(
-          rnd.nextInt()));
-      if (tempDir.mkdir()) {
-        tempDir.deleteOnExit();
-        return tempDir;
-      }
-    }
-    throw new RuntimeException("Could not create temporary directory");
-  }
-
-  private static void copy(InputStream in, File outFile) throws IOException {
-    try {
-      try (FileOutputStream out = new FileOutputStream(outFile)) {
-        byte[] buf = new byte[1024];
-        while (true) {
-          int r = in.read(buf);
-          if (r == -1) {
-            break;
-          }
-          out.write(buf, 0, r);
-        }
-      }
-    } finally {
-      in.close();
-    }
   }
 }
