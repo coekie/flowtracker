@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-agent-dev</artifactId>
-  <name>${artifactId}</name>
+  <name>${project.artifactId}</name>
   <description>Agent jar to be used for development</description>
 
   <dependencies>
