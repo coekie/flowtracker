@@ -1,18 +1,12 @@
 package be.coekaerts.wouter.flowtracker.agent;
 
-import static java.util.Objects.requireNonNull;
-
 import be.coekaerts.wouter.flowtracker.CoreInitializer;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import be.coekaerts.wouter.flowtracker.util.Logger;
-import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
 
@@ -21,6 +15,10 @@ public class FlowTrackAgent {
   private static final Map<String, String> config = new HashMap<>();
 
   public static void premain(String agentArgs, Instrumentation inst) {
+    new FlowTrackAgent().doPremain(agentArgs, inst);
+  }
+
+  void doPremain(String agentArgs, Instrumentation inst) {
     try {
       initProperties(agentArgs);
       // system property to override agent args. Useful in IntelliJ which picks up the agent from
@@ -66,32 +64,27 @@ public class FlowTrackAgent {
    * Those are loaded with their dependencies in a separate class loader to avoid polluting the
    * classpath of the application.
    */
-  private static ClassLoader initClassLoaders(Instrumentation inst) throws IOException {
-    // all other flowtracker and dependencies jars
-    List<URL> spiderClasspath = new ArrayList<>();
+  ClassLoader initClassLoaders(Instrumentation inst) throws IOException {
+    JarFile jar = getAgentJar();
 
-    if (config.containsKey("spiderClasspath")) {
-      for (String path : getConfig("spiderClasspath").split(",")) {
-        spiderClasspath.add(new File(path).toURI().toURL());
-      }
-      return new URLClassLoader(spiderClasspath.toArray(new URL[0]), null);
-    } else { // paths not explicitly configured
-      JarFile jar = getThisJar();
+    // make the instrumented JDK classes find the hook class
+    inst.appendToBootstrapClassLoaderSearch(jar);
 
-      // make the instrumented JDK classes find the hook class
-      inst.appendToBootstrapClassLoaderSearch(jar);
-
-      return new SpiderClassLoader(jar);
-    }
+    return new SpiderClassLoader(jar);
   }
 
   // NICE: generic plugin system would be cleaner
   private static void initWeb(ClassLoader classLoader) throws Exception {
+    // don't start webserver when "noweb" is set, e.g. for unit tests
+    if ("true".equals(config.get("noweb"))) {
+      return;
+    }
+
     Class<?> clazz;
     try {
       clazz = classLoader.loadClass("be.coekaerts.wouter.flowtracker.web.WebModule");
     } catch (ClassNotFoundException e) {
-      return; // ok, module not included
+      throw new Error(e);
     }
     clazz.newInstance();
   }
@@ -105,17 +98,12 @@ public class FlowTrackAgent {
     }
   }
 
-  private static String getConfig(String name) {
-    String result = config.get(name);
-    if (result == null) {
-      throw new RuntimeException("You must provide '" + name + "' as argument to the agent");
-    }
-    return result;
-  }
-
   /** Returns the jar that this class is running in */
-  private static JarFile getThisJar() throws IOException {
-    URL url = requireNonNull(FlowTrackAgent.class.getResource("FlowTrackAgent.class"));
+  static JarFile getAgentJar() throws IOException {
+    URL url = Thread.currentThread().getContextClassLoader().getResource("flowtracker-spider");
+    if (url == null) {
+      throw new IllegalStateException("Failed to find our own jar");
+    }
     String path = url.getPath();
     if (!"jar".equals(url.getProtocol()) || !path.startsWith("file:/")) {
       throw new IllegalStateException("Flowtracker not launched from jar file: " + url);

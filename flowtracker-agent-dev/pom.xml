@@ -13,21 +13,74 @@
   <description>Agent jar to be used for development</description>
 
   <dependencies>
+    <!--
+      We include the dependencies of flowtracker-weaver and flowtracker-web in the agent jar.
+      that way DevAgent can load them the same way as the real agent, and doesn't need to figure out
+      what dependencies to load.
+      That means their dependencies get duplicated and have to be kept in sync.
+      An alternative would have been to depend on flowtracker-weaver and flowtracker-web here and
+      then exclude everything that's not a dependency; but having flowtracker-agent-dev not depend
+      on any other flowtracker modules is nicer, avoiding circular dependencies.
+    -->
+
+    <!-- flowtracker-weaver dependencies -->
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
-      <artifactId>flowtracker-agent</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>${asm.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-util</artifactId>
+      <version>${asm.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-commons</artifactId>
+      <version>${asm.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- flowtracker-web dependencies -->
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-jetty-servlet</artifactId>
+      <version>2.35</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+      <version>2.35</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
+      <version>2.35</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.7</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.5.2</version>
         <configuration>
+          <descriptor>src/main/assembly/deps.xml</descriptor>
+          <!-- Make the assembly the main artifact -->
+          <appendAssemblyId>false</appendAssemblyId>
           <archive>
             <manifestEntries>
-              <Premain-Class>be.coekaerts.wouter.flowtracker.agent.FlowTrackAgent</Premain-Class>
+              <Premain-Class>be.coekaerts.wouter.flowtracker.agent.DevAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
               <Boot-Class-Path>
@@ -36,6 +89,22 @@
               </Boot-Class-Path>
             </manifestEntries>
           </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attached</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>3.1.1</version>
+        <configuration>
+          <skip>true</skip>
         </configuration>
       </plugin>
     </plugins>

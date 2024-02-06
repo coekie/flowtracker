@@ -113,7 +113,10 @@ class AsmTransformer implements ClassFileTransformer {
         && !className.startsWith("be/coekaerts/wouter/flowtracker/test")) {
       return null;
     }
-    if (classLoader == AsmTransformer.class.getClassLoader()) {
+    // exclude the classloader that loaded flowtracker classes, or that loaded our dependencies.
+    // when using flowtracker-agent-dev those are two different classloaders.
+    if (classLoader == AsmTransformer.class.getClassLoader()
+        || classLoader == Opcodes.class.getClassLoader()) {
       return null;
     }
 

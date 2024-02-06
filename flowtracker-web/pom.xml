@@ -24,6 +24,8 @@
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
+
+    <!-- NOTE: when updating dependencies here, also update flowtracker-agent-dev/pom.xml -->
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-jetty-servlet</artifactId>

@@ -52,7 +52,7 @@
           <!-- For cleaner debugging environment, but slower: -->
           <!--<reuseForks>false</reuseForks>-->
           <argLine>
-            -javaagent:../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=spiderClasspath=${project.basedir}/../flowtracker-weaver/target/classes,${settings.localRepository}/org/ow2/asm/asm/${asm.version}/asm-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-util/${asm.version}/asm-util-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-commons/${asm.version}/asm-commons-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-analysis/${asm.version}/asm-analysis-${asm.version}.jar,${settings.localRepository}/org/ow2/asm/asm-tree/${asm.version}/asm-tree-${asm.version}.jar;packages=be/coekaerts/wouter/flowtracker/test/;${flowtracker.extraAgentArgs}
+            -javaagent:../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=noweb=true;packages=be/coekaerts/wouter/flowtracker/test/;${flowtracker.extraAgentArgs}
             -XX:-UseStringDeduplication -XX:+UnlockDiagnosticVMOptions -XX:DisableIntrinsic=_copyOf -XX:DisableIntrinsic=_copyOfRange -XX:DisableIntrinsic=_String_String -XX:DisableIntrinsic=_StringBuilder_String -XX:DisableIntrinsic=_StringBuilder_append_char -XX:DisableIntrinsic=_StringBuilder_append_String -XX:DisableIntrinsic=_StringBuilder_toString -XX:DisableIntrinsic=_inflateStringC -XX:DisableIntrinsic=_inflateStringB -XX:DisableIntrinsic=_toBytesStringU -XX:DisableIntrinsic=_getCharsStringU -XX:DisableIntrinsic=_getCharStringU -XX:DisableIntrinsic=_putCharStringU -XX:DisableIntrinsic=_compressStringC -XX:DisableIntrinsic=_compressStringB -XX:DisableIntrinsic=_encodeByteISOArray
           </argLine>
           <!-- These should not be on the app classpath; the agent should take care of getting this on the classpath (bootstrap classpath and for spider classloader) -->
@@ -61,6 +61,27 @@
             <classpathDependencyExclude>be.coekaerts.wouter.flowtracker:flowtracker-weaver</classpathDependencyExclude>
           </classpathDependencyExcludes>
         </configuration>
+      </plugin>
+
+      <!-- disable install and packaging, because it's useless -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>3.1.1</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

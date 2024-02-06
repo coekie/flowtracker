@@ -14,6 +14,7 @@ class SpiderClassLoader extends ClassLoader {
   private final JarFile jar;
 
   SpiderClassLoader(JarFile jar) {
+    super(null);
     this.jar = jar;
   }
 
