@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Settings from './Settings.svelte'
+  import SettingsView from './SettingsView.svelte'
   import TrackerDetailView from './TrackerDetailView.svelte'
   import TrackerList from './TrackerList.svelte'
   import type { Tracker, TrackerDetail, TrackerPart } from '../javatypes'
@@ -11,7 +11,7 @@
   <TrackerList bind:selectedTracker={selectedTracker}/>
   <TrackerDetailView bind:selectedTracker={selectedTracker} />
 </div>
-<Settings />
+<SettingsView />
 
 <style>
   .trackersWrapper {
