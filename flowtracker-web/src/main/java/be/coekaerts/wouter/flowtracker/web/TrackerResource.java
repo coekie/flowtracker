@@ -3,10 +3,13 @@ package be.coekaerts.wouter.flowtracker.web;
 import static java.util.Objects.requireNonNull;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteContentTracker;
+import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharContentTracker;
+import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Growth;
 import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
+import be.coekaerts.wouter.flowtracker.tracker.OriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.WritableTracker;
 import java.util.ArrayList;
@@ -43,10 +46,14 @@ public class TrackerResource {
   public static class TrackerResponse {
     private final long id;
     private final String description;
+    private final boolean origin;
+    private final boolean sink;
 
     TrackerResponse(Tracker tracker) {
       id = tracker.getTrackerId();
       description = tracker.getDescriptor();
+      origin = tracker instanceof OriginTracker;
+      sink = tracker instanceof ByteSinkTracker || tracker instanceof CharSinkTracker;
     }
 
     public long getId() {
@@ -55,6 +62,14 @@ public class TrackerResource {
 
     public String getDescription() {
       return description;
+    }
+
+    public boolean isOrigin() {
+      return origin;
+    }
+
+    public boolean isSink() {
+      return sink;
     }
   }
 

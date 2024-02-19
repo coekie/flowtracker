@@ -7,6 +7,8 @@
 export interface Tracker {
   id: Number
   description: String
+  origin: boolean
+  sink: boolean
 }
 
 // in java: TrackerResource.TrackerPartResponse
@@ -20,6 +22,13 @@ export interface TrackerPart {
 // in java: TrackerResource.TrackerDetailResponse
 export interface TrackerDetail {
   parts: TrackerPart[]
+}
+
+// in java: TreeResource.NodeResponse
+export interface Node {
+  name: String
+  children: Node[]
+  trackers: Tracker[]
 }
 
 // in java: SettingsResource.Settings

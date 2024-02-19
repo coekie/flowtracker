@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/tracker' : 'http://localhost:8011',
+      '/tree' : 'http://localhost:8011',
       '/settings' : 'http://localhost:8011',
     }
   },

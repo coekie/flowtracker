@@ -3,12 +3,14 @@
   import TrackerDetailView from './TrackerDetailView.svelte'
   import TrackerList from './TrackerList.svelte'
   import type { Tracker, TrackerDetail, TrackerPart } from '../javatypes'
+  import TrackerTree from './TrackerTree.svelte';
 
   let selectedTracker: Tracker;
 </script>
 
 <div class="trackersWrapper">
-  <TrackerList bind:selectedTracker={selectedTracker}/>
+  <!-- <TrackerList bind:selectedTracker={selectedTracker}/> -->
+  <TrackerTree bind:selectedTracker={selectedTracker}/>
   <TrackerDetailView bind:selectedTracker={selectedTracker} />
 </div>
 <SettingsView />
