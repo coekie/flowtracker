@@ -4,6 +4,7 @@ import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBu
 import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.hook.Reflection;
+import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -52,7 +53,7 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
     try (FileChannel channel = openForRead()) {
       TrackTestHelper.assertThatTracker(getReadTracker(channel))
           .hasDescriptor("FileChannel for " + fileToRead.getPath())
-          .hasNode("Files", fileToRead.getAbsolutePath());
+          .hasNode("Files", fileToRead.getAbsolutePath(), FileDescriptorTrackerRepository.READ);
     }
   }
 

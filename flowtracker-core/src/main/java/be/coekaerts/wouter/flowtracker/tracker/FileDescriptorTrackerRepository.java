@@ -6,6 +6,9 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class FileDescriptorTrackerRepository {
+  public static final String READ = "Read";
+  public static final String WRITE = "Write";
+
   // like TrackerRepository, ideally these would be concurrent weak identity hash maps?
   private static final Map<FileDescriptor, TrackerPair> map =
       Collections.synchronizedMap(new IdentityHashMap<>());
@@ -34,7 +37,7 @@ public class FileDescriptorTrackerRepository {
       readTracker.initDescriptor((write ? "Read " : "") + descriptor);
       InterestRepository.interestTrackerCreated(readTracker);
       if (node != null) {
-        readTracker.addTo(node);
+        readTracker.addTo(node.node(READ));
       }
     } else {
       readTracker = null;
@@ -46,7 +49,7 @@ public class FileDescriptorTrackerRepository {
       writeTracker.initDescriptor((read ? "Write " : "") + descriptor);
       InterestRepository.interestTrackerCreated(writeTracker);
       if (node != null) {
-        writeTracker.addTo(node);
+        writeTracker.addTo(node.node(WRITE));
       }
     } else {
       writeTracker = null;

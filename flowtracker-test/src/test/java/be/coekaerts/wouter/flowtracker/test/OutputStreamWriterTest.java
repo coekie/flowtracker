@@ -146,6 +146,6 @@ public class OutputStreamWriterTest {
   private void assertDescriptorAndNode(OutputStreamWriter writer) {
     TrackTestHelper.assertThatTracker(writer)
         .hasDescriptor("OutputStreamWriter to FileOutputStream for " + file.getAbsolutePath())
-        .hasNode("Files", file.getAbsolutePath(), "Writer");
+        .hasNode("Files", file.getAbsolutePath(), FileDescriptorTrackerRepository.WRITE, "Writer");
   }
 }
