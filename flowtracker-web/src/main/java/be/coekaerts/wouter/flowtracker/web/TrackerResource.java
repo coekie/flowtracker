@@ -13,7 +13,6 @@ import be.coekaerts.wouter.flowtracker.tracker.OriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.WritableTracker;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -23,16 +22,6 @@ import javax.ws.rs.core.MediaType;
 
 @Path("/tracker")
 public class TrackerResource {
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  public List<TrackerResponse> list() {
-    Collection<Tracker> trackers = InterestRepository.getTrackers();
-    List<TrackerResponse> result = new ArrayList<>(trackers.size());
-    for (Tracker tracker : trackers) {
-      result.add(new TrackerResponse(tracker));
-    }
-    return result;
-  }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)

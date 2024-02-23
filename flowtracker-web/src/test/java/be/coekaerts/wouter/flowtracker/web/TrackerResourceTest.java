@@ -1,15 +1,12 @@
 package be.coekaerts.wouter.flowtracker.web;
 
 import static be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerDetailResponse;
-import static be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerResponse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
-import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
@@ -21,20 +18,6 @@ public class TrackerResourceTest {
 
   @Before public void setup() {
     trackerResource = new TrackerResource();
-  }
-
-  @Test public void list() {
-    Tracker tracker = new DefaultTracker();
-    tracker.initDescriptor("myTracker");
-    TrackerRepository.setInterestTracker(new Object(), tracker);
-
-    for (TrackerResponse t : trackerResource.list()) {
-      if (t.getId() == tracker.getTrackerId()) {
-        assertEquals("myTracker", t.getDescription());
-        return;
-      }
-    }
-    fail("tracker with right id not returned");
   }
 
   @Test public void getCharSinkTracker() {
