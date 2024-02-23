@@ -1,10 +1,16 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static java.util.Objects.requireNonNull;
+import static org.junit.Assert.assertEquals;
 
+import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.junit.Before;
@@ -30,7 +36,15 @@ public class ZipFileTest {
             .hasDescriptorMatching(desc ->
                 desc.matches("Unzipped .*\\.jar file org/junit/Test.class"))
             .hasNodeMatching(nodePath ->
-                nodePath.get(0).equals("Files") && nodePath.get(2).equals("org/junit/Test.class"));
+                nodePath.get(0).equals("Files")
+                    && nodePath.get(1).equals(testZipFilePath)
+                    && nodePath.get(2).equals("org/junit/Test.class"));
+
+        // this is tested more in InflaterInputStreamTest
+        byte[] bytes = in.readAllBytes();
+        Tracker tracker = TrackerRepository.getTracker(in);
+        snapshotBuilder().part(tracker, 0, bytes.length).assertTrackerOf(bytes);
+        assertEquals(ByteBuffer.wrap(bytes), ((ByteOriginTracker) tracker).getByteContent());
       }
     }
   }

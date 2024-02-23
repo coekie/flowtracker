@@ -29,6 +29,15 @@ public abstract class AbstractInputStreamTest {
   }
 
   @Test
+  public void readAllBytes() throws IOException {
+    try (InputStream is = createInputStream(abc)) {
+      byte[] buffer = is.readAllBytes();
+      assertContentEquals("abc", is);
+      snapshotBuilder().part(getStreamTracker(is), 0, 3).assertTrackerOf(buffer);
+    }
+  }
+
+  @Test
   public void readWithOffset() throws IOException {
     try (InputStream fis = createInputStream(abc)) {
       byte[] buffer = new byte[5];

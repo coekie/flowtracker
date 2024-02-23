@@ -28,7 +28,7 @@ public class SocketInputStreamTest extends AbstractInputStreamTest {
   InputStream createInputStream(byte[] bytes) throws IOException {
     tester = SocketTester.createConnected();
     tester.server.getOutputStream().write(bytes);
-    tester.server.getOutputStream().flush();
+    tester.server.getOutputStream().close();
     InputStream is = tester.client.getInputStream();
     // not sure if this is needed, but just to be safe, to avoid test flakiness
     while (is.available() == 0) {
