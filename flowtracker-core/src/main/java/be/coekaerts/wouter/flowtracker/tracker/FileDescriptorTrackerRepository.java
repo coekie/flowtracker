@@ -37,7 +37,7 @@ public class FileDescriptorTrackerRepository {
       readTracker.initDescriptor((write ? "Read " : "") + descriptor);
       InterestRepository.interestTrackerCreated(readTracker);
       if (node != null) {
-        readTracker.addTo(node.node(READ));
+        readTracker.addTo(node.optionalNode(READ));
       }
     } else {
       readTracker = null;
@@ -49,7 +49,7 @@ public class FileDescriptorTrackerRepository {
       writeTracker.initDescriptor((read ? "Write " : "") + descriptor);
       InterestRepository.interestTrackerCreated(writeTracker);
       if (node != null) {
-        writeTracker.addTo(node.node(WRITE));
+        writeTracker.addTo(node.optionalNode(WRITE));
       }
     } else {
       writeTracker = null;

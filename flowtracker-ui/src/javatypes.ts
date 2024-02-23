@@ -28,7 +28,7 @@ export interface TrackerDetail {
 export interface Node {
   name: String
   children: Node[]
-  trackers: Tracker[]
+  tracker: Tracker
 }
 
 // in java: SettingsResource.Settings

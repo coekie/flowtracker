@@ -81,7 +81,7 @@ public class SocketImplHook {
   }
 
   static TrackerTree.Node serverSocketNode(String localPort, String remote) {
-    return TrackerTree.node("Server socket").node(localPort).node(remote);
+    return TrackerTree.node("Server socket").optionalNode(localPort).node(remote);
   }
 
   static TrackerTree.Node clientSocketNode(SocketAddress remote) {

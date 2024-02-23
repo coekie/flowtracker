@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import type { Node, Tracker } from '../javatypes'
 
   export let expanded: boolean = false;
@@ -11,28 +10,26 @@
 	}
 </script>
 
-<button class="folder" class:expanded on:click={toggle}>{node.name}</button>
-
-{#if expanded}
+{#if node.tracker}
+  <button class="tracker"
+    class:expanded
+    class:origin={node.tracker.origin}
+    class:sink={node.tracker.sink}
+    class:selected={node.tracker === selectedTracker}
+    on:click={() => selectedTracker = node.tracker}>
+    {node.name}
+  </button>
+{:else}
+  <button class="folder" class:expanded on:click={toggle}>{node.name}</button>
+	{#if expanded}
 	<ul>
 		{#each node.children as child}
 			<li>
 				<svelte:self node={child} bind:selectedTracker={selectedTracker}/>
 			</li>
 		{/each}
-		{#each node.trackers as tracker}
-			<li>
-        <button class="tracker"
-          class:expanded
-          class:origin={tracker.origin}
-          class:sink={tracker.sink}
-          class:selected={tracker === selectedTracker}
-          on:click={() => selectedTracker = tracker}>
-          {tracker.description}
-        </button>
-			</li>
-		{/each}
 	</ul>
+	{/if}
 {/if}
 
 <style>
