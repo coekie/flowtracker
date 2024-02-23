@@ -8,7 +8,6 @@ import be.coekaerts.wouter.flowtracker.tracker.CharContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Growth;
-import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
 import be.coekaerts.wouter.flowtracker.tracker.OriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.WritableTracker;
@@ -40,6 +39,7 @@ public class TrackerResource {
 
     TrackerResponse(Tracker tracker) {
       id = tracker.getTrackerId();
+      InterestRepository.register(tracker);
       description = tracker.getDescriptor();
       origin = tracker instanceof OriginTracker;
       sink = tracker instanceof ByteSinkTracker || tracker instanceof CharSinkTracker;

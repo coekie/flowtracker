@@ -114,7 +114,10 @@ public class TrackTestHelper {
     }
 
     public TrackerAssertions hasNodeMatching(Predicate<List<String>> predicate) {
-      assertTrue(predicate.test(nodePath(tracker.getNode())));
+      List<String> nodePath = nodePath(tracker.getNode());
+      if (!predicate.test(nodePath)) {
+        throw new AssertionError(nodePath.toString());
+      }
       return this;
     }
   }

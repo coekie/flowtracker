@@ -43,7 +43,7 @@ public class OutputStreamWriterHook {
         .initDescriptor(streamTracker == null ? "OutputStreamWriter"
             : "OutputStreamWriter to " + streamTracker.getDescriptor())
         .addTo(TrackerTree.nodeOrUnknown(streamTracker).node("Writer"));
-    TrackerRepository.setInterestTracker(target, tracker);
+    TrackerRepository.setTracker(target, tracker);
   }
 
   @Hook(target = "java.io.OutputStreamWriter",

@@ -1,11 +1,11 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static org.junit.Assert.assertTrue;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTracker;
 
 import be.coekaerts.wouter.flowtracker.hook.Reflection;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
-import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
+import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -45,23 +45,31 @@ public class SocketChannelTest extends AbstractChannelTest<SocketChannel> {
   @Test
   public void descriptorForClient() {
     ByteOriginTracker readTracker = getReadTracker(client);
-    assertTrue(readTracker.getDescriptor().startsWith("Read Client socket to"));
-    assertTrue(InterestRepository.getTrackers().contains(readTracker));
+    assertThatTracker(readTracker)
+        .hasDescriptorMatching(d -> d.startsWith("Read Client socket to"))
+        .hasNodeMatching(n -> n.get(0).equals("Client socket")
+            && n.get(2).equals(FileDescriptorTrackerRepository.READ));
 
     ByteSinkTracker writeTracker = getWriteTracker(client);
-    assertTrue(writeTracker.getDescriptor().startsWith("Write Client socket to"));
-    assertTrue(InterestRepository.getTrackers().contains(writeTracker));
+    assertThatTracker(writeTracker)
+        .hasDescriptorMatching(d -> d.startsWith("Write Client socket to"))
+        .hasNodeMatching(n -> n.get(0).equals("Client socket")
+            && n.get(2).equals(FileDescriptorTrackerRepository.WRITE));
   }
 
   @Test
   public void descriptorForServer() {
     ByteOriginTracker readTracker = getReadTracker(server);
-    assertTrue(readTracker.getDescriptor().startsWith("Read Server socket to"));
-    assertTrue(InterestRepository.getTrackers().contains(readTracker));
+    assertThatTracker(readTracker)
+        .hasDescriptorMatching(d -> d.startsWith("Read Server socket to"))
+        .hasNodeMatching(n -> n.get(0).equals("Server socket")
+            && n.get(3).equals(FileDescriptorTrackerRepository.READ));
 
     ByteSinkTracker writeTracker = getWriteTracker(server);
-    assertTrue(writeTracker.getDescriptor().startsWith("Write Server socket to"));
-    assertTrue(InterestRepository.getTrackers().contains(writeTracker));
+    assertThatTracker(writeTracker)
+        .hasDescriptorMatching(d -> d.startsWith("Write Server socket to"))
+        .hasNodeMatching(n -> n.get(0).equals("Server socket")
+            && n.get(3).equals(FileDescriptorTrackerRepository.WRITE));
   }
 
   @Override

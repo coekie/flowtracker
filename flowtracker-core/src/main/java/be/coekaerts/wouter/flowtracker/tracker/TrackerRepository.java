@@ -32,11 +32,6 @@ public class TrackerRepository {
     return tracker == null ? createTracker(obj) : tracker;
   }
 
-  public static void setInterestTracker(Object obj, Tracker tracker) {
-    setTracker(obj, tracker);
-    InterestRepository.interestTrackerCreated(tracker);
-  }
-
   public static void setTracker(Object obj, Tracker tracker) {
     if (obj == null) {
       throw new NullPointerException("Can't track null");

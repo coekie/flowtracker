@@ -4,9 +4,9 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteAr
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
-import be.coekaerts.wouter.flowtracker.tracker.InterestRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import org.junit.Test;
 
 /**
@@ -43,9 +43,7 @@ public class SystemTest {
 		// IntelliJ and maven/surefire replace System.out and System.err with their own implementations,
 		// and we haven't implemented anything yet to handle those, so we don't test anything tied to
 		// the _current_ value of System.out and System.err.
-		assertTrue(InterestRepository.getTrackers().stream()
-				.anyMatch(t -> t.getDescriptor().equals("System.out")));
-		assertTrue(InterestRepository.getTrackers().stream()
-				.anyMatch(t -> t.getDescriptor().equals("System.err")));
+		assertFalse(TrackerTree.node("System").node("System.out").node("Write").trackers().isEmpty());
+		assertFalse(TrackerTree.node("System").node("System.err").node("Write").trackers().isEmpty());
 	}
 }

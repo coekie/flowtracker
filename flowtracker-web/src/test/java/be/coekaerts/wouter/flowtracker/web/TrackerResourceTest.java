@@ -22,7 +22,8 @@ public class TrackerResourceTest {
 
   @Test public void getCharSinkTracker() {
     CharSinkTracker tracker = new CharSinkTracker();
-    TrackerRepository.setInterestTracker(new Object(), tracker);
+    TrackerRepository.setTracker(new Object(), tracker);
+    InterestRepository.register(tracker);
 
     Tracker sourceTracker1 = new FixedOriginTracker(3);
     Tracker sourceTracker2 = new FixedOriginTracker(3);
@@ -63,7 +64,8 @@ public class TrackerResourceTest {
 
   @Test public void getByteSinkTracker() {
     ByteSinkTracker tracker = new ByteSinkTracker();
-    TrackerRepository.setInterestTracker(new Object(), tracker);
+    TrackerRepository.setTracker(new Object(), tracker);
+    InterestRepository.register(tracker);
 
     Tracker sourceTracker1 = new FixedOriginTracker(3);
     Tracker sourceTracker2 = new FixedOriginTracker(3);
@@ -104,7 +106,8 @@ public class TrackerResourceTest {
 
   @Test public void trackerPartResponse_sourceContext() {
     CharSinkTracker tracker = new CharSinkTracker();
-    TrackerRepository.setInterestTracker(new Object(), tracker);
+    TrackerRepository.setTracker(new Object(), tracker);
+    InterestRepository.register(tracker);
 
     CharOriginTracker sourceTracker = new CharOriginTracker();
     sourceTracker.append("abcdefghijklmnopqrstuvwxyz".toCharArray(), 0, 26);
@@ -124,7 +127,8 @@ public class TrackerResourceTest {
 
   @Test public void getContentTracker() {
     CharOriginTracker tracker = new CharOriginTracker();
-    TrackerRepository.setInterestTracker(new Object(), tracker);
+    TrackerRepository.setTracker(new Object(), tracker);
+    InterestRepository.register(tracker);
 
     tracker.append(new char[] {'a', 'b', 'c', 'd'}, 1, 2);
 

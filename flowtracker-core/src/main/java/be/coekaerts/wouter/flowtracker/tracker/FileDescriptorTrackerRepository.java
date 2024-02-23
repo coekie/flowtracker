@@ -35,7 +35,6 @@ public class FileDescriptorTrackerRepository {
     if (read) {
       readTracker = new ByteOriginTracker();
       readTracker.initDescriptor((write ? "Read " : "") + descriptor);
-      InterestRepository.interestTrackerCreated(readTracker);
       if (node != null) {
         readTracker.addTo(node.optionalNode(READ));
       }
@@ -47,7 +46,6 @@ public class FileDescriptorTrackerRepository {
     if (write) {
       writeTracker = new ByteSinkTracker();
       writeTracker.initDescriptor((read ? "Write " : "") + descriptor);
-      InterestRepository.interestTrackerCreated(writeTracker);
       if (node != null) {
         writeTracker.addTo(node.optionalNode(WRITE));
       }
