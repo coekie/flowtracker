@@ -13,15 +13,20 @@ export interface Tracker {
 
 // in java: TrackerResource.TrackerPartResponse
 export interface TrackerPart {
+  tracker: Tracker
+  offset: Number
+  context: String
+}
+
+// in java: TrackerResource.Region
+export interface Region {
   content: String
-  source: Tracker
-  sourceOffset: Number
-  sourceContext: String
+  parts: TrackerPart[]
 }
 
 // in java: TrackerResource.TrackerDetailResponse
 export interface TrackerDetail {
-  parts: TrackerPart[]
+  regions: Region[]
 }
 
 // in java: TreeResource.NodeResponse

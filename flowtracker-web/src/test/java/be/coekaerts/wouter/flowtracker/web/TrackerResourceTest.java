@@ -2,7 +2,7 @@ package be.coekaerts.wouter.flowtracker.web;
 
 import static be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerDetailResponse;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
@@ -10,6 +10,7 @@ import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.web.TrackerResource.Region;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,24 +43,13 @@ public class TrackerResourceTest {
     tracker.append('h');
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
-    assertEquals(5, response.getParts().size());
+    assertEquals(5, response.getRegions().size());
 
-    assertEquals("ab", response.getParts().get(0).getContent());
-    assertNull(response.getParts().get(0).getSource());
-
-    assertEquals("cde", response.getParts().get(1).getContent());
-    assertEquals(sourceTracker1.getTrackerId(), response.getParts().get(1).getSource().getId());
-    assertEquals(0, response.getParts().get(1).getSourceOffset());
-
-    assertEquals("f", response.getParts().get(2).getContent());
-    assertNull(response.getParts().get(2).getSource());
-
-    assertEquals("g", response.getParts().get(3).getContent());
-    assertEquals(sourceTracker2.getTrackerId(), response.getParts().get(3).getSource().getId());
-    assertEquals(2, response.getParts().get(3).getSourceOffset());
-
-    assertEquals("h", response.getParts().get(4).getContent());
-    assertNull(response.getParts().get(4).getSource());
+    assertRegionNoPart(response.getRegions().get(0), "ab");
+    assertRegionOnePart(response.getRegions().get(1), "cde", sourceTracker1, 0);
+    assertRegionNoPart(response.getRegions().get(2), "f");
+    assertRegionOnePart(response.getRegions().get(3), "g", sourceTracker2, 2);
+    assertRegionNoPart(response.getRegions().get(4), "h");
   }
 
   @Test public void getByteSinkTracker() {
@@ -84,24 +74,13 @@ public class TrackerResourceTest {
     tracker.append((byte) 'h');
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
-    assertEquals(5, response.getParts().size());
+    assertEquals(5, response.getRegions().size());
 
-    assertEquals("ab", response.getParts().get(0).getContent());
-    assertNull(response.getParts().get(0).getSource());
-
-    assertEquals("cde", response.getParts().get(1).getContent());
-    assertEquals(sourceTracker1.getTrackerId(), response.getParts().get(1).getSource().getId());
-    assertEquals(0, response.getParts().get(1).getSourceOffset());
-
-    assertEquals("f", response.getParts().get(2).getContent());
-    assertNull(response.getParts().get(2).getSource());
-
-    assertEquals("g", response.getParts().get(3).getContent());
-    assertEquals(sourceTracker2.getTrackerId(), response.getParts().get(3).getSource().getId());
-    assertEquals(2, response.getParts().get(3).getSourceOffset());
-
-    assertEquals("h", response.getParts().get(4).getContent());
-    assertNull(response.getParts().get(4).getSource());
+    assertRegionNoPart(response.getRegions().get(0), "ab");
+    assertRegionOnePart(response.getRegions().get(1), "cde", sourceTracker1, 0);
+    assertRegionNoPart(response.getRegions().get(2), "f");
+    assertRegionOnePart(response.getRegions().get(3), "g", sourceTracker2, 2);
+    assertRegionNoPart(response.getRegions().get(4), "h");
   }
 
   @Test public void trackerPartResponse_sourceContext() {
@@ -118,14 +97,15 @@ public class TrackerResourceTest {
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
     // middle, full context
-    assertEquals("cdefghijklmnopqrstuvwx", response.getParts().get(0).getSourceContext());
+    assertEquals("cdefghijklmnopqrstuvwx",
+        response.getRegions().get(0).getParts().get(0).getContext());
     // context near the beginning
-    assertEquals("abcdefghijklm", response.getParts().get(1).getSourceContext());
+    assertEquals("abcdefghijklm", response.getRegions().get(1).getParts().get(0).getContext());
     // context near the end
-    assertEquals("opqrstuvwxyz", response.getParts().get(2).getSourceContext());
+    assertEquals("opqrstuvwxyz", response.getRegions().get(2).getParts().get(0).getContext());
   }
 
-  @Test public void getContentTracker() {
+  @Test public void getOriginTracker() {
     CharOriginTracker tracker = new CharOriginTracker();
     TrackerRepository.setTracker(new Object(), tracker);
     InterestRepository.register(tracker);
@@ -133,9 +113,21 @@ public class TrackerResourceTest {
     tracker.append(new char[] {'a', 'b', 'c', 'd'}, 1, 2);
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
-    assertEquals(1, response.getParts().size());
+    assertEquals(1, response.getRegions().size());
 
-    assertEquals("bc", response.getParts().get(0).getContent());
-    assertNull(response.getParts().get(0).getSource());
+    assertRegionNoPart(response.getRegions().get(0), "bc");
+  }
+
+  private void assertRegionNoPart(Region region, String expectedContent) {
+    assertEquals(expectedContent, region.getContent());
+    assertTrue(region.getParts().isEmpty());
+  }
+
+  private void assertRegionOnePart(Region region, String expectedContent, Tracker expectedTracker,
+      int expectedOffset) {
+    assertEquals(expectedContent, region.getContent());
+    assertEquals(1, region.getParts().size());
+    assertEquals(expectedTracker.getTrackerId(), region.getParts().get(0).getTracker().getId());
+    assertEquals(expectedOffset, region.getParts().get(0).getOffset());
   }
 }
