@@ -4,6 +4,7 @@
   export let selectedTracker: Tracker;
   let trackerDetailPromise: Promise<TrackerDetail>;
   $: trackerDetailPromise = fetchTrackerDetail(selectedTracker);
+  let focusPart: TrackerPart | null;
 
   const fetchTrackerDetail = async (tracker:Tracker) => {
     if (!tracker) {
@@ -19,11 +20,31 @@
       'sourceOffset=' + part.sourceOffset + '\n' +
       'context=' + part.sourceContext;
   }
+
+  const focusIn = (part: TrackerPart) => {
+    if (part != null) {
+      focusPart = part
+    }
+  }
+  const focusOut = (part: TrackerPart) => {
+    if (part != null) {
+      focusPart = part
+    }
+  }
 </script>
 
 {#await trackerDetailPromise then trackerDetail}
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <pre class="trackerDetail">{#each trackerDetail.parts as part}<span class="trackerDetailPart"
-                                    title={tooltip(part)}>{part.content}</span>{/each}</pre>
+    role="mark"
+    tabindex="0"
+    on:mouseover={() => {focusIn(part)}}
+    on:mouseout={() => {focusOut(part)}}
+    on:focus={() => {focusIn(part)}}
+    on:blur={() => {focusOut(part)}}
+    class:overWithSource={focusPart === part && part.source}
+    class:overWithoutSource={focusPart === part && !part.source}
+    title={tooltip(part)}>{part.content}</span>{/each}</pre>
 {/await}
 
 <style>
@@ -42,5 +63,11 @@
     /* undo border */
     margin-right: 0;
     border-right: 0;
+  }
+  .overWithSource {
+    background-color: lightblue;
+  }
+  .overWithoutSource {
+    background-color: lightgray;
   }
 </style>
