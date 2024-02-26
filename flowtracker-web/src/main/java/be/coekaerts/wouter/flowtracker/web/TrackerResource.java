@@ -41,8 +41,8 @@ public class TrackerResource {
       id = tracker.getTrackerId();
       InterestRepository.register(tracker);
       description = tracker.getDescriptor();
-      origin = tracker instanceof OriginTracker;
-      sink = tracker instanceof ByteSinkTracker || tracker instanceof CharSinkTracker;
+      origin = TrackerResource.isOrigin(tracker);
+      sink = TrackerResource.isSink(tracker);
     }
 
     public long getId() {
@@ -155,5 +155,13 @@ public class TrackerResource {
     } else {
       return 0;
     }
+  }
+
+  static boolean isOrigin(Tracker tracker) {
+    return tracker instanceof OriginTracker;
+  }
+
+  static boolean isSink(Tracker tracker) {
+    return tracker instanceof ByteSinkTracker || tracker instanceof CharSinkTracker;
   }
 }
