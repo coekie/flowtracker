@@ -9,7 +9,6 @@ import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.web.TrackerResource.Region;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +22,6 @@ public class TrackerResourceTest {
 
   @Test public void getCharSinkTracker() {
     CharSinkTracker tracker = new CharSinkTracker();
-    TrackerRepository.setTracker(new Object(), tracker);
     InterestRepository.register(tracker);
 
     Tracker sourceTracker1 = new FixedOriginTracker(3);
@@ -54,7 +52,6 @@ public class TrackerResourceTest {
 
   @Test public void getByteSinkTracker() {
     ByteSinkTracker tracker = new ByteSinkTracker();
-    TrackerRepository.setTracker(new Object(), tracker);
     InterestRepository.register(tracker);
 
     Tracker sourceTracker1 = new FixedOriginTracker(3);
@@ -85,7 +82,6 @@ public class TrackerResourceTest {
 
   @Test public void trackerPartResponse_sourceContext() {
     CharSinkTracker tracker = new CharSinkTracker();
-    TrackerRepository.setTracker(new Object(), tracker);
     InterestRepository.register(tracker);
 
     CharOriginTracker sourceTracker = new CharOriginTracker();
@@ -107,7 +103,6 @@ public class TrackerResourceTest {
 
   @Test public void getOriginTracker() {
     CharOriginTracker tracker = new CharOriginTracker();
-    TrackerRepository.setTracker(new Object(), tracker);
     InterestRepository.register(tracker);
 
     tracker.append(new char[] {'a', 'b', 'c', 'd'}, 1, 2);
@@ -116,6 +111,39 @@ public class TrackerResourceTest {
     assertEquals(1, response.getRegions().size());
 
     assertRegionNoPart(response.getRegions().get(0), "bc");
+  }
+
+  @Test public void reverse() {
+    CharSinkTracker target = new CharSinkTracker();
+    CharOriginTracker source = new CharOriginTracker();
+    InterestRepository.register(target);
+    InterestRepository.register(source);
+
+    source.append("xabcdex");
+    target.append("..abc.cde.", 0, 9);
+    target.setSource(2, 3, source, 1);
+    target.setSource(6, 3, source, 3);
+
+    TrackerDetailResponse response = trackerResource.reverse(source.getTrackerId(),
+        target.getTrackerId());
+    assertEquals(5, response.getRegions().size());
+
+    assertRegionNoPart(response.getRegions().get(0), "x");
+    assertRegionOnePart(response.getRegions().get(1), "ab", target, 2);
+
+    // the region with two parts
+    Region region = response.getRegions().get(2);
+    assertEquals("c", region.getContent());
+    assertEquals(2, region.getParts().size());
+    assertEquals(target.getTrackerId(), region.getParts().get(0).getTracker().getId());
+    // note that this points to the *beginning* of the part (index 2), which does not correspond to
+    // the beginning of this region.
+    assertEquals(2, region.getParts().get(0).getOffset());
+    assertEquals(target.getTrackerId(), region.getParts().get(1).getTracker().getId());
+    assertEquals(6, region.getParts().get(1).getOffset());
+
+    assertRegionOnePart(response.getRegions().get(3), "de", target, 6);
+    assertRegionNoPart(response.getRegions().get(4), "x");
   }
 
   private void assertRegionNoPart(Region region, String expectedContent) {
