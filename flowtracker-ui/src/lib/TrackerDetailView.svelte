@@ -1,12 +1,14 @@
 <script lang="ts">
-  import type { Tracker, TrackerDetail, Region, TrackerPart } from '../javatypes'
+  import type { Tracker, TrackerDetail, Region } from '../javatypes'
+  import type { PartPointer } from './selection'
 
-  export let selectedTracker: Tracker;
+  export let selectedTracker: Tracker | null;
   let trackerDetailPromise: Promise<TrackerDetail>;
   $: trackerDetailPromise = fetchTrackerDetail(selectedTracker);
   let focusRegion: Region | null;
+  export let selection: PartPointer | null;
 
-  const fetchTrackerDetail = async (tracker:Tracker) => {
+  const fetchTrackerDetail = async (tracker:Tracker | null) => {
     if (!tracker) {
       return new Promise(() => {})
     }
@@ -27,37 +29,46 @@
   }
 
   const focusIn = (region: Region) => {
-    if (region != null) {
-      focusRegion = region
-    }
+    focusRegion = region
   }
+
   const focusOut = (region: Region) => {
-    if (region != null) {
-      focusRegion = region
+    focusRegion = null
+  }
+
+  const click = (region: Region) => {
+    if (region.parts.length > 0) {
+      selection = region.parts[0]
+    } else {
+      selection = null
     }
   }
 </script>
 
 {#await trackerDetailPromise then trackerDetail}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-  <pre class="trackerDetail">{#each trackerDetail.regions as region}<span class="region"
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+  <div class="trackerDetail">
+  <pre>{#each trackerDetail.regions as region}<span class="region"
     role="mark"
     tabindex="0"
-    on:mouseover={() => {focusIn(region)}}
-    on:mouseout={() => {focusOut(region)}}
-    on:focus={() => {focusIn(region)}}
-    on:blur={() => {focusOut(region)}}
-    class:overWithSource={focusRegion === region && region.parts}
-    class:overWithoutSource={focusRegion === region && !region.parts}
+    on:mouseover={() => focusIn(region)}
+    on:mouseout={() => focusOut(region)}
+    on:focus={() => focusIn(region)}
+    on:blur={() => focusOut(region)}
+    on:click={() => click(region)}
+    class:overWithSource={focusRegion === region && region.parts.length > 0}
+    class:overWithoutSource={focusRegion === region && region.parts.length == 0}
     title={tooltip(region)}>{region.content}</span>{/each}</pre>
+  </div>
 {/await}
 
 <style>
   .trackerDetail {
-    float: right;
-    width: 50%;
+    width: 100%;
     height: 100%;
-    overflow-y: auto;
+    overflow: auto;
   }
   .region {
     /* draw a vertical line after each part, without influencing size */

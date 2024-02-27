@@ -39,9 +39,6 @@
 
 <style>
 .tree {
-  float: left;
-  width: 50%;
-  height: 100%;
   overflow-y: auto;
 }
 </style>
