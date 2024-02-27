@@ -43,16 +43,16 @@ public class TrackerResource {
             Growth growth) {
           String content = requireNonNull(getContentAsString(tracker, index, index + length));
           if (sourceTracker != null) {
-            regions.add(new Region(content, singletonList(
+            regions.add(new Region(index, content, singletonList(
                 new TrackerPartResponse(sourceTracker, sourceIndex, length))));
           } else {
-            regions.add(new Region(content, emptyList()));
+            regions.add(new Region(index, content, emptyList()));
           }
         }
       }, 0);
     } else {
       regions.add(
-          new Region(getContentAsString(tracker, 0, getContentLength(tracker)), emptyList()));
+          new Region(0, getContentAsString(tracker, 0, getContentLength(tracker)), emptyList()));
     }
     return new TrackerDetailResponse(regions);
   }
@@ -115,7 +115,7 @@ public class TrackerResource {
       int endIndex = ceil == null ? getContentLength(tracker) : ceil;
 
       regions.add(
-          new Region(getContentAsString(tracker, i, endIndex), new ArrayList<>(activeParts)));
+          new Region(i, getContentAsString(tracker, i, endIndex), new ArrayList<>(activeParts)));
     }
 
     return new TrackerDetailResponse(regions);
@@ -166,13 +166,20 @@ public class TrackerResource {
     }
   }
 
+  @SuppressWarnings("UnusedDeclaration") // json
   public static class Region {
+    private final long offset;
     private final String content;
     private final List<TrackerPartResponse> parts;
 
-    public Region(String content, List<TrackerPartResponse> parts) {
+    Region(long offset, String content, List<TrackerPartResponse> parts) {
+      this.offset = offset;
       this.content = content;
       this.parts = parts;
+    }
+
+    public long getOffset() {
+      return offset;
     }
 
     public String getContent() {
@@ -207,6 +214,10 @@ public class TrackerResource {
 
     public int getOffset() {
       return offset;
+    }
+
+    public int getLength() {
+      return length;
     }
 
     public String getContext() {

@@ -1,6 +1,7 @@
 import type { Tracker } from '../javatypes'
 
-export interface PartPointer {
+export interface SelectedRange {
   tracker: Tracker
-  offset: Number
+  offset: number
+  length: number
 }

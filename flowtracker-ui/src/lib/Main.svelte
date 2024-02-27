@@ -2,11 +2,11 @@
   import SettingsView from './SettingsView.svelte'
   import TrackerDetailView from './TrackerDetailView.svelte'
   import type { Tracker } from '../javatypes'
-  import type { PartPointer } from './selection'
+  import type { SelectedRange } from './selection'
   import TrackerTree from './TrackerTree.svelte';
 
   let selectedTracker: Tracker;
-  let selection: PartPointer;
+  let selection: SelectedRange;
 </script>
 
 <div class="wrapper">
@@ -18,7 +18,7 @@
       <TrackerDetailView bind:selectedTracker={selectedTracker} bind:selection={selection}/>
     </div>
     <div class="updown">
-      <TrackerDetailView selectedTracker={selection ? selection.tracker : null} selection={null}/>
+      <TrackerDetailView selectedTracker={selection ? selection.tracker : null} selection={selection} targetTracker={selectedTracker}/>
     </div>
   </div>
 </div>

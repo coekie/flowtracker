@@ -5,7 +5,7 @@
 
 // in java: TrackerResource.TrackerResponse
 export interface Tracker {
-  id: Number
+  id: number
   description: String
   origin: boolean
   sink: boolean
@@ -14,12 +14,14 @@ export interface Tracker {
 // in java: TrackerResource.TrackerPartResponse
 export interface TrackerPart {
   tracker: Tracker
-  offset: Number
+  offset: number
+  length: number
   context: String
 }
 
 // in java: TrackerResource.Region
 export interface Region {
+  offset: number
   content: String
   parts: TrackerPart[]
 }
