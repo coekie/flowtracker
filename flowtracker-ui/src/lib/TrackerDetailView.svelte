@@ -3,20 +3,28 @@
   import type { SelectedRange } from './selection'
 
   export let selectedTracker: Tracker | null;
-  let trackerDetailPromise: Promise<TrackerDetail>;
-  $: trackerDetailPromise = fetchTrackerDetail(selectedTracker);
-  let focusRegion: Region | null;
-  export let selection: SelectedRange | null;
-  
   export let targetTracker: Tracker | null = null;
+  export let selection: SelectedRange | null;
 
-  const fetchTrackerDetail = async (tracker:Tracker | null) => {
-    if (!tracker) {
+  // pull out the ids, to prevent unnecessary re-fetching when tracker is changed to other instance
+  // with same id
+  let selectedTrackerId: number | undefined;
+  $: selectedTrackerId = selectedTracker?.id
+  let targetTrackerId: number | undefined;
+  $: targetTrackerId = targetTracker?.id
+
+  let trackerDetailPromise: Promise<TrackerDetail>;
+  $: trackerDetailPromise = fetchTrackerDetail(selectedTrackerId, targetTrackerId);
+  
+  let focusRegion: Region | null;
+
+  const fetchTrackerDetail = async (selectedTrackerId: number | undefined, targetTrackerId: number | undefined) => {
+    if (!selectedTrackerId) {
       return new Promise(() => {})
     }
-    const response = targetTracker == null
-      ? await fetch('/tracker/' + tracker.id)
-      : await fetch('/tracker/' + tracker.id + '/to/' + targetTracker.id)
+    const response = !targetTrackerId
+      ? await fetch('/tracker/' + selectedTrackerId)
+      : await fetch('/tracker/' + selectedTrackerId + '/to/' + targetTrackerId)
 		if (!response.ok) throw new Error(response.statusText)
 		return response.json()
   }
