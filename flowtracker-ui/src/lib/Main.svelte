@@ -36,6 +36,7 @@
   .left {
     flex-basis: 30%;
     flex-grow: 1;
+    overflow: hidden;
   }
 
   .right {

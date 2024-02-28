@@ -40,6 +40,7 @@
 <style>
 .tree {
   overflow-y: auto;
+  height: 100%;
 }
 </style>
   
