@@ -22,6 +22,7 @@ export interface TrackerPart {
 // in java: TrackerResource.Region
 export interface Region {
   offset: number
+  length: number
   content: String
   parts: TrackerPart[]
 }

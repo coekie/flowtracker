@@ -2,7 +2,6 @@ package be.coekaerts.wouter.flowtracker.web;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
@@ -41,18 +40,17 @@ public class TrackerResource {
         @Override
         public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
             Growth growth) {
-          String content = requireNonNull(getContentAsString(tracker, index, index + length));
           if (sourceTracker != null) {
-            regions.add(new Region(index, content, singletonList(
+            regions.add(new Region(tracker, index, length, singletonList(
                 new TrackerPartResponse(sourceTracker, sourceIndex, length))));
           } else {
-            regions.add(new Region(index, content, emptyList()));
+            regions.add(new Region(tracker, index, length, emptyList()));
           }
         }
       }, 0);
     } else {
       regions.add(
-          new Region(0, getContentAsString(tracker, 0, getContentLength(tracker)), emptyList()));
+          new Region(tracker, 0, getContentLength(tracker), emptyList()));
     }
     return new TrackerDetailResponse(regions);
   }
@@ -114,8 +112,7 @@ public class TrackerResource {
       Integer ceil = changePoints.ceilingKey(i + 1);
       int endIndex = ceil == null ? getContentLength(tracker) : ceil;
 
-      regions.add(
-          new Region(i, getContentAsString(tracker, i, endIndex), new ArrayList<>(activeParts)));
+      regions.add(new Region(tracker, i, endIndex - i, new ArrayList<>(activeParts)));
     }
 
     return new TrackerDetailResponse(regions);
@@ -168,18 +165,24 @@ public class TrackerResource {
 
   @SuppressWarnings("UnusedDeclaration") // json
   public static class Region {
-    private final long offset;
+    private final int offset;
+    private final int length;
     private final String content;
     private final List<TrackerPartResponse> parts;
 
-    Region(long offset, String content, List<TrackerPartResponse> parts) {
+    Region (Tracker tracker, int offset, int length, List<TrackerPartResponse> parts) {
       this.offset = offset;
-      this.content = content;
+      this.length =length;
+      this.content = getContentAsString(tracker, offset, offset + length);
       this.parts = parts;
     }
 
     public long getOffset() {
       return offset;
+    }
+
+    public long getLength() {
+      return length;
     }
 
     public String getContent() {

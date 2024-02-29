@@ -21,7 +21,7 @@
       <TrackerDetailView bind:viewTracker={mainTracker} bind:selection={selection}/>
     </div>
     <div class="updown">
-      <TrackerDetailView viewTracker={selection ? selection.tracker : null} selection={selection} targetTracker={mainTracker}/>
+      <TrackerDetailView viewTracker={selection ? selection.tracker : null} bind:selection={selection} targetTracker={mainTracker}/>
     </div>
   </div>
 </div>

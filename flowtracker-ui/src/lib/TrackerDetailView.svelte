@@ -10,6 +10,14 @@
    * This tracker is being shown in another TrackerDetailView,
    */
   export let targetTracker: Tracker | null = null;
+
+  /**
+   * The selected range of a tracker.
+   * 
+   * This is in terms of the source tracker:
+   * for the top view that is the trackers referenced in the parts;
+   * for the bottom view that is the tracker being shown.
+   */
   export let selection: SelectedRange | null;
 
   // pull out the ids, to prevent unnecessary re-fetching when tracker is changed to other instance
@@ -55,12 +63,17 @@
   }
 
   const click = (region: Region) => {
-    if (region.parts.length > 0) {
+    if (region.parts.length == 0) {
+      selection = null
+    } else if (!targetTracker) {
       selection = region.parts[0]
     } else {
-      selection = null
+      selection = {
+        tracker: viewTracker!,
+        offset: region.offset,
+        length: region.length
+      }
     }
-    console.log("selection", selection);
   }
 
   const isSelected = (region: Region, selection: SelectedRange | null):boolean => {
@@ -71,6 +84,7 @@
         && region.offset >= selection.offset
         && region.offset < selection.offset + selection.length;
     } else {
+      // we're looking at a sink (!targetTracker), so each region only has one part
       var part = region.parts[0];
       return part.tracker.id == selection.tracker.id && part.offset == selection.offset;
     }
