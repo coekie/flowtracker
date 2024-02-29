@@ -2,7 +2,7 @@
   import TrackerTreeNode from './TrackerTreeNode.svelte';
   import type { Tracker, Node } from '../javatypes'
   
-  export let selectedTracker: Tracker;
+  export let selectedTracker: Tracker | null;
 
   let showSinks:boolean = true
   let showOrigins:boolean = true

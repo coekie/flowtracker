@@ -2,29 +2,35 @@
   import type { Tracker, TrackerDetail, Region } from '../javatypes'
   import type { SelectedRange } from './selection'
 
-  export let selectedTracker: Tracker | null;
+  /** Main tracker that's being shown */
+  export let viewTracker: Tracker | null;
+
+  /**
+   * Tracker to which some content of viewTracker was copied.
+   * This tracker is being shown in another TrackerDetailView,
+   */
   export let targetTracker: Tracker | null = null;
   export let selection: SelectedRange | null;
 
   // pull out the ids, to prevent unnecessary re-fetching when tracker is changed to other instance
   // with same id
-  let selectedTrackerId: number | undefined;
-  $: selectedTrackerId = selectedTracker?.id
+  let viewTrackerId: number | undefined;
+  $: viewTrackerId = viewTracker?.id
   let targetTrackerId: number | undefined;
   $: targetTrackerId = targetTracker?.id
 
   let trackerDetailPromise: Promise<TrackerDetail>;
-  $: trackerDetailPromise = fetchTrackerDetail(selectedTrackerId, targetTrackerId);
+  $: trackerDetailPromise = fetchTrackerDetail(viewTrackerId, targetTrackerId);
   
   let focusRegion: Region | null;
 
-  const fetchTrackerDetail = async (selectedTrackerId: number | undefined, targetTrackerId: number | undefined) => {
-    if (!selectedTrackerId) {
+  const fetchTrackerDetail = async (viewTrackerId: number | undefined, targetTrackerId: number | undefined) => {
+    if (!viewTrackerId) {
       return new Promise(() => {})
     }
     const response = !targetTrackerId
-      ? await fetch('/tracker/' + selectedTrackerId)
-      : await fetch('/tracker/' + selectedTrackerId + '/to/' + targetTrackerId)
+      ? await fetch('/tracker/' + viewTrackerId)
+      : await fetch('/tracker/' + viewTrackerId + '/to/' + targetTrackerId)
 		if (!response.ok) throw new Error(response.statusText)
 		return response.json()
   }
@@ -58,19 +64,16 @@
   }
 
   const isSelected = (region: Region, selection: SelectedRange | null):boolean => {
-    if (selection == null || region.parts.length == 0 || selectedTracker == null) {
+    if (selection == null || region.parts.length == 0 || viewTracker == null) {
       return false;
-    }
-    if (targetTracker) {
-      return selection.tracker.id == selectedTracker.id
+    } else if (targetTracker) {
+      return selection.tracker.id == viewTracker.id
         && region.offset >= selection.offset
         && region.offset < selection.offset + selection.length;
     } else {
       var part = region.parts[0];
       return part.tracker.id == selection.tracker.id && part.offset == selection.offset;
     }
-
-    return false;
   }
 </script>
 

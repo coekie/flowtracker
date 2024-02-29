@@ -2,7 +2,7 @@
   import type { Node, Tracker } from '../javatypes'
 
   export let expanded: boolean = false;
-  export let selectedTracker: Tracker;
+  export let selectedTracker: Tracker | null;
   export let node: Node;
 
 	function toggle() {
