@@ -92,22 +92,19 @@
 </script>
 
 {#await trackerDetailPromise then trackerDetail}
-  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
   <div class="trackerDetail">
-  <pre>{#each trackerDetail.regions as region}<span class="region"
-    role="mark"
-    tabindex="0"
+  <pre>{#each trackerDetail.regions as region}<a class="region"
+    href={region.parts.length > 0 ? '#' : undefined}
     on:mouseover={() => focusIn(region)}
     on:mouseout={() => focusOut(region)}
     on:focus={() => focusIn(region)}
     on:blur={() => focusOut(region)}
     on:click={() => click(region)}
+    draggable="false"
     class:overWithSource={focusRegion === region && region.parts.length > 0}
     class:overWithoutSource={focusRegion === region && region.parts.length == 0}
     class:selected={isSelected(region, selection)}
-    title={tooltip(region)}>{region.content}</span>{/each}</pre>
+    title={tooltip(region)}>{region.content}</a>{/each}</pre>
   </div>
 {/await}
 
@@ -121,6 +118,8 @@
     /* draw a vertical line after each part, without influencing size */
     margin-right: -1px;
     border-right: 1px solid gray;
+    text-decoration: none;
+    color: inherit;
   }
   .region:last-child {
     /* undo border */
