@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { Node, Tracker } from '../javatypes'
+  import type { NodeDetail, Tracker } from '../javatypes'
 
   export let expanded: boolean = false;
   export let selectedTracker: Tracker | null;
-  export let node: Node;
+  export let node: NodeDetail;
 
 	function toggle() {
 		expanded = !expanded;

@@ -32,10 +32,10 @@ export interface TrackerDetail {
   regions: Region[]
 }
 
-// in java: TreeResource.NodeResponse
-export interface Node {
+// in java: TreeResource.NodeDetailResponse
+export interface NodeDetail {
   name: String
-  children: Node[]
+  children: NodeDetail[]
   tracker: Tracker
 }
 

@@ -19,26 +19,26 @@ import javax.ws.rs.core.MediaType;
 public class TreeResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public NodeResponse root(
+  public NodeDetailResponse root(
       @QueryParam("origins") @DefaultValue("true") boolean origins,
       @QueryParam("sinks") @DefaultValue("true") boolean sinks) {
-    return new NodeResponse(TrackerTree.ROOT, new NodeRequestParams(origins, sinks));
+    return new NodeDetailResponse(TrackerTree.ROOT, new NodeRequestParams(origins, sinks));
   }
 
   @SuppressWarnings("UnusedDeclaration") // json
-  public static class NodeResponse implements Comparable<NodeResponse> {
+  public static class NodeDetailResponse implements Comparable<NodeDetailResponse> {
     private final String name;
-    private final List<NodeResponse> children = new ArrayList<>();
+    private final List<NodeDetailResponse> children = new ArrayList<>();
     private final TrackerResponse tracker;
     private final int trackerCount;
 
     // Maps TrackerTree.Node to how we represent it in the UI. differences:
     // * Optional nodes are collapsed into their parent when they're the only child. That's to keep
     //   the UI minimal, avoid unnecessary deep nesting.
-    // * every NodeResponse has at most one tracker associated. If there are multiple trackers under
-    //   one TrackerTree.Node, then we create separate NodeResponses for them.
+    // * every NodeDetailResponse has at most one tracker associated. If there are multiple trackers
+    //   under one TrackerTree.Node, then we create separate NodeDetailResponses for them.
     @SuppressWarnings("StringConcatenationInLoop") // rarely loops
-    NodeResponse(Node node, NodeRequestParams nodeRequestParams) {
+    NodeDetailResponse(Node node, NodeRequestParams nodeRequestParams) {
       String name = node.name;
       while (node.children().size() == 1
           && node.trackers().isEmpty()
@@ -49,7 +49,7 @@ public class TreeResource {
       this.name = name;
       int trackerCount = 0;
       for (Node child : node.children()) {
-        NodeResponse childResponse = new NodeResponse(child, nodeRequestParams);
+        NodeDetailResponse childResponse = new NodeDetailResponse(child, nodeRequestParams);
         if (childResponse.trackerCount > 0) {
           trackerCount += childResponse.trackerCount;
           this.children.add(childResponse);
@@ -68,7 +68,7 @@ public class TreeResource {
         for (int i = 0; i < trackers.size(); i++) {
           Tracker tracker = trackers.get(i);
           if (nodeRequestParams.include(tracker)) {
-            this.children.add(new NodeResponse(Integer.toString(i), new TrackerResponse(tracker)));
+            this.children.add(new NodeDetailResponse(Integer.toString(i), new TrackerResponse(tracker)));
             trackerCount++;
           }
         }
@@ -77,7 +77,7 @@ public class TreeResource {
       this.trackerCount = trackerCount;
     }
 
-    private NodeResponse(String name, TrackerResponse tracker) {
+    private NodeDetailResponse(String name, TrackerResponse tracker) {
       this.name = name;
       this.tracker = tracker;
       this.trackerCount = 1;
@@ -87,7 +87,7 @@ public class TreeResource {
       return name;
     }
 
-    public List<NodeResponse> getChildren() {
+    public List<NodeDetailResponse> getChildren() {
       return children;
     }
 
@@ -97,10 +97,10 @@ public class TreeResource {
 
     @Override
     public boolean equals(Object o) {
-      if (!(o instanceof NodeResponse)) {
+      if (!(o instanceof NodeDetailResponse)) {
         return false;
       }
-      NodeResponse that = (NodeResponse) o;
+      NodeDetailResponse that = (NodeDetailResponse) o;
       return name.equals(that.name) && children.equals(that.children)
           && Objects.equals(tracker, that.tracker);
     }
@@ -111,7 +111,7 @@ public class TreeResource {
     }
 
     @Override
-    public int compareTo(NodeResponse o) {
+    public int compareTo(NodeDetailResponse o) {
       return name.compareTo(o.name);
     }
   }

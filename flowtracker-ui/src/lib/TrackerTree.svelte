@@ -1,13 +1,13 @@
 <script lang="ts">
   import TrackerTreeNode from './TrackerTreeNode.svelte';
-  import type { Tracker, Node } from '../javatypes'
+  import type { Tracker, NodeDetail } from '../javatypes'
   
   export let selectedTracker: Tracker | null;
 
   let showSinks:boolean = true
   let showOrigins:boolean = true
 
-  let rootPromise: Promise<Node>;
+  let rootPromise: Promise<NodeDetail>;
   $: rootPromise = fetchTree(showSinks, showOrigins);
 
   const fetchTree = async (showSinks:boolean, showOrigins:boolean) => {
