@@ -4,12 +4,16 @@ import static be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerDetailR
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
 import be.coekaerts.wouter.flowtracker.web.TrackerResource.Region;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -144,6 +148,16 @@ public class TrackerResourceTest {
 
     assertRegionOnePart(response.getRegions().get(3), "de", target, 6);
     assertRegionNoPart(response.getRegions().get(4), "x");
+  }
+
+  @Test public void path() {
+    Node root = TrackerTree.node("TrackerResourceTest.test");
+    Node one = root.node("a");
+    Node a = one.node("b");
+    Tracker tracker = new ByteOriginTracker().addTo(a);
+    InterestRepository.register(tracker);
+    TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
+    assertEquals(Arrays.asList("TrackerResourceTest.test", "a", "b"), response.getPath());
   }
 
   private void assertRegionNoPart(Region region, String expectedContent) {

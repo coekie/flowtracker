@@ -11,8 +11,11 @@ import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Growth;
 import be.coekaerts.wouter.flowtracker.tracker.OriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
 import be.coekaerts.wouter.flowtracker.tracker.WritableTracker;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 import javax.ws.rs.GET;
@@ -52,7 +55,7 @@ public class TrackerResource {
       regions.add(
           new Region(tracker, 0, getContentLength(tracker), emptyList()));
     }
-    return new TrackerDetailResponse(regions);
+    return new TrackerDetailResponse(path(tracker), regions);
   }
 
   /**
@@ -115,15 +118,21 @@ public class TrackerResource {
       regions.add(new Region(tracker, i, endIndex - i, new ArrayList<>(activeParts)));
     }
 
-    return new TrackerDetailResponse(regions);
+    return new TrackerDetailResponse(path(tracker), regions);
   }
 
   @SuppressWarnings({"UnusedDeclaration", "MismatchedQueryAndUpdateOfCollection"}) // json
   public static class TrackerDetailResponse {
+    private final List<String> path;
     private final List<Region> regions;
 
-    private TrackerDetailResponse(List<Region> regions) {
+    private TrackerDetailResponse(List<String> path, List<Region> regions) {
+      this.path = path;
       this.regions = regions;
+    }
+
+    public List<String> getPath() {
+      return path;
     }
 
     public List<Region> getRegions() {
@@ -227,5 +236,22 @@ public class TrackerResource {
 
   static boolean isSink(Tracker tracker) {
     return tracker instanceof ByteSinkTracker || tracker instanceof CharSinkTracker;
+  }
+
+  private static List<String> path(Tracker tracker) {
+    if (tracker.getNode() == null) {
+      return null;
+    } else {
+      return path(tracker.getNode());
+    }
+  }
+
+  private static List<String> path(Node node) {
+    ArrayList<String> result = new ArrayList<>();
+    for (Node n = node; n != TrackerTree.ROOT; n = n.parent) {
+      result.add(n.name);
+    }
+    Collections.reverse(result);
+    return result;
   }
 }

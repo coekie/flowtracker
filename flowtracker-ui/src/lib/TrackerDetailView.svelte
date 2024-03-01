@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Tracker, TrackerDetail, Region } from '../javatypes'
+  import PathView from './PathView.svelte';
   import type { SelectedRange } from './selection'
 
   /** Main tracker that's being shown */
@@ -93,6 +94,7 @@
 
 {#await trackerDetailPromise then trackerDetail}
   <div class="trackerDetail">
+  <div><PathView path={trackerDetail.path}/></div>
   <pre>{#each trackerDetail.regions as region}<a class="region"
     href={region.parts.length > 0 ? '#' : undefined}
     on:mouseover={() => focusIn(region)}
