@@ -118,38 +118,6 @@ public class TrackerResource {
     return new TrackerDetailResponse(regions);
   }
 
-  @SuppressWarnings("UnusedDeclaration") // json
-  public static class TrackerResponse {
-    private final long id;
-    private final String description;
-    private final boolean origin;
-    private final boolean sink;
-
-    TrackerResponse(Tracker tracker) {
-      id = tracker.getTrackerId();
-      InterestRepository.register(tracker);
-      description = tracker.getDescriptor();
-      origin = TrackerResource.isOrigin(tracker);
-      sink = TrackerResource.isSink(tracker);
-    }
-
-    public long getId() {
-      return id;
-    }
-
-    public String getDescription() {
-      return description;
-    }
-
-    public boolean isOrigin() {
-      return origin;
-    }
-
-    public boolean isSink() {
-      return sink;
-    }
-  }
-
   @SuppressWarnings({"UnusedDeclaration", "MismatchedQueryAndUpdateOfCollection"}) // json
   public static class TrackerDetailResponse {
     private final List<Region> regions;

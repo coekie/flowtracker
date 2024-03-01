@@ -3,7 +3,7 @@
 // ideally this would be generated from the java code,
 // but this is written manually
 
-// in java: TrackerResource.TrackerResponse
+// in java: TrackerResponse
 export interface Tracker {
   id: number
   description: String

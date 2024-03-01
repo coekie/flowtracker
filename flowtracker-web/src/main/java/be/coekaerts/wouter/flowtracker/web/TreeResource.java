@@ -3,7 +3,6 @@ package be.coekaerts.wouter.flowtracker.web;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
-import be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
