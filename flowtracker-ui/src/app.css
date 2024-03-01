@@ -1,3 +1,36 @@
 body {
   margin:0;
 }
+
+/*
+  Split pane. copied default theme and adjusted, from
+  https://orefalo.github.io/svelte-splitpanes/examples/styling/splitters .
+  Removed the handles (all the :before and :after), adjusted colors and size
+*/
+.splitpanes.my-theme .splitpanes__pane {
+  background-color: #fff; /* default: #f2f2f2 */
+}
+.splitpanes.my-theme .splitpanes__splitter {
+  background-color: #ccc; /* default: #fff */
+  box-sizing: border-box;
+  position: relative;
+  flex-shrink: 0;
+}
+.splitpanes.my-theme .splitpanes__splitter:first-child {
+  cursor: auto;
+}
+.my-theme.splitpanes .splitpanes .splitpanes__splitter {
+  z-index: 1;
+}
+.my-theme.splitpanes--vertical > .splitpanes__splitter,
+.my-theme .splitpanes--vertical > .splitpanes__splitter {
+  width: 3px; /* default: 7px */
+  border-left: 1px solid #ccc; /* default: 1px solid #eee */
+  cursor: col-resize;
+}
+.my-theme.splitpanes--horizontal > .splitpanes__splitter,
+.my-theme .splitpanes--horizontal > .splitpanes__splitter {
+  height: 3px; /* default: 7px */
+  border-top: 1px solid #ccc; /* default: 1px solid #eee */
+  cursor: row-resize;
+}
