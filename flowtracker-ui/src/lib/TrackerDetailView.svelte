@@ -33,6 +33,9 @@
   
   let focusRegion: Region | null;
 
+  /** For an ongoing selection (while the mouse button is down), the selection where we started (where the mouse went down) */
+  let selectionStart: SelectedRange | null;
+
   const fetchTrackerDetail = async (viewTrackerId: number | undefined, targetTrackerId: number | undefined) => {
     if (!viewTrackerId) {
       return new Promise(() => {})
@@ -63,32 +66,70 @@
     focusRegion = null
   }
 
-  const click = (region: Region) => {
-    if (region.parts.length == 0) {
-      selection = null
-    } else if (!targetTracker) {
-      selection = region.parts[0]
-    } else {
-      selection = {
+  // convertion a region (of viewTracker) to a SelectedRange.
+  // That is in terms of the source tracker, see `selection`.
+  const toSelection = (region: Region):SelectedRange | null => {
+    if (targetTracker) {
+      return {
         tracker: viewTracker!,
         offset: region.offset,
         length: region.length
       }
+    } else if (region.parts.length == 1) {
+      return region.parts[0]
+    } else {
+      return null;
+    } 
+  } 
+
+  const mousedown = (region: Region) => {
+    selection = selectionStart = toSelection(region)
+  }
+
+  // handle selecting multiple regions, by dragging
+  const mousemove = (e:MouseEvent, region: Region) => {
+    // if the button isn't pressed anymore, stop the selection
+    if (e.buttons != 1) {
+      selectionStart = null
+      return
+    }
+
+    let selectionEnd = toSelection(region)
+    // a valid selection must have a start and end with the same tracker
+    if (!selectionStart || !selectionEnd || selectionStart.tracker.id != selectionEnd.tracker.id) {
+      selection = null
+      return
+    }
+    // you can select from left to right, or right to left
+    let start:number = Math.min(selectionStart.offset, selectionEnd.offset)
+    let end:number = Math.max(selectionStart.offset + selectionStart.length, selectionEnd.offset + selectionEnd.length)
+    selection = {
+      tracker: selectionStart.tracker,
+      offset: start,
+      length: end - start
     }
   }
 
+  const mouseup = () => {
+    selectionStart = null;
+  }
+
   const isSelected = (region: Region, selection: SelectedRange | null):boolean => {
-    if (selection == null || region.parts.length == 0 || viewTracker == null) {
+    if (selection == null || viewTracker == null) {
       return false;
     } else if (targetTracker) {
       return selection.tracker.id == viewTracker.id
         && region.offset >= selection.offset
-        && region.offset < selection.offset + selection.length;
+        && region.offset < selection.offset + selection.length
+      // else, we're looking at a sink (!targetTracker), so each region has at most one part
+    } else if (region.parts.length == 0) {
+      return false
     } else {
-      // we're looking at a sink (!targetTracker), so each region only has one part
       var part = region.parts[0];
-      return part.tracker.id == selection.tracker.id && part.offset == selection.offset;
-    }
+      return part.tracker.id == selection.tracker.id &&
+        part.offset >= selection.offset &&
+        part.offset < selection.offset + selection.length
+    } 
   }
 </script>
 
@@ -101,11 +142,13 @@
     on:mouseout={() => focusOut(region)}
     on:focus={() => focusIn(region)}
     on:blur={() => focusOut(region)}
-    on:click={() => click(region)}
+    on:mousedown={() => mousedown(region)}
+    on:mousemove={e => mousemove(e, region)}
+    on:mouseup={mouseup}
     draggable="false"
-    class:overWithSource={focusRegion === region && region.parts.length > 0}
-    class:overWithoutSource={focusRegion === region && region.parts.length == 0}
+    class:focus={focusRegion === region}
     class:selected={isSelected(region, selection)}
+    class:withSource={region.parts.length > 0}
     title={tooltip(region)}>{region.content}</a>{/each}</pre>
   </div>
 {/await}
@@ -128,13 +171,16 @@
     margin-right: 0;
     border-right: 0;
   }
-  .overWithSource {
+  .focus.withSource {
     background-color: lightcyan;
   }
-  .overWithoutSource {
+  .focus {
     background-color: #F0F0F0
   }
-  .selected {
+  .selected.withSource {
     background-color: lightblue
+  }
+  .selected {
+    background-color: lightgray
   }
 </style>

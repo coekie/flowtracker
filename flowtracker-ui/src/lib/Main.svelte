@@ -11,7 +11,7 @@
   let mainTracker: Tracker | null;
 
   /** Part used in mainTracker that is selected, shown in the bottom TrackerDetailView */
-  let selection: SelectedRange | null;
+  let selection: SelectedRange | null = null;
 </script>
 
 <Splitpanes theme="my-theme">
