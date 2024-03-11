@@ -1,6 +1,9 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +18,16 @@ public class TrackerTree {
 
   /** Root node for tracking operations on files */
   public static Node fileNode(String name) {
-    return node("Files").node(name);
+    Node node = node("Files");
+    try {
+      return node.pathNode(new File(name).getCanonicalPath());
+    } catch (IOException e) {
+      return node.node("<invalid>").node(name);
+    }
+  }
+
+  private static boolean isPathSeparator(char c) {
+    return c == '/' || c == '\\';
   }
 
   public static Node nodeOrUnknown(Tracker tracker) {
@@ -51,6 +63,31 @@ public class TrackerTree {
       return children.computeIfAbsent(name, this::createChild);
     }
 
+    /** Get or create a chain of child nodes, for the given path */
+    public synchronized Node pathNode(String path) {
+      Node node = this;
+      int start = 0;
+      int length = path.length();
+
+      while (start < length && isPathSeparator(path.charAt(start))) {
+        start++;
+      }
+      int end = start;
+
+      while (end < length) {
+        while (end < length && !isPathSeparator(path.charAt(end))) {
+          end++;
+        }
+        node = node.optionalNode(path.substring(start, end));
+        while (end < length && isPathSeparator(path.charAt(end))) {
+          end++;
+        }
+        start = end;
+      }
+
+      return node;
+    }
+
     /** Get or create a new optional child node */
     public synchronized Node optionalNode(String name) {
       return children.computeIfAbsent(name, this::createOptionalChild);
@@ -76,6 +113,17 @@ public class TrackerTree {
 
     public synchronized List<Tracker> trackers() {
       return new ArrayList<>(trackers);
+    }
+
+    public List<String> path() {
+      Node node = this;
+      List<String> result = new ArrayList<>();
+      while (node.parent != null) {
+        result.add(node.name);
+        node = node.parent;
+      }
+      Collections.reverse(result);
+      return result;
     }
   }
 }

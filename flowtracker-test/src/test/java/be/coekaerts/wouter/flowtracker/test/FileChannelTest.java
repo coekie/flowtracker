@@ -53,7 +53,8 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
     try (FileChannel channel = openForRead()) {
       TrackTestHelper.assertThatTracker(getReadTracker(channel))
           .hasDescriptor("FileChannel for " + fileToRead.getPath())
-          .hasNode("Files", fileToRead.getAbsolutePath(), FileDescriptorTrackerRepository.READ);
+          .hasNodeStartingWith("Files")
+          .hasNodeEndingWith(fileToRead.getName(), FileDescriptorTrackerRepository.READ);
     }
   }
 

@@ -8,10 +8,7 @@ import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -75,16 +72,6 @@ public class TrackTestHelper {
     return new TrackerAssertions(tracker(sut));
   }
 
-  private static List<String> nodePath(Node node) {
-    List<String> result = new ArrayList<>();
-    while (node != null && node.parent != null) {
-      result.add(node.name);
-      node = node.parent;
-    }
-    Collections.reverse(result);
-    return result;
-  }
-
   private static Tracker tracker(Object o) {
     return o instanceof Tracker ? (Tracker) o : TrackerRepository.getTracker(o);
   }
@@ -109,12 +96,25 @@ public class TrackTestHelper {
     }
 
     public TrackerAssertions hasNode(String... expectedNodePath) {
-      assertEquals(Arrays.asList(expectedNodePath), nodePath(tracker.getNode()));
+      assertEquals(Arrays.asList(expectedNodePath), tracker.getNode().path());
+      return this;
+    }
+
+    public TrackerAssertions hasNodeStartingWith(String... expectedNodePath) {
+      assertEquals(Arrays.asList(expectedNodePath),
+          tracker.getNode().path().subList(0, expectedNodePath.length));
+      return this;
+    }
+
+    public TrackerAssertions hasNodeEndingWith(String... expectedNodePath) {
+      List<String> path = tracker.getNode().path();
+      assertEquals(Arrays.asList(expectedNodePath),
+          path.subList(path.size() - expectedNodePath.length, path.size()));
       return this;
     }
 
     public TrackerAssertions hasNodeMatching(Predicate<List<String>> predicate) {
-      List<String> nodePath = nodePath(tracker.getNode());
+      List<String> nodePath = tracker.getNode().path();
       if (!predicate.test(nodePath)) {
         throw new AssertionError(nodePath.toString());
       }

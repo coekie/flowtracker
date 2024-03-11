@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -37,8 +38,9 @@ public class ZipFileTest {
                 desc.matches("Unzipped .*\\.jar file org/junit/Test.class"))
             .hasNodeMatching(nodePath ->
                 nodePath.get(0).equals("Files")
-                    && nodePath.get(1).equals(testZipFilePath)
-                    && nodePath.get(2).equals("org/junit/Test.class"));
+                    && nodePath.contains(new File(testZipFilePath).getName())
+                    && nodePath.contains("junit")
+                    && nodePath.contains("Test.class"));
 
         // this is tested more in InflaterInputStreamTest
         byte[] bytes = in.readAllBytes();

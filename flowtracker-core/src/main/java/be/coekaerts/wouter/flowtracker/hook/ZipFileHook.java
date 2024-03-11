@@ -29,7 +29,7 @@ public class ZipFileHook {
         tracker.replaceDescriptor("Unzipped " + target.getName() + " file " + zipEntry.getName());
       }
       if (tracker.getNode() == null) {
-        tracker.addTo(TrackerTree.fileNode(target.getName()).node(zipEntry.getName()));
+        tracker.addTo(TrackerTree.fileNode(target.getName()).pathNode(zipEntry.getName()));
       }
     }
   }
