@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.agent;
 
+import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -25,12 +26,17 @@ class SpiderClassLoader extends ClassLoader {
       throw new ClassNotFoundException(name);
     }
 
+    byte[] b;
+    // don't track reading of flowtracker class files because that's noise to the user
+    Trackers.suspendOnCurrentThread();
     try (InputStream in = jar.getInputStream(entry)) {
-      byte[] b = in.readAllBytes();
-      return defineClass(name, b, 0, b.length);
+      b = in.readAllBytes();
     } catch (IOException e) {
       throw new Error(e);
+    } finally {
+      Trackers.unsuspendOnCurrentThread();
     }
+    return defineClass(name, b, 0, b.length);
   }
 
   @Override
