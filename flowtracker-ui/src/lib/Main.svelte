@@ -12,6 +12,9 @@
 
   /** Part used in mainTracker that is selected, shown in the bottom TrackerDetailView */
   let selection: SelectedRange | null = null;
+
+  let sinkView:TrackerDetailView;
+  let originView:TrackerDetailView;
 </script>
 
 <Splitpanes theme="my-theme">
@@ -21,10 +24,18 @@
 	<Pane>
     <Splitpanes horizontal={true} theme="my-theme" >
       <Pane>
-        <TrackerDetailView bind:viewTracker={mainTracker} bind:selection={selection}/>
+        <TrackerDetailView
+          bind:this={sinkView}
+          bind:viewTracker={mainTracker}
+          bind:selection={selection}
+          ondblclick={() => originView?.scrollToSelection()}/>
       </Pane>
       <Pane>
-        <TrackerDetailView viewTracker={selection ? selection.tracker : null} bind:selection={selection} targetTracker={mainTracker}/>
+        <TrackerDetailView
+          bind:this={originView}
+          viewTracker={selection ? selection.tracker : null}
+          bind:selection={selection} targetTracker={mainTracker}
+          ondblclick={() => sinkView?.scrollToSelection()}/>
       </Pane>
     </Splitpanes>
 	</Pane>

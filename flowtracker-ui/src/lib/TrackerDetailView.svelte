@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import type { Tracker, TrackerDetail, Region } from '../javatypes'
   import PathView from './PathView.svelte';
   import type { SelectedRange } from './selection'
@@ -21,6 +22,8 @@
    */
   export let selection: SelectedRange | null;
 
+  export let ondblclick: (() => void) | null = null;
+
   // pull out the ids, to prevent unnecessary re-fetching when tracker is changed to other instance
   // with same id
   let viewTrackerId: number | undefined;
@@ -35,6 +38,8 @@
 
   /** For an ongoing selection (while the mouse button is down), the selection where we started (where the mouse went down) */
   let selectionStart: SelectedRange | null;
+
+  let pre: HTMLPreElement;
 
   const fetchTrackerDetail = async (viewTrackerId: number | undefined, targetTrackerId: number | undefined) => {
     if (!viewTrackerId) {
@@ -131,12 +136,29 @@
         part.offset < selection.offset + selection.length
     } 
   }
+
+  // event for main view so that double-click in one TrackerDetailView causes scrollToSelection in the other
+  const dblclick = () => {
+    if (ondblclick) {
+      ondblclick()
+    }
+  }
+
+  /** scroll the first selected region into view */
+  export const scrollToSelection = () => {
+    pre?.querySelector(".selected")?.scrollIntoView()
+  }
+
+  /** waits for rendering and then scrolls the first selection region into view */
+  const scrollToSelectionOnFirstRender = (_:HTMLPreElement) => {
+    tick().then(scrollToSelection)
+  }
 </script>
 
 {#await trackerDetailPromise then trackerDetail}
   <div class="trackerDetail">
   <div><PathView path={trackerDetail.path}/></div>
-  <pre>{#each trackerDetail.regions as region}<a class="region"
+  <pre bind:this={pre} use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a class="region"
     href={region.parts.length > 0 ? '#' : undefined}
     on:mouseover={() => focusIn(region)}
     on:mouseout={() => focusOut(region)}
@@ -145,6 +167,7 @@
     on:mousedown={() => mousedown(region)}
     on:mousemove={e => mousemove(e, region)}
     on:mouseup={mouseup}
+    on:dblclick={dblclick}
     draggable="false"
     class:focus={focusRegion === region}
     class:selected={isSelected(region, selection)}
