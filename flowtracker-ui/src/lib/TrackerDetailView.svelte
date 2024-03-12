@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { tick } from 'svelte';
+  import { tick } from 'svelte'
   import type { Tracker, TrackerDetail, Region } from '../javatypes'
-  import PathView from './PathView.svelte';
+  import PathView from './PathView.svelte'
   import type { SelectedRange } from './selection'
+  import type { Coloring } from './coloring'
 
   /** Main tracker that's being shown */
   export let viewTracker: Tracker | null;
@@ -21,6 +22,8 @@
    * for the bottom view that is the tracker being shown.
    */
   export let selection: SelectedRange | null;
+
+  export let coloring: Coloring
 
   export let ondblclick: (() => void) | null = null;
 
@@ -137,6 +140,29 @@
     } 
   }
 
+  const backgroundColor = (region: Region, selection: SelectedRange | null, focusRegion: Region | null): string => {
+    if (focusRegion === region) {
+      if (region.parts.length > 0) {
+        return "lightcyan"
+      } else {
+        return "#f0f0f0"
+      }
+    } else if (isSelected(region, selection)) {
+      if (region.parts.length > 0) {
+        return "lightblue"
+      } else {
+        return "lightgray"
+      }
+    } else {
+      for (var assignment of coloring.assignments) {
+        if (assignment.ranges.some(range => isSelected(region, range))) {
+          return assignment.color;
+        }
+      }
+      return "inherit"
+    }
+  }
+
   // event for main view so that double-click in one TrackerDetailView causes scrollToSelection in the other
   const dblclick = () => {
     if (ondblclick) {
@@ -169,9 +195,8 @@
     on:mouseup={mouseup}
     on:dblclick={dblclick}
     draggable="false"
-    class:focus={focusRegion === region}
+    style="background-color: {backgroundColor(region, selection, focusRegion)}"
     class:selected={isSelected(region, selection)}
-    class:withSource={region.parts.length > 0}
     title={tooltip(region)}>{region.content}</a>{/each}</pre>
   </div>
 {/await}
@@ -193,17 +218,5 @@
     /* undo border */
     margin-right: 0;
     border-right: 0;
-  }
-  .focus.withSource {
-    background-color: lightcyan;
-  }
-  .focus {
-    background-color: #F0F0F0
-  }
-  .selected.withSource {
-    background-color: lightblue
-  }
-  .selected {
-    background-color: lightgray
   }
 </style>

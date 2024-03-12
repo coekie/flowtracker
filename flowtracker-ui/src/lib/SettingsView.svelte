@@ -39,8 +39,6 @@
 
 <style>
   .settingsWrapper {
-    position: absolute;
-    bottom: 0;
-    height: 50px;
+    margin: .5em
   }
 </style>
