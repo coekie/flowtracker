@@ -1,4 +1,4 @@
-import type { SelectedRange } from './selection'
+import type { Selected } from './selection'
 
 const autoColors: string[] = [
   "#ffaaaa", "#aaffaa", "#aaaaff",
@@ -9,21 +9,23 @@ const autoColors: string[] = [
 
 export class ColorAssignment {
   color: string
-  ranges: SelectedRange[]
+  selections: Selected[]
 
-  constructor(color: string, ranges:SelectedRange[]) {
+  constructor(color: string, selections:Selected[]) {
     this.color = color
-    this.ranges = ranges
+    this.selections = selections
   }
 }
 
 export class Coloring {
-  assignments:ColorAssignment[] = []
+  //assignments:ColorAssignment[] = []
+  // TODO temporary code for testing coloring of paths, until we can create them in the UI
+  assignments:ColorAssignment[] = [new ColorAssignment("#ffaaaa", [{type:"path", path:["Files"]}])]
 
-  add(range: SelectedRange | null):void {
-    if (!range) return;
+  add(selection: Selected | null):void {
+    if (!selection) return;
     let color = autoColors[Math.min(this.assignments.length, autoColors.length-1)]
-    this.assignments.push(new ColorAssignment(color, [range]))
+    this.assignments.push(new ColorAssignment(color, [selection]))
   }
 
   canAdd():boolean {

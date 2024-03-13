@@ -2,7 +2,7 @@
   import { tick } from 'svelte'
   import type { Tracker, TrackerDetail, Region } from '../javatypes'
   import PathView from './PathView.svelte'
-  import type { SelectedRange } from './selection'
+  import type { SelectedRange, Selected } from './selection'
   import type { Coloring } from './coloring'
 
   /** Main tracker that's being shown */
@@ -21,7 +21,7 @@
    * for the top view that is the trackers referenced in the parts;
    * for the bottom view that is the tracker being shown.
    */
-  export let selection: SelectedRange | null;
+  export let selection: Selected | null;
 
   export let coloring: Coloring
 
@@ -79,12 +79,16 @@
   const toSelection = (region: Region):SelectedRange | null => {
     if (targetTracker) {
       return {
+        type: "range",
         tracker: viewTracker!,
         offset: region.offset,
         length: region.length
       }
     } else if (region.parts.length == 1) {
-      return region.parts[0]
+      return {
+        type: "range",
+        ...(region.parts[0])
+      }
     } else {
       return null;
     } 
@@ -112,6 +116,7 @@
     let start:number = Math.min(selectionStart.offset, selectionEnd.offset)
     let end:number = Math.max(selectionStart.offset + selectionStart.length, selectionEnd.offset + selectionEnd.length)
     selection = {
+      type: "range",
       tracker: selectionStart.tracker,
       offset: start,
       length: end - start
@@ -122,25 +127,33 @@
     selectionStart = null;
   }
 
-  const isSelected = (region: Region, selection: SelectedRange | null):boolean => {
+  const isSelected = (region: Region, selection: Selected | null):boolean => {
     if (selection == null || viewTracker == null) {
       return false;
-    } else if (targetTracker) {
-      return selection.tracker.id == viewTracker.id
-        && region.offset >= selection.offset
-        && region.offset < selection.offset + selection.length
-      // else, we're looking at a sink (!targetTracker), so each region has at most one part
-    } else if (region.parts.length == 0) {
-      return false
-    } else {
-      var part = region.parts[0];
-      return part.tracker.id == selection.tracker.id &&
-        part.offset >= selection.offset &&
-        part.offset < selection.offset + selection.length
-    } 
+    } else if (selection.type == "range") { // selection is a SelectedRange
+      if (targetTracker) {
+        return selection.tracker.id == viewTracker.id
+          && region.offset >= selection.offset
+          && region.offset < selection.offset + selection.length
+        // else, we're looking at a sink (!targetTracker), so each region has at most one part
+      } else if (region.parts.length == 0) {
+        return false
+      } else {
+        var part = region.parts[0];
+        return part.tracker.id == selection.tracker.id &&
+          part.offset >= selection.offset &&
+          part.offset < selection.offset + selection.length
+      }
+    } else { // selection is a SelectedPath
+      return region.parts.some(part => pathStartsWith(part.tracker.path, selection.path))
+    }
   }
 
-  const backgroundColor = (region: Region, selection: SelectedRange | null, focusRegion: Region | null): string => {
+  const pathStartsWith = (a:String[], b:String[]):boolean => {
+    return a && b && a.length >= b.length && b.every((n, i) => a[i] == n)
+  }
+
+  const backgroundColor = (region: Region, selection: Selected | null, focusRegion: Region | null): string => {
     if (focusRegion === region) {
       if (region.parts.length > 0) {
         return "lightcyan"
@@ -155,7 +168,7 @@
       }
     } else {
       for (var assignment of coloring.assignments) {
-        if (assignment.ranges.some(range => isSelected(region, range))) {
+        if (assignment.selections.some(selection => isSelected(region, selection))) {
           return assignment.color;
         }
       }
