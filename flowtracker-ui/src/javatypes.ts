@@ -7,6 +7,7 @@
 export interface Tracker {
   id: number
   description: String
+  path: String[]
   origin: boolean
   sink: boolean
 }
@@ -29,7 +30,7 @@ export interface Region {
 
 // in java: TrackerResource.TrackerDetailResponse
 export interface TrackerDetail {
-  path: String[]
+  path: String[] | null
   regions: Region[]
 }
 

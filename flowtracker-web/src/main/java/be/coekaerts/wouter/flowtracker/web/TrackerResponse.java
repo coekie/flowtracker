@@ -1,36 +1,37 @@
 package be.coekaerts.wouter.flowtracker.web;
 
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
+import java.util.List;
 
 /** Reference to a Tracker */
 @SuppressWarnings("UnusedDeclaration") // json
 public class TrackerResponse {
-  private final long id;
-  private final String description;
-  private final boolean origin;
-  private final boolean sink;
+  private final Tracker tracker;
 
   TrackerResponse(Tracker tracker) {
-    id = tracker.getTrackerId();
+    this.tracker = tracker;
     InterestRepository.register(tracker);
-    description = tracker.getDescriptor();
-    origin = TrackerResource.isOrigin(tracker);
-    sink = TrackerResource.isSink(tracker);
   }
 
   public long getId() {
-    return id;
+    return tracker.getTrackerId();
   }
 
   public String getDescription() {
-    return description;
+    return tracker.getDescriptor();
+  }
+
+  public List<String> getPath() {
+    Node node = tracker.getNode();
+    return node == null ? null : node.path();
   }
 
   public boolean isOrigin() {
-    return origin;
+    return TrackerResource.isOrigin(tracker);
   }
 
   public boolean isSink() {
-    return sink;
+    return TrackerResource.isSink(tracker);
   }
 }
