@@ -93,7 +93,7 @@ public class TreeResourceTest {
 
   private String toString(NodeDetailResponse nodeDetailResponse, String indent) {
     StringBuilder sb = new StringBuilder();
-    sb.append(indent).append(nodeDetailResponse.getName()).append('\n');
+    sb.append(indent).append(String.join(" / ", nodeDetailResponse.getNames())).append('\n');
     for (NodeDetailResponse child : nodeDetailResponse.getChildren()) {
       sb.append(toString(child, indent + "  "));
     }

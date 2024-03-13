@@ -26,7 +26,7 @@ public class TreeResource {
 
   @SuppressWarnings("UnusedDeclaration") // json
   public static class NodeDetailResponse implements Comparable<NodeDetailResponse> {
-    private final String name;
+    private final List<String> names = new ArrayList<>();
     private final List<NodeDetailResponse> children = new ArrayList<>();
     private final TrackerResponse tracker;
     private final int trackerCount;
@@ -36,16 +36,14 @@ public class TreeResource {
     //   the UI minimal, avoid unnecessary deep nesting.
     // * every NodeDetailResponse has at most one tracker associated. If there are multiple trackers
     //   under one TrackerTree.Node, then we create separate NodeDetailResponses for them.
-    @SuppressWarnings("StringConcatenationInLoop") // rarely loops
     NodeDetailResponse(Node node, NodeRequestParams nodeRequestParams) {
-      String name = node.name;
+      names.add(node.name);
       while (node.children().size() == 1
           && node.trackers().isEmpty()
           && node.children().get(0).optional) {
         node = node.children().get(0);
-        name = name + " / " + node.name;
+        names.add(node.name);
       }
-      this.name = name;
       int trackerCount = 0;
       for (Node child : node.children()) {
         NodeDetailResponse childResponse = new NodeDetailResponse(child, nodeRequestParams);
@@ -77,13 +75,13 @@ public class TreeResource {
     }
 
     private NodeDetailResponse(String name, TrackerResponse tracker) {
-      this.name = name;
+      this.names.add(name);
       this.tracker = tracker;
       this.trackerCount = 1;
     }
 
-    public String getName() {
-      return name;
+    public List<String> getNames() {
+      return names;
     }
 
     public List<NodeDetailResponse> getChildren() {
@@ -100,18 +98,25 @@ public class TreeResource {
         return false;
       }
       NodeDetailResponse that = (NodeDetailResponse) o;
-      return name.equals(that.name) && children.equals(that.children)
+      return names.equals(that.names) && children.equals(that.children)
           && Objects.equals(tracker, that.tracker);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(name, children, tracker);
+      return Objects.hash(names, children, tracker);
     }
 
     @Override
     public int compareTo(NodeDetailResponse o) {
-      return name.compareTo(o.name);
+      int commonNameLen = Math.min(names.size(), o.names.size());
+      for (int i = 0; i < commonNameLen; i++) {
+        int result = names.get(i).compareTo(o.names.get(i));
+        if (result != 0) {
+          return result;
+        }
+      }
+      return Integer.compare(names.size(), o.names.size());
     }
   }
 

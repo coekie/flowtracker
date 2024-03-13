@@ -8,6 +8,10 @@
 	function toggle() {
 		expanded = !expanded;
 	}
+
+	function nodeName(node: NodeDetail):String {
+		return node.names.join("/")
+	}
 </script>
 
 {#if node.tracker}
@@ -17,10 +21,10 @@
     class:sink={node.tracker.sink}
     class:selected={node.tracker === selectedTracker}
     on:click={() => selectedTracker = node.tracker}>
-    {node.name}
+    {nodeName(node)}
   </button>
 {:else}
-  <button class="folder" class:expanded on:click={toggle}>{node.name}</button>
+  <button class="folder" class:expanded on:click={toggle}>{nodeName(node)}</button>
 	{#if expanded}
 	<ul>
 		{#each node.children as child}

@@ -35,7 +35,7 @@ export interface TrackerDetail {
 
 // in java: TreeResource.NodeDetailResponse
 export interface NodeDetail {
-  name: String
+  names: String[]
   children: NodeDetail[]
   tracker: Tracker
 }
