@@ -18,9 +18,7 @@ export class ColorAssignment {
 }
 
 export class Coloring {
-  //assignments:ColorAssignment[] = []
-  // TODO temporary code for testing coloring of paths, until we can create them in the UI
-  assignments:ColorAssignment[] = [new ColorAssignment("#ffaaaa", [{type:"path", path:["Files"]}])]
+  assignments:ColorAssignment[] = []
 
   add(selection: Selected | null):void {
     if (!selection) return;

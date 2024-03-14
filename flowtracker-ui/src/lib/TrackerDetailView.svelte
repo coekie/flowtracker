@@ -153,7 +153,7 @@
     return a && b && a.length >= b.length && b.every((n, i) => a[i] == n)
   }
 
-  const backgroundColor = (region: Region, selection: Selected | null, focusRegion: Region | null): string => {
+  const backgroundColor = (region: Region, selection: Selected | null, focusRegion: Region | null, coloring: Coloring): string => {
     if (focusRegion === region) {
       if (region.parts.length > 0) {
         return "lightcyan"
@@ -208,7 +208,7 @@
     on:mouseup={mouseup}
     on:dblclick={dblclick}
     draggable="false"
-    style="background-color: {backgroundColor(region, selection, focusRegion)}"
+    style="background-color: {backgroundColor(region, selection, focusRegion, coloring)}"
     class:selected={isSelected(region, selection)}
     title={tooltip(region)}>{region.content}</a>{/each}</pre>
   </div>

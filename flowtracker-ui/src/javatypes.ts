@@ -38,7 +38,10 @@ export interface TrackerDetail {
 export interface NodeDetail {
   names: String[]
   children: NodeDetail[]
-  tracker: Tracker
+  tracker: Tracker | null
+
+  // added on client side (TrackerTree.enrich)
+  path: String[]
 }
 
 // in java: SettingsResource.Settings

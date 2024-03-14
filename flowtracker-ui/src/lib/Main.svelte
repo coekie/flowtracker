@@ -25,7 +25,7 @@
   <div class="panes">
   <Splitpanes theme="my-theme">
     <Pane>
-      <TrackerTree bind:selectedTracker={mainTracker}/>
+      <TrackerTree bind:selectedTracker={mainTracker} bind:selection={selection} coloring={coloring}/>
     </Pane>
     <Pane>
       <Splitpanes horizontal={true} theme="my-theme" >
