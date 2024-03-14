@@ -153,27 +153,13 @@
     return a && b && a.length >= b.length && b.every((n, i) => a[i] == n)
   }
 
-  const backgroundColor = (region: Region, selection: Selected | null, focusRegion: Region | null, coloring: Coloring): string => {
-    if (focusRegion === region) {
-      if (region.parts.length > 0) {
-        return "lightcyan"
-      } else {
-        return "#f0f0f0"
+  const backgroundColor = (region: Region, coloring: Coloring): string => {
+    for (var assignment of coloring.assignments) {
+      if (assignment.selections.some(selection => isSelected(region, selection))) {
+        return assignment.color;
       }
-    } else if (isSelected(region, selection)) {
-      if (region.parts.length > 0) {
-        return "lightblue"
-      } else {
-        return "lightgray"
-      }
-    } else {
-      for (var assignment of coloring.assignments) {
-        if (assignment.selections.some(selection => isSelected(region, selection))) {
-          return assignment.color;
-        }
-      }
-      return "inherit"
     }
+    return "inherit"
   }
 
   // event for main view so that double-click in one TrackerDetailView causes scrollToSelection in the other
@@ -208,8 +194,10 @@
     on:mouseup={mouseup}
     on:dblclick={dblclick}
     draggable="false"
-    style="background-color: {backgroundColor(region, selection, focusRegion, coloring)}"
+    style="background-color: {backgroundColor(region, coloring)}"
     class:selected={isSelected(region, selection)}
+    class:withSource={region.parts.length > 0}
+    class:focus={focusRegion === region}
     title={tooltip(region)}>{region.content}</a>{/each}</pre>
   </div>
 {/await}
@@ -231,5 +219,17 @@
     /* undo border */
     margin-right: 0;
     border-right: 0;
+  }
+  .focus.withSource {
+    border: 1px solid lightblue;
+  }
+  .focus {
+    border: 1px solid lightgray;
+  }
+  .selected.withSource {
+    border: 1px solid blue;
+  }
+  .selected {
+    border: 1px solid gray;
   }
 </style>
