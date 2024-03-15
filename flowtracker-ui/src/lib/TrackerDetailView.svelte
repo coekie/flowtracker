@@ -2,7 +2,7 @@
   import { tick } from 'svelte'
   import type { Tracker, TrackerDetail, Region } from '../javatypes'
   import PathView from './PathView.svelte'
-  import type { SelectedRange, Selected } from './selection'
+  import { type SelectedRange, type Selected, pathStartsWith } from './selection'
   import type { Coloring } from './coloring'
 
   /** Main tracker that's being shown */
@@ -149,10 +149,6 @@
     }
   }
 
-  const pathStartsWith = (a:String[], b:String[]):boolean => {
-    return a && b && a.length >= b.length && b.every((n, i) => a[i] == n)
-  }
-
   const backgroundColor = (region: Region, coloring: Coloring): string => {
     for (var assignment of coloring.assignments) {
       if (assignment.selections.some(selection => isSelected(region, selection))) {
@@ -182,7 +178,7 @@
 
 {#await trackerDetailPromise then trackerDetail}
  <div class="trackerDetail">
-  <div class="path"><PathView path={trackerDetail.path}/></div>
+  <div class="path"><PathView path={trackerDetail.path} bind:selection={selection} coloring={coloring}/></div>
   <pre bind:this={pre} use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a class="region"
     href={region.parts.length > 0 ? '#' : undefined}
     on:mouseover={() => focusIn(region)}

@@ -1,15 +1,69 @@
 <script lang="ts">
+  import type { Coloring } from "./coloring"
+  import { indexInPath, type Selected } from "./selection"
+
   export let path : String[] | null;
+
+  export let selection: Selected | null
+  export let coloring: Coloring
+
+  let selectionIndex:number|null;
+  $: selectionIndex = indexInPath(selection, path)
+  let colorByIndex:ColorByIndex;
+  $: colorByIndex = calcColorByIndex(coloring, path)
+
+  function calcColorByIndex(coloring: Coloring, path: String[]|null):ColorByIndex {
+    const result:ColorByIndex = {}
+    for (var assignment of coloring.assignments) {
+      for (var selection of assignment.selections) {
+        let index:number|null = indexInPath(selection, path)
+        if (index != null && !result[index]) {
+          result[index] = assignment.color
+        }
+      }
+		}
+		return result
+  }
+
+  function click(index:number) {
+    if (!path) return;
+    selection = {
+      type: "path",
+      path: path.slice(0, index + 1)
+    }
+  }
+
+  interface ColorByIndex {
+    [key: number]: string;
+  }
 </script>
 
 <!-- @component
 Shows path of a tracker.
-That is a path as in TrackerDetailResponse.path, or as n the TrackerTree.
-(For now this is trivial, but a separate component because it's planned to become bigger, more interactive)
+That is a path as in TrackerDetailResponse.path, or as in the TrackerTree.
 -->
 {#if path}
   {#each path as name, i}
     {#if i != 0}{" / "}{/if}
-    {name}
+    <button
+      class:selected={i === selectionIndex}
+      on:click={() => click(i)}
+      style="background-color: {colorByIndex[i] || "inherit"}"
+      >{name}</button>
   {/each}
 {/if}
+
+<style>
+  button {
+		padding: 0 0 0 0;
+		color: var(--fg-1);
+		cursor: pointer;
+		border: none;
+		margin: 0;
+    text-align: left;
+  }
+
+  button.selected {
+    border: 1px solid blue
+  }
+</style>
