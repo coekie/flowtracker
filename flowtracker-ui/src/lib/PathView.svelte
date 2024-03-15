@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Coloring } from "./coloring"
+  import type { ColorByIndex, Coloring } from "./coloring"
   import { indexInPath, type Selected } from "./selection"
 
   export let path : String[] | null;
@@ -10,20 +10,7 @@
   let selectionIndex:number|null;
   $: selectionIndex = indexInPath(selection, path)
   let colorByIndex:ColorByIndex;
-  $: colorByIndex = calcColorByIndex(coloring, path)
-
-  function calcColorByIndex(coloring: Coloring, path: String[]|null):ColorByIndex {
-    const result:ColorByIndex = {}
-    for (var assignment of coloring.assignments) {
-      for (var selection of assignment.selections) {
-        let index:number|null = indexInPath(selection, path)
-        if (index != null && !result[index]) {
-          result[index] = assignment.color
-        }
-      }
-		}
-		return result
-  }
+  $: colorByIndex = coloring.calcColorByIndex(path)
 
   function click(index:number) {
     if (!path) return;
@@ -31,10 +18,6 @@
       type: "path",
       path: path.slice(0, index + 1)
     }
-  }
-
-  interface ColorByIndex {
-    [key: number]: string;
   }
 </script>
 

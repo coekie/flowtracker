@@ -1,4 +1,4 @@
-import type { Selected } from './selection'
+import { indexInPath, type Selected } from './selection'
 
 const autoColors: string[] = [
   "#ffaaaa", "#aaffaa", "#aaaaff",
@@ -7,6 +7,9 @@ const autoColors: string[] = [
   "#dddd77", "#dd77dd", "#77dddd",
 ]
 
+/**
+ * The assignment of a color to what (which `Selected`) should be rendered in that color.
+ */
 export class ColorAssignment {
   color: string
   selections: Selected[]
@@ -17,6 +20,9 @@ export class ColorAssignment {
   }
 }
 
+/**
+ * Contains the full configuration of how colors are assigned.
+ */
 export class Coloring {
   assignments:ColorAssignment[] = []
 
@@ -29,4 +35,26 @@ export class Coloring {
   canAdd():boolean {
     return autoColors.length > this.assignments.length
   }
+
+  /**
+   * Determines how `path` should be rendered according to this Coloring:
+   * which part of it should be colored.
+   */
+  calcColorByIndex(path: String[]|null):ColorByIndex {
+    const result:ColorByIndex = {}
+    for (var assignment of this.assignments) {
+      for (var selection of assignment.selections) {
+        let index:number|null = indexInPath(selection, path)
+        if (index != null && !result[index]) {
+          result[index] = assignment.color
+        }
+      }
+    }
+    return result
+  }
+}
+
+/** Mapping from index of parts of a path to the color in which that part should be rendered */
+export interface ColorByIndex {
+  [key: number]: string;
 }

@@ -10,7 +10,7 @@
   import { Coloring } from './coloring';
 
   /** Tracker that is selected in the tree, shown in the top TrackerDetailView */
-  let mainTracker: Tracker | null
+  let mainTracker: Tracker | null = null
 
   /** Part used in mainTracker that is selected, shown in the bottom TrackerDetailView */
   let selection: SelectedRange | null = null
