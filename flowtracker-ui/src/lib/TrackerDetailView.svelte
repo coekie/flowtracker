@@ -181,8 +181,8 @@
 </script>
 
 {#await trackerDetailPromise then trackerDetail}
-  <div class="trackerDetail">
-  <div><PathView path={trackerDetail.path}/></div>
+ <div class="trackerDetail">
+  <div class="path"><PathView path={trackerDetail.path}/></div>
   <pre bind:this={pre} use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a class="region"
     href={region.parts.length > 0 ? '#' : undefined}
     on:mouseover={() => focusIn(region)}
@@ -199,14 +199,24 @@
     class:withSource={region.parts.length > 0}
     class:focus={focusRegion === region}
     title={tooltip(region)}>{region.content}</a>{/each}</pre>
-  </div>
+ </div>
 {/await}
 
 <style>
   .trackerDetail {
     width: 100%;
     height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .path {
+    border-bottom: 1px solid #ccc;
+  }
+  pre {
     overflow: auto;
+    flex: 1;
+    margin: 0;    
   }
   .region {
     /* draw a vertical line after each part, without influencing size */
