@@ -26,6 +26,12 @@
     coloring = coloring
     e.preventDefault()
   }
+
+  function remove(index:number, e:MouseEvent) {
+    coloring.assignments.splice(index, 1)
+    coloring = coloring
+    e.preventDefault()
+  }  
 </script>
 
 <!-- @component
@@ -35,7 +41,12 @@ Component to edit coloring
 <div class="coloringwrapper">
 <div><b>Coloring:</b></div>
 {#each coloring.assignments as assignment, index}
-<a href={"#"} on:click={e => reassign(assignment, index, e)} class="square" style="background-color:{assignment.color}">&nbsp;</a>
+<a href={"#"}
+  on:click={e => reassign(assignment, index, e)}
+  on:contextmenu={e => remove(index, e)}
+  class="square"
+  style="background-color:{assignment.color}"
+  >&nbsp;</a>
 {/each}
 {#if coloring.canAdd()}
 <a href={"#"} on:click={add} class="square">+</a>
