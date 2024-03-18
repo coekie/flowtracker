@@ -25,6 +25,17 @@
 
   export let coloring: Coloring
 
+  /**
+   * Last Tracker to be selected.
+   * 
+   * When a range is selected in the main view, then we update the secondary view to show the tracker
+   * associated to that range. But when something else is selected (a path), then the secondaryTracker
+   * does not change. So the secondaryTracker is more or less the last `selection` that was a Tracker.
+   * Keeping track of secondaryTracker separately from `selection` makes it possible to select paths
+   * (e.g. in the secondary view) without the secondary view disappearing.
+   */
+   export let secondaryTracker: Tracker | null = null
+
   export let ondblclick: (() => void) | null = null;
 
   // pull out the ids, to prevent unnecessary re-fetching when tracker is changed to other instance
@@ -96,6 +107,7 @@
 
   const mousedown = (region: Region) => {
     selection = selectionStart = toSelection(region)
+    updateSecondaryTracker()
   }
 
   // handle selecting multiple regions, by dragging
@@ -121,6 +133,7 @@
       offset: start,
       length: end - start
     }
+    updateSecondaryTracker()
   }
 
   const mouseup = () => {
@@ -146,6 +159,12 @@
       }
     } else { // selection is a SelectedPath
       return region.parts.some(part => pathStartsWith(part.tracker.path, selection.path))
+    }
+  }
+
+  const updateSecondaryTracker = ():void => {
+    if (selection?.type == "range") {
+      secondaryTracker = selection.tracker
     }
   }
 

@@ -4,16 +4,18 @@
   import SettingsView from './SettingsView.svelte'
   import TrackerDetailView from './TrackerDetailView.svelte'
   import type { Tracker } from '../javatypes'
-  import type { SelectedRange } from './selection'
+  import type { Selected } from './selection'
   import TrackerTree from './TrackerTree.svelte';
   import ColoringView from './ColoringView.svelte';
   import { Coloring } from './coloring';
 
   /** Tracker that is selected in the tree, shown in the top TrackerDetailView */
   let mainTracker: Tracker | null = null
+  /** Tracker that is selected in the top TrackerDetailView, shown in the bottom TrackerDetailView */
+  let secondaryTracker: Tracker | null = null
 
-  /** Part used in mainTracker that is selected, shown in the bottom TrackerDetailView */
-  let selection: SelectedRange | null = null
+  /** The last clicked thing: a SelectedPath (e.g. a Tracker) or a SelectedRange */
+  let selection: Selected | null = null
 
   let coloring: Coloring = new Coloring()
 
@@ -32,15 +34,16 @@
         <Pane>
           <TrackerDetailView
             bind:this={sinkView}
-            bind:viewTracker={mainTracker}
+            viewTracker={mainTracker}
             bind:selection={selection}
             bind:coloring={coloring}
+            bind:secondaryTracker={secondaryTracker}
             ondblclick={() => originView?.scrollToSelection()}/>
         </Pane>
         <Pane>
           <TrackerDetailView
             bind:this={originView}
-            viewTracker={selection ? selection.tracker : null}
+            viewTracker={secondaryTracker}
             bind:selection={selection}
             bind:coloring={coloring}
             targetTracker={mainTracker}
