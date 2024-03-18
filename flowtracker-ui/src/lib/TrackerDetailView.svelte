@@ -66,17 +66,6 @@
 		return response.json()
   }
 
-  const tooltip = (region: Region) => {
-    if (region.parts.length === 0) {
-      return null
-    } else {
-      let part = region.parts[0];
-      return 'source=' + (part.tracker.description || 'unknown') + '\n' +
-        'sourceOffset=' + part.offset + '\n' +
-        'context=' + part.context;
-    }
-  }
-
   const focusIn = (region: Region) => {
     focusRegion = region
   }
@@ -213,7 +202,7 @@
     class:selected={isSelected(region, selection)}
     class:withSource={region.parts.length > 0}
     class:focus={focusRegion === region}
-    title={tooltip(region)}>{region.content}</a>{/each}</pre>
+    >{region.content}</a>{/each}</pre>
  </div>
 {/await}
 

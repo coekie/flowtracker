@@ -177,15 +177,11 @@ public class TrackerResource {
     private final int offset;
     private final int length;
     // TODO growth
-    private final String context;
 
     public TrackerPartResponse(Tracker tracker, int offset, int length) {
       this.tracker = new TrackerResponse(tracker);
       this.offset = offset;
       this.length = length;
-      this.context = getContentAsString(tracker,
-          Math.max(0, offset - 10),
-          Math.min(getContentLength(tracker), offset + length + 10));
     }
 
     public TrackerResponse getTracker() {
@@ -198,10 +194,6 @@ public class TrackerResource {
 
     public int getLength() {
       return length;
-    }
-
-    public String getContext() {
-      return context;
     }
   }
 

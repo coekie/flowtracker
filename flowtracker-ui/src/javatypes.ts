@@ -17,7 +17,6 @@ export interface TrackerPart {
   tracker: Tracker
   offset: number
   length: number
-  context: String
 }
 
 // in java: TrackerResource.Region

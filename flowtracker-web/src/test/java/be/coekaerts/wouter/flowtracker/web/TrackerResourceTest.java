@@ -84,27 +84,6 @@ public class TrackerResourceTest {
     assertRegionNoPart(response.getRegions().get(4), "h");
   }
 
-  @Test public void trackerPartResponse_sourceContext() {
-    CharSinkTracker tracker = new CharSinkTracker();
-    InterestRepository.register(tracker);
-
-    CharOriginTracker sourceTracker = new CharOriginTracker();
-    sourceTracker.append("abcdefghijklmnopqrstuvwxyz".toCharArray(), 0, 26);
-    tracker.append("mnbcxy", 0, 6);
-    tracker.setSource(0, 2, sourceTracker, 12);
-    tracker.setSource(2, 2, sourceTracker, 1);
-    tracker.setSource(4, 2, sourceTracker, 24);
-
-    TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
-    // middle, full context
-    assertEquals("cdefghijklmnopqrstuvwx",
-        response.getRegions().get(0).getParts().get(0).getContext());
-    // context near the beginning
-    assertEquals("abcdefghijklm", response.getRegions().get(1).getParts().get(0).getContext());
-    // context near the end
-    assertEquals("opqrstuvwxyz", response.getRegions().get(2).getParts().get(0).getContext());
-  }
-
   @Test public void getOriginTracker() {
     CharOriginTracker tracker = new CharOriginTracker();
     InterestRepository.register(tracker);
