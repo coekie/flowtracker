@@ -15,24 +15,6 @@
   let colorByIndex:ColorByIndex;
   $: colorByIndex = coloring.calcColorByIndex(node.path)
 
-	function isSelected(selection: Selected|null):boolean {
-		if (!selection || selection.type != "path") return false;
-		return selection.type == "path" && arraysEqual(selection.path, node.path)
-	}
-
-	function arraysEqual(a:String[], b:String[]):boolean {
-		return a.length === b.length && a.every((value, index) => value === b[index])
-	}
-
-  function backgroundColor(coloring: Coloring):string {
-		for (var assignment of coloring.assignments) {
-			if (assignment.selections.some(selection => isSelected(selection))) {
-				return assignment.color;
-			}
-		}
-		return "inherit"
-  }
-
 	function click(node: NodeDetail) {
 		if (node.tracker) {
 			selectedTracker = node.tracker
@@ -64,7 +46,7 @@
   class:sink={node.tracker?.sink}
   class:selected={selectionIndex == node.path.length - 1}
 	class:selected-tracker={node.tracker && node.tracker === selectedTracker}
-	style="background-color: {backgroundColor(coloring)}"
+	style="background-color: {colorByIndex[node.path.length - 1] || "inherit"}"
   on:click={() => click(node)}>
 	{#each node.names as name, i}
 	  <!--
@@ -77,7 +59,7 @@
 		 -->
 		{#if i != 0}{"/"}{/if}<span class="path-part"
 			class:selected={pathIndex(i) === selectionIndex && i != node.names.length - 1}
-			style="background-color: {colorByIndex[pathIndex(i)] || "inherit"}"
+			style="background-color: {((i != node.names.length - 1) && colorByIndex[pathIndex(i)]) || "inherit"}"
 			>{name}</span>
 	{/each}
 </button>
