@@ -3,11 +3,12 @@
   import type { ColorByIndex, Coloring } from './coloring'
   import { indexInPath, type Selected } from './selection'
 
-  export let expanded: boolean = false
   export let selectedTracker: Tracker | null
 	export let selection: Selected | null
 	export let coloring: Coloring
   export let node: NodeDetail
+	/** If this node is expanded; if children are visible. Initially only root node is expanded. */
+	export let expanded: boolean = (node.path.length == 0)
 
 	let selectionIndex:number|null;
   $: selectionIndex = indexInPath(selection, node.path)
