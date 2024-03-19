@@ -27,6 +27,11 @@
     "sourceMap": true,
     "strict": true
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "./vitest-setup.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.js",
+    "src/**/*.svelte",
+    "./vitest-setup.ts"
+  ],
+  "references": [{"path": "./tsconfig.node.json"}]
 }
