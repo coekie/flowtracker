@@ -2,7 +2,7 @@
   import { tick } from 'svelte'
   import type { Tracker, TrackerDetail, Region } from '../javatypes'
   import PathView from './PathView.svelte'
-  import { type SelectedRange, type Selected, pathStartsWith } from './selection'
+  import { type ASelection, pathStartsWith, RangeSelection } from './selection'
   import type { Coloring } from './coloring'
 
   /** Main tracker that's being shown */
@@ -21,7 +21,7 @@
    * for the top view that is the trackers referenced in the parts;
    * for the bottom view that is the tracker being shown.
    */
-  export let selection: Selected | null;
+  export let selection: ASelection | null;
 
   export let coloring: Coloring
 
@@ -51,7 +51,7 @@
   let focusRegion: Region | null;
 
   /** For an ongoing selection (while the mouse button is down), the selection where we started (where the mouse went down) */
-  let selectionStart: SelectedRange | null;
+  let selectionStart: RangeSelection | null;
 
   let pre: HTMLPreElement;
 
@@ -74,21 +74,13 @@
     focusRegion = null
   }
 
-  // convertion a region (of viewTracker) to a SelectedRange.
+  // convertion a region (of viewTracker) to a RangeSelection.
   // That is in terms of the source tracker, see `selection`.
-  const toSelection = (region: Region):SelectedRange | null => {
+  const toSelection = (region: Region):RangeSelection | null => {
     if (targetTracker) {
-      return {
-        type: "range",
-        tracker: viewTracker!,
-        offset: region.offset,
-        length: region.length
-      }
+      return new RangeSelection(viewTracker!, region.offset, region.length)
     } else if (region.parts.length == 1) {
-      return {
-        type: "range",
-        ...(region.parts[0])
-      }
+      return new RangeSelection(region.parts[0].tracker, region.parts[0].offset, region.parts[0].length)
     } else {
       return null;
     } 
@@ -116,12 +108,7 @@
     // you can select from left to right, or right to left
     let start:number = Math.min(selectionStart.offset, selectionEnd.offset)
     let end:number = Math.max(selectionStart.offset + selectionStart.length, selectionEnd.offset + selectionEnd.length)
-    selection = {
-      type: "range",
-      tracker: selectionStart.tracker,
-      offset: start,
-      length: end - start
-    }
+    selection = new RangeSelection(selectionStart.tracker, start, end - start)
     updateSecondaryTracker()
   }
 
@@ -129,10 +116,10 @@
     selectionStart = null;
   }
 
-  const isSelected = (region: Region, selection: Selected | null):boolean => {
+  const isSelected = (region: Region, selection: ASelection | null):boolean => {
     if (selection == null || viewTracker == null) {
       return false;
-    } else if (selection.type == "range") { // selection is a SelectedRange
+    } else if (selection instanceof RangeSelection) {
       if (targetTracker) {
         return selection.tracker.id == viewTracker.id
           && region.offset >= selection.offset
@@ -146,13 +133,13 @@
           part.offset >= selection.offset &&
           part.offset < selection.offset + selection.length
       }
-    } else { // selection is a SelectedPath
+    } else { // selection is a PathSelection
       return region.parts.some(part => pathStartsWith(part.tracker.path, selection.path))
     }
   }
 
   const updateSecondaryTracker = ():void => {
-    if (selection?.type == "range") {
+    if (selection instanceof RangeSelection) {
       secondaryTracker = selection.tracker
     }
   }

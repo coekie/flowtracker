@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { ColorByIndex, Coloring } from "./coloring"
-  import { indexInPath, type Selected } from "./selection"
+  import { PathSelection, indexInPath, type ASelection } from "./selection"
 
   export let path : String[] | null;
 
-  export let selection: Selected | null
+  export let selection: ASelection | null
   export let coloring: Coloring
 
   let selectionIndex:number|null;
@@ -14,10 +14,7 @@
 
   function click(index:number) {
     if (!path) return;
-    selection = {
-      type: "path",
-      path: path.slice(0, index + 1)
-    }
+    selection = new PathSelection(path.slice(0, index + 1))
   }
 </script>
 

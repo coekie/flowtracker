@@ -8,6 +8,7 @@ import { Coloring } from './coloring'
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { server } from "../mocks/node";
 import { simpleOriginTracker, simpleSinkTracker } from '../mocks/handlers'
+import { RangeSelection } from './selection'
  
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
@@ -33,7 +34,7 @@ describe('select region', () => {
     await user.click(foo)
     expect(foo).toHaveClass('selected')
     expect(bar).not.toHaveClass('selected')
-    expect(tree.selection).toMatchObject({type: "range", tracker: simpleOriginTracker, offset: 10, length: 3})
+    expect(tree.selection).toMatchObject({tracker: simpleOriginTracker, offset: 10, length: 3})
   }
 
   test('in sink tracker', async () => {
@@ -64,7 +65,7 @@ describe('select multiple regions', () => {
   
     expect(foo).toHaveClass('selected')
     expect(bar).toHaveClass('selected')
-    expect(tree.selection).toMatchObject({type: "range", tracker: simpleOriginTracker, offset: 10, length: 13})
+    expect(tree.selection).toMatchObject({tracker: simpleOriginTracker, offset: 10, length: 13})
   }
 
   test('in sink tracker', async () => {
@@ -94,7 +95,7 @@ describe('select multiple regions in reverse', () => {
   
     expect(foo).toHaveClass('selected')
     expect(bar).toHaveClass('selected')
-    expect(tree.selection).toMatchObject({type: "range", tracker: simpleOriginTracker, offset: 10, length: 13})
+    expect(tree.selection).toMatchObject({tracker: simpleOriginTracker, offset: 10, length: 13})
   }
 
   test('in sink tracker', async () => {
@@ -111,8 +112,8 @@ describe('select multiple regions in reverse', () => {
 describe('coloring', () => {
   const testIt = async (tree:TrackerDetailView) => {
     const coloring = new Coloring()
-    coloring.add({type: 'range', tracker: simpleOriginTracker, offset: 10, length: 3})
-    coloring.add({type: 'range', tracker: simpleOriginTracker, offset: 20, length: 3})
+    coloring.add(new RangeSelection(simpleOriginTracker, 10, 3))
+    coloring.add(new RangeSelection(simpleOriginTracker, 20, 3))
     tree.coloring = coloring
   
     const foo = await screen.findByText('foo')

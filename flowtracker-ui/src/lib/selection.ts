@@ -1,22 +1,35 @@
 import type { Tracker } from '../javatypes'
 
-export interface SelectedRange {
-  type: "range"
+/** A range of characters in a tracker */
+export class RangeSelection {
   tracker: Tracker
   offset: number
   length: number
+
+  constructor(tracker: Tracker, offset: number, length: number) {
+    this.tracker = tracker
+    this.offset = offset
+    this.length = length
+  }
 }
 
-export interface SelectedPath {
-  type: "path"
+/** A path, pointing to a tracker or sub-path/folder containing multiple trackers */
+export class PathSelection {
   path: String[]
+
+  constructor(path: String[]) {
+    this.path = path
+  }
 }
 
-export type Selected = SelectedRange | SelectedPath
+/**
+ * Anything that can be selected. (Not calling this `Selection` to avoid naming conflict)
+ */
+export type ASelection = RangeSelection | PathSelection
 
 /** Returns which part (index) of `path` should be rendered as being selected */
-export function indexInPath(selection: Selected | null, path: String[]|null):number|null {
-  if (!selection || !path || selection.type !== "path" || !pathStartsWith(path, selection.path)) return null
+export function indexInPath(selection: ASelection | null, path: String[]|null):number|null {
+  if (!path || !(selection instanceof PathSelection) || !pathStartsWith(path, selection.path)) return null
   return selection.path.length - 1
 }
 

@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { NodeDetail, Tracker } from '../javatypes'
   import type { ColorByIndex, Coloring } from './coloring'
-  import { indexInPath, type Selected } from './selection'
+  import { indexInPath, PathSelection, type ASelection } from './selection'
 
   export let selectedTracker: Tracker | null
-	export let selection: Selected | null
+	export let selection: ASelection | null
 	export let coloring: Coloring
   export let node: NodeDetail
 	/** If this node is expanded; if children are visible. Initially only root node is expanded. */
@@ -22,10 +22,7 @@
 		if (node.children.length > 0) {
 			expanded = !expanded
 		}
-		selection = {
-			type: "path",
-			path: node.path
-		}
+		selection = new PathSelection(node.path)
 	}
 
 	/**

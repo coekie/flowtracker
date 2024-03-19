@@ -4,6 +4,7 @@ import {expect, test} from 'vitest'
 
 import PathView from './PathView.svelte'
 import { Coloring } from './coloring'
+import { PathSelection } from './selection'
 
 test('simple path', () => {
   render(PathView, {path: ['node1', 'node2'], selection: null, coloring: new Coloring()})
@@ -25,7 +26,7 @@ test('select path and render as selected', async () => {
 
   await user.click(node2)
 
-  expect(pathView.selection).toMatchObject({type: 'path', path: ['node1', 'node2']})
+  expect(pathView.selection).toMatchObject({path: ['node1', 'node2']})
   expect(node1).not.toHaveClass('selected')
   expect(node2).toHaveClass('selected')
   expect(node3).not.toHaveClass('selected')
@@ -34,7 +35,7 @@ test('select path and render as selected', async () => {
 test('coloring', async () => {
   const user = userEvent.setup()
   const coloring = new Coloring();
-  coloring.add({type: "path", path: ['node1', 'node2']})
+  coloring.add(new PathSelection(['node1', 'node2']))
   const pathView:PathView = render(PathView, {path: ['node1', 'node2', 'node3'], selection: null, coloring: coloring}).component
 
   const node1 = screen.getByText('node1')

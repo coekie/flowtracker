@@ -1,4 +1,4 @@
-import { indexInPath, type Selected } from './selection'
+import { indexInPath, type ASelection } from './selection'
 
 const autoColors: string[] = [
   "#ffaaaa", "#aaffaa", "#aaaaff",
@@ -8,13 +8,13 @@ const autoColors: string[] = [
 ]
 
 /**
- * The assignment of a color to what (which `Selected`) should be rendered in that color.
+ * The assignment of a color to what (which `ASelection`) should be rendered in that color.
  */
 export class ColorAssignment {
   color: string
-  selections: Selected[]
+  selections: ASelection[]
 
-  constructor(color: string, selections:Selected[]) {
+  constructor(color: string, selections:ASelection[]) {
     this.color = color
     this.selections = selections
   }
@@ -26,7 +26,7 @@ export class ColorAssignment {
 export class Coloring {
   assignments:ColorAssignment[] = []
 
-  add(selection: Selected | null):void {
+  add(selection: ASelection | null):void {
     if (!selection) return;
     let color = autoColors[Math.min(this.assignments.length, autoColors.length-1)]
     this.assignments.push(new ColorAssignment(color, [selection]))

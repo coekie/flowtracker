@@ -1,9 +1,9 @@
 <script lang="ts">
   import { ColorAssignment, Coloring } from './coloring'
-  import type { Selected } from './selection'
+  import type { ASelection } from './selection'
 
   export let coloring: Coloring
-  export let selection: Selected | null
+  export let selection: ASelection | null
 
   function add():void {
     coloring.add(selection)

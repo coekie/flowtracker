@@ -4,7 +4,7 @@
   import SettingsView from './SettingsView.svelte'
   import TrackerDetailView from './TrackerDetailView.svelte'
   import type { Tracker } from '../javatypes'
-  import type { Selected } from './selection'
+  import type { ASelection } from './selection'
   import TrackerTree from './TrackerTree.svelte';
   import ColoringView from './ColoringView.svelte';
   import { Coloring } from './coloring';
@@ -14,8 +14,8 @@
   /** Tracker that is selected in the top TrackerDetailView, shown in the bottom TrackerDetailView */
   let secondaryTracker: Tracker | null = null
 
-  /** The last clicked thing: a SelectedPath (e.g. a Tracker) or a SelectedRange */
-  let selection: Selected | null = null
+  /** The last clicked thing: a PathSelection (e.g. a Tracker) or a RangeSelection */
+  let selection: ASelection | null = null
 
   let coloring: Coloring = new Coloring()
 

@@ -1,11 +1,11 @@
 <script lang="ts">
   import TrackerTreeNode from './TrackerTreeNode.svelte'
   import type { Tracker, NodeDetail } from '../javatypes'
-  import type { Selected } from './selection'
+  import type { ASelection } from './selection'
   import type { Coloring } from './coloring'
   
   export let selectedTracker: Tracker | null;
-  export let selection: Selected | null;
+  export let selection: ASelection | null;
   export let coloring: Coloring
 
   let showSinks:boolean = true
