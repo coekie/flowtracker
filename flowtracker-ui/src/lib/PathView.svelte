@@ -2,7 +2,7 @@
   import type { ColorByIndex, Coloring } from "./coloring"
   import { PathSelection, indexInPath, type ASelection } from "./selection"
 
-  export let path : String[] | null;
+  export let path: string[] | null;
 
   export let selection: ASelection | null
   export let coloring: Coloring

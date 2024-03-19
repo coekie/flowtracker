@@ -39,7 +39,7 @@ export class Coloring {
   add(selection: ASelection | null):void {
     if (!selection) return;
     // first unused color from autoColors
-    let color = autoColors.find(c => !this.assignments.some(a => a.color == c)) ?? "#eeeeee"
+    const color = autoColors.find(c => !this.assignments.some(a => a.color == c)) ?? "#eeeeee"
     this.assignments.push(new ColorAssignment(color, [selection]))
   }
 
@@ -51,11 +51,11 @@ export class Coloring {
    * Determines how `path` should be rendered according to this Coloring:
    * which part of it should be colored.
    */
-  calcColorByIndex(path: String[]|null):ColorByIndex {
+  calcColorByIndex(path: string[]|null):ColorByIndex {
     const result:ColorByIndex = {}
-    for (var assignment of this.assignments) {
-      for (var selection of assignment.selections) {
-        let index:number|null = indexInPath(selection, path)
+    for (const assignment of this.assignments) {
+      for (const selection of assignment.selections) {
+        const index:number|null = indexInPath(selection, path)
         if (index != null && !result[index]) {
           result[index] = assignment.color
         }

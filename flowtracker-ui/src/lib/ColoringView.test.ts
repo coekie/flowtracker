@@ -25,7 +25,6 @@ test('render colorings', () => {
   coloring.add(selection2)
   render(ColoringView, {coloring, selection: null})
 
-  const squares = screen.getAllByRole('link')
   expect(getSquares()).toHaveLength(3)
   expect(getSquare(0)).toHaveStyle({'background-color': autoColors[0]})
   expect(getSquare(1)).toHaveStyle({'background-color': autoColors[1]})

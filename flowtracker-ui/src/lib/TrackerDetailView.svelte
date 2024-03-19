@@ -70,7 +70,7 @@
     focusRegion = region
   }
 
-  const focusOut = (region: Region) => {
+  const focusOut = () => {
     focusRegion = null
   }
 
@@ -177,9 +177,9 @@
   <pre bind:this={pre} use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a class="region"
     href={region.parts.length > 0 ? '#' : undefined}
     on:mouseover={() => focusIn(region)}
-    on:mouseout={() => focusOut(region)}
+    on:mouseout={() => focusOut()}
     on:focus={() => focusIn(region)}
-    on:blur={() => focusOut(region)}
+    on:blur={() => focusOut()}
     on:mousedown={() => mousedown(region)}
     on:mousemove={e => mousemove(e, region)}
     on:mouseup={mouseup}

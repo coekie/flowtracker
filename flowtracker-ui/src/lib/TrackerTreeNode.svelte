@@ -46,14 +46,14 @@
 	style="background-color: {colorByIndex[node.path.length - 1] || "inherit"}"
   on:click={() => click(node)}>
 	{#each node.names as name, i}
-	  <!--
-			When the whole path represented by this node is selected then we draw the selection border around the whole node
-			(so apply .selected to the button); but when a sub-path is selected (e.g. 'a/b' in 'a/b/c') then we put the selection
-			border only on the specific part (e.g. the 'b' span). Similar for coloring.
-			That's a little inconsistent, but it allows clicking on a node in a tree to feel natural (selecting the whole node),
-			while still giving an indication of when part of a path (that can't be selected by clicking in the tree, but can be
-			selected in PathView) has been selected or colored.
-		 -->
+    <!--
+      When the whole path represented by this node is selected then we draw the selection border around the whole node
+      (so apply .selected to the button); but when a sub-path is selected (e.g. 'a/b' in 'a/b/c') then we put the selection
+      border only on the specific part (e.g. the 'b' span). Similar for coloring.
+      That's a little inconsistent, but it allows clicking on a node in a tree to feel natural (selecting the whole node),
+      while still giving an indication of when part of a path (that can't be selected by clicking in the tree, but can be
+      selected in PathView) has been selected or colored.
+		-->
 		{#if i != 0}{"/"}{/if}<span class="path-part"
 			class:selected={pathIndex(i) === selectionIndex && i != node.names.length - 1}
 			style="background-color: {((i != node.names.length - 1) && colorByIndex[pathIndex(i)]) || "inherit"}"

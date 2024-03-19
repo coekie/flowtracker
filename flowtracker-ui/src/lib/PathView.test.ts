@@ -6,6 +6,8 @@ import PathView from './PathView.svelte'
 import { Coloring } from './coloring'
 import { PathSelection } from './selection'
 
+const user = userEvent.setup()
+
 test('simple path', () => {
   render(PathView, {path: ['node1', 'node2'], selection: null, coloring: new Coloring()})
 
@@ -14,7 +16,6 @@ test('simple path', () => {
 })
 
 test('select path and render as selected', async () => {
-  const user = userEvent.setup()
   const pathView:PathView = render(PathView, {path: ['node1', 'node2', 'node3'], selection: null, coloring: new Coloring()}).component
 
   const node1 = screen.getByText('node1')
@@ -33,10 +34,9 @@ test('select path and render as selected', async () => {
 })
 
 test('coloring', async () => {
-  const user = userEvent.setup()
   const coloring = new Coloring();
   coloring.add(new PathSelection(['node1', 'node2']))
-  const pathView:PathView = render(PathView, {path: ['node1', 'node2', 'node3'], selection: null, coloring: coloring}).component
+  render(PathView, {path: ['node1', 'node2', 'node3'], selection: null, coloring: coloring}).component
 
   const node1 = screen.getByText('node1')
   const node2 = screen.getByText('node2')
