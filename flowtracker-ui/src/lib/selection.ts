@@ -11,6 +11,10 @@ export class RangeSelection {
     this.offset = offset
     this.length = length
   }
+
+  eq(o:any):boolean {
+    return o instanceof RangeSelection && this.tracker.id == o.tracker.id && this.offset == o.offset && this.length == o.length
+  }
 }
 
 /** A path, pointing to a tracker or sub-path/folder containing multiple trackers */
@@ -19,6 +23,10 @@ export class PathSelection {
 
   constructor(path: String[]) {
     this.path = path
+  }
+
+  eq(o:any):boolean {
+    return o instanceof PathSelection && this.path.length == o.path.length && this.path.every((n, i) => o.path[i] == n)
   }
 }
 

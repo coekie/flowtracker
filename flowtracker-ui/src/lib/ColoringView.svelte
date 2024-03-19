@@ -11,16 +11,13 @@
   }
 
   function reassign(assignment: ColorAssignment, index:number, e:MouseEvent) {
-    if (e.shiftKey) {
-      if (selection) {
-        // TODO remove if it's already in there. requires equality check on selection.
-        assignment.selections.push(selection)
-      }
-    } else {
-      if (selection) {
-        assignment.selections = [selection]
+    if (selection) {
+      if (assignment.remove(selection)) {
+        if (assignment.selections.length == 0) {
+          coloring.assignments.splice(index, 1)
+        }
       } else {
-        coloring.assignments.splice(index, 1)
+        assignment.selections.push(selection)
       }
     }
     coloring = coloring

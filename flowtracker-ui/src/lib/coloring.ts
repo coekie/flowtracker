@@ -1,6 +1,6 @@
 import { indexInPath, type ASelection } from './selection'
 
-const autoColors: string[] = [
+export const autoColors: string[] = [
   "#ffaaaa", "#aaffaa", "#aaaaff",
   "#ffffaa", "#ffaaff", "#aaffff",
   "#dd7777", "#77dd77", "#7777dd",
@@ -18,6 +18,16 @@ export class ColorAssignment {
     this.color = color
     this.selections = selections
   }
+
+  remove(selection:ASelection):boolean {
+    for (let i = 0; i < this.selections.length; i++) {
+      if (selection.eq(this.selections[i])) {
+        this.selections.splice(i, 1)
+        return true
+      }
+    }
+    return false
+  }
 }
 
 /**
@@ -28,7 +38,8 @@ export class Coloring {
 
   add(selection: ASelection | null):void {
     if (!selection) return;
-    let color = autoColors[Math.min(this.assignments.length, autoColors.length-1)]
+    // first unused color from autoColors
+    let color = autoColors.find(c => !this.assignments.some(a => a.color == c)) ?? "#eeeeee"
     this.assignments.push(new ColorAssignment(color, [selection]))
   }
 
