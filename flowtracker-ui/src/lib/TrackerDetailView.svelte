@@ -69,17 +69,17 @@
     return response.json();
   };
 
-  const focusIn = (region: Region) => {
+  function focusIn(region: Region) {
     focusRegion = region;
-  };
+  }
 
-  const focusOut = () => {
+  function focusOut() {
     focusRegion = null;
-  };
+  }
 
   // convertion a region (of viewTracker) to a RangeSelection.
   // That is in terms of the source tracker, see `selection`.
-  const toSelection = (region: Region): RangeSelection | null => {
+  function toSelection(region: Region): RangeSelection | null {
     if (targetTracker) {
       return new RangeSelection(viewTracker!, region.offset, region.length);
     } else if (region.parts.length == 1) {
@@ -91,15 +91,15 @@
     } else {
       return null;
     }
-  };
+  }
 
-  const mousedown = (region: Region) => {
+  function mousedown(region: Region) {
     selection = selectionStart = toSelection(region);
     updateSecondaryTracker();
-  };
+  }
 
   // handle selecting multiple regions, by dragging
-  const mousemove = (e: MouseEvent, region: Region) => {
+  function mousemove(e: MouseEvent, region: Region) {
     // if the button isn't pressed anymore, stop the selection
     if (e.buttons != 1) {
       selectionStart = null;
@@ -124,16 +124,13 @@
     );
     selection = new RangeSelection(selectionStart.tracker, start, end - start);
     updateSecondaryTracker();
-  };
+  }
 
-  const mouseup = () => {
+  function mouseup() {
     selectionStart = null;
-  };
+  }
 
-  const isSelected = (
-    region: Region,
-    selection: ASelection | null
-  ): boolean => {
+  function isSelected(region: Region, selection: ASelection | null): boolean {
     if (selection == null || viewTracker == null) {
       return false;
     } else if (selection instanceof RangeSelection) {
@@ -160,15 +157,15 @@
         pathStartsWith(part.tracker.path, selection.path)
       );
     }
-  };
+  }
 
-  const updateSecondaryTracker = (): void => {
+  function updateSecondaryTracker(): void {
     if (selection instanceof RangeSelection) {
       secondaryTracker = selection.tracker;
     }
-  };
+  }
 
-  const backgroundColor = (region: Region, coloring: Coloring): string => {
+  function backgroundColor(region: Region, coloring: Coloring): string {
     for (var assignment of coloring.assignments) {
       if (
         assignment.selections.some(selection => isSelected(region, selection))
@@ -177,24 +174,24 @@
       }
     }
     return 'inherit';
-  };
+  }
 
   // event for main view so that double-click in one TrackerDetailView causes scrollToSelection in the other
-  const dblclick = () => {
+  function dblclick() {
     if (ondblclick) {
       ondblclick();
     }
-  };
+  }
 
   /** scroll the first selected region into view */
-  export const scrollToSelection = () => {
+  export function scrollToSelection() {
     pre?.querySelector('.selected')?.scrollIntoView();
-  };
+  }
 
   /** waits for rendering and then scrolls the first selection region into view */
-  const scrollToSelectionOnFirstRender = (_: HTMLPreElement) => {
+  function scrollToSelectionOnFirstRender(_: HTMLPreElement) {
     tick().then(scrollToSelection);
-  };
+  }
 </script>
 
 {#await trackerDetailPromise then trackerDetail}

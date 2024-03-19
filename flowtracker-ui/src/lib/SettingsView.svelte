@@ -3,14 +3,14 @@
   import type {Settings} from '../javatypes';
   let settings: Settings;
 
-  const initSettings = async () => {
+  async function initSettings() {
     const response = await fetch('/settings');
     if (!response.ok) throw new Error(response.statusText);
     settings = await response.json();
     console.log('Loaded settings: ', response, settings);
-  };
+  }
 
-  const save = () => {
+  async function save() {
     console.log('Saving settings: ', settings);
     fetch('/settings', {
       method: 'POST',
@@ -19,7 +19,7 @@
       },
       body: JSON.stringify(settings),
     });
-  };
+  }
 
   onMount(() => {
     initSettings();
