@@ -1,13 +1,13 @@
-import {render, screen, waitFor} from '@testing-library/svelte'
+import {render, screen} from '@testing-library/svelte'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
-import {describe, expect, test} from 'vitest'
+import {expect, test} from 'vitest'
 
 import TrackerTree from './TrackerTree.svelte'
 import { Coloring } from './coloring'
 
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { server } from "../mocks/node";
-import type { SelectedPath } from './selection'
+import { simpleSinkTracker } from '../mocks/handlers'
  
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
@@ -28,14 +28,14 @@ test('navigate tree', async () => {
   await user.click(category)
   expect(category).toHaveClass('expanded')
   expect(category).toHaveClass('selected')
-  const tracker1 = await screen.findByRole('button', {name: 'tracker1'})
+  const tracker1 = await screen.findByRole('button', {name: 'sink1'})
   expect(tracker1).toHaveClass('tracker')
 
   // select a tracker
   expect(tree.selectedTracker).toBeNull()
   await user.click(tracker1)
   expect(tracker1).toHaveClass('selected')
-  expect(tree.selectedTracker).toMatchObject({id: 101})
+  expect(tree.selectedTracker).toMatchObject(simpleSinkTracker)
 })
 
 test('coloring', async () => {
