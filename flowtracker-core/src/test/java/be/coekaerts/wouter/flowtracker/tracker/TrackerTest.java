@@ -360,4 +360,19 @@ public class TrackerTest {
     snapshotBuilder().part(3, source, 0, Growth.DOUBLE)
         .assertEquals(target);
   }
+
+  @Test public void testOverwriteSelfBackwards() {
+    target.setSource(5, 5, source, 105); // setting 5,6,7,8,9
+    target.setSource(6, 2, target, 8);
+    snapshotBuilder().gap(5).part(source, 105, 1).part(source, 108, 2).part(source, 108, 2)
+        .assertEquals(target);
+  }
+
+  @Test public void testOverwriteSelfForwards() {
+    target.setSource(5, 5, source, 105); // setting 5,6,7,8,9
+    target.setSource(6, 2, target, 5);
+
+    snapshotBuilder().gap(5).part(source, 105, 1).part(source, 105, 2).part(source, 108, 2)
+        .assertEquals(target);
+  }
 }

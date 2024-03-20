@@ -1,5 +1,9 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -53,16 +57,20 @@ public class DefaultTracker extends Tracker {
     Entry<Integer, PartTracker> startEntry = getEntryAt(sourceIndex);
     int startIndex = startEntry == null ? sourceIndex : startEntry.getKey();
 
+    // TODO[growth] s/targetLength/sourceLength/, probably
+    Collection<Entry<Integer, PartTracker>> entriesToPush =
+        map.subMap(startIndex, sourceIndex + targetLength).entrySet();
+
+    // avoid issues where what we're pushing is being mutated while we're pushing it, when pushing
+    // onto ourselves
+    if (targetTracker == this) {
+      entriesToPush = copy(entriesToPush);
+    }
+
     int pos = 0; // how far we are in pushing, from 0 to length
-    for (Entry<Integer, PartTracker> entry : map.tailMap(startIndex).entrySet()) {
+    for (Entry<Integer, PartTracker> entry : entriesToPush) {
       int partIndex = entry.getKey();
       PartTracker part = entry.getValue();
-
-      // if we're at a part that's after the range we want to copy, stop
-      // TODO[growth] s/targetLength/sourceLength/, probably
-      if (partIndex >= sourceIndex + targetLength) {
-        break;
-      }
 
       // gap before this entry
       int gapBefore = partIndex - sourceIndex - pos;
@@ -188,5 +196,18 @@ public class DefaultTracker extends Tracker {
     if (map.isEmpty()) return 0;
     Entry<Integer, PartTracker> lastEntry = map.lastEntry();
     return lastEntry.getKey() + lastEntry.getValue().getLength();
+  }
+
+  /** Create a copy of a set of entries */
+  private static Collection<Entry<Integer, PartTracker>> copy(
+      Collection<Entry<Integer, PartTracker>> entries) {
+    List<Entry<Integer, PartTracker>> result = new ArrayList<>(entries.size());
+    for (Entry<Integer, PartTracker> entry : entries) {
+      PartTracker part = entry.getValue();
+      PartTracker partCopy = new PartTracker(part.getTracker(), part.getSourceIndex(),
+          part.getLength(), part.getGrowth());
+      result.add(Map.entry(entry.getKey(), partCopy));
+    }
+    return result;
   }
 }

@@ -39,6 +39,16 @@ public class SystemTest {
 	}
 
 	@Test
+	public void arrayCopyOntoSelf() {
+		byte[] src = trackedByteArray("abcdef");
+		byte[] a = new byte[src.length];
+		System.arraycopy(src, 0, a, 0, src.length);
+		System.arraycopy(a, 4, a, 2, 2); // copy ef
+		assertEquals("abefef", new String(a));
+		snapshotBuilder().track(src, 0, 2).track(src, 4, 2).track(src, 4, 2).assertTrackerOf(a);
+	}
+
+	@Test
 	public void outAndErr() {
 		// IntelliJ and maven/surefire replace System.out and System.err with their own implementations,
 		// and we haven't implemented anything yet to handle those, so we don't test anything tied to

@@ -76,4 +76,16 @@ public class StringBuilderTest {
         .trackString(abcd, 0, 1)
         .assertEquals(getStringTracker(result));
   }
+
+  @Test
+  public void replace() {
+    String abcd = trackCopy("abcdef");
+    String x = trackCopy("x");
+    StringBuilder sb = new StringBuilder(abcd);
+    sb.replace(1, 3, x);
+    String result = sb.toString();
+    assertEquals("axdef", result);
+    snapshotBuilder().trackString(abcd, 0, 1).trackString(x, 0, 1).trackString(abcd, 3, 3)
+        .assertEquals(getStringTracker(result));
+  }
 }
