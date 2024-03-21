@@ -8,6 +8,7 @@ import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
+import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Growth;
 import be.coekaerts.wouter.flowtracker.tracker.OriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
@@ -115,6 +116,11 @@ public class TrackerResource {
       Integer ceil = changePoints.ceilingKey(i + 1);
       int endIndex = ceil == null ? getContentLength(tracker) : ceil;
 
+      // if-condition: don't write out empty region that can otherwise appear at the end
+      if (endIndex <= i) {
+        break;
+      }
+
       regions.add(new Region(tracker, i, endIndex - i, new ArrayList<>(activeParts)));
     }
 
@@ -205,6 +211,8 @@ public class TrackerResource {
       ByteContentTracker byteTracker = (ByteContentTracker) tracker;
       // TODO encoding
       return new String(byteTracker.getContent().getByteContent().array(), start, end - start);
+    } else if (tracker instanceof FixedOriginTracker) {
+      return "<not implemented>";
     } else {
       return null;
     }
@@ -217,6 +225,8 @@ public class TrackerResource {
     } else if (tracker instanceof ByteContentTracker) {
       ByteContentTracker byteTracker = (ByteContentTracker) tracker;
       return byteTracker.getContent().size();
+    } else if (tracker instanceof FixedOriginTracker) {
+      return tracker.getLength();
     } else {
       return 0;
     }

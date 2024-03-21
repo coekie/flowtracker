@@ -14,6 +14,7 @@ public class SimpleDemo {
     }
     Files.copy(Paths.get("/etc/issue"), System.out);
     System.out.write("test\n".getBytes());
+    System.out.println('a');
     System.out.println("Done");
   }
 }

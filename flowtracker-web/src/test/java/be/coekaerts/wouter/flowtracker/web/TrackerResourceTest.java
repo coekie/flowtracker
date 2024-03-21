@@ -129,6 +129,26 @@ public class TrackerResourceTest {
     assertRegionNoPart(response.getRegions().get(4), "x");
   }
 
+  /**
+   * Test reverse with a region that spans from start to end. Regression test for an off-by-one-ish
+   * problem.
+   */
+  @Test public void reverseOneRegion() {
+    CharSinkTracker target = new CharSinkTracker();
+    CharOriginTracker source = new CharOriginTracker();
+    InterestRepository.register(target);
+    InterestRepository.register(source);
+
+    source.append("bc");
+    target.append("abcd", 0, 4);
+    target.setSource(1, 2, source, 0);
+
+    TrackerDetailResponse response = trackerResource.reverse(source.getTrackerId(),
+        target.getTrackerId());
+    assertEquals(1, response.getRegions().size());
+    assertRegionOnePart(response.getRegions().get(0), "bc", target, 1);
+  }
+
   @Test public void path() {
     Node root = TrackerTree.node("TrackerResourceTest.test");
     Node one = root.node("a");
