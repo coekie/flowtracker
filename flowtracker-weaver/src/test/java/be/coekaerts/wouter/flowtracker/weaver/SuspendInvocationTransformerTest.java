@@ -20,7 +20,7 @@ public class SuspendInvocationTransformerTest {
     SuspendInvocationTransformer transformer = new SuspendInvocationTransformer(true);
     called = false;
 
-    Invocation suspendedInvocation = Invocation.calling("should get suspended")
+    Invocation suspendedInvocation = Invocation.createCalling("should get suspended")
         .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777));
     transformAndRun(transformer, Type.getType(SuspendInvocationTransformerTestSubject.class));
     assertTrue(called);

@@ -20,6 +20,19 @@ import org.objectweb.asm.tree.VarInsnNode;
 class InvocationOutgoingTransformation {
   private final MethodInsnNode mInsn;
   private final FlowMethodAdapter methodNode;
+
+  /**
+   * The instruction that creates the Invocation. Initially this is a call to
+   * {@link Invocation#createCalling(String)}. If necessary this is split into invocations to
+   * {@link Invocation#create(String)} and {@link Invocation#calling()}. (Only splitting when
+   * necessary, to minimize size of the instrumented code).
+   */
+  private MethodInsnNode createInsn;
+
+  /** Call to {@link Invocation#calling()}, if has been split from {@link #createInsn} */
+  private MethodInsnNode callingInsn;
+
+  /** Last instruction of our instrumentation, that removes the {@link Invocation} from the stack */
   private AbstractInsnNode endInsn;
 
   InvocationOutgoingTransformation(MethodInsnNode mInsn, FlowMethodAdapter methodNode) {
@@ -27,7 +40,7 @@ class InvocationOutgoingTransformation {
     this.methodNode = methodNode;
   }
 
-  /** Insert call to {@link Invocation#calling(String)} if it hasn't been added yet */
+  /** Insert call to {@link Invocation#createCalling(String)} if it hasn't been added yet */
   void ensureInstrumented() {
     if (endInsn != null) {
       return;
@@ -36,11 +49,11 @@ class InvocationOutgoingTransformation {
     InsnList toInsert = new InsnList();
     methodNode.addComment(toInsert, "begin InvocationOutgoingTransformation.ensureInstrumented");
     toInsert.add(new LdcInsnNode(Invocation.signature(mInsn.name, mInsn.desc)));
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/tracker/Invocation",
-            "calling",
-            "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;"));
+    createInsn = new MethodInsnNode(Opcodes.INVOKESTATIC,
+        "be/coekaerts/wouter/flowtracker/tracker/Invocation",
+        "createCalling",
+        "(Ljava/lang/String;)Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;");
+    toInsert.add(createInsn);
     // initially we assume we're not going to need the Invocation anymore.
     endInsn = new InsnNode(Opcodes.POP);
     toInsert.add(endInsn);
@@ -55,7 +68,18 @@ class InvocationOutgoingTransformation {
    * instructions it should still be there.
    */
   void insertInvocationPreparation(InsnList toInsert) {
-    methodNode.instructions.insertBefore(endInsn, toInsert);
+    if (callingInsn == null) {
+      // split call to "createCalling" into "create" and "calling"; where we can put the `toInsert`
+      // in between.
+      createInsn.name = "create";
+      callingInsn = new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+          "be/coekaerts/wouter/flowtracker/tracker/Invocation",
+          "calling",
+          "()Lbe/coekaerts/wouter/flowtracker/tracker/Invocation;");
+      methodNode.instructions.insertBefore(endInsn, callingInsn);
+    }
+
+    methodNode.instructions.insertBefore(callingInsn, toInsert);
   }
 
   /**

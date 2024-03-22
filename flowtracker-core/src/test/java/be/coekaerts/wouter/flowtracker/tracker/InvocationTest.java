@@ -12,7 +12,7 @@ public class InvocationTest {
     Tracker tracker = new CharOriginTracker();
     TrackerPoint trackerPoint = TrackerPoint.of(tracker, 2);
 
-    Invocation callingInvocation = Invocation.calling("read");
+    Invocation callingInvocation = Invocation.createCalling("read");
     // inside the called read() method:
     {
       Invocation calledInvocation = Invocation.start("read");
@@ -29,7 +29,7 @@ public class InvocationTest {
 
     TrackerPoint trackerPoint = TrackerPoint.of(tracker, 2);
     Invocation callingInvocation =
-        Invocation.calling("write").setArg(0, trackerPoint);
+        Invocation.create("write").setArg(0, trackerPoint).calling();
     // inside the called write() method:
     {
       Invocation calledInvocation = requireNonNull(Invocation.start("write"));
@@ -45,7 +45,7 @@ public class InvocationTest {
 
   @Test
   public void testUseEachInvocationOnlyOnce() {
-    Invocation calling = Invocation.calling("read");
+    Invocation calling = Invocation.createCalling("read");
     Invocation called = Invocation.start("read");
     assertSame(calling, called);
     assertNull(Invocation.start("read"));

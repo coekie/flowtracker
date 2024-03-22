@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import org.junit.Test;
 
 public class InvocationInstrumentationTest {
@@ -111,6 +112,28 @@ public class InvocationInstrumentationTest {
     assertTrue(StaticSink.called);
     // assert that class loading and initialization didn't disrupt the tracking of the invocation
     flowTester.assertIsTheTrackedValue(result1);
+  }
+
+  /**
+   * Tests interaction between invocation instrumentation and the ConstantDynamic created for char
+   * literals. Regression test for a problem where the initialization of the ConstantDynamic caused
+   * the Invocation to get lost due to other Invocations happening in the initialization.
+   */
+  @Test
+  public void constantArgs() {
+    class MultiSink {
+      boolean called;
+
+      void write(char c0, char c1) {
+        assertTrue(FlowTester.getCharSourcePoint(c0).tracker instanceof ClassOriginTracker);
+        assertTrue(FlowTester.getCharSourcePoint(c1).tracker instanceof ClassOriginTracker);
+        called = true;
+      }
+    }
+
+    MultiSink sink = new MultiSink();
+    sink.write('a', 'b');
+    assertTrue(sink.called);
   }
 
   static boolean staticSinkInitialized = false;

@@ -78,6 +78,15 @@ public class Invocation {
   }
 
   /**
+   * Called by a caller just before calling another method through which we want to track return or
+   * parameter values.
+   */
+  public Invocation calling() {
+    pending.set(this);
+    return this;
+  }
+
+  /**
    * Sets the source tracker of a returned value
    */
   public static void returning(Invocation invocation, TrackerPoint returnPoint) {
@@ -96,13 +105,20 @@ public class Invocation {
   }
 
   /**
+   * Creates an {@link Invocation}. Can optionally be followed by calls to
+   * {@link #setArg0(TrackerPoint)} and friends, and should be followed by {@link #calling()} before
+   * doing the actual call.
+   */
+  public static Invocation create(String signature) {
+    return new Invocation(signature);
+  }
+
+  /**
    * Called by a caller before calling another method through which we want to track return or
    * parameter values.
    */
-  public static Invocation calling(String signature) {
-    Invocation invocation = new Invocation(signature);
-    pending.set(invocation);
-    return invocation;
+  public static Invocation createCalling(String signature) {
+    return create(signature).calling();
   }
 
   /**
@@ -130,7 +146,7 @@ public class Invocation {
    * This is used to solve a problem caused by class loading and initialization triggered by a
    * method invocation.
    * The problem is that the loading and initialization can happen between when the caller calls
-   * {@link #calling(String)} and when the callee calls {@link #start(String)}. And it may involve
+   * {@link #calling()} and when the callee calls {@link #start(String)}. And it may involve
    * other method calls that use Invocation. Since we only keep track of one pending call, this
    * means class loading would make us forget about the pending call.
    * We solve that by, when class loading is triggered, removing the current pending call, and
