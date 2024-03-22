@@ -8,6 +8,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicInterpreter;
@@ -88,9 +89,12 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       case Opcodes.ICONST_3:
       case Opcodes.ICONST_4:
       case Opcodes.ICONST_5:
+        return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, insn,
+            insn.getOpcode() - Opcodes.ICONST_0);
       case Opcodes.SIPUSH:
       case Opcodes.BIPUSH:
-        return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, flowMethodAdapter.owner, insn);
+        return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, insn,
+            ((IntInsnNode) insn).operand);
     }
     return toFlowValue(basicInterpreter.newOperation(insn));
   }

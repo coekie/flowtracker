@@ -47,10 +47,12 @@ public class FlowAnalyzingTransformer implements Transformer {
 
   private class FlowClassAdapter extends ClassVisitor {
     private final String className;
+    private final ConstantsTransformation constantsTransformation;
 
     private FlowClassAdapter(String className, ClassVisitor cv) {
       super(Opcodes.ASM9, cv);
       this.className = className;
+      this.constantsTransformation = new ConstantsTransformation(className);
     }
 
     @Override
@@ -66,7 +68,8 @@ public class FlowAnalyzingTransformer implements Transformer {
     public MethodVisitor visitMethod(int access, String name, String desc, String signature,
         String[] exceptions) {
       MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-      return new FlowMethodAdapter(mv, className, access, name, desc, signature, exceptions);
+      return new FlowMethodAdapter(mv, className, access, name, desc, signature, exceptions,
+          constantsTransformation);
     }
   }
 
@@ -76,12 +79,14 @@ public class FlowAnalyzingTransformer implements Transformer {
     private final TransparentLocalVariablesSorter varSorter;
     final InsnList intro = new InsnList();
     final InvocationIncomingTransformation invocation = new InvocationIncomingTransformation();
+    final ConstantsTransformation constantsTransformation;
 
     private FlowMethodAdapter(MethodVisitor mv, String owner, int access, String name, String desc,
-        String signature, String[] exceptions) {
+        String signature, String[] exceptions, ConstantsTransformation constantsTransformation) {
       super(Opcodes.ASM9, access, name, desc, signature, exceptions);
       this.owner = owner;
       this.varSorter = new TransparentLocalVariablesSorter(access, desc, mv);
+      this.constantsTransformation = constantsTransformation;
     }
 
     @Override
