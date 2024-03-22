@@ -48,6 +48,7 @@ public class FlowAnalyzingTransformer implements Transformer {
   private class FlowClassAdapter extends ClassVisitor {
     private final String className;
     private final ConstantsTransformation constantsTransformation;
+    private int version;
 
     private FlowClassAdapter(String className, ClassVisitor cv) {
       super(Opcodes.ASM9, cv);
@@ -59,6 +60,7 @@ public class FlowAnalyzingTransformer implements Transformer {
     public void visit(int version, int access, String name, String signature, String superName,
         String[] interfaces) {
       super.visit(version, access, name, signature, superName, interfaces);
+      this.version = version;
       if (!className.equals(name)) {
         throw new IllegalStateException("Class name mismatch: " + name + " != " + className);
       }
@@ -68,23 +70,26 @@ public class FlowAnalyzingTransformer implements Transformer {
     public MethodVisitor visitMethod(int access, String name, String desc, String signature,
         String[] exceptions) {
       MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-      return new FlowMethodAdapter(mv, className, access, name, desc, signature, exceptions,
-          constantsTransformation);
+      return new FlowMethodAdapter(mv, className, version, access, name, desc, signature,
+          exceptions, constantsTransformation);
     }
   }
 
   class FlowMethodAdapter extends MethodNode {
     final String owner;
+    final int version;
     /** The next visitor in the chain after this one */
     private final TransparentLocalVariablesSorter varSorter;
     final InsnList intro = new InsnList();
     final InvocationIncomingTransformation invocation = new InvocationIncomingTransformation();
     final ConstantsTransformation constantsTransformation;
 
-    private FlowMethodAdapter(MethodVisitor mv, String owner, int access, String name, String desc,
-        String signature, String[] exceptions, ConstantsTransformation constantsTransformation) {
+    private FlowMethodAdapter(MethodVisitor mv, String owner, int version, int access, String name,
+        String desc, String signature, String[] exceptions,
+        ConstantsTransformation constantsTransformation) {
       super(Opcodes.ASM9, access, name, desc, signature, exceptions);
       this.owner = owner;
+      this.version = version;
       this.varSorter = new TransparentLocalVariablesSorter(access, desc, mv);
       this.constantsTransformation = constantsTransformation;
     }

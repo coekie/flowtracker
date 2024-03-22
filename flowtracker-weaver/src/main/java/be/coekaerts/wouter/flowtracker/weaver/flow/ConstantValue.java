@@ -1,6 +1,8 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import org.objectweb.asm.ConstantDynamic;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -29,17 +31,43 @@ public class ConstantValue extends TrackableValue {
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
-    // NICE the TrackerPoint could be a ConstantDynamic
     int classId = flowMethodAdapter.constantsTransformation.classId();
-    flowMethodAdapter.addComment(toInsert,
-        "ConstantValue.loadSourcePoint: ConstantHook.constantPoint(%s, %s)", classId, offset);
-    toInsert.add(iconst(classId));
-    toInsert.add(iconst(offset));
-    toInsert.add(
-        new MethodInsnNode(Opcodes.INVOKESTATIC,
-            "be/coekaerts/wouter/flowtracker/hook/ConstantHook",
-            "constantPoint",
-            "(II)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
+
+    if (canUseConstantDynamic()) {
+      flowMethodAdapter.addComment(toInsert,
+          "ConstantValue.loadSourcePoint: condy ConstantHook.constantPoint(%s, %s)", classId,
+          offset);
+      ConstantDynamic cd = new ConstantDynamic("$ft" + offset,
+          "Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;",
+          new Handle(Opcodes.H_INVOKESTATIC,
+              "be/coekaerts/wouter/flowtracker/hook/ConstantHook",
+              "constantPoint",
+              "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;II)"
+                  + "Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;",
+              false),
+          classId, offset);
+      toInsert.add(new LdcInsnNode(cd));
+    } else {
+      flowMethodAdapter.addComment(toInsert,
+          "ConstantValue.loadSourcePoint: ConstantHook.constantPoint(%s, %s)", classId, offset);
+      toInsert.add(iconst(classId));
+      toInsert.add(iconst(offset));
+      toInsert.add(
+          new MethodInsnNode(Opcodes.INVOKESTATIC,
+              "be/coekaerts/wouter/flowtracker/hook/ConstantHook",
+              "constantPoint",
+              "(II)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
+    }
+  }
+
+  private boolean canUseConstantDynamic() {
+    return flowMethodAdapter.version >= Opcodes.V11
+        // avoid infinite recursion by trying to use condy in condy implementation
+        && !flowMethodAdapter.owner.startsWith("java/lang/invoke")
+        && !flowMethodAdapter.owner.startsWith("java/lang/Class")
+        && !flowMethodAdapter.owner.startsWith("java/lang/String")
+        && !flowMethodAdapter.owner.startsWith("sun/invoke")
+        && !flowMethodAdapter.owner.startsWith("jdk/internal/org/objectweb/asm");
   }
 
   // based on asm InstructionAdapter.iconst

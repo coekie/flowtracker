@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
@@ -19,6 +20,15 @@ public class ConstantTest {
         .hasDescriptor(ConstantTest.class.getName().replace('.', '/'))
         .hasNode("Class", "be", "coekaerts", "wouter", "flowtracker", "test", "ConstantTest");
     assertEquals('a', ((ClassOriginTracker) point.tracker).getContent().charAt(point.index));
+  }
+
+  /** Test that the constantdynamic is doing its work, only creating one TrackerPoint instance */
+  @Test
+  public void testSamePointInstance() {
+    char a = 'a';
+    TrackerPoint point1 = FlowTester.getCharSourcePoint(a);
+    TrackerPoint point2 = FlowTester.getCharSourcePoint(a);
+    assertSame(point1, point2);
   }
 
   @Test
