@@ -16,7 +16,7 @@ public class TrackerRepository {
 
   public static Tracker createFixedOriginTracker(Object obj, int length) {
     Tracker tracker = new FixedOriginTracker(length);
-    setTracker(obj, tracker);
+    forceSetTracker(obj, tracker);
     return tracker;
   }
 
@@ -43,5 +43,17 @@ public class TrackerRepository {
     } else {
       objectToTracker.put(obj, tracker);
     }
+  }
+
+  public static void forceSetTracker(Object obj, Tracker tracker) {
+    if (obj == null) {
+      throw new NullPointerException("Can't track null");
+    } else {
+      objectToTracker.put(obj, tracker);
+    }
+  }
+
+  public static void removeTracker(Object obj) {
+    objectToTracker.remove(obj);
   }
 }

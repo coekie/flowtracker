@@ -3,16 +3,20 @@ package be.coekaerts.wouter.flowtracker.test;
 import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedString;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.Part;
 import org.junit.Test;
 
 public class StringTest {
   @Test public void testUnknown() {
-    String a = "unknownTest";
+    String a = untrackedString("unknownTest");
     assertNull(TrackerRepository.getTracker(a));
     assertNull(getStringTracker(a));
   }
@@ -114,5 +118,15 @@ public class StringTest {
     assertEquals("axc", result);
     snapshotBuilder().trackString(src, 0, 1).trackString(replacement).trackString(src, 2, 1)
         .assertEquals(getStringTracker(result));
+  }
+
+  @Test public void testStringConstant() {
+    String str = "test-ldc";
+    TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
+    assertEquals(1, snapshot.getParts().size());
+    Part part = snapshot.getParts().get(0);
+    ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
+    assertEquals("test-ldc", sourceTracker.getContent()
+        .subSequence(part.sourceIndex, part.sourceIndex + part.length));
   }
 }

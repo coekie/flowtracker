@@ -45,9 +45,7 @@ public class TrackTestHelper {
   /** Create a char array without tracking (by a {@link FixedOriginTracker}) */
   public static char[] untrackedCharArray(String str) {
     char[] result = str.toCharArray();
-    if (TrackerRepository.getTracker(result) != null) {
-      throw new IllegalStateException("Did not expect result to be tracked");
-    }
+    TrackerRepository.removeTracker(result);
     return result;
   }
 
@@ -61,9 +59,14 @@ public class TrackTestHelper {
   /** Create a byte array without tracking */
   public static byte[] untrackedByteArray(String str) {
     byte[] result = str.getBytes();
-    if (TrackerRepository.getTracker(result) != null) {
-      throw new IllegalStateException("Did not expect result to be tracked");
-    }
+    TrackerRepository.removeTracker(result);
+    return result;
+  }
+
+  /** Create a String without tracking */
+  public static String untrackedString(String str) {
+    String result = new String(str.getBytes());
+    StringHook.removeTracker(result);
     return result;
   }
 

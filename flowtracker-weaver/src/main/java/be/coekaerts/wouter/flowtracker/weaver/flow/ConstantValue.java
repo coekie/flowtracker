@@ -33,7 +33,7 @@ public class ConstantValue extends TrackableValue {
   void loadSourcePoint(InsnList toInsert) {
     int classId = flowMethodAdapter.constantsTransformation.classId();
 
-    if (canUseConstantDynamic()) {
+    if (flowMethodAdapter.canUseConstantDynamic()) {
       flowMethodAdapter.addComment(toInsert,
           "ConstantValue.loadSourcePoint: condy ConstantHook.constantPoint(%s, %s)", classId,
           offset);
@@ -58,16 +58,6 @@ public class ConstantValue extends TrackableValue {
               "constantPoint",
               "(II)Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
     }
-  }
-
-  private boolean canUseConstantDynamic() {
-    return flowMethodAdapter.version >= Opcodes.V11
-        // avoid infinite recursion by trying to use condy in condy implementation
-        && !flowMethodAdapter.owner.startsWith("java/lang/invoke")
-        && !flowMethodAdapter.owner.startsWith("java/lang/Class")
-        && !flowMethodAdapter.owner.startsWith("java/lang/String")
-        && !flowMethodAdapter.owner.startsWith("sun/invoke")
-        && !flowMethodAdapter.owner.startsWith("jdk/internal/org/objectweb/asm");
   }
 
   // based on asm InstructionAdapter.iconst

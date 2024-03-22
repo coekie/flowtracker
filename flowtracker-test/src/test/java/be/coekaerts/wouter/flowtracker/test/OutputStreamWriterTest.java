@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.test;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedCharArray;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedString;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
@@ -112,7 +113,7 @@ public class OutputStreamWriterTest {
   }
 
   @Test public void writeUntrackedString() throws IOException {
-    String abc = "abc"; // // without tracking
+    String abc = untrackedString("abc"); // // without tracking
     String def = trackCopy("def"); // with tracking to test if offset is still correct
 
     writer.write(abc);

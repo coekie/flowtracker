@@ -26,6 +26,10 @@ class ConstantsTransformation {
     return tracker().registerConstant(method, value);
   }
 
+  int trackConstantString(String method, String value) {
+    return tracker().registerConstantString(method, value);
+  }
+
   int classId() {
     return tracker().classId;
   }

@@ -10,6 +10,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ConstantDynamic;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -18,6 +20,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Frame;
@@ -173,6 +176,8 @@ public class FlowAnalyzingTransformer implements Transformer {
           stores.add(new InvocationReturnStore((InsnNode) insn, frame, invocation));
         } else if (insn.getOpcode() == Opcodes.PUTFIELD) {
           stores.add(new FieldStore((FieldInsnNode) insn, frame));
+        } else if (insn.getOpcode() == Opcodes.LDC) {
+          instrumentLdc((LdcInsnNode) insn);
         }
       }
 
@@ -236,6 +241,42 @@ public class FlowAnalyzingTransformer implements Transformer {
       StringWriter sw = new StringWriter();
       asmifier.print(new PrintWriter(sw));
       System.err.println(sw);
+    }
+
+    void instrumentLdc(LdcInsnNode insn) {
+      // TODO instrument String constants without using constantDynamic where needed (when
+      //  canBreakInterning() but not canUseConstantDynamic())
+      if (insn.cst instanceof String && canBreakInterning() && canUseConstantDynamic()) {
+        String value = (String) insn.cst;
+        int offset = constantsTransformation.trackConstantString(name, value);
+
+        insn.cst = new ConstantDynamic("$ft" + offset,
+            "Ljava/lang/String;",
+            new Handle(Opcodes.H_INVOKESTATIC,
+                "be/coekaerts/wouter/flowtracker/hook/StringHook",
+                "constantString",
+                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;IILjava/lang/String;)"
+                    + "Ljava/lang/String;",
+                false),
+            constantsTransformation.classId(), offset, value);
+      }
+    }
+
+    boolean canBreakInterning() {
+      // TODO make this less strict / configurable
+      return !owner.startsWith("java/")
+          && !owner.startsWith("sun/")
+          && !owner.startsWith("jdk/");
+    }
+
+    boolean canUseConstantDynamic() {
+      return version >= Opcodes.V11
+          // avoid infinite recursion by trying to use condy in condy implementation
+          && !owner.startsWith("java/lang/invoke")
+          && !owner.startsWith("java/lang/Class")
+          && !owner.startsWith("java/lang/String")
+          && !owner.startsWith("sun/invoke")
+          && !owner.startsWith("jdk/internal/org/objectweb/asm");
     }
   }
 

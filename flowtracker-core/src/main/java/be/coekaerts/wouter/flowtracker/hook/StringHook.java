@@ -1,8 +1,11 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
+import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 
 public class StringHook {
@@ -24,12 +27,16 @@ public class StringHook {
     TrackerRepository.createFixedOriginTracker(getValueArray(str), str.length());
   }
 
+  public static void removeTracker(String str) {
+    TrackerRepository.removeTracker(getValueArray(str));
+  }
+
   /** Get the "value" field from a String */
   private static Object getValueArray(String str) {
     return Reflection.getFieldValue(str, valueField);
   }
 
-  @SuppressWarnings("UnusedDeclaration") // used by instrumented code
+  @SuppressWarnings({"UnusedDeclaration", "CallToPrintStackTrace"}) // used by instrumented code
   public static void afterInit(String target) {
     if (debugUntracked != null && target.contains(debugUntracked)
         && getStringTracker(target) == null
@@ -50,5 +57,16 @@ public class StringHook {
     Tracker result = getStringTracker(str);
     Trackers.suspendOnCurrentThread();
     return result;
+  }
+
+  // first three arguments are here because this is invoked using ConstantDynamic
+  @SuppressWarnings("unused")
+  public static String constantString(MethodHandles.Lookup lookup, String name,
+      Class<?> type, int classId, int offset, String value) {
+    String str = new String(value.getBytes());
+    byte[] valueArray = (byte[]) getValueArray(str);
+    TrackerUpdater.setSourceTracker(valueArray, 0, valueArray.length,
+        ClassOriginTracker.get(classId), offset);
+    return str;
   }
 }

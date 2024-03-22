@@ -51,4 +51,11 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     content.append((char) value).append('\n');
     return offset;
   }
+
+  public synchronized int registerConstantString(String method, String value) {
+    content.append(method).append(" literal: ");
+    int offset = content.length();
+    content.append(value).append('\n');
+    return offset;
+  }
 }
