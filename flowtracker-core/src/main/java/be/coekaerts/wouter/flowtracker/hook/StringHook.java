@@ -63,6 +63,10 @@ public class StringHook {
   @SuppressWarnings("unused")
   public static String constantString(MethodHandles.Lookup lookup, String name,
       Class<?> type, int classId, int offset, String value) {
+    return constantString(value, classId, offset);
+  }
+
+  public static String constantString(String value, int classId, int offset) {
     String str = new String(value.getBytes());
     byte[] valueArray = (byte[]) getValueArray(str);
     TrackerUpdater.setSourceTracker(valueArray, 0, valueArray.length,

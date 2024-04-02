@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ConstantDynamic;
-import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -73,7 +71,8 @@ public class FlowAnalyzingTransformer implements Transformer {
     private FlowClassAdapter(String className, ClassVisitor cv) {
       super(Opcodes.ASM9, cv);
       this.className = className;
-      this.constantsTransformation = new ConstantsTransformation(className);
+      this.constantsTransformation =
+          new ConstantsTransformation(className, breakStringInterningFilter);
     }
 
     @Override
@@ -194,7 +193,10 @@ public class FlowAnalyzingTransformer implements Transformer {
         } else if (insn.getOpcode() == Opcodes.PUTFIELD) {
           stores.add(new FieldStore((FieldInsnNode) insn, frame));
         } else if (insn.getOpcode() == Opcodes.LDC) {
-          instrumentLdc((LdcInsnNode) insn);
+          LdcInsnNode ldcInsn = (LdcInsnNode) insn;
+          if (ldcInsn.cst instanceof String) {
+            stores.add(new StringLdc(ldcInsn, frame));
+          }
         }
       }
 
@@ -260,29 +262,6 @@ public class FlowAnalyzingTransformer implements Transformer {
       System.err.println(sw);
     }
 
-    void instrumentLdc(LdcInsnNode insn) {
-      // TODO instrument String constants without using constantDynamic where needed (when
-      //  canBreakStringInterning() but not canUseConstantDynamic())
-      if (insn.cst instanceof String && canBreakStringInterning() && canUseConstantDynamic()) {
-        String value = (String) insn.cst;
-        int offset = constantsTransformation.trackConstantString(name, value);
-
-        insn.cst = new ConstantDynamic("$ft" + offset,
-            "Ljava/lang/String;",
-            new Handle(Opcodes.H_INVOKESTATIC,
-                "be/coekaerts/wouter/flowtracker/hook/StringHook",
-                "constantString",
-                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;IILjava/lang/String;)"
-                    + "Ljava/lang/String;",
-                false),
-            constantsTransformation.classId(), offset, value);
-      }
-    }
-
-    boolean canBreakStringInterning() {
-      return breakStringInterningFilter.include(owner);
-    }
-
     boolean canUseConstantDynamic() {
       return version >= Opcodes.V11
           // avoid infinite recursion by trying to use condy in condy implementation
@@ -290,7 +269,9 @@ public class FlowAnalyzingTransformer implements Transformer {
           && !owner.startsWith("java/lang/Class")
           && !owner.startsWith("java/lang/String")
           && !owner.startsWith("sun/invoke")
-          && !owner.startsWith("jdk/internal/org/objectweb/asm");
+          && !owner.startsWith("jdk/internal/org/objectweb/asm")
+          // for testing
+          && !owner.equals("be/coekaerts/wouter/flowtracker/test/StringTest$NoCondy");
     }
   }
 

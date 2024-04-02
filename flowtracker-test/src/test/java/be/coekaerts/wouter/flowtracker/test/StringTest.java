@@ -6,7 +6,9 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharAr
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedString;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
@@ -121,12 +123,41 @@ public class StringTest {
   }
 
   @Test public void testStringConstant() {
-    String str = "test-ldc";
+    String str = ldcString();
     TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
     assertEquals(1, snapshot.getParts().size());
     Part part = snapshot.getParts().get(0);
     ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
     assertEquals("test-ldc", sourceTracker.getContent()
         .subSequence(part.sourceIndex, part.sourceIndex + part.length));
+    assertSame(str, ldcString());
+  }
+
+  // this is a separate method, so that there's only one entry for this in the constant pool for
+  // constant-dynamic, so that the "assertSame" check above passes.
+  // in instrumented code; a constant String referenced in two different places in the code is not
+  // always the same instance (our instrumentation breaks String interning).
+  private String ldcString() {
+    return "test-ldc";
+  }
+
+  @Test public void testStringConstantNoCondy() {
+    String str = NoCondy.ldcNoCondy();
+    TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
+    assertEquals(1, snapshot.getParts().size());
+    Part part = snapshot.getParts().get(0);
+    ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
+    assertEquals("test-ldc-no-condy", sourceTracker.getContent()
+        .subSequence(part.sourceIndex, part.sourceIndex + part.length));
+    //noinspection EqualsWithItself
+    assertNotSame(NoCondy.ldcNoCondy(), NoCondy.ldcNoCondy());
+  }
+
+  // this class is excluded from using constant-dynamic, to be able to test instrumentation where
+  // we cannot apply constant-dynamic.
+  static class NoCondy {
+    static String ldcNoCondy() {
+      return "test-ldc-no-condy";
+    }
   }
 }
