@@ -48,6 +48,7 @@ class AsmTransformer implements ClassFileTransformer {
   private final String dumpTextPrefix;
   private final Map<String, String> config;
   private final HookSpecTransformer hookSpecTransformer;
+  private final FlowAnalyzingTransformer flowAnalyzingTransformer;
 
   public AsmTransformer(Map<String, String> config) {
     toInstrumentFilter = new ClassFilter(config.getOrDefault("filter", "+*"), RECOMMENDED_FILTER);
@@ -60,6 +61,7 @@ class AsmTransformer implements ClassFileTransformer {
     dumpTextPrefix = config.getOrDefault("dumpTextPrefix", "");
     this.config = config;
     hookSpecTransformer = GeneratedHookSpecs.createTransformer();
+    flowAnalyzingTransformer = new FlowAnalyzingTransformer(config);
   }
 
   public byte[] transform(ClassLoader loader, String className,
@@ -143,7 +145,7 @@ class AsmTransformer implements ClassFileTransformer {
     if (toInstrumentFilter.include(className)) {
       result = Transformer.and(result, new SuspendInvocationTransformer());
       if (dumpTextPath == null || !className.startsWith(dumpTextPrefix)) {
-        result = Transformer.and(result, new FlowAnalyzingTransformer(config));
+        result = Transformer.and(result, flowAnalyzingTransformer);
       } else {
         // if we're dumping the text, then use RealCommentator to instrument it, so that the dumped
         // text includes comments
