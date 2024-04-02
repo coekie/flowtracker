@@ -3,12 +3,14 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import static be.coekaerts.wouter.flowtracker.weaver.flow.InvocationArgStore.shouldInstrumentInvocationArg;
 
 import be.coekaerts.wouter.flowtracker.util.Logger;
+import be.coekaerts.wouter.flowtracker.weaver.ClassFilter;
 import be.coekaerts.wouter.flowtracker.weaver.Transformer;
 import be.coekaerts.wouter.flowtracker.weaver.Types;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;
@@ -32,20 +34,35 @@ public class FlowAnalyzingTransformer implements Transformer {
 
   private final Commentator commentator;
   private final AnalysisListener listener;
+  private final ClassFilter breakStringInterningFilter;
 
-  public FlowAnalyzingTransformer() {
-    this.commentator = new Commentator(); // noop Commentator
-    this.listener = new AnalysisListener(); // noop Listener
+  public FlowAnalyzingTransformer(Map<String, String> config) {
+    this(new Commentator(), // noop Commentator
+        new AnalysisListener(), // noop Listener
+        config);
   }
 
-  public FlowAnalyzingTransformer(Commentator commentator, AnalysisListener listener) {
-    this.commentator = commentator;
-    this.listener = listener;
+  public FlowAnalyzingTransformer(Commentator commentator) {
+    this(commentator,
+        new AnalysisListener(), // noop Listener
+        Map.of());
   }
 
   public FlowAnalyzingTransformer(AnalysisListener listener) {
-    this.commentator = new Commentator(); // noop Commentator
+    this(new Commentator(), // noop Commentator
+        listener,
+        Map.of());
+  }
+
+  private FlowAnalyzingTransformer(Commentator commentator, AnalysisListener listener,
+      Map<String, String> config) {
+    this.commentator = commentator;
     this.listener = listener;
+    this.breakStringInterningFilter = new ClassFilter(
+        config.getOrDefault("breakStringInterning", "%recommended,+*"),
+        // by default, we allow most JDK classes to depend on interning to work, but not other
+        // libraries. this probably breaks some libraries.
+        "-java.*,-sun.*,-jdk.*");
   }
 
   private class FlowClassAdapter extends ClassVisitor {
@@ -245,8 +262,8 @@ public class FlowAnalyzingTransformer implements Transformer {
 
     void instrumentLdc(LdcInsnNode insn) {
       // TODO instrument String constants without using constantDynamic where needed (when
-      //  canBreakInterning() but not canUseConstantDynamic())
-      if (insn.cst instanceof String && canBreakInterning() && canUseConstantDynamic()) {
+      //  canBreakStringInterning() but not canUseConstantDynamic())
+      if (insn.cst instanceof String && canBreakStringInterning() && canUseConstantDynamic()) {
         String value = (String) insn.cst;
         int offset = constantsTransformation.trackConstantString(name, value);
 
@@ -262,11 +279,8 @@ public class FlowAnalyzingTransformer implements Transformer {
       }
     }
 
-    boolean canBreakInterning() {
-      // TODO make this less strict / configurable
-      return !owner.startsWith("java/")
-          && !owner.startsWith("sun/")
-          && !owner.startsWith("jdk/");
+    boolean canBreakStringInterning() {
+      return breakStringInterningFilter.include(owner);
     }
 
     boolean canUseConstantDynamic() {

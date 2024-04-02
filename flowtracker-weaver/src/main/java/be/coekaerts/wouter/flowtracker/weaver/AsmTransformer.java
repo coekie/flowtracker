@@ -4,7 +4,6 @@ import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.debug.DumpTextTransformer;
 import be.coekaerts.wouter.flowtracker.weaver.debug.RealCommentator;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer;
-import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.AnalysisListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -144,12 +143,12 @@ class AsmTransformer implements ClassFileTransformer {
     if (toInstrumentFilter.include(className)) {
       result = Transformer.and(result, new SuspendInvocationTransformer());
       if (dumpTextPath == null || !className.startsWith(dumpTextPrefix)) {
-        result = Transformer.and(result, new FlowAnalyzingTransformer());
+        result = Transformer.and(result, new FlowAnalyzingTransformer(config));
       } else {
         // if we're dumping the text, then use RealCommentator to instrument it, so that the dumped
         // text includes comments
         FlowAnalyzingTransformer flowTransformer
-            = new FlowAnalyzingTransformer(new RealCommentator(), new AnalysisListener());
+            = new FlowAnalyzingTransformer(new RealCommentator());
         result = Transformer.and(result,
             new DumpTextTransformer(flowTransformer, dumpTextPath));
       }

@@ -19,14 +19,14 @@ import java.util.List;
  * everything else in the foo package (and subpackages), apply it recommended classes, don't apply
  * it to anything else.
  */
-class ClassFilter {
+public class ClassFilter {
   private final List<Rule> rules;
 
-  ClassFilter(String rulesStr, String recommended) {
+  public ClassFilter(String rulesStr, String recommended) {
     this.rules = parseRules(rulesStr, recommended);
   }
 
-  boolean include(String name) {
+  public boolean include(String name) {
     String outerName = outerName(name);
     for (Rule rule : rules) {
       if (rule.matches(outerName)) {
