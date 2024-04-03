@@ -20,6 +20,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -196,6 +197,14 @@ public class FlowAnalyzingTransformer implements Transformer {
           LdcInsnNode ldcInsn = (LdcInsnNode) insn;
           if (ldcInsn.cst instanceof String) {
             stores.add(new StringLdc(ldcInsn, frame));
+          }
+        } else if (insn.getOpcode() == Opcodes.IF_ACMPEQ || insn.getOpcode() == Opcodes.IF_ACMPNE) {
+          boolean firstIsString =
+              Types.STRING.equals(frame.getStack(frame.getStackSize() - 2).getType());
+          boolean secondIsString =
+              Types.STRING.equals(frame.getStack(frame.getStackSize() - 1).getType());
+          if ((firstIsString || secondIsString) && !owner.startsWith("java/lang/")) {
+            stores.add(new StringComparison((JumpInsnNode) insn, frame, firstIsString));
           }
         }
       }

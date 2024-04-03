@@ -67,11 +67,15 @@ class FlowInterpreter extends Interpreter<FlowValue> {
         return UntrackableValue.DOUBLE_VALUE;
       case Type.ARRAY:
       case Type.OBJECT:
-        // for char[] and byte[] remember the exact type
-        if (Types.CHAR_ARRAY.equals(type) || Types.BYTE_ARRAY.equals(type)) {
+        // for char[], byte[] and String remember the exact type, because we use those in our
+        // analysis.
+        if (Types.CHAR_ARRAY.equals(type) || Types.BYTE_ARRAY.equals(type)
+            || Types.STRING.equals(type)) {
           return new UntrackableValue(type);
         } else {
-          // for others the exact type doesn't matter
+          // for others the exact type doesn't matter, so don't bother (for performance: this makes
+          // the analysis faster; asm's analyzer doesn't have to loop through the code as many times
+          // when it learns that a value can have a different type)
           return UntrackableValue.REFERENCE_VALUE;
         }
       default:

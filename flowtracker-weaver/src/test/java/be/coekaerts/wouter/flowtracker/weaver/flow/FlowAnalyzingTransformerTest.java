@@ -263,6 +263,85 @@ public class FlowAnalyzingTransformerTest {
             + "MAXLOCALS = 2\n");
   }
 
+  /** Test instrumentation using {@link StringComparison} */
+  @Test
+  public void stringEq() {
+    testTransform(new Object() {
+                    @SuppressWarnings({"unused", "StringEquality"})
+                    boolean eq(String s1, String s2) {
+                      return s1 == s2;
+                    }
+                  },
+        "ALOAD 1\n"
+            + "ALOAD 2\n"
+            + "IF_ACMPNE L0\n"
+            + "ICONST_1\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ java/lang/String java/lang/String] []\n"
+            + "ICONST_0\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ java/lang/String java/lang/String] [I]\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 2\n"
+            + "MAXLOCALS = 3\n",
+        "ALOAD 1\n"
+            + "ALOAD 2\n"
+            + "// StringComparison.insertTrackStatements\n"
+            + "INVOKESTATIC java/util/Objects.equals (Ljava/lang/Object;Ljava/lang/Object;)Z\n"
+            + "IFEQ L0\n"
+            + "ICONST_1\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ java/lang/String java/lang/String] []\n"
+            + "ICONST_0\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ java/lang/String java/lang/String] [I]\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 2\n"
+            + "MAXLOCALS = 3\n");
+  }
+
+  /** Test instrumentation using {@link StringComparison} */
+  @Test
+  public void stringEqWithSwap() {
+    testTransform(new Object() {
+                    @SuppressWarnings("unused")
+                    boolean eq(Object s1, String s2) {
+                      return s1 == s2;
+                    }
+                  },
+        "ALOAD 1\n"
+            + "ALOAD 2\n"
+            + "IF_ACMPNE L0\n"
+            + "ICONST_1\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ java/lang/Object java/lang/String] []\n"
+            + "ICONST_0\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ java/lang/Object java/lang/String] [I]\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 2\n"
+            + "MAXLOCALS = 3\n",
+        "ALOAD 1\n"
+            + "ALOAD 2\n"
+            + "// StringComparison.insertTrackStatements\n"
+            + "SWAP\n"
+            + "INVOKESTATIC java/util/Objects.equals (Ljava/lang/Object;Ljava/lang/Object;)Z\n"
+            + "IFEQ L0\n"
+            + "ICONST_1\n"
+            + "GOTO L1\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ java/lang/Object java/lang/String] []\n"
+            + "ICONST_0\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ java/lang/Object java/lang/String] [I]\n"
+            + "IRETURN\n"
+            + "MAXSTACK = 2\n"
+            + "MAXLOCALS = 3\n");
+  }
+
   /** Test Instrumentation using {@link InvocationReturnValue} */
   @Test
   public void invocationReturnValue() {

@@ -6,9 +6,11 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharAr
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedString;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
@@ -141,6 +143,7 @@ public class StringTest {
     return "test-ldc";
   }
 
+  @SuppressWarnings("EqualsWithItself")
   @Test public void testStringConstantNoCondy() {
     String str = NoCondy.ldcNoCondy();
     TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
@@ -149,8 +152,22 @@ public class StringTest {
     ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
     assertEquals("test-ldc-no-condy", sourceTracker.getContent()
         .subSequence(part.sourceIndex, part.sourceIndex + part.length));
-    //noinspection EqualsWithItself
+    // would have been nice if they were, but currently multiple invocations do not return the same
+    // instance.
     assertNotSame(NoCondy.ldcNoCondy(), NoCondy.ldcNoCondy());
+  }
+
+  /**
+   * Tests if String equality (==) still kinda works, even though we broke interning.
+   * Yeah, this is weird.
+   */
+  @SuppressWarnings("all")
+  @Test public void testStringEquality() {
+    String foo1 = "foo";
+    String foo2 = "foo";
+    assertTrue(foo1 == foo2);
+    assertFalse(foo1 != foo2);
+    assertNotSame(foo1, foo2);
   }
 
   // this class is excluded from using constant-dynamic, to be able to test instrumentation where

@@ -49,11 +49,13 @@ public class StringLdc extends Store {
             constantsTransformation.classId(), offset, value);
       } else {
         InsnList toInsert = new InsnList();
+        methodNode.addComment(toInsert, "begin StringLdc.insertTrackStatements");
         toInsert.add(ConstantsTransformation.iconst(constantsTransformation.classId()));
         toInsert.add(ConstantsTransformation.iconst(offset));
         toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             "be/coekaerts/wouter/flowtracker/hook/StringHook", "constantString",
             "(Ljava/lang/String;II)Ljava/lang/String;"));
+        methodNode.addComment(toInsert, "end StringLdc.insertTrackStatements");
         methodNode.instructions.insert(insn, toInsert);
         methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
       }
