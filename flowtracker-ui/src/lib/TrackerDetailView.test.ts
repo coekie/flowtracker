@@ -8,7 +8,7 @@ import {Coloring} from './coloring';
 import {afterAll, afterEach, beforeAll} from 'vitest';
 import {server} from '../mocks/node';
 import {simpleOriginTracker, simpleSinkTracker} from '../mocks/handlers';
-import {RangeSelection} from './selection';
+import {PathSelection, RangeSelection} from './selection';
 
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
@@ -154,5 +154,19 @@ describe('coloring', () => {
 
   test('in origin tracker', async () => {
     await testIt(renderSimpleOriginTracker());
+  });
+});
+
+test('coloring uses most specific path', async () => {
+  const tree = renderSimpleSinkTracker();
+  const coloring = new Coloring();
+  coloring.add(new PathSelection(['Simple']));
+  coloring.add(new PathSelection(['Simple', 'origin1']));
+  tree.coloring = coloring;
+
+  const foo = await screen.findByText('foo');
+
+  expect(foo).toHaveStyle({
+    'background-color': coloring.assignments[1].color,
   });
 });

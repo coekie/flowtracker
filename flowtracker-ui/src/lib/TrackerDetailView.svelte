@@ -2,8 +2,8 @@
   import {tick} from 'svelte';
   import type {Tracker, TrackerDetail, Region} from '../javatypes';
   import PathView from './PathView.svelte';
-  import {type ASelection, pathStartsWith, RangeSelection} from './selection';
-  import type {Coloring} from './coloring';
+  import {type ASelection, pathStartsWith, RangeSelection, PathSelection} from './selection';
+  import type {ColorAssignment, Coloring} from './coloring';
 
   /** Main tracker that's being shown */
   export let viewTracker: Tracker | null;
@@ -166,14 +166,22 @@
   }
 
   function backgroundColor(region: Region, coloring: Coloring): string {
-    for (var assignment of coloring.assignments) {
-      if (
-        assignment.selections.some(selection => isSelected(region, selection))
-      ) {
-        return assignment.color;
+    // we find a matching assignment, and if there are multiple matching then use the most
+    // specific one, that is the one with the highest score.
+    var bestScore:number = -1;
+    var color:string = 'inherit';
+    for (const assignment of coloring.assignments) {
+      for (const selection of assignment.selections) {
+        if (isSelected(region, selection)) {
+          const score = selection instanceof PathSelection ? selection.path.length : 9999;
+          if (score > bestScore) {
+            bestScore = score;
+            color = assignment.color;
+          }
+        }
       }
     }
-    return 'inherit';
+    return color;
   }
 
   // event for main view so that double-click in one TrackerDetailView causes scrollToSelection in the other
