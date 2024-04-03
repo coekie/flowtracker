@@ -10,9 +10,11 @@ public class ClassOriginTrackerTest {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass("myClass");
     assertSame(tracker, ClassOriginTracker.get(tracker.classId));
 
-    int xOffset = tracker.registerConstant("myMethod", 'x');
+    tracker.startMethod("myMethod");
+    int xOffset = tracker.registerConstant('x');
     assertEquals("class myClass\n"
-        + "myMethod literal: x\n",
+            + "myMethod:\n"
+            + "  x\n",
         tracker.getContent().toString());
     assertEquals('x', tracker.getContent().charAt(xOffset));
   }

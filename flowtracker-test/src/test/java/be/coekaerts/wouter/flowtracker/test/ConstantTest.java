@@ -46,4 +46,23 @@ public class ConstantTest {
     assertTrue(point.tracker instanceof ClassOriginTracker);
     assertEquals(1, ((ClassOriginTracker) point.tracker).getContent().charAt(point.index));
   }
+
+  @Test
+  public void testClassOriginTrackerContent() {
+    char a = MyClass.myMethod(0, null);
+    TrackerPoint point = FlowTester.getCharSourcePoint(a);
+    ClassOriginTracker tracker = (ClassOriginTracker) point.tracker;
+    assertEquals("class be/coekaerts/wouter/flowtracker/test/ConstantTest$MyClass\n"
+            + "char myMethod(int, java.lang.String):\n"
+            + "  c\n",
+        tracker.getContent().toString());
+  }
+
+  static class MyClass {
+    // method signature with parameters to test how it's represented as a String
+    @SuppressWarnings("unused")
+    static char myMethod(int i, String s) {
+      return 'c';
+    }
+  }
 }

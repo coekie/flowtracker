@@ -22,9 +22,7 @@ public class ConstantValue extends TrackableValue {
 
   @Override
   void insertTrackStatements() {
-    offset = flowMethodAdapter.constantsTransformation.trackConstant(
-        flowMethodAdapter.name,
-        value);
+    offset = flowMethodAdapter.constantsTransformation.trackConstant(flowMethodAdapter, value);
   }
 
   @Override

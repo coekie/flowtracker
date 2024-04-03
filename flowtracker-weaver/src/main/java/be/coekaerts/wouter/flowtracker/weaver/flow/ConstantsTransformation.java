@@ -4,6 +4,7 @@ import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.weaver.ClassFilter;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
@@ -14,6 +15,7 @@ class ConstantsTransformation {
   private final String className;
   private final ClassFilter breakStringInterningFilter;
   private ClassOriginTracker tracker;
+  private FlowMethodAdapter lastMethod;
 
   ConstantsTransformation(String className, ClassFilter breakStringInterningFilter) {
     this.className = className;
@@ -31,12 +33,22 @@ class ConstantsTransformation {
     return tracker;
   }
 
-  int trackConstant(String method, int value) {
-    return tracker().registerConstant(method, value);
+  /** Adds a header indicating a new method starts, if this is a new method */
+  private void maybeAddMethodHeader(FlowMethodAdapter methodNode) {
+    if (lastMethod != methodNode) {
+      tracker().startMethod(methodDescription(methodNode));
+      lastMethod = methodNode;
+    }
   }
 
-  int trackConstantString(String method, String value) {
-    return tracker().registerConstantString(method, value);
+  int trackConstant(FlowMethodAdapter methodNode, int value) {
+    maybeAddMethodHeader(methodNode);
+    return tracker().registerConstant(value);
+  }
+
+  int trackConstantString(FlowMethodAdapter methodNode, String value) {
+    maybeAddMethodHeader(methodNode);
+    return tracker().registerConstantString(value);
   }
 
   int classId() {
@@ -45,6 +57,27 @@ class ConstantsTransformation {
 
   boolean canBreakStringInterning(FlowMethodAdapter methodNode) {
     return breakStringInterningFilter.include(methodNode.owner);
+  }
+
+  /** Human-friendly String representation of a method signature */
+  private static String methodDescription(FlowMethodAdapter methodNode) {
+    Type methodType = Type.getMethodType(methodNode.desc);
+    StringBuilder sb = new StringBuilder();
+    sb.append(methodType.getReturnType().getClassName());
+    sb.append(' ');
+    sb.append(methodNode.name);
+    sb.append('(');
+    boolean first = true;
+    for (Type arg : methodType.getArgumentTypes()) {
+      if (first) {
+        first = false;
+      } else {
+        sb.append(", ");
+      }
+      sb.append(arg.getClassName());
+    }
+    sb.append(')');
+    return sb.toString();
   }
 
   /** Create an InsnNode that loads a constant int value. Based on asm InstructionAdapter.iconst */

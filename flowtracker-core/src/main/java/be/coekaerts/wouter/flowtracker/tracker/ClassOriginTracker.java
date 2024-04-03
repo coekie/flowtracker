@@ -45,15 +45,19 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     return 0;
   }
 
-  public synchronized int registerConstant(String method, int value) {
-    content.append(method).append(" literal: ");
+  public synchronized void startMethod(String method) {
+    content.append(method).append(":\n");
+  }
+
+  public synchronized int registerConstant(int value) {
+    content.append("  ");
     int offset = content.length();
     content.append((char) value).append('\n');
     return offset;
   }
 
-  public synchronized int registerConstantString(String method, String value) {
-    content.append(method).append(" literal: ");
+  public synchronized int registerConstantString(String value) {
+    content.append("  ");
     int offset = content.length();
     content.append(value).append('\n');
     return offset;

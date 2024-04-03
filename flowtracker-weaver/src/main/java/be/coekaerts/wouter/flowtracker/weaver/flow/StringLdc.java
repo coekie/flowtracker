@@ -29,7 +29,7 @@ public class StringLdc extends Store {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
     if (constantsTransformation.canBreakStringInterning(methodNode)) {
       String value = (String) insn.cst;
-      int offset = constantsTransformation.trackConstantString(methodNode.name, value);
+      int offset = constantsTransformation.trackConstantString(methodNode, value);
       // we prefer to use constant-dynamic, that is replacing just the LDC value. That is better for
       // performance, and at least partially maintains the properties of String interning: the
       // literal String loaded from the same location in the code will still always be the same
