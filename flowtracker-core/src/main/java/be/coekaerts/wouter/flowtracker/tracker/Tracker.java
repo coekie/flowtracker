@@ -7,7 +7,6 @@ public abstract class Tracker implements WritableTracker {
   private static final AtomicLong idGenerator = new AtomicLong();
   private final long trackerId = idGenerator.getAndIncrement();
 
-  private String descriptor;
   private TrackerTree.Node node;
 
   Tracker() {
@@ -68,28 +67,10 @@ public abstract class Tracker implements WritableTracker {
     throw new UnsupportedOperationException();
   }
 
-  /** Initializes {@link #getDescriptor()} */
-  public Tracker initDescriptor(String descriptor) {
-    if (this.descriptor != null) {
-      throw new IllegalStateException("Descriptor already initialized: " + this.descriptor);
-    }
-    this.descriptor = descriptor;
-    return this;
-  }
-
+  /** Registers this tracker in the tree, at the given node */
   public Tracker addTo(Node node) {
     node.internalAddTracker(this);
     return this;
-  }
-
-  /** Replaces {@link #getDescriptor()} */
-  public void replaceDescriptor(String descriptor) {
-    this.descriptor = descriptor;
-  }
-
-  /** Description of what kind of object is being tracked and/or where it got created from */
-  public String getDescriptor() {
-    return descriptor;
   }
 
   public TrackerTree.Node getNode() {

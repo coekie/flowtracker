@@ -14,8 +14,6 @@ import java.util.zip.InflaterInputStream;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class InflaterInputStreamHook {
-  public static final String DESCRIPTOR = "InflaterInputStream";
-
   @Hook(target = "java.util.zip.InflaterInputStream",
       method = "void <init>(java.io.InputStream,java.util.zip.Inflater,int)")
   public static void afterInit(@Arg("THIS") InflaterInputStream target,
@@ -23,11 +21,6 @@ public class InflaterInputStreamHook {
     if (Trackers.isActive()) {
       var tracker = new ByteOriginTracker();
       Tracker inTracker = InputStreamHook.getInputStreamTracker(in);
-      if (inTracker != null) {
-        tracker.initDescriptor("InflaterInputStream for " + inTracker.getDescriptor());
-      } else {
-        tracker.initDescriptor(DESCRIPTOR);
-      }
       if (inTracker != null && inTracker.getNode() != null) {
         tracker.addTo(inTracker.getNode().node("Inflater"));
       }

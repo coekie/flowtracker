@@ -27,8 +27,7 @@ public class SocketChannelImplHook {
           (SocketAddress) Reflection.getFieldValue(channel, remoteAddressField);
       SocketAddress localAddress =
           (SocketAddress) Reflection.getFieldValue(channel, localAddressField);
-      FileDescriptorTrackerRepository.createTracker(fd,
-          "Client socket to " + remoteAddress + " from " + localAddress, true, true,
+      FileDescriptorTrackerRepository.createTracker(fd, true, true,
           SocketImplHook.clientSocketNode(remoteAddress));
     }
   }
@@ -43,8 +42,7 @@ public class SocketChannelImplHook {
           (SocketAddress) Reflection.getFieldValue(channel, remoteAddressField);
       SocketAddress localAddress =
           (SocketAddress) Reflection.getFieldValue(channel, localAddressField);
-      FileDescriptorTrackerRepository.createTracker(fd,
-          "Server socket to " + localAddress + " from " + remoteAddress, true, true,
+      FileDescriptorTrackerRepository.createTracker(fd, true, true,
           SocketImplHook.serverSocketNode(localAddress, remoteAddress));
     }
   }
@@ -60,8 +58,7 @@ public class SocketChannelImplHook {
           (SocketAddress) Reflection.getFieldValue(channel, localAddressField);
       FileDescriptor fd =
           (FileDescriptor) Reflection.getFieldValue(channel, fdField);
-      FileDescriptorTrackerRepository.createTracker(fd,
-          "Server socket to " + localAddress + " from " + remoteAddress, true, true,
+      FileDescriptorTrackerRepository.createTracker(fd, true, true,
           SocketImplHook.serverSocketNode(localAddress, remoteAddress));
     }
   }

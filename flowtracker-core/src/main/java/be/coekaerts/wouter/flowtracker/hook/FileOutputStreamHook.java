@@ -21,9 +21,8 @@ public class FileOutputStreamHook {
   public static void afterInit(@Arg("FileOutputStream_fd") FileDescriptor fd,
       @Arg("ARG0") File file) {
     if (Trackers.isActive()) {
-      FileDescriptorTrackerRepository.createTracker(fd,
-          "FileOutputStream for " + file.getAbsolutePath(),
-          false, true, TrackerTree.fileNode(file.getAbsolutePath()));
+      FileDescriptorTrackerRepository.createTracker(fd, false, true,
+          TrackerTree.fileNode(file.getAbsolutePath()));
     }
   }
 

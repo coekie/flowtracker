@@ -5,7 +5,6 @@ export const simpleOriginTracker = {
   path: ['Simple', 'origin1'],
   origin: true,
   sink: false,
-  description: 'Simple origin',
 };
 
 export const simpleSinkTracker = {
@@ -13,7 +12,6 @@ export const simpleSinkTracker = {
   path: ['Simple', 'sink1'],
   origin: false,
   sink: true,
-  description: 'Simple sink',
 };
 
 export const handlers: HttpHandler[] = [
@@ -51,7 +49,6 @@ export const handlers: HttpHandler[] = [
                     path: ['CombinedPath', 'one', 'two', 'three', 'tracker1'],
                     origin: true,
                     sink: false,
-                    description: 'my description',
                   },
                 },
               ],

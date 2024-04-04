@@ -17,7 +17,6 @@ public class ConstantTest {
     TrackerPoint point = FlowTester.getCharSourcePoint('a');
     assertTrue(point.tracker instanceof ClassOriginTracker);
     TrackTestHelper.assertThatTracker(point.tracker)
-        .hasDescriptor(ConstantTest.class.getName().replace('.', '/'))
         .hasNode("Class", "be", "coekaerts", "wouter", "flowtracker", "test", "ConstantTest");
     assertEquals('a', ((ClassOriginTracker) point.tracker).getContent().charAt(point.index));
   }

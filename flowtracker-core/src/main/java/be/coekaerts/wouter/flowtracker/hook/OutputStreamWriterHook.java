@@ -39,10 +39,7 @@ public class OutputStreamWriterHook {
       OutputStream stream) {
     Tracker streamTracker = getOutputStreamTracker(stream);
     CharSinkTracker tracker = new CharSinkTracker();
-    tracker
-        .initDescriptor(streamTracker == null ? "OutputStreamWriter"
-            : "OutputStreamWriter to " + streamTracker.getDescriptor())
-        .addTo(TrackerTree.nodeOrUnknown(streamTracker).node("Writer"));
+    tracker.addTo(TrackerTree.nodeOrUnknown(streamTracker).node("Writer"));
     TrackerRepository.setTracker(target, tracker);
   }
 

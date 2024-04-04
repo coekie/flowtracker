@@ -35,7 +35,7 @@ public class SystemHook {
       FileOutputStream fileOut = (FileOutputStream)
           Reflection.getFieldValue(Reflection.getFieldValue(printStream, outField), outField);
       FileDescriptor fd = fileOut.getFD();
-      FileDescriptorTrackerRepository.createTracker(fd, name, false, true,
+      FileDescriptorTrackerRepository.createTracker(fd, false, true,
           TrackerTree.node("System").node(name));
 
       // track on the OutputStreamWriter level

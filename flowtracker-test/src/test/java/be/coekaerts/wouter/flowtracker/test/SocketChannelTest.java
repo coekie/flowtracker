@@ -43,31 +43,27 @@ public class SocketChannelTest extends AbstractChannelTest<SocketChannel> {
   }
 
   @Test
-  public void descriptorForClient() {
+  public void nodeForClient() {
     ByteOriginTracker readTracker = getReadTracker(client);
     assertThatTracker(readTracker)
-        .hasDescriptorMatching(d -> d.startsWith("Read Client socket to"))
         .hasNodeMatching(n -> n.get(0).equals("Client socket")
             && n.get(2).equals(FileDescriptorTrackerRepository.READ));
 
     ByteSinkTracker writeTracker = getWriteTracker(client);
     assertThatTracker(writeTracker)
-        .hasDescriptorMatching(d -> d.startsWith("Write Client socket to"))
         .hasNodeMatching(n -> n.get(0).equals("Client socket")
             && n.get(2).equals(FileDescriptorTrackerRepository.WRITE));
   }
 
   @Test
-  public void descriptorForServer() {
+  public void nodeForServer() {
     ByteOriginTracker readTracker = getReadTracker(server);
     assertThatTracker(readTracker)
-        .hasDescriptorMatching(d -> d.startsWith("Read Server socket to"))
         .hasNodeMatching(n -> n.get(0).equals("Server socket")
             && n.get(3).equals(FileDescriptorTrackerRepository.READ));
 
     ByteSinkTracker writeTracker = getWriteTracker(server);
     assertThatTracker(writeTracker)
-        .hasDescriptorMatching(d -> d.startsWith("Write Server socket to"))
         .hasNodeMatching(n -> n.get(0).equals("Server socket")
             && n.get(3).equals(FileDescriptorTrackerRepository.WRITE));
   }

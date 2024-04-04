@@ -19,8 +19,8 @@ public class FileChannelImplHook {
       @Arg("ARG1") String path, @Arg("ARG2") boolean readable, @Arg("ARG3") boolean writeable) {
     if (Trackers.isActive()) {
       if (!FileDescriptorTrackerRepository.hasTracker(fd)) {
-        FileDescriptorTrackerRepository.createTracker(fd, "FileChannel for " + path, readable,
-            writeable, TrackerTree.fileNode(path));
+        FileDescriptorTrackerRepository.createTracker(fd, readable, writeable,
+            TrackerTree.fileNode(path));
       }
     }
   }

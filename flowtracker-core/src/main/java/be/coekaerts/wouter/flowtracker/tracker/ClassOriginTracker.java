@@ -25,7 +25,6 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
 
   public static synchronized ClassOriginTracker registerClass(String className) {
     ClassOriginTracker tracker = new ClassOriginTracker(className);
-    tracker.initDescriptor(className);
     trackers.add(tracker);
     tracker.addTo(TrackerTree.node("Class").pathNode(className));
     return tracker;

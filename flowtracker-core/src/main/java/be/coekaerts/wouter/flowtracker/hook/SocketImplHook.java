@@ -31,9 +31,7 @@ public class SocketImplHook {
   public static void afterConnect(@Arg("SocketImpl_fd") FileDescriptor fd,
       @Arg("ARG0") SocketAddress remote, @Arg("SocketImpl_localport") int localport) {
     if (Trackers.isActive()) {
-      FileDescriptorTrackerRepository.createTracker(fd,
-          "Client socket to " + remote + " from " + localport, true, true,
-          clientSocketNode(remote));
+      FileDescriptorTrackerRepository.createTracker(fd, true, true, clientSocketNode(remote));
     }
   }
 
@@ -49,8 +47,7 @@ public class SocketImplHook {
       FileDescriptor fd = (FileDescriptor) Reflection.getFieldValue(si, fdField);
       InetAddress address = (InetAddress) Reflection.getFieldValue(si, addressField);
       int port = Reflection.getInt(si, portField);
-      FileDescriptorTrackerRepository.createTracker(fd,
-          "Server socket to " + localport + " from " + address + ":" + port, true, true,
+      FileDescriptorTrackerRepository.createTracker(fd, true, true,
           serverSocketNode(Integer.toString(localport), address + ":" + port));
     }
   }

@@ -37,25 +37,22 @@ public class InflaterInputStreamTest extends AbstractInputStreamTest {
   }
 
   @Test
-  public void descriptor() throws IOException {
+  public void node() throws IOException {
     ByteArrayInputStream src = new ByteArrayInputStream(deflated);
-    TrackerRepository.setTracker(src, new TagTracker("src").addTo(TrackerTree.node("src")));
+    TrackerRepository.setTracker(src, new TagTracker().addTo(TrackerTree.node("src")));
 
     try (InputStream is = new InflaterInputStream(src)) {
       TrackTestHelper.assertThatTracker(is)
-          .hasDescriptor("InflaterInputStream for src")
           .hasNode("src", "Inflater");
     }
 
     try (InputStream is = new InflaterInputStream(src, new Inflater())) {
       TrackTestHelper.assertThatTracker(is)
-          .hasDescriptor("InflaterInputStream for src")
           .hasNode("src", "Inflater");
     }
 
     try (InputStream is = new InflaterInputStream(src, new Inflater(), 512)) {
       TrackTestHelper.assertThatTracker(is)
-          .hasDescriptor("InflaterInputStream for src")
           .hasNode("src", "Inflater");
     }
   }

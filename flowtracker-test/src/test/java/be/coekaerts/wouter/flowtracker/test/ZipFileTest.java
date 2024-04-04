@@ -34,13 +34,9 @@ public class ZipFileTest {
       ZipEntry entry = zipFile.getEntry(testZipFileEntryName);
       try (InputStream in = zipFile.getInputStream(entry)) {
         TrackTestHelper.assertThatTracker(in)
-            .hasDescriptorMatching(desc ->
-                desc.matches("Unzipped .*\\.jar file org/junit/Test.class"))
-            .hasNodeMatching(nodePath ->
-                nodePath.get(0).equals("Files")
-                    && nodePath.contains(new File(testZipFilePath).getName())
-                    && nodePath.contains("junit")
-                    && nodePath.contains("Test.class"));
+            .hasNodeStartingWith("Files")
+            .hasNodeMatching(nodePath -> nodePath.contains(new File(testZipFilePath).getName()))
+            .hasNodeEndingWith("junit", "Test.class");
 
         // this is tested more in InflaterInputStreamTest
         byte[] bytes = in.readAllBytes();

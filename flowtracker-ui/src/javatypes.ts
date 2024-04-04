@@ -6,7 +6,6 @@
 // in java: TrackerResponse
 export interface Tracker {
   id: number;
-  description: string;
   path: string[];
   origin: boolean;
   sink: boolean;

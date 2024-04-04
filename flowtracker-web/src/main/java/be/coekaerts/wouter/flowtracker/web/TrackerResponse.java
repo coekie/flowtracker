@@ -18,10 +18,6 @@ public class TrackerResponse {
     return tracker.getTrackerId();
   }
 
-  public String getDescription() {
-    return tracker.getDescriptor();
-  }
-
   public List<String> getPath() {
     Node node = tracker.getNode();
     return node == null ? null : node.path();

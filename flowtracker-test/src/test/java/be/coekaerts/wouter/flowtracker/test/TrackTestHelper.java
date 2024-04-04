@@ -2,7 +2,6 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
@@ -86,16 +85,6 @@ public class TrackTestHelper {
     private TrackerAssertions(Tracker tracker) {
       assertNotNull(tracker);
       this.tracker = tracker;
-    }
-
-    public TrackerAssertions hasDescriptor(String expectedDescriptor) {
-      assertEquals(expectedDescriptor, tracker.getDescriptor());
-      return this;
-    }
-
-    public TrackerAssertions hasDescriptorMatching(Predicate<String> predicate) {
-      assertTrue(predicate.test(tracker.getDescriptor()));
-      return this;
     }
 
     public TrackerAssertions hasNode(String... expectedNodePath) {

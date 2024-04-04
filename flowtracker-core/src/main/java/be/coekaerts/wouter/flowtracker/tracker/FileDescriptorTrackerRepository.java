@@ -29,12 +29,11 @@ public class FileDescriptorTrackerRepository {
     return map.containsKey(fd);
   }
 
-  public static void createTracker(FileDescriptor fd, String descriptor, boolean read,
-      boolean write, TrackerTree.Node node) {
+  public static void createTracker(FileDescriptor fd, boolean read, boolean write,
+      TrackerTree.Node node) {
     ByteOriginTracker readTracker;
     if (read) {
       readTracker = new ByteOriginTracker();
-      readTracker.initDescriptor((write ? "Read " : "") + descriptor);
       if (node != null) {
         readTracker.addTo(node.optionalNode(READ));
       }
@@ -45,7 +44,6 @@ public class FileDescriptorTrackerRepository {
     ByteSinkTracker writeTracker;
     if (write) {
       writeTracker = new ByteSinkTracker();
-      writeTracker.initDescriptor((read ? "Write " : "") + descriptor);
       if (node != null) {
         writeTracker.addTo(node.optionalNode(WRITE));
       }

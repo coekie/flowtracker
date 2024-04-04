@@ -49,17 +49,15 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
     }
   }
 
-  @Test public void descriptor() throws IOException {
+  @Test public void node() throws IOException {
     try (var fisFromFile = new FileInputStream(file)) {
       TrackTestHelper.assertThatTracker(getStreamTracker(fisFromFile))
-          .hasDescriptor("FileInputStream for " + file.getPath())
           .hasNodeStartingWith("Files")
           .hasNodeEndingWith(file.getName(), FileDescriptorTrackerRepository.READ);
     }
 
     try (var fisFromName = new FileInputStream(file.getPath())) {
       TrackTestHelper.assertThatTracker(getStreamTracker(fisFromName))
-          .hasDescriptor("FileInputStream for " + file.getPath())
           .hasNodeStartingWith("Files")
           .hasNodeEndingWith(file.getName(), FileDescriptorTrackerRepository.READ);
     }

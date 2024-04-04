@@ -24,10 +24,6 @@ public class ZipFileHook {
       if (tracker == null) {
         return;
       }
-
-      if (InflaterInputStreamHook.DESCRIPTOR.equals(tracker.getDescriptor())) {
-        tracker.replaceDescriptor("Unzipped " + target.getName() + " file " + zipEntry.getName());
-      }
       if (tracker.getNode() == null) {
         tracker.addTo(TrackerTree.fileNode(target.getName()).pathNode(zipEntry.getName()));
       }

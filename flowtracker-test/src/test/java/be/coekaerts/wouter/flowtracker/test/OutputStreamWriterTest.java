@@ -132,11 +132,11 @@ public class OutputStreamWriterTest {
   }
 
   @SuppressWarnings("CharsetObjectCanBeUsed")
-  @Test public void descriptorAndNode() throws IOException {
-    assertDescriptorAndNode(writer);
-    assertDescriptorAndNode(new OutputStreamWriter(stream, "UTF-8"));
-    assertDescriptorAndNode(new OutputStreamWriter(stream, StandardCharsets.UTF_8));
-    assertDescriptorAndNode(new OutputStreamWriter(stream,
+  @Test public void node() throws IOException {
+    assertNode(writer);
+    assertNode(new OutputStreamWriter(stream, "UTF-8"));
+    assertNode(new OutputStreamWriter(stream, StandardCharsets.UTF_8));
+    assertNode(new OutputStreamWriter(stream,
         new CharsetEncoder(StandardCharsets.UTF_8, 1, 1) {
           @Override protected CoderResult encodeLoop(CharBuffer in, ByteBuffer out) {
             return null;
@@ -144,9 +144,8 @@ public class OutputStreamWriterTest {
         }));
   }
 
-  private void assertDescriptorAndNode(OutputStreamWriter writer) {
+  private void assertNode(OutputStreamWriter writer) {
     TrackTestHelper.assertThatTracker(writer)
-        .hasDescriptor("OutputStreamWriter to FileOutputStream for " + file.getAbsolutePath())
         .hasNodeStartingWith("Files")
         .hasNodeEndingWith(file.getName(), FileDescriptorTrackerRepository.WRITE, "Writer");
   }

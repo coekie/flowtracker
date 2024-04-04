@@ -20,9 +20,8 @@ public class FileInputStreamHook {
   public static void afterInit(@Arg("FileInputStream_fd") FileDescriptor fd,
       @Arg("ARG0") File file) {
     if (Trackers.isActive()) {
-      FileDescriptorTrackerRepository.createTracker(fd,
-          "FileInputStream for " + file.getAbsolutePath(),
-          true, false, TrackerTree.fileNode(file.getAbsolutePath()));
+      FileDescriptorTrackerRepository.createTracker(fd, true, false,
+          TrackerTree.fileNode(file.getAbsolutePath()));
     }
   }
 
