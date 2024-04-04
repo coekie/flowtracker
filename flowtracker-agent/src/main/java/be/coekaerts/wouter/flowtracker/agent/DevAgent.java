@@ -16,13 +16,12 @@ public class DevAgent extends FlowTrackAgent {
   }
 
   @Override
-  ClassLoader initClassLoaders(Instrumentation inst) throws IOException {
+  ClassLoader initClassLoaders(Instrumentation inst, JarFile agentJar) throws IOException {
     // for DevAgent the manifest already puts flowtracker-core on the bootstrap classpath,
     // so unlike our superclass, we don't need to do appendToBootstrapClassLoaderSearch here.
 
-    // this find the flowtracker-agent-dev/target/flowtracker-agent-dev-*-SNAPSHOT.jar file
-    JarFile thisJar = getAgentJar();
-    File root = new File(thisJar.getName()).getParentFile().getParentFile().getParentFile();
+    // agentJar is flowtracker-agent-dev/target/flowtracker-agent-dev-*-SNAPSHOT.jar
+    File root = new File(agentJar.getName()).getParentFile().getParentFile().getParentFile();
 
     List<URL> spiderClasspath = new ArrayList<>();
     for (String module : new String[]{"flowtracker-weaver", "flowtracker-web"}) {
@@ -34,6 +33,7 @@ public class DevAgent extends FlowTrackAgent {
     }
     // we load our own classes from target/classes, but our dependencies are bundled in the agent
     // jar, handled by SpiderClassLoader
-    return new URLClassLoader(spiderClasspath.toArray(new URL[0]), new SpiderClassLoader(thisJar));
+    return new URLClassLoader(spiderClasspath.toArray(new URL[0]),
+        new SpiderClassLoader(agentJar, config));
   }
 }

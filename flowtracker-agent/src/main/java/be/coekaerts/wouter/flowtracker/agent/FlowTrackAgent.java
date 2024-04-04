@@ -12,7 +12,7 @@ import java.util.jar.JarFile;
 
 public class FlowTrackAgent {
   /** Configuration passed to the agent */
-  private static final Map<String, String> config = new HashMap<>();
+  static final Map<String, String> config = new HashMap<>();
 
   public static void premain(String agentArgs, Instrumentation inst) {
     new FlowTrackAgent().doPremain(agentArgs, inst);
@@ -33,7 +33,8 @@ public class FlowTrackAgent {
        * This also puts flowtracker-core on the bootstrap classpath. So code before this line should
        * not make any references to classes in flowtracker-core yet.
        */
-      ClassLoader spiderClassLoader = initClassLoaders(inst);
+      JarFile agentJar = getAgentJar();
+      ClassLoader spiderClassLoader = initClassLoaders(inst, agentJar);
 
       Logger.initLogging(config);
 
@@ -45,7 +46,7 @@ public class FlowTrackAgent {
           .getMethod("initialize", Instrumentation.class, Map.class)
           .invoke(null, inst, config);
 
-      CoreInitializer.initialize(config);
+      CoreInitializer.initialize(config, agentJar);
 
       // initialization done, unsuspend tracking
       Trackers.unsuspendOnCurrentThread();
@@ -64,13 +65,11 @@ public class FlowTrackAgent {
    * Those are loaded with their dependencies in a separate class loader to avoid polluting the
    * classpath of the application.
    */
-  ClassLoader initClassLoaders(Instrumentation inst) throws IOException {
-    JarFile jar = getAgentJar();
-
+  ClassLoader initClassLoaders(Instrumentation inst, JarFile agentJar) throws IOException {
     // make the instrumented JDK classes find the hook class
-    inst.appendToBootstrapClassLoaderSearch(jar);
+    inst.appendToBootstrapClassLoaderSearch(agentJar);
 
-    return new SpiderClassLoader(jar);
+    return new SpiderClassLoader(agentJar, config);
   }
 
   // NICE: generic plugin system would be cleaner
@@ -99,7 +98,7 @@ public class FlowTrackAgent {
   }
 
   /** Returns the jar that this class is running in */
-  static JarFile getAgentJar() throws IOException {
+  private static JarFile getAgentJar() throws IOException {
     URL url = Thread.currentThread().getContextClassLoader().getResource("flowtracker-spider");
     if (url == null) {
       throw new IllegalStateException("Failed to find our own jar");

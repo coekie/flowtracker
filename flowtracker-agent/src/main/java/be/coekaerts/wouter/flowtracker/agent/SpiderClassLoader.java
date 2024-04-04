@@ -7,16 +7,19 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /** Classloader for weaver + web, that loads classes from the "flowtracker-spider" dir in the jar */
 class SpiderClassLoader extends ClassLoader {
   private final JarFile jar;
+  private final boolean hideInternals;
 
-  SpiderClassLoader(JarFile jar) {
+  SpiderClassLoader(JarFile jar, Map<String, String> config) {
     super(null);
     this.jar = jar;
+    this.hideInternals = !"false".equals(config.get("hideInternals"));
   }
 
   @Override
@@ -27,14 +30,19 @@ class SpiderClassLoader extends ClassLoader {
     }
 
     byte[] b;
-    // don't track reading of flowtracker class files because that's noise to the user
-    Trackers.suspendOnCurrentThread();
+    if (hideInternals) {
+      // don't track reading of flowtracker class files because that's noise to the user
+      Trackers.suspendOnCurrentThread();
+    }
     try (InputStream in = jar.getInputStream(entry)) {
       b = in.readAllBytes();
     } catch (IOException e) {
       throw new Error(e);
     } finally {
-      Trackers.unsuspendOnCurrentThread();
+      if (hideInternals) {
+        // don't track reading of flowtracker class files because that's noise to the user
+        Trackers.unsuspendOnCurrentThread();
+      }
     }
     return defineClass(name, b, 0, b.length);
   }

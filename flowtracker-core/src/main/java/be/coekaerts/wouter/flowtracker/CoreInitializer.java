@@ -2,16 +2,19 @@ package be.coekaerts.wouter.flowtracker;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.hook.SystemHook;
+import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.util.ShutdownSuspender;
 import java.util.Map;
+import java.util.jar.JarFile;
 
 public class CoreInitializer {
-  public static void initialize(Map<String, String> config) {
+  public static void initialize(Map<String, String> config, JarFile agentJar) {
     ensureInitialized();
     Tracker.initTrackCreation("true".equals(config.get(Tracker.TRACK_CREATION)));
+    ZipFileHook.initialize(config, agentJar);
     SystemHook.initialize();
     StringHook.initDebugUntracked(config.get(StringHook.DEBUG_UNTRACKED));
   }
