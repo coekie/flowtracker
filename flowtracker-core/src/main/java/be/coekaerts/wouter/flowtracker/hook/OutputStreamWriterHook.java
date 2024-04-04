@@ -84,7 +84,7 @@ public class OutputStreamWriterHook {
   private static Tracker getOutputStreamTracker(OutputStream os) {
     if (os instanceof FileOutputStream) {
       try {
-        return FileDescriptorTrackerRepository.getWriteTracker(((FileOutputStream) os).getFD());
+        return FileDescriptorTrackerRepository.forceGetWriteTracker(((FileOutputStream) os).getFD());
       } catch (IOException e) {
         return null;
       }

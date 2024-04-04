@@ -54,6 +54,8 @@ public class SystemTest {
 		// and we haven't implemented anything yet to handle those, so we don't test anything tied to
 		// the _current_ value of System.out and System.err.
 		assertFalse(TrackerTree.node("System").node("System.out").trackers().isEmpty());
+		assertFalse(TrackerTree.node("System").node("System.out").node("Writer").trackers().isEmpty());
 		assertFalse(TrackerTree.node("System").node("System.err").trackers().isEmpty());
+		assertFalse(TrackerTree.node("System").node("System.err").node("Writer").trackers().isEmpty());
 	}
 }

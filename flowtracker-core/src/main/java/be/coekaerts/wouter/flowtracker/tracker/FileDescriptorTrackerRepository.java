@@ -21,6 +21,11 @@ public class FileDescriptorTrackerRepository {
 
   public static ByteSinkTracker getWriteTracker(FileDescriptor fd) {
     if (!Trackers.isActive()) return null;
+    return forceGetWriteTracker(fd);
+  }
+
+  /** Get tracker for writes, even when not {@link Trackers#isActive()} */
+  public static ByteSinkTracker forceGetWriteTracker(FileDescriptor fd) {
     TrackerPair pair = map.get(fd);
     return pair == null ? null : pair.writeTracker;
   }
