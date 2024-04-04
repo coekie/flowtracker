@@ -12,6 +12,7 @@ import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharContentTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -142,6 +143,7 @@ public class OutputStreamWriterTest {
             return null;
           }
         }));
+    assertNode(new OutputStreamWriter(new BufferedOutputStream(stream)));
   }
 
   private void assertNode(OutputStreamWriter writer) {

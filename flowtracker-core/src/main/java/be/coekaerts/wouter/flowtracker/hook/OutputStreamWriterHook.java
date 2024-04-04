@@ -9,9 +9,11 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Field;
 
 /**
  * Hook methods called by instrumented code for OutputStreamWriter.
@@ -20,6 +22,9 @@ import java.io.OutputStreamWriter;
  */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class OutputStreamWriterHook {
+  private static final Field filterOutputStreamOut =
+      Reflection.getDeclaredField(FilterOutputStream.class, "out");
+
   @Hook(target = "java.io.OutputStreamWriter",
       method = "void <init>(java.io.OutputStream)")
   @Hook(target = "java.io.OutputStreamWriter",
@@ -88,6 +93,9 @@ public class OutputStreamWriterHook {
       } catch (IOException e) {
         return null;
       }
+    } else if (os instanceof FilterOutputStream) {
+      return getOutputStreamTracker(
+          (OutputStream) Reflection.getFieldValue(os, filterOutputStreamOut));
     }
     return null;
   }
