@@ -4,10 +4,14 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Tracker implements WritableTracker {
+  public static final String TRACK_CREATION = "trackCreation";
+
   private static final AtomicLong idGenerator = new AtomicLong();
   private final long trackerId = idGenerator.getAndIncrement();
+  public static boolean trackCreation = false;
 
   private TrackerTree.Node node;
+  private StackTraceElement[] creationStackTrace;
 
   Tracker() {
   }
@@ -70,6 +74,12 @@ public abstract class Tracker implements WritableTracker {
   /** Registers this tracker in the tree, at the given node */
   public Tracker addTo(Node node) {
     node.internalAddTracker(this);
+    if (trackCreation) {
+      // we set the stacktrace in this method, because we only want to track stacktraces of Trackers
+      // that have a node. (doing it for every Tracker would be useless, add too much overhead, and
+      // lead to infinite recursion).
+      creationStackTrace = new Throwable().getStackTrace();
+    }
     return this;
   }
 
@@ -77,7 +87,15 @@ public abstract class Tracker implements WritableTracker {
     return node;
   }
 
+  public StackTraceElement[] getCreationStackTrace() {
+    return creationStackTrace;
+  }
+
   void initNode(Node node) {
     this.node = node;
+  }
+
+  public static void initTrackCreation(boolean enabled) {
+    trackCreation = enabled;
   }
 }

@@ -29,6 +29,7 @@ export interface Region {
 // in java: TrackerResource.TrackerDetailResponse
 export interface TrackerDetail {
   path: string[] | null;
+  creationStackTrace: string | null;
   regions: Region[];
 }
 

@@ -213,25 +213,30 @@
     <div class="path">
       <PathView path={trackerDetail.path} bind:selection {coloring} />
     </div>
-    <pre
-      bind:this={pre}
-      use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a
-          class="region"
-          href={region.parts.length > 0 ? '#' : undefined}
-          on:mouseover={() => focusIn(region)}
-          on:mouseout={() => focusOut()}
-          on:focus={() => focusIn(region)}
-          on:blur={() => focusOut()}
-          on:mousedown={() => mousedown(region)}
-          on:mousemove={e => mousemove(e, region)}
-          on:mouseup={mouseup}
-          on:dblclick={dblclick}
-          draggable="false"
-          style="background-color: {backgroundColor(region, coloring)}"
-          class:selected={isSelected(region, selection)}
-          class:withSource={region.parts.length > 0}
-          class:focus={focusRegion === region}>{region.content}</a
-        >{/each}</pre>
+    <div class="content">
+      {#if trackerDetail.creationStackTrace}
+        <pre class="creation">{trackerDetail.creationStackTrace}</pre>
+      {/if}
+      <pre
+        bind:this={pre}
+        use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a
+            class="region"
+            href={region.parts.length > 0 ? '#' : undefined}
+            on:mouseover={() => focusIn(region)}
+            on:mouseout={() => focusOut()}
+            on:focus={() => focusIn(region)}
+            on:blur={() => focusOut()}
+            on:mousedown={() => mousedown(region)}
+            on:mousemove={e => mousemove(e, region)}
+            on:mouseup={mouseup}
+            on:dblclick={dblclick}
+            draggable="false"
+            style="background-color: {backgroundColor(region, coloring)}"
+            class:selected={isSelected(region, selection)}
+            class:withSource={region.parts.length > 0}
+            class:focus={focusRegion === region}>{region.content}</a
+          >{/each}</pre>
+    </div>
   </div>
 {/await}
 
@@ -246,10 +251,17 @@
   .path {
     border-bottom: 1px solid #ccc;
   }
-  pre {
+  .creation {
+    margin: 0 0 1em 0;
+    border-bottom: 1px solid #ccc;
+  }
+  .content {
     overflow: auto;
     flex: 1;
     margin: 0;
+  }
+  pre {
+    margin: 0 0 0 0;
   }
   .region {
     /* draw a vertical line after each part, without influencing size */

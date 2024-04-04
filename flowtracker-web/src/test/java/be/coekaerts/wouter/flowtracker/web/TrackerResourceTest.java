@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.web;
 
 import static be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerDetailResponse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
@@ -157,6 +158,34 @@ public class TrackerResourceTest {
     InterestRepository.register(tracker);
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
     assertEquals(Arrays.asList("TrackerResourceTest.test", "a", "b"), response.getPath());
+  }
+
+  @Test public void creationStackTrace() {
+    boolean oldCreationStackTraceEnabled = Tracker.trackCreation;
+    Tracker.trackCreation = true;
+    try {
+      Node node = TrackerTree.node("TrackerResourceTest.creationStackTrace");
+      Tracker tracker = new ByteOriginTracker().addTo(node);
+      InterestRepository.register(tracker);
+      TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
+      assertTrue(response.getCreationStackTrace().contains("TrackerResourceTest"));
+    } finally {
+      Tracker.trackCreation = oldCreationStackTraceEnabled;
+    }
+  }
+
+  @Test public void creationStackTraceDisabled() {
+    boolean oldCreationStackTraceEnabled = Tracker.trackCreation;
+    Tracker.trackCreation = false;
+    try {
+      Node node = TrackerTree.node("TrackerResourceTest.creationStackTrace");
+      Tracker tracker = new ByteOriginTracker().addTo(node);
+      InterestRepository.register(tracker);
+      TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
+      assertNull(response.getCreationStackTrace());
+    } finally {
+      Tracker.trackCreation = oldCreationStackTraceEnabled;
+    }
   }
 
   private void assertRegionNoPart(Region region, String expectedContent) {

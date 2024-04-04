@@ -56,7 +56,7 @@ public class TrackerResource {
       regions.add(
           new Region(tracker, 0, getContentLength(tracker), emptyList()));
     }
-    return new TrackerDetailResponse(path(tracker), regions);
+    return new TrackerDetailResponse(tracker, regions);
   }
 
   /**
@@ -124,21 +124,27 @@ public class TrackerResource {
       regions.add(new Region(tracker, i, endIndex - i, new ArrayList<>(activeParts)));
     }
 
-    return new TrackerDetailResponse(path(tracker), regions);
+    return new TrackerDetailResponse(tracker, regions);
   }
 
   @SuppressWarnings({"UnusedDeclaration", "MismatchedQueryAndUpdateOfCollection"}) // json
   public static class TrackerDetailResponse {
     private final List<String> path;
+    private final String creationStackTrace;
     private final List<Region> regions;
 
-    private TrackerDetailResponse(List<String> path, List<Region> regions) {
-      this.path = path;
+    private TrackerDetailResponse(Tracker tracker, List<Region> regions) {
+      this.path = path(tracker);
+      this.creationStackTrace = creationStackTraceToString(tracker);
       this.regions = regions;
     }
 
     public List<String> getPath() {
       return path;
+    }
+
+    public String getCreationStackTrace() {
+      return creationStackTrace;
     }
 
     public List<Region> getRegions() {
@@ -255,5 +261,17 @@ public class TrackerResource {
     }
     Collections.reverse(result);
     return result;
+  }
+
+  private static String creationStackTraceToString(Tracker tracker) {
+    StackTraceElement[] trace = tracker.getCreationStackTrace();
+    if (trace == null) {
+      return null;
+    }
+    StringBuilder sb = new StringBuilder();
+    for (StackTraceElement element : trace) {
+      sb.append("at ").append(element).append('\n');
+    }
+    return sb.toString();
   }
 }

@@ -4,12 +4,14 @@ import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.hook.SystemHook;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.util.ShutdownSuspender;
 import java.util.Map;
 
 public class CoreInitializer {
   public static void initialize(Map<String, String> config) {
     ensureInitialized();
+    Tracker.initTrackCreation("true".equals(config.get(Tracker.TRACK_CREATION)));
     SystemHook.initialize();
     StringHook.initDebugUntracked(config.get(StringHook.DEBUG_UNTRACKED));
   }
