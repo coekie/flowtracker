@@ -201,8 +201,8 @@ class GeneratedHookSpecs {
       "(I)V",
       "be/coekaerts/wouter/flowtracker/hook/OutputStreamWriterHook",
       "afterWrite1",
-      "(Ljava/io/OutputStreamWriter;I)V",
-      THIS, ARG0);
+      "(Ljava/io/OutputStreamWriter;ILbe/coekaerts/wouter/flowtracker/tracker/Invocation;)V",
+      THIS, ARG0, INVOCATION);
     t.register("java/io/OutputStreamWriter",
       "write",
       "([CII)V",

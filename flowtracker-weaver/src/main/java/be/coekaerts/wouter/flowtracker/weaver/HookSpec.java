@@ -135,7 +135,7 @@ public class HookSpec {
       generator.push(
           Invocation.signature(spec.targetMethod.getName(), spec.targetMethod.getDescriptor()));
       generator.invokeStatic(Type.getType(Invocation.class), Method.getMethod(
-          "be.coekaerts.wouter.flowtracker.tracker.Invocation start(String)"));
+          "be.coekaerts.wouter.flowtracker.tracker.Invocation preStart(String)"));
     }
   };
 

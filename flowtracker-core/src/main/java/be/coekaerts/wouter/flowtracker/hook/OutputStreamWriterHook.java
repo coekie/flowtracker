@@ -4,7 +4,9 @@ import be.coekaerts.wouter.flowtracker.annotation.Arg;
 import be.coekaerts.wouter.flowtracker.annotation.Hook;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
@@ -50,11 +52,15 @@ public class OutputStreamWriterHook {
 
   @Hook(target = "java.io.OutputStreamWriter",
       method = "void write(int)")
-  public static void afterWrite1(@Arg("THIS") OutputStreamWriter target, @Arg("ARG0") int c) {
+  public static void afterWrite1(@Arg("THIS") OutputStreamWriter target, @Arg("ARG0") int c,
+    @Arg("INVOCATION") Invocation invocation) {
     Tracker tracker = TrackerRepository.getTracker(target);
     if (tracker != null) {
+      TrackerPoint sourcePoint = Invocation.getArgPoint(invocation, 0);
+      if (sourcePoint != null) {
+        tracker.setSource(tracker.getLength(), 1, sourcePoint.tracker, sourcePoint.index);
+      }
       ((CharSinkTracker) tracker).append((char) c);
-      // TODO tracking of source of single character writes
     }
   }
 

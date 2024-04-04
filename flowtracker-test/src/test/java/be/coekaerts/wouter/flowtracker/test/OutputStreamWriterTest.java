@@ -67,9 +67,10 @@ public class OutputStreamWriterTest {
     assertContentEquals("a");
     writer.write(flowTester1.createSourceChar('b'));
     assertContentEquals("ab");
-    // tracking of source for write(char) not implemented for OutputStreamWriter
-    snapshotBuilder().gap(2).assertTrackerOf(writer);
-    // but it does work for the underlying OutputStream
+    snapshotBuilder()
+        .part(flowTester0.theSource(), flowTester0.theSourceIndex(), 1)
+        .part(flowTester1.theSource(), flowTester1.theSourceIndex(), 1)
+        .assertTrackerOf(writer);
     snapshotBuilder()
         .part(flowTester0.theSource(), flowTester0.theSourceIndex(), 1)
         .part(flowTester1.theSource(), flowTester1.theSourceIndex(), 1)

@@ -135,6 +135,21 @@ public class Invocation {
     return null;
   }
 
+  /**
+   * Like {@link #start(String)}, but doesn't clear the invocation. Can be used to get the
+   * invocation in a hook without breaking the real invocation instrumentation.
+   */
+  @SuppressWarnings("unused") // used in HookSpec.INVOCATION
+  public static Invocation preStart(String signature) {
+    Invocation invocation = pending.get();
+    if (invocation != null) {
+      if (signature.equals(invocation.signature)) {
+        return invocation;
+      }
+    }
+    return null;
+  }
+
   public static String signature(String name, String desc) {
     return name + " " + desc;
   }
