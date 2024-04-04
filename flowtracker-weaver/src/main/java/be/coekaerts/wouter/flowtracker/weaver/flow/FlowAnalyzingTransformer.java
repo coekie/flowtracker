@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import static be.coekaerts.wouter.flowtracker.weaver.flow.InvocationArgStore.shouldInstrumentInvocationArg;
 
+import be.coekaerts.wouter.flowtracker.util.Config;
 import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.ClassFilter;
 import be.coekaerts.wouter.flowtracker.weaver.Transformer;
@@ -10,7 +11,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -35,30 +35,30 @@ public class FlowAnalyzingTransformer implements Transformer {
   private final AnalysisListener listener;
   private final ClassFilter breakStringInterningFilter;
 
-  public FlowAnalyzingTransformer(Map<String, String> config) {
-    this(new Commentator(), // noop Commentator
-        new AnalysisListener(), // noop Listener
-        config);
+  public FlowAnalyzingTransformer(Config config) {
+    this(config,
+        new Commentator(), // noop Commentator
+        new AnalysisListener()); // noop Listener
+
   }
 
-  public FlowAnalyzingTransformer(Commentator commentator) {
-    this(commentator,
-        new AnalysisListener(), // noop Listener
-        Map.of());
+  public FlowAnalyzingTransformer(Config config, Commentator commentator) {
+    this(config, commentator,
+        new AnalysisListener()); // noop Listener
   }
 
-  public FlowAnalyzingTransformer(AnalysisListener listener) {
-    this(new Commentator(), // noop Commentator
-        listener,
-        Map.of());
+  public FlowAnalyzingTransformer(Config config, AnalysisListener listener) {
+    this(config,
+        new Commentator(), // noop Commentator
+        listener);
   }
 
-  private FlowAnalyzingTransformer(Commentator commentator, AnalysisListener listener,
-      Map<String, String> config) {
+  private FlowAnalyzingTransformer(Config config, Commentator commentator,
+      AnalysisListener listener) {
     this.commentator = commentator;
     this.listener = listener;
     this.breakStringInterningFilter = new ClassFilter(
-        config.getOrDefault("breakStringInterning", "%recommended,+*"),
+        config.get("breakStringInterning", "%recommended,+*"),
         // by default, we allow most JDK classes to depend on interning to work, but not other
         // libraries. this probably breaks some libraries.
         "-java.*,-sun.*,-jdk.*");

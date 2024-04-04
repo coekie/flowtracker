@@ -6,8 +6,8 @@ import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import be.coekaerts.wouter.flowtracker.util.Config;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -41,9 +41,8 @@ public class ZipFileHook {
     }
   }
 
-  public static void initialize(Map<String, String> config, JarFile agentJar) {
-    boolean hideInternals = !"false".equals(config.get("hideInternals"));
-    if (hideInternals) {
+  public static void initialize(Config config, JarFile agentJar) {
+    if (config.hideInternals()) {
       agentJarToHide = agentJar;
     }
   }

@@ -1,10 +1,10 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
+import be.coekaerts.wouter.flowtracker.util.Config;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Tracker implements WritableTracker {
-  public static final String TRACK_CREATION = "trackCreation";
 
   private static final AtomicLong idGenerator = new AtomicLong();
   private final long trackerId = idGenerator.getAndIncrement();
@@ -95,7 +95,7 @@ public abstract class Tracker implements WritableTracker {
     this.node = node;
   }
 
-  public static void initTrackCreation(boolean enabled) {
-    trackCreation = enabled;
+  public static void initialize(Config config) {
+    trackCreation = config.getBoolean("trackCreation", false);
   }
 }

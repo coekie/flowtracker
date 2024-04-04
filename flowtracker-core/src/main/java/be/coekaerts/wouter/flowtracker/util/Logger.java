@@ -1,15 +1,12 @@
 package be.coekaerts.wouter.flowtracker.util;
 
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
-import java.util.Map;
 
 public class Logger {
   private static boolean logging;
 
-  public static void initLogging(Map<String, String> config) {
-    if ("true".equals(config.get("logging"))) {
-      logging = true;
-    }
+  public static void initLogging(Config config) {
+    logging = config.getBoolean("logging", false);
   }
 
   private final String name;

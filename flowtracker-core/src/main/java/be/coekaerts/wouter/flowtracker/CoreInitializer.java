@@ -6,17 +6,17 @@ import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
+import be.coekaerts.wouter.flowtracker.util.Config;
 import be.coekaerts.wouter.flowtracker.util.ShutdownSuspender;
-import java.util.Map;
 import java.util.jar.JarFile;
 
 public class CoreInitializer {
-  public static void initialize(Map<String, String> config, JarFile agentJar) {
+  public static void initialize(Config config, JarFile agentJar) {
     ensureInitialized();
-    Tracker.initTrackCreation("true".equals(config.get(Tracker.TRACK_CREATION)));
+    Tracker.initialize(config);
     ZipFileHook.initialize(config, agentJar);
     SystemHook.initialize();
-    StringHook.initDebugUntracked(config.get(StringHook.DEBUG_UNTRACKED));
+    StringHook.initialize(config);
   }
 
   // call stuff to make sure JDK internals needed for it are initialized, before we enable tracking
@@ -32,7 +32,7 @@ public class CoreInitializer {
    * hook without a UI available to stop it if initialization fails.
    */
   @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
-  public static void postInitialize(Map<String, String> config) {
-    ShutdownSuspender.initShutdownHook("true".equals(config.get("suspendShutdown")));
+  public static void postInitialize(Config config) {
+    ShutdownSuspender.initShutdownHook(config.getBoolean("suspendShutdown", false));
   }
 }

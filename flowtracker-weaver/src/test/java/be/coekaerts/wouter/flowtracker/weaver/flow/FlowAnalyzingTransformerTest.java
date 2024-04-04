@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import static org.junit.Assert.assertEquals;
 
+import be.coekaerts.wouter.flowtracker.util.Config;
 import be.coekaerts.wouter.flowtracker.weaver.debug.CommentTextifier;
 import be.coekaerts.wouter.flowtracker.weaver.debug.RealCommentator;
 import java.io.IOException;
@@ -1032,7 +1033,7 @@ public class FlowAnalyzingTransformerTest {
     MethodPrintingClassVisitor afterVisitor =
         new MethodPrintingClassVisitor(new CheckClassAdapter(classWriter), classInternalName);
     ClassVisitor transformingVisitor =
-        new FlowAnalyzingTransformer(new RealCommentator())
+        new FlowAnalyzingTransformer(Config.empty(), new RealCommentator())
             .transform(classInternalName, afterVisitor);
     // writes out original bytecode to text
     MethodPrintingClassVisitor beforeVisitor =

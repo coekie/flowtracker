@@ -5,6 +5,7 @@ import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import be.coekaerts.wouter.flowtracker.util.Config;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 
@@ -15,8 +16,8 @@ public class StringHook {
 
   private static String debugUntracked = null;
 
-  public static void initDebugUntracked(String debugUntrackedConfig) {
-    debugUntracked = debugUntrackedConfig;
+  public static void initialize(Config config) {
+    debugUntracked = config.get(DEBUG_UNTRACKED);
   }
 
   public static Tracker getStringTracker(String str) {

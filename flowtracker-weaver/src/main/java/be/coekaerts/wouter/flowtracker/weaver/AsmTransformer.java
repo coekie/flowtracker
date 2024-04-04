@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import be.coekaerts.wouter.flowtracker.util.Config;
 import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.debug.DumpTextTransformer;
 import be.coekaerts.wouter.flowtracker.weaver.debug.RealCommentator;
@@ -10,7 +11,6 @@ import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
-import java.util.Map;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -46,19 +46,19 @@ class AsmTransformer implements ClassFileTransformer {
   private final File dumpByteCodePath;
   private final File dumpTextPath;
   private final String dumpTextPrefix;
-  private final Map<String, String> config;
+  private final Config config;
   private final HookSpecTransformer hookSpecTransformer;
   private final FlowAnalyzingTransformer flowAnalyzingTransformer;
 
-  public AsmTransformer(Map<String, String> config) {
-    toInstrumentFilter = new ClassFilter(config.getOrDefault("filter", "+*"), RECOMMENDED_FILTER);
+  public AsmTransformer(Config config) {
+    toInstrumentFilter = new ClassFilter(config.get("filter", "+*"), RECOMMENDED_FILTER);
     dumpByteCodePath = config.containsKey("dumpByteCode")
         ? new File(config.get("dumpByteCode"))
         : null;
     dumpTextPath = config.containsKey("dumpText")
         ? new File(config.get("dumpText"))
         : null;
-    dumpTextPrefix = config.getOrDefault("dumpTextPrefix", "");
+    dumpTextPrefix = config.get("dumpTextPrefix", "");
     this.config = config;
     hookSpecTransformer = GeneratedHookSpecs.createTransformer();
     flowAnalyzingTransformer = new FlowAnalyzingTransformer(config);
@@ -150,7 +150,7 @@ class AsmTransformer implements ClassFileTransformer {
         // if we're dumping the text, then use RealCommentator to instrument it, so that the dumped
         // text includes comments
         FlowAnalyzingTransformer flowTransformer
-            = new FlowAnalyzingTransformer(new RealCommentator());
+            = new FlowAnalyzingTransformer(config, new RealCommentator());
         result = Transformer.and(result,
             new DumpTextTransformer(flowTransformer, dumpTextPath));
       }

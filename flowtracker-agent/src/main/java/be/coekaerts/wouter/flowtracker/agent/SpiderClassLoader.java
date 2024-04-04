@@ -1,13 +1,13 @@
 package be.coekaerts.wouter.flowtracker.agent;
 
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import be.coekaerts.wouter.flowtracker.util.Config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -16,10 +16,10 @@ class SpiderClassLoader extends ClassLoader {
   private final JarFile jar;
   private final boolean hideInternals;
 
-  SpiderClassLoader(JarFile jar, Map<String, String> config) {
+  SpiderClassLoader(JarFile jar, Config config) {
     super(null);
     this.jar = jar;
-    this.hideInternals = !"false".equals(config.get("hideInternals"));
+    this.hideInternals = config.hideInternals();
   }
 
   @Override

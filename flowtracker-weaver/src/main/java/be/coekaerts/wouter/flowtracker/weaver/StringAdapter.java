@@ -1,7 +1,7 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
-import java.util.Map;
+import be.coekaerts.wouter.flowtracker.util.Config;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -15,7 +15,7 @@ import org.objectweb.asm.commons.Method;
 class StringAdapter extends ClassVisitor {
   private final boolean debugUntracked;
 
-  public StringAdapter(ClassVisitor cv, Map<String, String> config) {
+  public StringAdapter(ClassVisitor cv, Config config) {
     super(Opcodes.ASM9, cv);
     debugUntracked = config.containsKey(StringHook.DEBUG_UNTRACKED);
   }
