@@ -53,7 +53,20 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
     try (FileChannel channel = openForRead()) {
       TrackTestHelper.assertThatTracker(getReadTracker(channel))
           .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(fileToRead.getName(), FileDescriptorTrackerRepository.READ);
+          .hasNodeEndingWith(fileToRead.getName());
+    }
+  }
+
+  @Test
+  public void nodeWithReadAndWrite() throws IOException {
+    try (FileChannel channel = FileChannel.open(fileToWrite.toPath(),
+        StandardOpenOption.READ, StandardOpenOption.WRITE)) {
+      TrackTestHelper.assertThatTracker(getReadTracker(channel))
+          .hasNodeStartingWith("Files")
+          .hasNodeEndingWith(fileToWrite.getName(), FileDescriptorTrackerRepository.READ);
+      TrackTestHelper.assertThatTracker(getWriteTracker(channel))
+          .hasNodeStartingWith("Files")
+          .hasNodeEndingWith(fileToWrite.getName(), FileDescriptorTrackerRepository.WRITE);
     }
   }
 

@@ -4,7 +4,6 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTra
 import static java.util.Objects.requireNonNull;
 
 import be.coekaerts.wouter.flowtracker.hook.InputStreamHook;
-import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -20,7 +19,7 @@ public class URLTest {
     try (InputStream in = url.openStream()) {
       assertThatTracker(InputStreamHook.getInputStreamTracker(in))
           .hasNodeStartingWith("Files")
-          .hasNodeEndingWith("URLTest.class", FileDescriptorTrackerRepository.READ);
+          .hasNodeEndingWith("URLTest.class");
     }
   }
 

@@ -36,13 +36,13 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
     try (var fosFromFile = new FileOutputStream(file)) {
       TrackTestHelper.assertThatTracker(getTracker(fosFromFile))
           .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(file.getName(), FileDescriptorTrackerRepository.WRITE);
+          .hasNodeEndingWith(file.getName());
     }
 
     try (var fosFromName = new FileOutputStream(file.getPath())) {
       TrackTestHelper.assertThatTracker(getTracker(fosFromName))
           .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(file.getName(), FileDescriptorTrackerRepository.WRITE);
+          .hasNodeEndingWith(file.getName());
     }
   }
 

@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot;
@@ -47,6 +46,6 @@ public class FilesTest {
     Part part = trackerSnapshot.getParts().get(0);
     assertThatTracker(part.source)
         .hasNodeStartingWith("Files")
-        .hasNodeEndingWith(file.getName(), FileDescriptorTrackerRepository.READ);
+        .hasNodeEndingWith(file.getName());
   }
 }

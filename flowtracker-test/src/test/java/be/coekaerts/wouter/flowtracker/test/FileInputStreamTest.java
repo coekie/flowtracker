@@ -53,13 +53,13 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
     try (var fisFromFile = new FileInputStream(file)) {
       TrackTestHelper.assertThatTracker(getStreamTracker(fisFromFile))
           .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(file.getName(), FileDescriptorTrackerRepository.READ);
+          .hasNodeEndingWith(file.getName());
     }
 
     try (var fisFromName = new FileInputStream(file.getPath())) {
       TrackTestHelper.assertThatTracker(getStreamTracker(fisFromName))
           .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(file.getName(), FileDescriptorTrackerRepository.READ);
+          .hasNodeEndingWith(file.getName());
     }
   }
 

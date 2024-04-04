@@ -53,7 +53,7 @@ public class SystemTest {
 		// IntelliJ and maven/surefire replace System.out and System.err with their own implementations,
 		// and we haven't implemented anything yet to handle those, so we don't test anything tied to
 		// the _current_ value of System.out and System.err.
-		assertFalse(TrackerTree.node("System").node("System.out").node("Write").trackers().isEmpty());
-		assertFalse(TrackerTree.node("System").node("System.err").node("Write").trackers().isEmpty());
+		assertFalse(TrackerTree.node("System").node("System.out").trackers().isEmpty());
+		assertFalse(TrackerTree.node("System").node("System.err").trackers().isEmpty());
 	}
 }

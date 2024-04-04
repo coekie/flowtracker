@@ -31,11 +31,13 @@ public class FileDescriptorTrackerRepository {
 
   public static void createTracker(FileDescriptor fd, boolean read, boolean write,
       TrackerTree.Node node) {
+    // if we're reading *and* writing, then create separate nodes to distinguish the two.
+    boolean twoNodes = read && write;
     ByteOriginTracker readTracker;
     if (read) {
       readTracker = new ByteOriginTracker();
       if (node != null) {
-        readTracker.addTo(node.optionalNode(READ));
+        readTracker.addTo(twoNodes ? node.optionalNode(READ) : node);
       }
     } else {
       readTracker = null;
@@ -45,7 +47,7 @@ public class FileDescriptorTrackerRepository {
     if (write) {
       writeTracker = new ByteSinkTracker();
       if (node != null) {
-        writeTracker.addTo(node.optionalNode(WRITE));
+        writeTracker.addTo(twoNodes ? node.optionalNode(WRITE) : node);
       }
     } else {
       writeTracker = null;
