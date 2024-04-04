@@ -2,8 +2,13 @@
   import {tick} from 'svelte';
   import type {Tracker, TrackerDetail, Region} from '../javatypes';
   import PathView from './PathView.svelte';
-  import {type ASelection, pathStartsWith, RangeSelection, PathSelection} from './selection';
-  import type {ColorAssignment, Coloring} from './coloring';
+  import {
+    type ASelection,
+    pathStartsWith,
+    RangeSelection,
+    PathSelection,
+  } from './selection';
+  import type {Coloring} from './coloring';
 
   /** Main tracker that's being shown */
   export let viewTracker: Tracker | null;
@@ -168,12 +173,13 @@
   function backgroundColor(region: Region, coloring: Coloring): string {
     // we find a matching assignment, and if there are multiple matching then use the most
     // specific one, that is the one with the highest score.
-    var bestScore:number = -1;
-    var color:string = 'inherit';
+    var bestScore: number = -1;
+    var color: string = 'inherit';
     for (const assignment of coloring.assignments) {
       for (const selection of assignment.selections) {
         if (isSelected(region, selection)) {
-          const score = selection instanceof PathSelection ? selection.path.length : 9999;
+          const score =
+            selection instanceof PathSelection ? selection.path.length : 9999;
           if (score > bestScore) {
             bestScore = score;
             color = assignment.color;
