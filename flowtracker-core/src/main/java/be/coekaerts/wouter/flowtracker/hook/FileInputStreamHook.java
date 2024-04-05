@@ -19,7 +19,7 @@ public class FileInputStreamHook {
       method = "void <init>(java.io.File)")
   public static void afterInit(@Arg("FileInputStream_fd") FileDescriptor fd,
       @Arg("ARG0") File file) {
-    if (Trackers.isActive()) {
+    if (Trackers.isActive() && !ClassLoaderHook.shouldHideFileReading(file.getPath())) {
       FileDescriptorTrackerRepository.createTracker(fd, true, false,
           TrackerTree.fileNode(file.getAbsolutePath()));
     }

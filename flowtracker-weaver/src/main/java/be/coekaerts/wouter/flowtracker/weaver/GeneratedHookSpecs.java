@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import static be.coekaerts.wouter.flowtracker.annotation.HookLocation.ON_ENTER;
 import static be.coekaerts.wouter.flowtracker.annotation.HookLocation.ON_RETURN;
 import static be.coekaerts.wouter.flowtracker.weaver.HookArgs.FileChannelImpl_fd;
 import static be.coekaerts.wouter.flowtracker.weaver.HookArgs.FileInputStream_fd;
@@ -38,6 +39,36 @@ class GeneratedHookSpecs {
       "(Ljava/nio/ByteBuffer;ILjava/nio/ByteBuffer;II)V",
       ON_RETURN,
       THIS, ARG0, ARG1, ARG2, ARG3);
+    t.register("jdk/internal/loader/BuiltinClassLoader",
+      "defineClass",
+      "(Ljava/lang/String;Ljdk/internal/loader/Resource;)Ljava/lang/Class;",
+      "be/coekaerts/wouter/flowtracker/hook/ClassLoaderHook",
+      "afterDefineClass",
+      "()V",
+      ON_RETURN);
+    t.register("java/net/URLClassLoader",
+      "defineClass",
+      "(Ljava/lang/String;Ljdk/internal/loader/Resource;)Ljava/lang/Class;",
+      "be/coekaerts/wouter/flowtracker/hook/ClassLoaderHook",
+      "afterDefineClass",
+      "()V",
+      ON_RETURN);
+    t.register("jdk/internal/loader/BuiltinClassLoader",
+      "defineClass",
+      "(Ljava/lang/String;Ljdk/internal/loader/Resource;)Ljava/lang/Class;",
+      "be/coekaerts/wouter/flowtracker/hook/ClassLoaderHook",
+      "beforeDefineClass",
+      "(Ljava/lang/String;)V",
+      ON_ENTER,
+      ARG0);
+    t.register("java/net/URLClassLoader",
+      "defineClass",
+      "(Ljava/lang/String;Ljdk/internal/loader/Resource;)Ljava/lang/Class;",
+      "be/coekaerts/wouter/flowtracker/hook/ClassLoaderHook",
+      "beforeDefineClass",
+      "(Ljava/lang/String;)V",
+      ON_ENTER,
+      ARG0);
     t.register("sun/nio/ch/FileChannelImpl",
       "<init>",
       "(Ljava/io/FileDescriptor;Ljava/lang/String;ZZZLjava/lang/Object;)V",

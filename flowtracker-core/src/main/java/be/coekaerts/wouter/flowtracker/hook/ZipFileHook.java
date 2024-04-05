@@ -14,6 +14,7 @@ import java.util.zip.ZipFile;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class ZipFileHook {
+  private static boolean hideInternals;
   /**
    * Entries in this file are not tracked (well, not put in the TrackerTree), because the user
    * doesn't care about tracking the internals of flowtracker.
@@ -32,7 +33,12 @@ public class ZipFileHook {
       if (tracker == null) {
         return;
       }
-      if (agentJarToHide != null && agentJarToHide.getName().equals(target.getName())) {
+      if (hideInternals) {
+        if (agentJarToHide.getName().equals(target.getName())) {
+          return;
+        }
+      }
+      if (ClassLoaderHook.shouldHideFileReading(zipEntry.getName())) {
         return;
       }
       if (tracker.getNode() == null) {
@@ -42,8 +48,7 @@ public class ZipFileHook {
   }
 
   public static void initialize(Config config, JarFile agentJar) {
-    if (config.hideInternals()) {
-      agentJarToHide = agentJar;
-    }
+    hideInternals = config.hideInternals();
+    agentJarToHide = agentJar;
   }
 }

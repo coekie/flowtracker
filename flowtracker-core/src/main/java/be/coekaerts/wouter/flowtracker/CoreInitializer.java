@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker;
 
+import be.coekaerts.wouter.flowtracker.hook.ClassLoaderHook;
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.hook.SystemHook;
 import be.coekaerts.wouter.flowtracker.hook.ZipFileHook;
@@ -17,6 +18,7 @@ public class CoreInitializer {
     ZipFileHook.initialize(config, agentJar);
     SystemHook.initialize();
     StringHook.initialize(config);
+    ClassLoaderHook.initialize(config);
   }
 
   // call stuff to make sure JDK internals needed for it are initialized, before we enable tracking

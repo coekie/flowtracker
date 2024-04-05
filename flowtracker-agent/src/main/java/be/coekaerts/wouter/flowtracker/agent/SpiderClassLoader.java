@@ -31,7 +31,8 @@ class SpiderClassLoader extends ClassLoader {
 
     byte[] b;
     if (hideInternals) {
-      // don't track reading of flowtracker class files because that's noise to the user
+      // don't track reading of flowtracker class files because that's noise to the user.
+      // (see also ClassLoaderHook.shouldHideFileReading for other class loaders)
       Trackers.suspendOnCurrentThread();
     }
     try (InputStream in = jar.getInputStream(entry)) {
@@ -40,7 +41,6 @@ class SpiderClassLoader extends ClassLoader {
       throw new Error(e);
     } finally {
       if (hideInternals) {
-        // don't track reading of flowtracker class files because that's noise to the user
         Trackers.unsuspendOnCurrentThread();
       }
     }
