@@ -17,4 +17,5 @@ public @interface Hook {
   String target();
   String method();
   String condition() default "";
+  HookLocation location() default HookLocation.ON_RETURN;
 }

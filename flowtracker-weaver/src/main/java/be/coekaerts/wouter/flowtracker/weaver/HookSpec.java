@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import be.coekaerts.wouter.flowtracker.annotation.HookLocation;
 import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,17 +152,24 @@ public class HookSpec {
       for (HookArgumentInstance argumentInstance : argumentInstances) {
         argumentInstance.onMethodEnter(this);
       }
+      if (location == HookLocation.ON_ENTER) {
+        insertHook();
+      }
       super.onMethodEnter();
     }
 
     @Override
     protected void onMethodExit(int opcode) {
-      if (opcode != ATHROW) {
-        for (HookArgumentInstance argumentInstance : argumentInstances) {
-          argumentInstance.load(this);
-        }
-        invokeStatic(hookClass, hookMethod);
+      if (opcode != ATHROW && location == HookLocation.ON_RETURN) {
+        insertHook();
       }
+    }
+
+    private void insertHook() {
+      for (HookArgumentInstance argumentInstance : argumentInstances) {
+        argumentInstance.load(this);
+      }
+      invokeStatic(hookClass, hookMethod);
     }
 
     @Override
@@ -173,16 +181,18 @@ public class HookSpec {
   private final Type targetClass;
   private final Method targetMethod;
   private final Type hookClass;
+  private final HookLocation location;
   private final HookArgument[] hookArguments;
   private final Method hookMethod;
   private final Type[] cacheTargetMethodArgumentTypes;
 
   HookSpec(Type targetClass, Method targetMethod,
-      Type hookClass, Method hookMethod, HookArgument... hookArguments) {
+      Type hookClass, Method hookMethod, HookLocation location, HookArgument... hookArguments) {
     this.targetClass = targetClass;
     this.targetMethod = targetMethod;
     this.hookClass = hookClass;
     this.hookMethod = hookMethod;
+    this.location = location;
     this.hookArguments = hookArguments;
     this.cacheTargetMethodArgumentTypes = targetMethod.getArgumentTypes();
   }

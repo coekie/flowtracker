@@ -42,6 +42,8 @@ public class HookSpecGenerator {
     StringBuilder sb = new StringBuilder();
     sb.append("package be.coekaerts.wouter.flowtracker.weaver;\n"
         + "\n"
+        + "import static be.coekaerts.wouter.flowtracker.annotation.HookLocation.ON_ENTER;\n"
+        + "import static be.coekaerts.wouter.flowtracker.annotation.HookLocation.ON_RETURN;\n"
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG0;\n"
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG1;\n"
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.ARG2;\n"
@@ -94,7 +96,8 @@ public class HookSpecGenerator {
         str(targetMethod.getDescriptor()),
         str(method.getDeclaringClass().getName().replace('.', '/')),
         str(hookMethod.getName()),
-        str(hookMethod.getDescriptor()));
+        str(hookMethod.getDescriptor()),
+        annotation.location().name());
 
     List<String> varArgs = Stream.of(method.getParameterAnnotations())
         .map(parameterAnnotation -> Stream.of(parameterAnnotation)

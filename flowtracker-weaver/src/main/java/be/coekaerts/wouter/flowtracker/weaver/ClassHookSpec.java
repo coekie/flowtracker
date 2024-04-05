@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import be.coekaerts.wouter.flowtracker.annotation.HookLocation;
 import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import java.util.HashMap;
@@ -42,9 +43,9 @@ class ClassHookSpec implements Transformer {
   }
 
   ClassHookSpec addMethodHookSpec(Method targetMethod, Type hookClass, Method hookMethod,
-      HookArgument... hookArguments) {
+      HookLocation location, HookArgument... hookArguments) {
     HookSpec hookSpec =
-        new HookSpec(targetClass, targetMethod, hookClass, hookMethod, hookArguments);
+        new HookSpec(targetClass, targetMethod, hookClass, hookMethod, location, hookArguments);
     methodHookSpecs.put(targetMethod, hookSpec);
     return this;
   }

@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.weaver;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import be.coekaerts.wouter.flowtracker.annotation.HookLocation;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
@@ -29,6 +30,7 @@ public class HookSpecTest {
     ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(Foo.class));
     transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void bar(int)"),
         Type.getType(MyHook.class), Method.getMethod("void afterBar(java.lang.Object,int)"),
+        HookLocation.ON_RETURN,
         HookSpec.THIS, HookSpec.ARG0));
     assertEquals("bar 5\n"
         + "afterBar Foo2 5\n", log.toString());
@@ -40,13 +42,14 @@ public class HookSpecTest {
     transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("String withReturnValue(int)"),
         Type.getType(MyHook.class),
         Method.getMethod("void afterWithReturnValue(java.lang.String,int)"),
+        HookLocation.ON_RETURN,
         HookSpec.RETURN, HookSpec.ARG0));
     assertEquals("withReturnValue 5\n"
         + "afterWithReturnValue retVal 5\n", log.toString());
   }
 
   @Test
-  public void testOnEnter() throws ReflectiveOperationException {
+  public void testOnEnterArgument() throws ReflectiveOperationException {
     HookArgument arg0OnEnter = spec -> new OnEnterHookArgumentInstance(Type.getType(String.class)) {
       @Override
       void loadOnMethodEnter(GeneratorAdapter generator) {
@@ -59,6 +62,7 @@ public class HookSpecTest {
         classHookSpec.addMethodHookSpec(Method.getMethod("void withOnEnter(java.lang.String)"),
             Type.getType(MyHook.class),
             Method.getMethod("void afterWithOnEnter(java.lang.String,java.lang.String)"),
+            HookLocation.ON_RETURN,
             arg0OnEnter, HookSpec.ARG0));
     assertEquals("withOnEnter originalArg 2\n"
         + "afterWithOnEnter originalArg updatedArg\n", log.toString());
@@ -72,6 +76,7 @@ public class HookSpecTest {
     transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void withInvocation()"),
         Type.getType(MyHook.class), Method.getMethod(
             "void afterWithInvocation(be.coekaerts.wouter.flowtracker.tracker.Invocation)"),
+        HookLocation.ON_RETURN,
         HookSpec.INVOCATION));
     assertEquals("withInvocation\n"
         + "afterWithInvocation 777\n", log.toString());
@@ -83,8 +88,19 @@ public class HookSpecTest {
     HookArgument[] hookArguments = new HookArgument[]{HookSpec.field(Type.getType("Lbe/coekaerts/wouter/flowtracker/weaver/WithField2;"),
         "i", Type.getType(int.class))};
     transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void withField()"),
-        Type.getType(MyHook.class), Method.getMethod("void afterWithField(int)"), hookArguments));
+        Type.getType(MyHook.class), Method.getMethod("void afterWithField(int)"),
+        HookLocation.ON_RETURN, hookArguments));
     assertEquals("afterWithField 10\n", log.toString());
+  }
+
+  @Test
+  public void testOnEnter() throws ReflectiveOperationException {
+    ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(Foo.class));
+    transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void bar(int)"),
+        Type.getType(MyHook.class), Method.getMethod("void before(java.lang.Object,int)"),
+        HookLocation.ON_ENTER, HookSpec.THIS, HookSpec.ARG0));
+    assertEquals("before Foo2 5\n"
+        + "bar 5\n", log.toString());
   }
 
   /**
@@ -127,6 +143,10 @@ public class HookSpecTest {
 
     public static void afterWithField(int i) {
       log("afterWithField", i);
+    }
+
+    public static void before(Object thiz, int i) {
+      log("before", thiz.getClass().getSimpleName(), i);
     }
   }
 }

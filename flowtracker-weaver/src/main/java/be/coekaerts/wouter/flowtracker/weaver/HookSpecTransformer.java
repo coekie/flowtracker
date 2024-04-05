@@ -3,6 +3,7 @@ package be.coekaerts.wouter.flowtracker.weaver;
 import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.RETURN;
 import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.THIS;
 
+import be.coekaerts.wouter.flowtracker.annotation.HookLocation;
 import be.coekaerts.wouter.flowtracker.weaver.HookSpec.HookArgument;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,14 +16,16 @@ class HookSpecTransformer implements Transformer {
   private final Map<String, ClassHookSpec> specs = new HashMap<>();
 
   void register(String targetClass, String targetMethodName, String targetMethodDesc,
-      String hookMethodClass, String hookMethodName, String hookMethodDesc, HookArgument... args) {
+      String hookMethodClass, String hookMethodName, String hookMethodDesc, HookLocation location,
+      HookArgument... args) {
     ClassHookSpec spec = specs.get(targetClass);
     if (spec == null) {
       spec = new ClassHookSpec(Type.getObjectType(targetClass));
       specs.put(targetClass, spec);
     }
     spec.addMethodHookSpec(new Method(targetMethodName, targetMethodDesc),
-        Type.getObjectType(hookMethodClass), new Method(hookMethodName, hookMethodDesc), args);
+        Type.getObjectType(hookMethodClass), new Method(hookMethodName, hookMethodDesc), location,
+        args);
   }
 
   private ClassHookSpec getSpec(String className) {
@@ -39,6 +42,7 @@ class HookSpecTransformer implements Transformer {
     spec.addMethodHookSpec(new Method("getInputStream", "()Ljava.io.InputStream;"),
         Type.getObjectType("be/coekaerts/wouter/flowtracker/hook/URLConnectionHook"),
         new Method("afterGetInputStream", "(Ljava/io/InputStream;Ljava/net/URLConnection;)V"),
+        HookLocation.ON_RETURN,
         RETURN, THIS);
     return spec;
   }
