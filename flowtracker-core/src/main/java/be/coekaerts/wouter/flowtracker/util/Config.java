@@ -51,6 +51,10 @@ public class Config {
     return new Config(Map.of());
   }
 
+  public static Config forTesting(Map<String, String> map) {
+    return new Config(map);
+  }
+
   private static void initMap(Map<String, String> map, String properties) {
     if (properties != null) {
       for (String arg : properties.split(";")) {

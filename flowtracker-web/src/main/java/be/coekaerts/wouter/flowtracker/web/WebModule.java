@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.web;
 
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import be.coekaerts.wouter.flowtracker.util.Config;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import org.eclipse.jetty.server.Connector;
@@ -18,10 +19,12 @@ import org.glassfish.jersey.servlet.ServletProperties;
 
 @SuppressWarnings("UnusedDeclaration") // loaded by name by the agent
 public class WebModule {
-  public WebModule() throws Exception {
+  final Server server;
+
+  public WebModule(Config config) throws Exception {
     // Setup server and servlet context
-    Server server = new Server(new TrackerSuspendingThreadPool());
-    server.addConnector(createConnector(server));
+    server = new Server(new TrackerSuspendingThreadPool());
+    server.addConnector(createConnector(server, config));
 
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath("/");
@@ -47,11 +50,15 @@ public class WebModule {
     server.start();
   }
 
-  private static Connector createConnector(Server server) {
+  private static Connector createConnector(Server server, Config config) {
     ServerConnector connector = new ServerConnector(server);
     connector.setHost("127.0.0.1");
-    connector.setPort(8011);
+    connector.setPort(Integer.parseInt(config.get("port", "8011")));
     return connector;
+  }
+
+  int getPort() {
+    return ((ServerConnector) server.getConnectors()[0]).getLocalPort();
   }
 
   /**

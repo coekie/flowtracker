@@ -6,6 +6,7 @@ import be.coekaerts.wouter.flowtracker.util.Config;
 import be.coekaerts.wouter.flowtracker.util.Logger;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.jar.JarFile;
 
@@ -83,13 +84,9 @@ public class FlowTrackAgent {
         return;
       }
 
-      Class<?> clazz;
-      try {
-        clazz = classLoader.loadClass("be.coekaerts.wouter.flowtracker.web.WebModule");
-      } catch (ClassNotFoundException e) {
-        throw new Error(e);
-      }
-      clazz.newInstance();
+      Class<?> clazz = classLoader.loadClass("be.coekaerts.wouter.flowtracker.web.WebModule");
+      Constructor<?> constructor = clazz.getConstructor(Config.class);
+      constructor.newInstance(config);
     }
   }
 }

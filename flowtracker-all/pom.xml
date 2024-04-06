@@ -90,8 +90,11 @@
               </excludes>
               <!-- exclude everything except our test dependencies -->
               <classpathDependencyScopeExclude>runtime</classpathDependencyScopeExclude>
-              <!-- activate the agent, without giving any options to it -->
-              <argLine>-javaagent:${project.build.directory}/${project.build.finalName}.jar</argLine>
+              <!--
+                activate the agent, without giving any options to it,
+                except for port to avoid port conflicts (e.g. with other running flowtracker agents)
+              -->
+              <argLine>-javaagent:${project.build.directory}/${project.build.finalName}.jar=port=0</argLine>
             </configuration>
           </execution>
         </executions>
