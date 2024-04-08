@@ -14,14 +14,27 @@
   let rootPromise: Promise<NodeDetail>;
   $: rootPromise = fetchTree(showSinks, showOrigins);
 
-  async function fetchTree(showSinks: boolean, showOrigins: boolean) {
-    const response = await fetch(
-      '/tree?' +
-        new URLSearchParams({
-          sinks: showSinks.toString(),
-          origins: showOrigins.toString(),
-        })
-    );
+  async function fetchTree(
+    showSinks: boolean,
+    showOrigins: boolean
+  ): Promise<NodeDetail> {
+    let url: string;
+    if (showSinks && showOrigins) {
+      url = '';
+    } else if (showSinks) {
+      url = '/sinks';
+    } else if (showOrigins) {
+      url = '/origins';
+    } else {
+      // nothing, no sinks no origins => return empty root node
+      return {
+        names: [],
+        children: [],
+        tracker: null,
+        path: [],
+      };
+    }
+    const response = await fetch('/tree' + url);
     if (!response.ok) return Promise.reject(response);
     return response.json().then(r => enrich(r, null));
   }

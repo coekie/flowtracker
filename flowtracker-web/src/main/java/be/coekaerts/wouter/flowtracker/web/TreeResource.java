@@ -3,11 +3,9 @@ package be.coekaerts.wouter.flowtracker.web;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
-import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,12 +14,34 @@ import java.util.Objects;
 
 @Path("/tree")
 public class TreeResource {
+  private final TrackerTree.Node root;
+
+  public TreeResource() {
+    this(TrackerTree.ROOT);
+  }
+
+  public TreeResource(Node root) {
+    this.root = root;
+  }
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public NodeDetailResponse root(
-      @QueryParam("origins") @DefaultValue("true") boolean origins,
-      @QueryParam("sinks") @DefaultValue("true") boolean sinks) {
-    return new NodeDetailResponse(TrackerTree.ROOT, new NodeRequestParams(origins, sinks));
+  public NodeDetailResponse root() {
+    return new NodeDetailResponse(root, new NodeRequestParams(true, true));
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("origins")
+  public NodeDetailResponse origins() {
+    return new NodeDetailResponse(root, new NodeRequestParams(true, false));
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("sinks")
+  public NodeDetailResponse sinks() {
+    return new NodeDetailResponse(root, new NodeRequestParams(false, true));
   }
 
   @SuppressWarnings("UnusedDeclaration") // json
