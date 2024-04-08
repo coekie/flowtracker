@@ -2,8 +2,8 @@ package be.coekaerts.wouter.flowtracker.web;
 
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import be.coekaerts.wouter.flowtracker.util.Config;
+import jakarta.servlet.DispatcherType;
 import java.util.EnumSet;
-import javax.servlet.DispatcherType;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
