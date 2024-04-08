@@ -129,83 +129,43 @@ public class TrackerResource {
 
   @SuppressWarnings({"UnusedDeclaration", "MismatchedQueryAndUpdateOfCollection"}) // json
   public static class TrackerDetailResponse {
-    private final List<String> path;
-    private final String creationStackTrace;
-    private final List<Region> regions;
+    public final List<String> path;
+    public final String creationStackTrace;
+    public final List<Region> regions;
 
     private TrackerDetailResponse(Tracker tracker, List<Region> regions) {
       this.path = path(tracker);
       this.creationStackTrace = creationStackTraceToString(tracker);
       this.regions = regions;
     }
-
-    public List<String> getPath() {
-      return path;
-    }
-
-    public String getCreationStackTrace() {
-      return creationStackTrace;
-    }
-
-    public List<Region> getRegions() {
-      return regions;
-    }
   }
 
   @SuppressWarnings("UnusedDeclaration") // json
   public static class Region {
-    private final int offset;
-    private final int length;
-    private final String content;
-    private final List<TrackerPartResponse> parts;
+    public final int offset;
+    public final int length;
+    public final String content;
+    public final List<TrackerPartResponse> parts;
 
-    Region (Tracker tracker, int offset, int length, List<TrackerPartResponse> parts) {
+    Region(Tracker tracker, int offset, int length, List<TrackerPartResponse> parts) {
       this.offset = offset;
       this.length =length;
       this.content = getContentAsString(tracker, offset, offset + length);
       this.parts = parts;
     }
-
-    public long getOffset() {
-      return offset;
-    }
-
-    public long getLength() {
-      return length;
-    }
-
-    public String getContent() {
-      return content;
-    }
-
-    public List<TrackerPartResponse> getParts() {
-      return parts;
-    }
   }
 
   @SuppressWarnings("UnusedDeclaration") // json
   public static class TrackerPartResponse {
-    private final TrackerResponse tracker;
-    private final int offset;
-    private final int length;
+    public final TrackerResponse tracker;
+    public final int offset;
+    public final int length;
     // TODO growth
 
     public TrackerPartResponse(Tracker tracker, int offset, int length) {
       this.tracker = new TrackerResponse(tracker);
       this.offset = offset;
       this.length = length;
-    }
-
-    public TrackerResponse getTracker() {
-      return tracker;
-    }
-
-    public int getOffset() {
-      return offset;
-    }
-
-    public int getLength() {
-      return length;
     }
   }
 

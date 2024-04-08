@@ -70,7 +70,7 @@
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
-      <artifactId>jersey-media-json-jackson</artifactId>
+      <artifactId>jersey-media-json-gson</artifactId>
       <version>3.1.6</version>
       <scope>runtime</scope>
     </dependency>

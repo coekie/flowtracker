@@ -12,7 +12,7 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.gson.JsonGsonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.glassfish.jersey.servlet.ServletProperties;
@@ -34,7 +34,7 @@ public class WebModule {
     ResourceConfig resourceConfig =
         new ResourceConfig(TrackerResource.class, TreeResource.class, SettingsResource.class)
             .property(ServletProperties.FILTER_FORWARD_ON_404, true)
-            .register(JacksonFeature.class);
+            .register(JsonGsonFeature.class);
     ServletContainer servletContainer = new ServletContainer(resourceConfig);
     context.addFilter(new FilterHolder(servletContainer), "/*", EnumSet.of(DispatcherType.REQUEST));
 

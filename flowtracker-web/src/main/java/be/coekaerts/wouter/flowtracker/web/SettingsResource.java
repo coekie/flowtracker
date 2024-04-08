@@ -19,18 +19,10 @@ public class SettingsResource {
 
   @POST
   public void set(Settings settings) {
-    ShutdownSuspender.setSuspendShutdown(settings.isSuspendShutdown());
+    ShutdownSuspender.setSuspendShutdown(settings.suspendShutdown);
   }
 
   public static class Settings {
-    private boolean suspendShutdown;
-
-    public boolean isSuspendShutdown() {
-      return suspendShutdown;
-    }
-
-    public void setSuspendShutdown(boolean suspendShutdown) {
-      this.suspendShutdown = suspendShutdown;
-    }
+    public boolean suspendShutdown;
   }
 }

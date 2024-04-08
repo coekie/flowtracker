@@ -26,10 +26,10 @@ public class TreeResource {
 
   @SuppressWarnings("UnusedDeclaration") // json
   public static class NodeDetailResponse implements Comparable<NodeDetailResponse> {
-    private final List<String> names = new ArrayList<>();
-    private final List<NodeDetailResponse> children = new ArrayList<>();
-    private final TrackerResponse tracker;
-    private final int trackerCount;
+    public final List<String> names = new ArrayList<>();
+    public final List<NodeDetailResponse> children = new ArrayList<>();
+    public final TrackerResponse tracker;
+    public final int trackerCount;
 
     // Maps TrackerTree.Node to how we represent it in the UI. differences:
     // * Optional nodes are collapsed into their parent when they're the only child. That's to keep
@@ -78,18 +78,6 @@ public class TreeResource {
       this.names.add(name);
       this.tracker = tracker;
       this.trackerCount = 1;
-    }
-
-    public List<String> getNames() {
-      return names;
-    }
-
-    public List<NodeDetailResponse> getChildren() {
-      return children;
-    }
-
-    public TrackerResponse getTracker() {
-      return tracker;
     }
 
     @Override
