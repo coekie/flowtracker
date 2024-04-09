@@ -26,6 +26,7 @@ public class TreeResource {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
+  @Path("all")
   public NodeDetailResponse root() {
     return new NodeDetailResponse(root, new NodeRequestParams(true, true));
   }

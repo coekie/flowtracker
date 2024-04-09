@@ -15,7 +15,7 @@ export const simpleSinkTracker = {
 };
 
 export const handlers: HttpHandler[] = [
-  http.get('/tree', () => {
+  http.get('/tree/all', () => {
     return HttpResponse.json({
       names: ['<root>'],
       children: [

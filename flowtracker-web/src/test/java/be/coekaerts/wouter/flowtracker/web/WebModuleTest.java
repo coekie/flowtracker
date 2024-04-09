@@ -36,7 +36,7 @@ public class WebModuleTest {
     assertContains("svelte", jsPath);
 
     // rest endpoints
-    assertContains("root", get("/tree"));
+    assertContains("root", get("/tree/all"));
   }
 
   @After

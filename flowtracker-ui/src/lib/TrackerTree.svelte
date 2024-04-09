@@ -20,7 +20,7 @@
   ): Promise<NodeDetail> {
     let url: string;
     if (showSinks && showOrigins) {
-      url = '';
+      url = '/all';
     } else if (showSinks) {
       url = '/sinks';
     } else if (showOrigins) {
