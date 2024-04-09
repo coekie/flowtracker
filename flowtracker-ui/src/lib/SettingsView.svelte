@@ -4,7 +4,7 @@
   let settings: Settings;
 
   async function initSettings() {
-    const response = await fetch('/settings');
+    const response = await fetch('settings');
     if (!response.ok) throw new Error(response.statusText);
     settings = await response.json();
     console.log('Loaded settings: ', response, settings);
@@ -12,7 +12,7 @@
 
   async function save() {
     console.log('Saving settings: ', settings);
-    fetch('/settings', {
+    fetch('settings', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

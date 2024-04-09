@@ -68,8 +68,8 @@
       return new Promise(() => {});
     }
     const response = !targetTrackerId
-      ? await fetch('/tracker/' + viewTrackerId)
-      : await fetch('/tracker/' + viewTrackerId + '/to/' + targetTrackerId);
+      ? await fetch('tracker/' + viewTrackerId)
+      : await fetch('tracker/' + viewTrackerId + '/to/' + targetTrackerId);
     if (!response.ok) throw new Error(response.statusText);
     return response.json();
   };

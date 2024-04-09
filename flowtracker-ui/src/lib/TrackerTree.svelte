@@ -34,7 +34,7 @@
         path: [],
       };
     }
-    const response = await fetch('/tree' + url);
+    const response = await fetch('tree' + url);
     if (!response.ok) return Promise.reject(response);
     return response.json().then(r => enrich(r, null));
   }
