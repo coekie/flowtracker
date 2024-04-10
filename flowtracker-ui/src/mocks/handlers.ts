@@ -102,7 +102,7 @@ export const handlers: HttpHandler[] = [
     });
   }),
   http.get(
-    '/tracker/' + simpleOriginTracker.id + '/to/' + simpleSinkTracker.id,
+    '/tracker/' + simpleOriginTracker.id + '_to_' + simpleSinkTracker.id,
     () => {
       return HttpResponse.json({
         path: simpleOriginTracker.path,

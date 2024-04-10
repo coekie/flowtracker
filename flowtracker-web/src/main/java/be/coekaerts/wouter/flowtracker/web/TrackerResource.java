@@ -70,7 +70,7 @@ public class TrackerResource {
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("{id}/to/{target}")
+  @Path("{id}_to_{target}")
   public TrackerDetailResponse reverse(@PathParam("id") long id,
       @PathParam("target") long targetId) {
     Tracker tracker = InterestRepository.getContentTracker(id);
