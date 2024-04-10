@@ -5,13 +5,16 @@ import static java.util.Objects.requireNonNull;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -62,23 +65,46 @@ public class Snapshot {
 
   /** Write the static files for the UI (html, js,...) */
   private void writeStaticFiles(ZipOutputStream zos) throws IOException {
-    URL indexUrl = requireNonNull(Snapshot.class.getResource("/static/index.html"));
+    for (String path : findStaticResources("static", "index.html")) {
+      try (InputStream in = requireNonNull(Snapshot.class.getResourceAsStream("/static/" + path))) {
+        writeFile(zos, path, in.readAllBytes());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Find all resources in the classpath under `dir`. Given an example file in that dir, so that we
+   * can use {@link Class#getResource(String)}.
+   */
+  static List<String> findStaticResources(String dir, String exampleFile) throws IOException {
+    URL indexUrl = requireNonNull(Snapshot.class.getResource('/' + dir + "/" + exampleFile));
     if (indexUrl.getProtocol().equals("file")) {
       Path staticDir = Path.of(indexUrl.getPath()).getParent();
       try (Stream<Path> paths = Files.walk(staticDir)) {
-        paths
+        return paths
             .filter(Files::isRegularFile)
-            .forEach(fullPath -> {
-              try {
-                writeFile(zos, staticDir.relativize(fullPath).toString(),
-                    Files.readAllBytes(fullPath));
-              } catch (IOException e) {
-                throw new UncheckedIOException(e);
-              }
-            });
+            .map(fullPath -> staticDir.relativize(fullPath).toString())
+            .collect(Collectors.toList());
       }
-    } else if (indexUrl.getProtocol().equals("jar")) {
-      throw new UnsupportedOperationException("TODO");
+    } else if (indexUrl.getProtocol().equals("jar")
+        && indexUrl.getPath().startsWith("file:")
+        && indexUrl.getPath().contains("!/")) {
+      String jarPath = indexUrl.getPath().substring(5, indexUrl.getPath().indexOf("!/"));
+      // note: the way we package ourselves in the flowtracker agent jar, the classpath root is not
+      // the root of the jar. so for our jar, `pathInJar` is not the same as `dir`
+      String pathInJar = indexUrl.getPath().substring(indexUrl.getPath().indexOf("!/") + 2,
+          indexUrl.getPath().lastIndexOf('/') + 1);
+      try (ZipFile zip = new ZipFile(jarPath)) {
+        return zip.stream()
+            .filter(entry -> !entry.isDirectory())
+            .filter(entry -> entry.getName().startsWith(pathInJar))
+            .map(entry -> entry.getName().substring(pathInJar.length()))
+            .collect(Collectors.toList());
+      }
+    } else {
+      throw new UnsupportedOperationException("Unexpected resources URL: " + indexUrl);
     }
   }
 }

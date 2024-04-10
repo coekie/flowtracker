@@ -27,6 +27,15 @@ public class SnapshotTest {
   }
 
   @Test
+  public void testGetStaticResources() throws IOException {
+    // test that it works for files in the filesystem
+    assertTrue(Snapshot.findStaticResources("static", "index.html").contains("folder.svg"));
+    // test that it works for files in jars (so that it _would_ work for static/index.html as well
+    // when that is packaged in the flowtracker jar)
+    assertTrue(Snapshot.findStaticResources("jakarta/ws/rs", "GET.class").contains("POST.class"));
+  }
+
+  @Test
   public void testTree() throws IOException {
     Node root = TrackerTree.node("SnapshotTest.testTree");
     new ByteSinkTracker().addTo(root.node("mySink"));
@@ -52,11 +61,9 @@ public class SnapshotTest {
 
     Map<String, String> result = new HashMap<>();
     try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(baos.toByteArray()))) {
-      ZipEntry zipEntry = zis.getNextEntry();
-      while (zipEntry != null) {
-        result.put(zipEntry.getName().substring(Snapshot.PATH_PREFIX.length()),
+      for (ZipEntry entry = zis.getNextEntry(); entry != null; entry = zis.getNextEntry()) {
+        result.put(entry.getName().substring(Snapshot.PATH_PREFIX.length()),
             new String(zis.readAllBytes()));
-        zipEntry = zis.getNextEntry();
       }
       zis.closeEntry();
     }
