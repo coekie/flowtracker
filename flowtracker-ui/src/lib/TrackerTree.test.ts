@@ -7,7 +7,7 @@ import {Coloring} from './coloring';
 
 import {afterAll, afterEach, beforeAll} from 'vitest';
 import {server} from '../mocks/node';
-import {simpleSinkTracker} from '../mocks/handlers';
+import {simpleSinkTracker, simpleOriginTracker} from '../mocks/handlers';
 import {PathSelection} from './selection';
 
 beforeAll(() => server.listen());
@@ -20,6 +20,7 @@ const user: UserEvent = userEvent.setup();
 test('navigate tree', async () => {
   const tree: TrackerTree = render(TrackerTree, {
     selectedTracker: null,
+    secondaryTracker: null,
     selection: null,
     coloring: new Coloring(),
   }).component;
@@ -43,11 +44,31 @@ test('navigate tree', async () => {
   expect(tree.selectedTracker).toMatchObject(simpleSinkTracker);
 });
 
+test('clicking tracker in tree resets secondary tracker', async () => {
+  const tree: TrackerTree = render(TrackerTree, {
+    selectedTracker: null,
+    secondaryTracker: simpleOriginTracker,
+    selection: null,
+    coloring: new Coloring(),
+  }).component;
+
+  const category = await screen.findByRole('button', {name: 'Simple'});
+  await user.click(category);
+  const tracker1 = await screen.findByRole('button', {name: 'sink1'});
+
+  await user.click(tracker1);
+  expect(tree.secondaryTracker).toBeNull();
+});
+
 test('coloring', async () => {
   const coloring: Coloring = new Coloring();
   coloring.add(new PathSelection(['Simple']));
-  render(TrackerTree, {selectedTracker: null, selection: null, coloring})
-    .component;
+  render(TrackerTree, {
+    selectedTracker: null,
+    secondaryTracker: null,
+    selection: null,
+    coloring,
+  }).component;
 
   const category = await screen.findByRole('button', {name: 'Simple'});
 
@@ -59,6 +80,7 @@ test('coloring', async () => {
 test('node with multiple names: selection of part of name', async () => {
   const tree: TrackerTree = render(TrackerTree, {
     selectedTracker: null,
+    secondaryTracker: null,
     selection: null,
     coloring: new Coloring(),
   }).component;
@@ -73,6 +95,7 @@ test('node with multiple names: selection of part of name', async () => {
 test('node with multiple names: selection of full name', async () => {
   const tree: TrackerTree = render(TrackerTree, {
     selectedTracker: null,
+    secondaryTracker: null,
     selection: null,
     coloring: new Coloring(),
   }).component;
@@ -90,8 +113,12 @@ test('node with multiple names: selection of full name', async () => {
 test('node with multiple names: coloring of part of name', async () => {
   const coloring: Coloring = new Coloring();
   coloring.add(new PathSelection(['CombinedPath', 'one', 'two']));
-  render(TrackerTree, {selectedTracker: null, selection: null, coloring})
-    .component;
+  render(TrackerTree, {
+    selectedTracker: null,
+    secondaryTracker: null,
+    selection: null,
+    coloring,
+  }).component;
   await user.click(await screen.findByRole('button', {name: 'CombinedPath'}));
 
   expect(await screen.findByText('one')).toHaveStyle({
@@ -108,8 +135,12 @@ test('node with multiple names: coloring of part of name', async () => {
 test('node with multiple names: coloring of full name', async () => {
   const coloring: Coloring = new Coloring();
   coloring.add(new PathSelection(['CombinedPath', 'one', 'two', 'three']));
-  render(TrackerTree, {selectedTracker: null, selection: null, coloring})
-    .component;
+  render(TrackerTree, {
+    selectedTracker: null,
+    secondaryTracker: null,
+    selection: null,
+    coloring,
+  }).component;
   await user.click(await screen.findByRole('button', {name: 'CombinedPath'}));
 
   expect(await screen.findByText('one')).toHaveStyle({

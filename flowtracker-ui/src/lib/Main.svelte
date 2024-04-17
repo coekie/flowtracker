@@ -29,6 +29,7 @@
       <Pane>
         <TrackerTree
           bind:selectedTracker={mainTracker}
+          bind:secondaryTracker
           bind:selection
           {coloring}
         />

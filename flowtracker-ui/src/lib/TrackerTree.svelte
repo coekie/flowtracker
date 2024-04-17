@@ -5,6 +5,7 @@
   import type {Coloring} from './coloring';
 
   export let selectedTracker: Tracker | null;
+  export let secondaryTracker: Tracker | null;
   export let selection: ASelection | null;
   export let coloring: Coloring;
 
@@ -63,6 +64,7 @@
     <TrackerTreeNode
       node={root}
       bind:selectedTracker
+      bind:secondaryTracker
       bind:selection
       {coloring}
     />

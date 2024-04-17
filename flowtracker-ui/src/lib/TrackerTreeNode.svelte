@@ -4,6 +4,7 @@
   import {indexInPath, PathSelection, type ASelection} from './selection';
 
   export let selectedTracker: Tracker | null;
+  export let secondaryTracker: Tracker | null;
   export let selection: ASelection | null;
   export let coloring: Coloring;
   export let node: NodeDetail;
@@ -17,6 +18,10 @@
 
   function click(node: NodeDetail) {
     if (node.tracker) {
+      // reset secondaryTracker, to prevent ever having a secondaryTracker
+      // that is unrelated to the selectedTracker
+      secondaryTracker = null;
+
       selectedTracker = node.tracker;
     }
     if (node.children.length > 0) {
@@ -72,6 +77,7 @@
         <svelte:self
           node={child}
           bind:selectedTracker
+          bind:secondaryTracker
           bind:selection
           {coloring}
         />
