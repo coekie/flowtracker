@@ -11,8 +11,20 @@ import jakarta.ws.rs.core.StreamingOutput;
 @Path("/snapshot")
 public class SnapshotResource {
   @GET
-  public Response get() {
-    StreamingOutput streamingOutput = output -> new Snapshot(TrackerTree.ROOT).write(output);
+  @Path("full")
+  public Response full() {
+    return get(false);
+  }
+
+  @GET
+  @Path("minimized")
+  public Response minimized() {
+    return get(true);
+  }
+
+  private Response get(boolean minimized) {
+    StreamingOutput streamingOutput = output ->
+        new Snapshot(TrackerTree.ROOT, minimized).write(output);
     return Response.ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
         .header("Content-Disposition", "attachment; filename=\"flowtracker-snapshot.zip\"")
         .build();

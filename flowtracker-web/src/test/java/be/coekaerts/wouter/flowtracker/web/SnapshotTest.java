@@ -79,15 +79,50 @@ public class SnapshotTest {
   }
 
   @Test
+  public void testMinimize() throws IOException {
+    Node root = TrackerTree.node("SnapshotTest.testMinimize");
+    ByteSinkTracker sink1 = new ByteSinkTracker();
+    sink1.addTo(root.node("mySink"));
+    ByteOriginTracker origin1 = new ByteOriginTracker();
+    origin1.addTo(root.node("origin1"));
+
+    // an origin that's not in the tree, but referenced from a tracker that is
+    ByteOriginTracker origin2 = new ByteOriginTracker();
+
+    // an origin in the tree, but not referenced from any tracker
+    ByteOriginTracker origin3 = new ByteOriginTracker();
+    origin3.addTo(root.node("origin3"));
+
+    sink1.setSource(0, 1, origin1, 0);
+    sink1.append((byte) 1);
+
+    sink1.setSource(1, 1, origin2, 0);
+    sink1.append((byte) 1);
+
+    Map<String, String> entries = snapshot(root, true);
+    assertTrue(entries.containsKey("tracker/" + sink1.getTrackerId()));
+    assertTrue(entries.containsKey("tracker/" + origin1.getTrackerId()));
+    assertTrue(entries.containsKey("tracker/" + origin2.getTrackerId()));
+    assertFalse(entries.containsKey("tracker/" + origin3.getTrackerId()));
+    assertTrue(entries.get("tree/all").contains("origin1"));
+    assertFalse(entries.get("tree/all").contains("origin3"));
+  }
+
+  @Test
   public void testSettings() throws IOException {
     Map<String, String> entries = snapshot(TrackerTree.node("SnapshotTest.testSettings"));
     assertTrue(entries.containsKey("settings"));
     assertTrue(Snapshot.GSON.fromJson(entries.get("settings"), Settings.class).snapshot);
   }
 
-  Map<String, String> snapshot(TrackerTree.Node node) throws IOException {
+  private Map<String, String> snapshot(TrackerTree.Node node) throws IOException {
+    return snapshot(node, false);
+  }
+
+  private Map<String, String> snapshot(TrackerTree.Node node, boolean minimized)
+      throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    new Snapshot(node).write(baos);
+    new Snapshot(node, minimized).write(baos);
 
     Map<String, String> result = new HashMap<>();
     try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(baos.toByteArray()))) {

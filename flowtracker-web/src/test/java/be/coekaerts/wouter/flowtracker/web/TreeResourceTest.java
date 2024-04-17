@@ -26,7 +26,7 @@ public class TreeResourceTest {
             + "  one\n"
             + "    a\n"
             + "    b\n",
-        toString(new NodeDetailResponse(root, new NodeRequestParams(true, true))));
+        toString(new NodeDetailResponse(root, NodeRequestParams.ALL)));
   }
 
   @Test
@@ -43,7 +43,7 @@ public class TreeResourceTest {
         "TreeResourceTest.testOptional / one\n"
             + "  a\n"
             + "  b\n",
-        toString(new NodeDetailResponse(root, new NodeRequestParams(true, true))));
+        toString(new NodeDetailResponse(root, NodeRequestParams.ALL)));
   }
 
   @Test
@@ -61,7 +61,7 @@ public class TreeResourceTest {
             + "    a\n"
             + "      0\n"
             + "      1\n",
-        toString(new NodeDetailResponse(root, new NodeRequestParams(true, true))));
+        toString(new NodeDetailResponse(root, NodeRequestParams.ALL)));
   }
 
 
@@ -79,12 +79,12 @@ public class TreeResourceTest {
         "TreeResourceTest.testFilter / one\n"
             + "  aa\n"
             + "    a\n",
-        toString(new NodeDetailResponse(root, new NodeRequestParams(true, false))));
+        toString(new NodeDetailResponse(root, NodeRequestParams.ORIGINS)));
     assertEquals(
         "TreeResourceTest.testFilter / one\n"
             + "  bb\n"
             + "    b\n",
-        toString(new NodeDetailResponse(root, new NodeRequestParams(false, true))));
+        toString(new NodeDetailResponse(root, NodeRequestParams.SINKS)));
   }
 
   private String toString(NodeDetailResponse nodeDetailResponse) {

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 @Path("/tree")
 public class TreeResource {
@@ -27,22 +28,26 @@ public class TreeResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("all")
-  public NodeDetailResponse root() {
-    return new NodeDetailResponse(root, new NodeRequestParams(true, true));
+  public NodeDetailResponse all() {
+    return tree(NodeRequestParams.ALL);
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("origins")
   public NodeDetailResponse origins() {
-    return new NodeDetailResponse(root, new NodeRequestParams(true, false));
+    return tree(NodeRequestParams.ORIGINS);
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("sinks")
   public NodeDetailResponse sinks() {
-    return new NodeDetailResponse(root, new NodeRequestParams(false, true));
+    return tree(NodeRequestParams.SINKS);
+  }
+
+  NodeDetailResponse tree(NodeRequestParams params) {
+    return new NodeDetailResponse(root, params);
   }
 
   @SuppressWarnings("UnusedDeclaration") // json
@@ -130,20 +135,23 @@ public class TreeResource {
   }
 
   static class NodeRequestParams {
-    /** Include origins in the response */
-    private final boolean origins;
+    static final NodeRequestParams ALL = new NodeRequestParams(t -> true);
+    static final NodeRequestParams ORIGINS = new NodeRequestParams(TrackerResource::isOrigin);
+    static final NodeRequestParams SINKS = new NodeRequestParams(TrackerResource::isSink);
 
-    /** Include sinks in the response */
-    private final boolean sinks;
+    /** Only include trackers that match this predicate */
+    private final Predicate<Tracker> filter;
 
-    NodeRequestParams(boolean origins, boolean sinks) {
-      this.origins = origins;
-      this.sinks = sinks;
+    NodeRequestParams(Predicate<Tracker> filter) {
+      this.filter = filter;
+    }
+
+    NodeRequestParams and(Predicate<Tracker> filter) {
+      return new NodeRequestParams(this.filter.and(filter));
     }
 
     boolean include(Tracker tracker) {
-      return (origins && TrackerResource.isOrigin(tracker))
-          || (sinks && TrackerResource.isSink(tracker));
+      return filter.test(tracker);
     }
   }
 }

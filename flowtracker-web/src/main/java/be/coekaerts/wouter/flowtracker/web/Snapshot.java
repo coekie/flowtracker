@@ -9,6 +9,7 @@ import be.coekaerts.wouter.flowtracker.web.SettingsResource.Settings;
 import be.coekaerts.wouter.flowtracker.web.TrackerResource.Region;
 import be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerDetailResponse;
 import be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerPartResponse;
+import be.coekaerts.wouter.flowtracker.web.TreeResource.NodeRequestParams;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +20,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -33,10 +35,26 @@ public class Snapshot {
   static final Gson GSON = new Gson();
   static final String PATH_PREFIX = "snapshot/";
 
+  /**
+   * Root node, to determine what trackers to include in the snapshot. {@link TrackerTree#ROOT} in
+   * real snapshots, but can be something else in tests.
+   */
   private final TrackerTree.Node root;
 
-  Snapshot(TrackerTree.Node root) {
+  /** A minimized snapshot only includes origins if they are referenced from a sink. In other words,
+   * it leaves out data that was read, but then not used in the output (at least not in a way that
+   * we track)
+   */
+  private final boolean minimized;
+
+  private final TrackerResource trackerResource = new TrackerResource();
+
+  /** Ids of trackers that we already wrote in the snapshot */
+  private final Set<Long> includedTrackers = new HashSet<>();
+
+  Snapshot(TrackerTree.Node root, boolean minimized) {
     this.root = root;
+    this.minimized = minimized;
   }
 
   /** Write the zip file to the output stream */
@@ -44,52 +62,55 @@ public class Snapshot {
     try (ZipOutputStream zos = new ZipOutputStream(out)) {
       writeStaticFiles(zos);
       writeSettings(zos);
+
+      // the order here matters because Snapshot.includedTrackers is mutable: it is populated by
+      // writeTrackers and depended on by writeTree.
+      writeTrackers(zos, TrackerTree.ROOT);
       writeTree(zos);
-      writeTrackers(zos);
     }
   }
 
   /** Write files for {@link TreeResource} */
   private void writeTree(ZipOutputStream zos) throws IOException {
     TreeResource tree = new TreeResource(root);
-    writeJson(zos, "tree/all", tree.root());
-    writeJson(zos, "tree/origins", tree.origins());
-    writeJson(zos, "tree/sinks", tree.sinks());
+    // only include trackers in the tree if we wrote the tracker; that excludes trackers that have
+    // been "minimized" away.
+    Predicate<Tracker> filter = tracker -> includedTrackers.contains(tracker.getTrackerId());
+
+    writeJson(zos, "tree/all", tree.tree(NodeRequestParams.ALL.and(filter)));
+    writeJson(zos, "tree/origins", tree.tree(NodeRequestParams.ORIGINS.and(filter)));
+    writeJson(zos, "tree/sinks", tree.tree(NodeRequestParams.SINKS.and(filter)));
   }
 
-  /** Write files for {@link TrackerResource} */
-  private void writeTrackers(ZipOutputStream zos) throws IOException {
-    TrackerResource trackerResource = new TrackerResource();
-    Set<Long> written = new HashSet<>();
-    writeTrackers(zos, trackerResource, written, TrackerTree.ROOT);
+  private void writeTrackers(ZipOutputStream zos, TrackerTree.Node node) throws IOException {
+    for (Tracker tracker : node.trackers()) {
+      // if condition: when minimized then don't include origin trackers just because they are in
+      // the tree. So they are only included if they are referenced from a sink.
+      if (!(minimized && TrackerResource.isOrigin(tracker))) {
+        InterestRepository.register(tracker);
+        writeTracker(zos, tracker.getTrackerId());
+      }
+    }
+    for (Node child : node.children()) {
+      writeTrackers(zos, child);
+    }
   }
 
   /** Write a tracker, and all other trackers that it refers to */
-  private void writeTracker(ZipOutputStream zos, TrackerResource trackerResource, Set<Long> written,
-      long trackerId) throws IOException {
-    if (written.add(trackerId)) {
+  private void writeTracker(ZipOutputStream zos, long trackerId) throws IOException {
+    if (includedTrackers.add(trackerId)) {
       TrackerDetailResponse trackerDetail = trackerResource.get(trackerId);
       writeJson(zos, "tracker/" + trackerId, trackerDetail);
       Set<Long> toWritten = new HashSet<>(); // for which trackers we wrote x_to_y already
       for (Region region : trackerDetail.regions) {
         for (TrackerPartResponse part : region.parts) {
-          writeTracker(zos, trackerResource, written, part.tracker.id);
+          writeTracker(zos, part.tracker.id);
           if (toWritten.add(part.tracker.id)) {
             writeJson(zos, "tracker/" + part.tracker.id + "_to_" + trackerId,
                 trackerResource.reverse(part.tracker.id, trackerId));
           }
         }
       }
-    }
-  }
-
-  private void writeTrackers(ZipOutputStream zos, TrackerResource trackerResource,
-      Set<Long> written, TrackerTree.Node node) throws IOException {
-    for (Tracker tracker : node.trackers()) {
-      writeTracker(zos, trackerResource, written, tracker.getTrackerId());
-    }
-    for (Node child : node.children()) {
-      writeTrackers(zos, trackerResource, written, child);
     }
   }
 
