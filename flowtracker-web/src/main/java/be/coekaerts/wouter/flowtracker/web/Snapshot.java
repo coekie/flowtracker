@@ -2,7 +2,12 @@ package be.coekaerts.wouter.flowtracker.web;
 
 import static java.util.Objects.requireNonNull;
 
+import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
+import be.coekaerts.wouter.flowtracker.web.TrackerResource.Region;
+import be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerDetailResponse;
+import be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerPartResponse;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +15,9 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -36,6 +43,7 @@ public class Snapshot {
     try (ZipOutputStream zos = new ZipOutputStream(out)) {
       writeStaticFiles(zos);
       writeTree(zos);
+      writeTrackers(zos);
     }
   }
 
@@ -45,6 +53,42 @@ public class Snapshot {
     writeJson(zos, "tree/all", tree.root());
     writeJson(zos, "tree/origins", tree.origins());
     writeJson(zos, "tree/sinks", tree.sinks());
+  }
+
+  /** Write files for {@link TrackerResource} */
+  private void writeTrackers(ZipOutputStream zos) throws IOException {
+    TrackerResource trackerResource = new TrackerResource();
+    Set<Long> written = new HashSet<>();
+    writeTrackers(zos, trackerResource, written, TrackerTree.ROOT);
+  }
+
+  /** Write a tracker, and all other trackers that it refers to */
+  private void writeTracker(ZipOutputStream zos, TrackerResource trackerResource, Set<Long> written,
+      long trackerId) throws IOException {
+    if (written.add(trackerId)) {
+      TrackerDetailResponse trackerDetail = trackerResource.get(trackerId);
+      writeJson(zos, "tracker/" + trackerId, trackerDetail);
+      Set<Long> toWritten = new HashSet<>(); // for which trackers we wrote x_to_y already
+      for (Region region : trackerDetail.regions) {
+        for (TrackerPartResponse part : region.parts) {
+          writeTracker(zos, trackerResource, written, part.tracker.id);
+          if (toWritten.add(part.tracker.id)) {
+            writeJson(zos, "tracker/" + part.tracker.id + "_to_" + trackerId,
+                trackerResource.reverse(part.tracker.id, trackerId));
+          }
+        }
+      }
+    }
+  }
+
+  private void writeTrackers(ZipOutputStream zos, TrackerResource trackerResource,
+      Set<Long> written, TrackerTree.Node node) throws IOException {
+    for (Tracker tracker : node.trackers()) {
+      writeTracker(zos, trackerResource, written, tracker.getTrackerId());
+    }
+    for (Node child : node.children()) {
+      writeTrackers(zos, trackerResource, written, child);
+    }
   }
 
   /** Write a single json file */

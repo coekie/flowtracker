@@ -1,5 +1,8 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+/**
+ * Helper methods for hooks to update trackers
+ */
 public class TrackerUpdater {
   public static void setSource(Object target, int targetIndex, int length, Object source,
       int sourceIndex) {

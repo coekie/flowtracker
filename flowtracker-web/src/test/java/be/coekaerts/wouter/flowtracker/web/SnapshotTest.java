@@ -55,6 +55,28 @@ public class SnapshotTest {
     assertTrue(entries.get("tree/origins").contains("myOrigin"));
   }
 
+  @Test
+  public void testTracker() throws IOException {
+    Node root = TrackerTree.node("SnapshotTest.testTracker");
+    ByteSinkTracker sink1 = new ByteSinkTracker();
+    sink1.addTo(root.node("mySink"));
+    ByteOriginTracker origin1 = new ByteOriginTracker();
+    origin1.addTo(root.node("myOrigin"));
+
+    // an origin that's not in the tree, but referenced from a tracker that is
+    ByteOriginTracker origin2 = new ByteOriginTracker();
+
+    sink1.setSource(0, 1, origin2, 0);
+    sink1.append((byte) 1);
+
+    Map<String, String> entries = snapshot(root);
+    assertTrue(entries.containsKey("tracker/" + sink1.getTrackerId()));
+    assertTrue(entries.containsKey("tracker/" + origin1.getTrackerId()));
+    assertTrue(entries.containsKey("tracker/" + origin2.getTrackerId()));
+    assertTrue(entries.containsKey("tracker/"
+        + origin2.getTrackerId() + "_to_" + sink1.getTrackerId()));
+  }
+
   Map<String, String> snapshot(TrackerTree.Node node) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     new Snapshot(node).write(baos);
