@@ -26,7 +26,7 @@
   });
 </script>
 
-{#if settings}
+{#if settings && !settings.snapshot}
   <div class="settingsWrapper">
     <b>Settings:</b>
     <form>

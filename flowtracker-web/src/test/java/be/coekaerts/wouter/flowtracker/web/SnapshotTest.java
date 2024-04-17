@@ -7,6 +7,7 @@ import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
+import be.coekaerts.wouter.flowtracker.web.SettingsResource.Settings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -75,6 +76,13 @@ public class SnapshotTest {
     assertTrue(entries.containsKey("tracker/" + origin2.getTrackerId()));
     assertTrue(entries.containsKey("tracker/"
         + origin2.getTrackerId() + "_to_" + sink1.getTrackerId()));
+  }
+
+  @Test
+  public void testSettings() throws IOException {
+    Map<String, String> entries = snapshot(TrackerTree.node("SnapshotTest.testSettings"));
+    assertTrue(entries.containsKey("settings"));
+    assertTrue(Snapshot.GSON.fromJson(entries.get("settings"), Settings.class).snapshot);
   }
 
   Map<String, String> snapshot(TrackerTree.Node node) throws IOException {

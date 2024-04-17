@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
+import be.coekaerts.wouter.flowtracker.web.SettingsResource.Settings;
 import be.coekaerts.wouter.flowtracker.web.TrackerResource.Region;
 import be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerDetailResponse;
 import be.coekaerts.wouter.flowtracker.web.TrackerResource.TrackerPartResponse;
@@ -29,7 +30,7 @@ import java.util.zip.ZipOutputStream;
  * of the UI, that can be viewed in a browser just like the live interface.
  */
 public class Snapshot {
-  private static final Gson GSON = new Gson();
+  static final Gson GSON = new Gson();
   static final String PATH_PREFIX = "snapshot/";
 
   private final TrackerTree.Node root;
@@ -42,6 +43,7 @@ public class Snapshot {
   void write(OutputStream out) throws IOException {
     try (ZipOutputStream zos = new ZipOutputStream(out)) {
       writeStaticFiles(zos);
+      writeSettings(zos);
       writeTree(zos);
       writeTrackers(zos);
     }
@@ -89,6 +91,12 @@ public class Snapshot {
     for (Node child : node.children()) {
       writeTrackers(zos, trackerResource, written, child);
     }
+  }
+
+  private void writeSettings(ZipOutputStream zos) throws IOException {
+    Settings settings = new SettingsResource().get();
+    settings.snapshot = true;
+    writeJson(zos, "settings", settings);
   }
 
   /** Write a single json file */

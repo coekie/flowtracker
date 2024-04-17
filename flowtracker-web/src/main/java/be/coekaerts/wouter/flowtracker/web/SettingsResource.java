@@ -23,6 +23,7 @@ public class SettingsResource {
   }
 
   public static class Settings {
+    public boolean snapshot;
     public boolean suspendShutdown;
   }
 }

@@ -45,5 +45,6 @@ export interface NodeDetail {
 
 // in java: SettingsResource.Settings
 export interface Settings {
+  snapshot: boolean;
   suspendShutdown: boolean;
 }
