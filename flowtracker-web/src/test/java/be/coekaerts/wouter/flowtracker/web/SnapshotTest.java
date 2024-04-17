@@ -80,7 +80,7 @@ public class SnapshotTest {
 
   @Test
   public void testMinimize() throws IOException {
-    Node root = TrackerTree.node("SnapshotTest.testMinimize");
+    Node root = TrackerTree.FILES; // minimizing only applies to FILES and CLASS
     ByteSinkTracker sink1 = new ByteSinkTracker();
     sink1.addTo(root.node("mySink"));
     ByteOriginTracker origin1 = new ByteOriginTracker();

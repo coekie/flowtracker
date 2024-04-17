@@ -11,6 +11,8 @@ import java.util.Map;
 /** Tree of interesting trackers, for the UI */
 public class TrackerTree {
   public static final Node ROOT = new Node(null, "<root>", false);
+  public static final Node FILES = node("Files");
+  public static final Node CLASS = node("Class");
 
   public static Node node(String name) {
     return ROOT.node(name);
@@ -18,11 +20,10 @@ public class TrackerTree {
 
   /** Root node for tracking operations on files */
   public static Node fileNode(String name) {
-    Node node = node("Files");
     try {
-      return node.pathNode(new File(name).getCanonicalPath());
+      return FILES.pathNode(new File(name).getCanonicalPath());
     } catch (IOException e) {
-      return node.node("<invalid>").node(name);
+      return FILES.node("<invalid>").node(name);
     }
   }
 

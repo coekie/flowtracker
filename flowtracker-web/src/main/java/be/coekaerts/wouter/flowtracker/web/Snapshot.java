@@ -65,7 +65,7 @@ public class Snapshot {
 
       // the order here matters because Snapshot.includedTrackers is mutable: it is populated by
       // writeTrackers and depended on by writeTree.
-      writeTrackers(zos, TrackerTree.ROOT);
+      writeTrackers(zos, TrackerTree.ROOT, false);
       writeTree(zos);
     }
   }
@@ -82,17 +82,22 @@ public class Snapshot {
     writeJson(zos, "tree/sinks", tree.tree(NodeRequestParams.SINKS.and(filter)));
   }
 
-  private void writeTrackers(ZipOutputStream zos, TrackerTree.Node node) throws IOException {
+  private void writeTrackers(ZipOutputStream zos, TrackerTree.Node node, boolean minimizedNode)
+      throws IOException {
+    // only apply minimizing to files and classes
+    if (node == TrackerTree.FILES || node == TrackerTree.CLASS) {
+      minimizedNode = minimized;
+    }
     for (Tracker tracker : node.trackers()) {
       // if condition: when minimized then don't include origin trackers just because they are in
       // the tree. So they are only included if they are referenced from a sink.
-      if (!(minimized && TrackerResource.isOrigin(tracker))) {
+      if (!(minimizedNode && TrackerResource.isOrigin(tracker))) {
         InterestRepository.register(tracker);
         writeTracker(zos, tracker.getTrackerId());
       }
     }
     for (Node child : node.children()) {
-      writeTrackers(zos, child);
+      writeTrackers(zos, child, minimizedNode);
     }
   }
 
