@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.web;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
@@ -11,6 +11,7 @@ import be.coekaerts.wouter.flowtracker.web.TreeResource.NodeRequestParams;
 import org.junit.Test;
 
 public class TreeResourceTest {
+
   @Test
   public void test() {
     Node root = TrackerTree.node("TreeResourceTest.test");
@@ -21,12 +22,11 @@ public class TreeResourceTest {
     new ByteOriginTracker().addTo(a);
     new ByteOriginTracker().addTo(b);
 
-    assertEquals(
+    assertThat(toString(new NodeDetailResponse(root, NodeRequestParams.ALL))).isEqualTo(
         "TreeResourceTest.test\n"
             + "  one\n"
             + "    a\n"
-            + "    b\n",
-        toString(new NodeDetailResponse(root, NodeRequestParams.ALL)));
+            + "    b\n");
   }
 
   @Test
@@ -39,11 +39,10 @@ public class TreeResourceTest {
     new ByteOriginTracker().addTo(a);
     new ByteOriginTracker().addTo(b);
 
-    assertEquals(
+    assertThat(toString(new NodeDetailResponse(root, NodeRequestParams.ALL))).isEqualTo(
         "TreeResourceTest.testOptional / one\n"
             + "  a\n"
-            + "  b\n",
-        toString(new NodeDetailResponse(root, NodeRequestParams.ALL)));
+            + "  b\n");
   }
 
   @Test
@@ -55,13 +54,12 @@ public class TreeResourceTest {
     new ByteOriginTracker().addTo(a);
     new ByteOriginTracker().addTo(a);
 
-    assertEquals(
+    assertThat(toString(new NodeDetailResponse(root, NodeRequestParams.ALL))).isEqualTo(
         "TreeResourceTest.testMultipleTrackersOnOneNode\n"
             + "  one\n"
             + "    a\n"
             + "      0\n"
-            + "      1\n",
-        toString(new NodeDetailResponse(root, NodeRequestParams.ALL)));
+            + "      1\n");
   }
 
 
@@ -75,16 +73,14 @@ public class TreeResourceTest {
     new ByteOriginTracker().addTo(a);
     new ByteSinkTracker().addTo(b);
 
-    assertEquals(
+    assertThat(toString(new NodeDetailResponse(root, NodeRequestParams.ORIGINS))).isEqualTo(
         "TreeResourceTest.testFilter / one\n"
             + "  aa\n"
-            + "    a\n",
-        toString(new NodeDetailResponse(root, NodeRequestParams.ORIGINS)));
-    assertEquals(
+            + "    a\n");
+    assertThat(toString(new NodeDetailResponse(root, NodeRequestParams.SINKS))).isEqualTo(
         "TreeResourceTest.testFilter / one\n"
             + "  bb\n"
-            + "    b\n",
-        toString(new NodeDetailResponse(root, NodeRequestParams.SINKS)));
+            + "    b\n");
   }
 
   private String toString(NodeDetailResponse nodeDetailResponse) {

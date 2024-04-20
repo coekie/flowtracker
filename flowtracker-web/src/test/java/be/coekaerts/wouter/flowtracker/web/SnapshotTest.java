@@ -1,7 +1,6 @@
 package be.coekaerts.wouter.flowtracker.web;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
@@ -22,18 +21,18 @@ public class SnapshotTest {
   public void testStatic() throws IOException {
     Node root = TrackerTree.node("SnapshotTest.testStatic");
     Map<String, String> entries = snapshot(root);
-    assertTrue(entries.containsKey("index.html"));
-    assertTrue(entries.get("index.html").contains("<script"));
-    assertTrue(entries.keySet().stream().anyMatch(p -> p.startsWith("assets/index")));
+    assertThat(entries).containsKey("index.html");
+    assertThat(entries.get("index.html")).contains("<script");
+    assertThat(entries.keySet().stream().anyMatch(p -> p.startsWith("assets/index"))).isTrue();
   }
 
   @Test
   public void testGetStaticResources() throws IOException {
     // test that it works for files in the filesystem
-    assertTrue(Snapshot.findStaticResources("static", "index.html").contains("folder.svg"));
+    assertThat(Snapshot.findStaticResources("static", "index.html")).contains("folder.svg");
     // test that it works for files in jars (so that it _would_ work for static/index.html as well
     // when that is packaged in the flowtracker jar)
-    assertTrue(Snapshot.findStaticResources("jakarta/ws/rs", "GET.class").contains("POST.class"));
+    assertThat(Snapshot.findStaticResources("jakarta/ws/rs", "GET.class")).contains("POST.class");
   }
 
   @Test
@@ -43,17 +42,17 @@ public class SnapshotTest {
     new ByteOriginTracker().addTo(root.node("myOrigin"));
 
     Map<String, String> entries = snapshot(root);
-    assertTrue(entries.containsKey("tree/all"));
-    assertTrue(entries.get("tree/all").contains("mySink"));
-    assertTrue(entries.get("tree/all").contains("myOrigin"));
+    assertThat(entries).containsKey("tree/all");
+    assertThat(entries.get("tree/all")).contains("mySink");
+    assertThat(entries.get("tree/all")).contains("myOrigin");
 
-    assertTrue(entries.containsKey("tree/sinks"));
-    assertTrue(entries.get("tree/sinks").contains("mySink"));
-    assertFalse(entries.get("tree/sinks").contains("myOrigin"));
+    assertThat(entries).containsKey("tree/sinks");
+    assertThat(entries.get("tree/sinks")).contains("mySink");
+    assertThat(entries.get("tree/sinks")).doesNotContain("myOrigin");
 
-    assertTrue(entries.containsKey("tree/origins"));
-    assertFalse(entries.get("tree/origins").contains("mySink"));
-    assertTrue(entries.get("tree/origins").contains("myOrigin"));
+    assertThat(entries).containsKey("tree/origins");
+    assertThat(entries.get("tree/origins")).doesNotContain("mySink");
+    assertThat(entries.get("tree/origins")).contains("myOrigin");
   }
 
   @Test
@@ -71,11 +70,11 @@ public class SnapshotTest {
     sink1.append((byte) 1);
 
     Map<String, String> entries = snapshot(root);
-    assertTrue(entries.containsKey("tracker/" + sink1.getTrackerId()));
-    assertTrue(entries.containsKey("tracker/" + origin1.getTrackerId()));
-    assertTrue(entries.containsKey("tracker/" + origin2.getTrackerId()));
-    assertTrue(entries.containsKey("tracker/"
-        + origin2.getTrackerId() + "_to_" + sink1.getTrackerId()));
+    assertThat(entries).containsKey("tracker/" + sink1.getTrackerId());
+    assertThat(entries).containsKey("tracker/" + origin1.getTrackerId());
+    assertThat(entries).containsKey("tracker/" + origin2.getTrackerId());
+    assertThat(entries)
+        .containsKey("tracker/" + origin2.getTrackerId() + "_to_" + sink1.getTrackerId());
   }
 
   @Test
@@ -100,19 +99,19 @@ public class SnapshotTest {
     sink1.append((byte) 1);
 
     Map<String, String> entries = snapshot(root, true);
-    assertTrue(entries.containsKey("tracker/" + sink1.getTrackerId()));
-    assertTrue(entries.containsKey("tracker/" + origin1.getTrackerId()));
-    assertTrue(entries.containsKey("tracker/" + origin2.getTrackerId()));
-    assertFalse(entries.containsKey("tracker/" + origin3.getTrackerId()));
-    assertTrue(entries.get("tree/all").contains("origin1"));
-    assertFalse(entries.get("tree/all").contains("origin3"));
+    assertThat(entries).containsKey("tracker/" + sink1.getTrackerId());
+    assertThat(entries).containsKey("tracker/" + origin1.getTrackerId());
+    assertThat(entries).containsKey("tracker/" + origin2.getTrackerId());
+    assertThat(entries).doesNotContainKey("tracker/" + origin3.getTrackerId());
+    assertThat(entries.get("tree/all")).contains("origin1");
+    assertThat(entries.get("tree/all")).doesNotContain("origin3");
   }
 
   @Test
   public void testSettings() throws IOException {
     Map<String, String> entries = snapshot(TrackerTree.node("SnapshotTest.testSettings"));
-    assertTrue(entries.containsKey("settings"));
-    assertTrue(Snapshot.GSON.fromJson(entries.get("settings"), Settings.class).snapshot);
+    assertThat(entries).containsKey("settings");
+    assertThat(Snapshot.GSON.fromJson(entries.get("settings"), Settings.class).snapshot).isTrue();
   }
 
   private Map<String, String> snapshot(TrackerTree.Node node) throws IOException {

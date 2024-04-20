@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.web;
 
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+import static java.util.Objects.requireNonNull;
 
 import be.coekaerts.wouter.flowtracker.util.Config;
 import java.io.IOException;
@@ -22,32 +23,26 @@ public class WebModuleTest {
   @Test
   public void test() throws Exception {
     webModule = new WebModule(Config.forTesting(Map.of("port", "0")));
-    assertTrue(webModule.server.isStarted());
+    assertThat(requireNonNull(webModule.server).isStarted()).isTrue();
 
     // entry point
     String index = get("/");
-    assertContains("<title>Flowtracker</title>", index);
+    assertThat(index).contains("<title>Flowtracker</title>");
 
     // static files
-    assertContains("<svg", get("/folder.svg"));
+    assertThat(get("/folder.svg")).contains("<svg");
 
     // compiled js
     String jsPath = get(index.substring(index.indexOf("/assets/"), index.indexOf(".js") + 3));
-    assertContains("svelte", jsPath);
+    assertThat(jsPath).contains("svelte");
 
     // rest endpoints
-    assertContains("root", get("/tree/all"));
+    assertThat(get("/tree/all")).contains("root");
   }
 
   @After
   public void after() throws Exception {
-    webModule.server.stop();
-  }
-
-  private void assertContains(String expected, String str) {
-    if (!str.contains(expected)) {
-      throw new AssertionError("Count not find " + expected + " in " + str);
-    }
+    requireNonNull(webModule.server).stop();
   }
 
   private String get(String path) throws IOException, InterruptedException {
