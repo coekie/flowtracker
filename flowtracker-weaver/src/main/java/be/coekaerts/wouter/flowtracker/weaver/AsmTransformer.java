@@ -40,7 +40,9 @@ class AsmTransformer implements ClassFileTransformer {
       + "+java.net.SocketOutputStream," // JDK 11
       + "+java.net.Socket,"
       + "+java.lang.ClassLoader,"
-      + "+com.sun.org.apache.xerces.*";
+      + "+com.sun.org.apache.xerces.*,"
+      + "-java.lang.CharacterData*"; // seems to break the debugger sometimes?
+  private static final String DEFAULT_FILTER = "-java.lang.CharacterData*,+*";
 
   private final ClassFilter toInstrumentFilter;
   private final File dumpByteCodePath;
@@ -51,7 +53,7 @@ class AsmTransformer implements ClassFileTransformer {
   private final FlowAnalyzingTransformer flowAnalyzingTransformer;
 
   public AsmTransformer(Config config) {
-    toInstrumentFilter = new ClassFilter(config.get("filter", "+*"), RECOMMENDED_FILTER);
+    toInstrumentFilter = new ClassFilter(config.get("filter", DEFAULT_FILTER), RECOMMENDED_FILTER);
     dumpByteCodePath = config.containsKey("dumpByteCode")
         ? new File(config.get("dumpByteCode"))
         : null;
