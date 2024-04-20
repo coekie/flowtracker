@@ -2,7 +2,8 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.FlowTester.untrackedChar;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -24,16 +25,16 @@ public class BufferedWriterTest {
   @Test public void string() throws IOException {
     String str = trackCopy("abcdefg");
     bw.write(str);
-    snapshotBuilder().trackString(str, 0, 6).assertTrackerOf(out);
+    assertThatTrackerOf(out).matches(snapshot().trackString(str, 0, 6));
     bw.flush();
-    snapshotBuilder().trackString(str).assertTrackerOf(out);
+    assertThatTrackerOf(out).matches(snapshot().trackString(str));
   }
 
   /** write longer than size of the buffer */
   @Test public void longCharArray() throws IOException {
     char[] chars = TrackTestHelper.trackedCharArray("abcdef");
     bw.write(chars, 1, 4);
-    snapshotBuilder().track(chars, 1, 4).assertTrackerOf(out);
+    assertThatTrackerOf(out).matches(snapshot().track(chars, 1, 4));
   }
 
   /** writes shorter than size of the buffer */
@@ -43,7 +44,7 @@ public class BufferedWriterTest {
     bw.write(chars, 1, 1);
     bw.write(chars, 0, 2);
     bw.flush();
-    snapshotBuilder().track(chars, 0, 2).track(chars, 0, 2).assertTrackerOf(out);
+    assertThatTrackerOf(out).matches(snapshot().track(chars, 0, 2).track(chars, 0, 2));
   }
 
   /** make sure gaps (writes from unknown sources) work properly with the buffer being reused */
@@ -53,7 +54,7 @@ public class BufferedWriterTest {
     bw.write(untrackedChar('e'));
     bw.write(str);
     bw.flush();
-    snapshotBuilder().trackString(str).gap(1).trackString(str).assertTrackerOf(out);
+    assertThatTrackerOf(out).matches(snapshot().trackString(str).gap(1).trackString(str));
   }
 
   @Test public void gapThroughMultipleBuffers() throws IOException {
@@ -68,7 +69,7 @@ public class BufferedWriterTest {
     outerBw.write(untrackedChar('c'));
     outerBw.write(str);
     outerBw.flush();
-    snapshotBuilder().trackString(str).trackString(str).trackString(str).gap(1).trackString(str)
-        .assertTrackerOf(out);
+    assertThatTrackerOf(out).matches(
+        snapshot().trackString(str).trackString(str).trackString(str).gap(1).trackString(str));
   }
 }

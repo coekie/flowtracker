@@ -4,7 +4,9 @@ import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerRepository.getTracker;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
@@ -22,8 +24,8 @@ public class CharFlowAnalysisTest {
   @Test public void charArrayStore() {
     char[] array = new char[3];
     array[2] = ft.createSourceChar('a');
-    snapshotBuilder().gap(2).part(ft.theSource(), ft.theSourceIndex(), 1)
-        .assertTrackerOf(array);
+    assertThatTrackerOf(array).matches(
+        snapshot().gap(2).part(ft.theSource(), ft.theSourceIndex(), 1));
   }
 
   @Test public void charArrayLoadAndStore() {
@@ -34,8 +36,8 @@ public class CharFlowAnalysisTest {
     array[1] = abc[0];
     array[2] = abc[2];
 
-    snapshotBuilder().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1)
-        .assertTrackerOf(array);
+    assertThatTrackerOf(array).matches(
+        snapshot().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1));
   }
 
   @Test public void byteArrayLoadAndStore() {
@@ -46,18 +48,18 @@ public class CharFlowAnalysisTest {
     array[1] = abc[0];
     array[2] = abc[2];
 
-    snapshotBuilder().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1)
-        .assertTrackerOf(array);
+    assertThatTrackerOf(array).matches(
+        snapshot().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1));
   }
 
   @Test public void charArrayClone() {
     char[] array = TrackTestHelper.trackedCharArrayWithLength(3);
-    snapshotBuilder().track(array).assertTrackerOf(array.clone());
+    assertThatTrackerOf(array.clone()).matches(snapshot().track(array));
   }
 
   @Test public void byteArrayClone() {
     byte[] array = trackedByteArray("abc");
-    snapshotBuilder().track(array).assertTrackerOf(array.clone());
+    assertThatTrackerOf(array.clone()).matches(snapshot().track(array));
   }
 
   // regression test for NPE in analysis when byte[] type is null
@@ -86,8 +88,7 @@ public class CharFlowAnalysisTest {
 
     assertThat(result).isEqualTo("abc");
 
-    snapshotBuilder().trackString(abc, 0, 3)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(abc, 0, 3));
   }
 
   @Test public void stringBufferAppendChar() {
@@ -100,8 +101,7 @@ public class CharFlowAnalysisTest {
 
     assertThat(result).isEqualTo("abc");
 
-    snapshotBuilder().trackString(abc, 0, 3)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(abc, 0, 3));
   }
 
   // This one is hard.
@@ -125,7 +125,7 @@ public class CharFlowAnalysisTest {
     array[0] = secondLast;
     array[1] = last;
 
-    snapshotBuilder().gap(1).trackString(abc, 1, 1).assertTrackerOf(array);
+    assertThatTrackerOf(array).matches(snapshot().gap(1).trackString(abc, 1, 1));
     // if we would track secondLast through the loop, then this would be:
     //   snapshotBuilder().trackString(abc, 0, 2).assertTrackerOf(array);
   }
@@ -146,7 +146,7 @@ public class CharFlowAnalysisTest {
     array[0] = x;
 
     // it still has the old value
-    snapshotBuilder().trackString(abc, 1, 1).assertTrackerOf(array);
+    assertThatTrackerOf(array).matches(snapshot().trackString(abc, 1, 1));
   }
 
   char[] chars = new char[]{FlowTester.untrackedChar('.')};
@@ -215,7 +215,7 @@ public class CharFlowAnalysisTest {
       dst[i] = (char)(src[i + 1] & 255);
     }
 
-    snapshotBuilder().track(src, 1, 3).assertTrackerOf(dst);
+    assertThatTrackerOf(dst).matches(snapshot().track(src, 1, 3));
   }
 
   /** Test handling of a jump; mostly if frames are correctly updated by the LocalVariablesSorter */
@@ -258,8 +258,8 @@ public class CharFlowAnalysisTest {
     target[0] = gotA;
     target[1] = gotB;
 
-    snapshotBuilder().part(ft.theSource(), ft.theSourceIndex(), 1)
-        .part(ft2.theSource(), ft2.theSourceIndex(), 1)
-        .assertTrackerOf(target);
+    assertThatTrackerOf(target).matches(snapshot()
+        .part(ft.theSource(), ft.theSourceIndex(), 1)
+        .part(ft2.theSource(), ft2.theSourceIndex(), 1));
   }
 }

@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -41,7 +42,7 @@ public class ZipFileTest {
         // this is tested more in InflaterInputStreamTest
         byte[] bytes = in.readAllBytes();
         Tracker tracker = TrackerRepository.getTracker(in);
-        snapshotBuilder().part(tracker, 0, bytes.length).assertTrackerOf(bytes);
+        assertThatTrackerOf(bytes).matches(snapshot().part(tracker, 0, bytes.length));
         assertThat(((ByteOriginTracker) tracker).getByteContent())
             .isEqualTo(ByteBuffer.wrap(bytes));
       }

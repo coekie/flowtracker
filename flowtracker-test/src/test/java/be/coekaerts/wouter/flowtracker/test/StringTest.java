@@ -4,7 +4,9 @@ import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedString;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
@@ -23,7 +25,7 @@ public class StringTest {
   @Test public void testToCharArray() {
     String foo = trackCopy("foo");
     char[] array = foo.toCharArray();
-    snapshotBuilder().trackString(foo).assertEquals(TrackerRepository.getTracker(array));
+    assertThatTrackerOf(array).matches(snapshot().trackString(foo));
   }
 
   @Test public void testConcat() {
@@ -32,8 +34,8 @@ public class StringTest {
     String foobar = foo.concat(bar);
     assertThat(foobar).isEqualTo("foobar");
 
-    snapshotBuilder().trackString(foo).trackString(bar)
-        .assertEquals(getStringTracker(foobar));
+    assertThatTracker(getStringTracker(foobar)).matches(
+        snapshot().trackString(foo).trackString(bar));
   }
 
   @Test public void testSubstringBegin() {
@@ -41,8 +43,7 @@ public class StringTest {
     String foo = foobar.substring(0, 3);
     assertThat(foo).isEqualTo("foo");
 
-    snapshotBuilder().trackString(foobar, 0, 3)
-        .assertEquals(getStringTracker(foo));
+    assertThatTracker(getStringTracker(foo)).matches(snapshot().trackString(foobar, 0, 3));
   }
 
   @Test public void testSubstringEnd() {
@@ -50,8 +51,7 @@ public class StringTest {
     String bar = foobar.substring(3);
     assertThat(bar).isEqualTo("bar");
 
-    snapshotBuilder().trackString(foobar, 3, 3)
-        .assertEquals(getStringTracker(bar));
+    assertThatTracker(getStringTracker(bar)).matches(snapshot().trackString(foobar, 3, 3));
   }
 
   @Test public void testCharAt() {
@@ -61,16 +61,14 @@ public class StringTest {
 
   @Test public void testGetBytes() {
     String foobar = trackCopy("foobar");
-    snapshotBuilder().trackString(foobar, 0, 6)
-        .assertTrackerOf(foobar.getBytes());
+    assertThatTrackerOf(foobar.getBytes()).matches(snapshot().trackString(foobar, 0, 6));
   }
 
   @Test public void testGetChars() {
     String foobar = trackCopy("foobar");
     char[] dst = new char[6];
     foobar.getChars(3, 6, dst, 1);
-    snapshotBuilder().gap(1).trackString(foobar, 3, 3)
-        .assertTrackerOf(dst);
+    assertThatTrackerOf(dst).matches(snapshot().gap(1).trackString(foobar, 3, 3));
     // TODO test UTF-16 version
   }
 
@@ -79,8 +77,7 @@ public class StringTest {
     String str = new String(chars, 1, 2); // create String "bc"
     assertThat(str).isEqualTo("bc");
 
-    snapshotBuilder().track(chars, 1, 2)
-        .assertEquals(getStringTracker(str));
+    assertThatTracker(getStringTracker(str)).matches(snapshot().track(chars, 1, 2));
   }
 
   /** Test {@link String#replace(CharSequence, CharSequence)} */
@@ -89,8 +86,8 @@ public class StringTest {
     String replacement = trackCopy("x");
     String result = src.replace("bc", replacement);
     assertThat(result).isEqualTo("axd");
-    snapshotBuilder().trackString(src, 0, 1).trackString(replacement).trackString(src, 3, 1)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(
+        snapshot().trackString(src, 0, 1).trackString(replacement).trackString(src, 3, 1));
   }
 
   /** Test {@link String#replace(char, char)} */
@@ -99,10 +96,9 @@ public class StringTest {
     FlowTester replacementCharTester = new FlowTester();
     String result = src.replace('b', replacementCharTester.createSourceChar('x'));
     assertThat(result).isEqualTo("axc");
-    snapshotBuilder().trackString(src, 0, 1)
+    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(src, 0, 1)
         .part(replacementCharTester.theSource(), replacementCharTester.theSourceIndex(), 1)
-        .trackString(src, 2, 1)
-        .assertEquals(getStringTracker(result));
+        .trackString(src, 2, 1));
   }
 
   /**
@@ -115,8 +111,8 @@ public class StringTest {
     String replacement = trackCopy("x");
     String result = src.replace("b", replacement);
     assertThat(result).isEqualTo("axc");
-    snapshotBuilder().trackString(src, 0, 1).trackString(replacement).trackString(src, 2, 1)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(
+        snapshot().trackString(src, 0, 1).trackString(replacement).trackString(src, 2, 1));
   }
 
   @Test public void testStringConstant() {
@@ -139,7 +135,6 @@ public class StringTest {
     return "test-ldc";
   }
 
-  @SuppressWarnings("EqualsWithItself")
   @Test public void testStringConstantNoCondy() {
     String str = NoCondy.ldcNoCondy();
     TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));

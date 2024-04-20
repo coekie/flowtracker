@@ -1,7 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.nio.ByteBuffer;
@@ -21,7 +22,7 @@ public class CharsetEncoderTest {
     utf8Encoder().encode(CharBuffer.wrap(abc), bb, false);
 
     assertThat(bb.array()).isEqualTo("abc\0\0".getBytes());
-    snapshotBuilder().track(abc, 0, 3).assertTrackerOf(bb.array());
+    assertThatTrackerOf(bb.array()).matches(snapshot().track(abc, 0, 3));
   }
 
   // not a real test, just gathering some good test data
@@ -43,7 +44,8 @@ public class CharsetEncoderTest {
 
     assertThat(bb.array()).isEqualTo("a\u00A3bc\0".getBytes());
     // TODO this isn't right, lost track of the non-ascii char
-    snapshotBuilder().track(chars, 0, 1).gap(2).track(chars, 2, 2).assertTrackerOf(bb.array());
+    assertThatTrackerOf(bb.array()).matches(snapshot()
+        .track(chars, 0, 1).gap(2).track(chars, 2, 2));
   }
 
   // TODO test non-ASCII chars. also test cases with surrogate pairs (especially tricky with

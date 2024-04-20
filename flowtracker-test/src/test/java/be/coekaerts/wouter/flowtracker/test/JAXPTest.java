@@ -1,7 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
@@ -36,8 +37,8 @@ public class JAXPTest {
     assertThat(StringHook.getStringTracker(handler.startedElement)).isNull();
 
     // but content is tracked
-    snapshotBuilder().trackString(input, 6, 5)
-        .assertEquals(StringHook.getStringTracker(handler.characters));
+    assertThatTracker(StringHook.getStringTracker(handler.characters)).matches(
+        snapshot().trackString(input, 6, 5));
   }
 
   private static class MyHandler extends DefaultHandler {

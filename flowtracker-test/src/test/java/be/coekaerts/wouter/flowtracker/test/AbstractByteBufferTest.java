@@ -1,12 +1,14 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 
@@ -18,8 +20,8 @@ public abstract class AbstractByteBufferTest {
     FlowTester ft = new FlowTester();
     bb.put(ft.createSourceByte((byte)'x'));
 
-    snapshotBuilder().gap(5 + sliceOffset()).part(ft.theSource(), ft.theSourceIndex(), 1)
-        .assertEquals(getTracker(bb));
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(5 + sliceOffset()).part(ft.theSource(), ft.theSourceIndex(), 1));
   }
 
   @Test
@@ -30,8 +32,7 @@ public abstract class AbstractByteBufferTest {
     bb.position(5);
     bb.put(array, 1, 2);
 
-    snapshotBuilder().gap(5 + sliceOffset()).track(array, 1, 2)
-        .assertEquals(getTracker(bb));
+    assertThatTracker(bbTracker(bb)).matches(snapshot().gap(5 + sliceOffset()).track(array, 1, 2));
   }
 
   @Test
@@ -42,8 +43,8 @@ public abstract class AbstractByteBufferTest {
     bb.position(5);
     bb.put(src);
 
-    snapshotBuilder().gap(5 + sliceOffset()).part(getTracker(src), 0, 3)
-        .assertEquals(getTracker(bb));
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(5 + sliceOffset()).part(bbTracker(src), 0, 3));
   }
 
   // overwrite part of a tracker buffer with a direct ByteBuffer which we don't track yet.
@@ -61,8 +62,8 @@ public abstract class AbstractByteBufferTest {
     bb.position(1);
     bb.put(src);
 
-    snapshotBuilder().gap(sliceOffset()).track(array, 0, 1).gap(3).track(array, 4, 2)
-        .assertEquals(getTracker(bb));
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(sliceOffset()).track(array, 0, 1).gap(3).track(array, 4, 2));
   }
 
   @Test
@@ -77,8 +78,8 @@ public abstract class AbstractByteBufferTest {
     bb.position(1);
     bb.put(src);
 
-    snapshotBuilder().gap(sliceOffset()).track(array, 0, 1).gap(20).track(array, 21, 5)
-        .assertEquals(getTracker(bb));
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(sliceOffset()).track(array, 0, 1).gap(20).track(array, 21, 5));
   }
 
   @Test
@@ -89,8 +90,8 @@ public abstract class AbstractByteBufferTest {
     bb.position(1);
     bb.get(array, 5, 3);
 
-    snapshotBuilder().gap(5).part(getTracker(bb), 1 + sliceOffset(), 3)
-        .assertTrackerOf(array);
+    TrackerSnapshot.assertThatTrackerOf(array).matches(
+        snapshot().gap(5).part(bbTracker(bb), 1 + sliceOffset(), 3));
   }
 
   @Test
@@ -98,7 +99,7 @@ public abstract class AbstractByteBufferTest {
     ByteBuffer bb = allocateTracked(4);
     bb.position(2);
     TrackerPoint point = FlowTester.getByteSourcePoint(bb.get());
-    assertThat(point.tracker).isSameInstanceAs(getTracker(bb));
+    assertThat(point.tracker).isSameInstanceAs(bbTracker(bb));
     assertThat(point.index).isEqualTo(2 + sliceOffset());
   }
 
@@ -110,8 +111,7 @@ public abstract class AbstractByteBufferTest {
     bb.position(2);
     bb.compact();
 
-    snapshotBuilder().gap(sliceOffset()).track(array, 2, 3)
-        .assertEquals(getTracker(bb));
+    assertThatTracker(bbTracker(bb)).matches(snapshot().gap(sliceOffset()).track(array, 2, 3));
   }
 
   /**
@@ -121,7 +121,7 @@ public abstract class AbstractByteBufferTest {
     return ByteBuffer.wrap(TrackTestHelper.trackedByteArray("x".repeat(capacity)));
   }
 
-  Tracker getTracker(ByteBuffer bb) {
+  Tracker bbTracker(ByteBuffer bb) {
     assertThat(bb.isDirect()).isFalse(); // direct ByteBuffers not supported here yet
     return TrackerRepository.getTracker(bb.array());
   }

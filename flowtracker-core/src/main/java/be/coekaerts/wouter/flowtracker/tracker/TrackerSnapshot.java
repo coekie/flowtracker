@@ -9,12 +9,12 @@ import java.util.Objects;
 
 /**
  * Immutable copy of a tracker, that is modeled after {@link WritableTracker}.
- *
+ * <p>
  * Just used for testing for now. This is convenient because the WritableTracker interface is the
  * main way we look at what's inside a tracker, so that's what we want our tests to test. But it's
  * not an interface you can directly write assertions on. It's easier to create a snapshot built
  * from it (with {@link #of(Tracker)}) and compare that to an expected snapshot (build with
- * {@link #snapshotBuilder()}).
+ * {@link #snapshot()}).
  */
 public class TrackerSnapshot {
   private final List<Part> parts;
@@ -49,17 +49,16 @@ public class TrackerSnapshot {
     return parts.toString();
   }
 
-  // this belongs more in test code, but we want to share this between core and other modules,
-  // so it's easiest to just have it in here.
-  public void assertEquals(TrackerSnapshot other) {
-    if (!equals(other)) {
-      // this pattern is used because IntelliJ recognizes it
-      throw new AssertionError("expected:<" + this + "> but was:<" + other + ">");
-    }
+  public static Builder snapshot() {
+    return new Builder();
   }
 
-  public static Builder snapshotBuilder() {
-    return new Builder();
+  public static TrackerSubject assertThatTracker(Tracker tracker) {
+    return new TrackerSubject(tracker);
+  }
+
+  public static TrackerSubject assertThatTrackerOf(Object obj) {
+    return new TrackerSubject(TrackerRepository.getTracker(obj));
   }
 
   private static int length(List<Part> parts) {
@@ -178,13 +177,29 @@ public class TrackerSnapshot {
     public TrackerSnapshot build() {
       return new TrackerSnapshot(parts);
     }
+  }
 
-    public void assertEquals(Tracker tracker) {
-      build().assertEquals(TrackerSnapshot.of(tracker));
+  // this belongs more in test code, but we want to share this between core and other modules,
+  // so it's easiest to just have it in here.
+  // this API follows roughly the google-truth example, but this isn't an actual truth "Subject"
+  // because this can't depend on google-truth here.
+  public static final class TrackerSubject {
+    private final Tracker tracker;
+
+    private TrackerSubject(Tracker tracker) {
+      this.tracker = tracker;
     }
 
-    public void assertTrackerOf(Object obj) {
-      assertEquals(TrackerRepository.getTracker(obj));
+    public void matches(TrackerSnapshot.Builder expected) {
+      matches(expected.build());
+    }
+
+    public void matches(TrackerSnapshot expected) {
+      TrackerSnapshot snapshot = TrackerSnapshot.of(tracker);
+      if (!expected.equals(snapshot)) {
+        // this pattern is used because IntelliJ recognizes it
+        throw new AssertionError("expected:<" + expected + "> but was:<" + snapshot + ">");
+      }
     }
   }
 }

@@ -2,7 +2,8 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedByteArray;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import java.io.FileOutputStream;
@@ -21,10 +22,9 @@ public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
       os.write(flowTester1.createSourceChar('b'));
 
       assertContentEquals("ab", os);
-      snapshotBuilder()
+      assertThatTracker(getTracker(os)).matches(snapshot()
           .part(flowTester0.theSource(), flowTester0.theSourceIndex(), 1)
-          .part(flowTester1.theSource(), flowTester1.theSourceIndex(), 1)
-          .assertEquals(getTracker(os));
+          .part(flowTester1.theSource(), flowTester1.theSourceIndex(), 1));
     }
   }
 
@@ -35,7 +35,7 @@ public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
       os.write(abc);
 
       assertContentEquals("abcabc", os);
-      snapshotBuilder().track(abc, 0, 3).track(abc, 0, 3).assertEquals(getTracker(os));
+      assertThatTracker(getTracker(os)).matches(snapshot().track(abc, 0, 3).track(abc, 0, 3));
     }
   }
 
@@ -47,7 +47,7 @@ public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
       os.write(def);
 
       assertContentEquals("abcdef", os);
-      snapshotBuilder().gap(3).track(def, 0, 3).assertEquals(getTracker(os));
+      assertThatTracker(getTracker(os)).matches(snapshot().gap(3).track(def, 0, 3));
     }
   }
 
@@ -57,7 +57,7 @@ public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
       os.write(abcd, 1, 2);
 
       assertContentEquals("bc", os);
-      snapshotBuilder().track(abcd, 1, 2).assertEquals(getTracker(os));
+      assertThatTracker(getTracker(os)).matches(snapshot().track(abcd, 1, 2));
     }
   }
 

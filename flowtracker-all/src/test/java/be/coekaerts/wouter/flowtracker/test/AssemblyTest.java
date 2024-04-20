@@ -1,13 +1,14 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
+import static org.junit.Assert.fail;
+
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import java.util.Arrays;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
-
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.fail;
 
 /**
  * Test for the assembly, and for {@link be.coekaerts.wouter.flowtracker.agent.FlowTrackAgent}'s
@@ -27,6 +28,7 @@ public class AssemblyTest {
     }
   }
 
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test(expected = NoClassDefFoundError.class)
   public void dependenciesNotInAppClasspath() {
     ClassReader.class.getMethods();
@@ -36,6 +38,6 @@ public class AssemblyTest {
     char[] a = new char['a'];
     Tracker aTracker = TrackerRepository.createFixedOriginTracker(a, a.length);
     char[] copy = Arrays.copyOf(a, a.length);
-    snapshotBuilder().part(aTracker).assertTrackerOf(copy);
+    assertThatTrackerOf(copy).matches(snapshot().part(aTracker));
   }
 }

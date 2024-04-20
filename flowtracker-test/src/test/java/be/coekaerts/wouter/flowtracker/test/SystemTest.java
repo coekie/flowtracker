@@ -2,7 +2,8 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
@@ -23,7 +24,7 @@ public class SystemTest {
 		char[] defabc = new char[6];
 		System.arraycopy(abcdef, 0, defabc, 3, 3); // copy abc
 		System.arraycopy(abcdef, 3, defabc, 0, 3); // copy def
-		snapshotBuilder().track(abcdef, 3, 3).track(abcdef, 0, 3).assertTrackerOf(defabc);
+    assertThatTrackerOf(defabc).matches(snapshot().track(abcdef, 3, 3).track(abcdef, 0, 3));
 		assertThat(defabc[0]).isEqualTo('d');
 	}
 
@@ -33,7 +34,7 @@ public class SystemTest {
 		byte[] defabc = new byte[6];
 		System.arraycopy(abcdef, 0, defabc, 3, 3); // copy abc
 		System.arraycopy(abcdef, 3, defabc, 0, 3); // copy def
-		snapshotBuilder().track(abcdef, 3, 3).track(abcdef, 0, 3).assertTrackerOf(defabc);
+    assertThatTrackerOf(defabc).matches(snapshot().track(abcdef, 3, 3).track(abcdef, 0, 3));
 		assertThat(defabc[0]).isEqualTo('d');
 	}
 
@@ -44,7 +45,7 @@ public class SystemTest {
 		System.arraycopy(src, 0, a, 0, src.length);
 		System.arraycopy(a, 4, a, 2, 2); // copy ef
 		assertThat(new String(a)).isEqualTo("abefef");
-		snapshotBuilder().track(src, 0, 2).track(src, 4, 2).track(src, 4, 2).assertTrackerOf(a);
+    assertThatTrackerOf(a).matches(snapshot().track(src, 0, 2).track(src, 4, 2).track(src, 4, 2));
 	}
 
 	@Test

@@ -1,7 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -58,7 +59,8 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
       os.getChannel().write(bb);
 
       assertContentEquals("abcdef", os);
-      snapshotBuilder().track(abc, 0, 3).track(bb.array(), 0, 3).assertEquals(getTracker(os));
+      assertThatTracker(getTracker(os)).matches(
+          snapshot().track(abc, 0, 3).track(bb.array(), 0, 3));
     }
   }
 

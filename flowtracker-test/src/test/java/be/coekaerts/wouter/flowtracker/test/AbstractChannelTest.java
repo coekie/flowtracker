@@ -1,7 +1,9 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -25,7 +27,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       ByteBuffer bb = ByteBuffer.allocate(10);
       assertThat(channel.read(bb)).isEqualTo(3);
       assertReadContentEquals("abc", channel);
-      snapshotBuilder().part(getReadTracker(channel), 0, 3).assertTrackerOf(bb.array());
+      assertThatTrackerOf(bb.array()).matches(snapshot().part(getReadTracker(channel), 0, 3));
     }
   }
 
@@ -35,13 +37,13 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       ByteBuffer bb = ByteBuffer.allocate(2);
       assertThat(channel.read(bb)).isEqualTo(2);
       assertReadContentEquals("ab", channel);
-      snapshotBuilder().part(getReadTracker(channel), 0, 2).assertTrackerOf(bb.array());
+      assertThatTrackerOf(bb.array()).matches(snapshot().part(getReadTracker(channel), 0, 2));
 
       bb.position(0);
       assertThat(channel.read(bb)).isEqualTo(1);
       assertReadContentEquals("abc", channel);
-      snapshotBuilder().part(getReadTracker(channel), 2, 1).part(getReadTracker(channel), 1, 1)
-          .assertTrackerOf(bb.array());
+      assertThatTrackerOf(bb.array()).matches(
+          snapshot().part(getReadTracker(channel), 2, 1).part(getReadTracker(channel), 1, 1));
     }
   }
 
@@ -51,7 +53,8 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       ByteBuffer bb = ByteBuffer.wrap(trackedByteArray("abc"));
       channel.write(bb);
       assertWrittenContentEquals("abc", channel);
-      snapshotBuilder().track(bb.array()).assertEquals(getWriteTracker(channel));
+      assertThatTracker(getWriteTracker(channel)).matches(
+          snapshot().track(bb.array()));
     }
   }
 
@@ -63,8 +66,8 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       channel.write(bb1);
       channel.write(bb2);
       assertWrittenContentEquals("abcdef", channel);
-      snapshotBuilder().track(bb1.array()).track(bb2.array())
-          .assertEquals(getWriteTracker(channel));
+      assertThatTracker(getWriteTracker(channel)).matches(
+          snapshot().track(bb1.array()).track(bb2.array()));
     }
   }
 

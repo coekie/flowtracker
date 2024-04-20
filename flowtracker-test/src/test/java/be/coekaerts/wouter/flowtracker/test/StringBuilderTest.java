@@ -2,7 +2,8 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.hook.StringHook.getStringTracker;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
@@ -19,8 +20,8 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("abcdefghi");
 
-    snapshotBuilder().trackString(abc).trackString(def).trackString(ghi)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(
+        snapshot().trackString(abc).trackString(def).trackString(ghi));
   }
 
   @Test public void testAppendCharSequenceRange() {
@@ -30,8 +31,7 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("bcd");
 
-    snapshotBuilder().trackString(abcdef, 1, 3)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(abcdef, 1, 3));
   }
 
   @Test public void testInsert() {
@@ -45,8 +45,8 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("abxyzcd");
 
-    snapshotBuilder().trackString(ab).trackString(xyz).trackString(cd)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(
+        snapshot().trackString(ab).trackString(xyz).trackString(cd));
   }
 
   /** Use StringBuilder.insert to split the original value in two */
@@ -61,8 +61,8 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("abxyzcd");
 
-    snapshotBuilder().trackString(abcd, 0, 2).trackString(xyz).trackString(abcd, 2, 2)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(
+        snapshot().trackString(abcd, 0, 2).trackString(xyz).trackString(abcd, 2, 2));
   }
 
   @Test
@@ -72,9 +72,9 @@ public class StringBuilderTest {
     sb.reverse();
     String result = sb.toString();
     assertThat(result).isEqualTo("dcba");
-    snapshotBuilder().trackString(abcd, 3, 1).trackString(abcd, 2, 1).trackString(abcd, 1, 1)
-        .trackString(abcd, 0, 1)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(snapshot()
+        .trackString(abcd, 3, 1).trackString(abcd, 2, 1).trackString(abcd, 1, 1)
+        .trackString(abcd, 0, 1));
   }
 
   @Test
@@ -85,7 +85,7 @@ public class StringBuilderTest {
     sb.replace(1, 3, x);
     String result = sb.toString();
     assertThat(result).isEqualTo("axdef");
-    snapshotBuilder().trackString(abcd, 0, 1).trackString(x, 0, 1).trackString(abcd, 3, 3)
-        .assertEquals(getStringTracker(result));
+    assertThatTracker(getStringTracker(result)).matches(snapshot()
+        .trackString(abcd, 0, 1).trackString(x, 0, 1).trackString(abcd, 3, 3));
   }
 }

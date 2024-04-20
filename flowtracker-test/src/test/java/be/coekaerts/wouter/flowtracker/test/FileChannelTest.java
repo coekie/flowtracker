@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.hook.Reflection;
@@ -77,7 +78,7 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
       ByteBuffer bb = ByteBuffer.allocate(10);
       channel.read(bb, 1);
       assertReadContentEquals("bc", channel);
-      snapshotBuilder().part(getReadTracker(channel), 0, 2).assertTrackerOf(bb.array());
+      assertThatTrackerOf(bb.array()).matches(snapshot().part(getReadTracker(channel), 0, 2));
     }
   }
 

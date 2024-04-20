@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -24,7 +25,7 @@ public abstract class AbstractInputStreamTest {
       assertThat(is.read(buffer)).isEqualTo(3);
 
       assertContentEquals("abc", is);
-      snapshotBuilder().part(getStreamTracker(is), 0, 3).assertTrackerOf(buffer);
+      assertThatTrackerOf(buffer).matches(snapshot().part(getStreamTracker(is), 0, 3));
     }
   }
 
@@ -33,7 +34,7 @@ public abstract class AbstractInputStreamTest {
     try (InputStream is = createInputStream(abc)) {
       byte[] buffer = is.readAllBytes();
       assertContentEquals("abc", is);
-      snapshotBuilder().part(getStreamTracker(is), 0, 3).assertTrackerOf(buffer);
+      assertThatTrackerOf(buffer).matches(snapshot().part(getStreamTracker(is), 0, 3));
     }
   }
 
@@ -44,8 +45,7 @@ public abstract class AbstractInputStreamTest {
       assertThat(fis.read(buffer, 1, 4)).isEqualTo(3);
 
       assertContentEquals("abc", fis);
-      snapshotBuilder().gap(1).part(getStreamTracker(fis), 0, 3)
-          .assertTrackerOf(buffer);
+      assertThatTrackerOf(buffer).matches(snapshot().gap(1).part(getStreamTracker(fis), 0, 3));
     }
   }
 
