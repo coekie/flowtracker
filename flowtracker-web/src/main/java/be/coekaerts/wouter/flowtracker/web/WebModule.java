@@ -15,6 +15,7 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.glassfish.jersey.gson.JsonGsonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -37,8 +38,16 @@ public class WebModule {
   }
 
   private static Server startServer(Config config) throws Exception {
-    // Setup server and servlet context
+    // Setup server
     Server server = new Server(new TrackerSuspendingThreadPool());
+
+    // make jetty scheduler threads daemon threads, so that we don't prevent the JVM from shutting
+    // down.
+    ScheduledExecutorScheduler scheduler =
+        new ScheduledExecutorScheduler("flowtracker-jetty-scheduler", true);
+    scheduler.start();
+    server.addBean(scheduler);
+
     server.addConnector(createConnector(server, config));
 
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -80,19 +89,17 @@ public class WebModule {
   }
 
   private static void snapshotOnExit(String path, Config config) {
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override public void run() {
-        Trackers.suspendOnCurrentThread();
-        try (var out = new FileOutputStream(path)) {
-          new Snapshot(TrackerTree.ROOT, config.getBoolean("snapshotOnExitMinimized", true))
-              .write(out);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        } finally {
-          Trackers.unsuspendOnCurrentThread();
-        }
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      Trackers.suspendOnCurrentThread();
+      try (var out = new FileOutputStream(path)) {
+        new Snapshot(TrackerTree.ROOT, config.getBoolean("snapshotOnExitMinimized", true))
+            .write(out);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      } finally {
+        Trackers.unsuspendOnCurrentThread();
       }
-    });
+    }));
   }
 
   /**
@@ -102,17 +109,14 @@ public class WebModule {
   private static class TrackerSuspendingThreadPool extends QueuedThreadPool {
 
     public TrackerSuspendingThreadPool() {
-      // make some thread daemon threads. unfortunately it also makes other threads, that are harder
-      // to make daemon threads
+      // make these threads daemon threads
       setDaemon(true);
     }
 
     @Override public Thread newThread(final Runnable runnable) {
-      return super.newThread(new Runnable() {
-        @Override public void run() {
-          Trackers.suspendOnCurrentThread();
-          runnable.run();
-        }
+      return super.newThread(() -> {
+        Trackers.suspendOnCurrentThread();
+        runnable.run();
       });
     }
   }
