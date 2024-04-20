@@ -52,9 +52,9 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
   @Test
   public void node() throws IOException {
     try (FileChannel channel = openForRead()) {
-      TrackTestHelper.assertThatTracker(getReadTracker(channel))
-          .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(fileToRead.getName());
+      TrackTestHelper.assertThatTrackerNode(getReadTracker(channel))
+          .hasPathStartingWith("Files")
+          .hasPathEndingWith(fileToRead.getName());
     }
   }
 
@@ -62,12 +62,12 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
   public void nodeWithReadAndWrite() throws IOException {
     try (FileChannel channel = FileChannel.open(fileToWrite.toPath(),
         StandardOpenOption.READ, StandardOpenOption.WRITE)) {
-      TrackTestHelper.assertThatTracker(getReadTracker(channel))
-          .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(fileToWrite.getName(), FileDescriptorTrackerRepository.READ);
-      TrackTestHelper.assertThatTracker(getWriteTracker(channel))
-          .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(fileToWrite.getName(), FileDescriptorTrackerRepository.WRITE);
+      TrackTestHelper.assertThatTrackerNode(getReadTracker(channel))
+          .hasPathStartingWith("Files")
+          .hasPathEndingWith(fileToWrite.getName(), FileDescriptorTrackerRepository.READ);
+      TrackTestHelper.assertThatTrackerNode(getWriteTracker(channel))
+          .hasPathStartingWith("Files")
+          .hasPathEndingWith(fileToWrite.getName(), FileDescriptorTrackerRepository.WRITE);
     }
   }
 

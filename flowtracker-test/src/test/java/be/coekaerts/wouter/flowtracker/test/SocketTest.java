@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTrackerNode;
 
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import java.io.IOException;
@@ -15,27 +15,27 @@ import org.junit.Test;
 public class SocketTest {
   @Test public void testClient() throws IOException {
     try (SocketTester tester = SocketTester.createConnected()) {
-      assertThatTracker(SocketTester.getReadTracker(tester.client))
-          .hasNodeStartingWith("Client socket")
-          .hasNodeEndingWith(tester.client.getRemoteSocketAddress().toString(),
+      assertThatTrackerNode(SocketTester.getReadTracker(tester.client))
+          .hasPathStartingWith("Client socket")
+          .hasPathEndingWith(tester.client.getRemoteSocketAddress().toString(),
               FileDescriptorTrackerRepository.READ);
-      assertThatTracker(SocketTester.getWriteTracker(tester.client))
-          .hasNodeStartingWith("Client socket")
-          .hasNodeEndingWith(tester.client.getRemoteSocketAddress().toString(),
+      assertThatTrackerNode(SocketTester.getWriteTracker(tester.client))
+          .hasPathStartingWith("Client socket")
+          .hasPathEndingWith(tester.client.getRemoteSocketAddress().toString(),
               FileDescriptorTrackerRepository.WRITE);
     }
   }
 
   @Test public void testServer() throws IOException {
     try (SocketTester tester = SocketTester.createConnected()) {
-      assertThatTracker(SocketTester.getReadTracker(tester.server))
-          .hasNodeStartingWith("Server socket")
-          .hasNodeEndingWith(Integer.toString(tester.server.getLocalPort()),
+      assertThatTrackerNode(SocketTester.getReadTracker(tester.server))
+          .hasPathStartingWith("Server socket")
+          .hasPathEndingWith(Integer.toString(tester.server.getLocalPort()),
               tester.server.getRemoteSocketAddress().toString(),
               FileDescriptorTrackerRepository.READ);
-      assertThatTracker(SocketTester.getWriteTracker(tester.server))
-          .hasNodeStartingWith("Server socket")
-          .hasNodeEndingWith(Integer.toString(tester.server.getLocalPort()),
+      assertThatTrackerNode(SocketTester.getWriteTracker(tester.server))
+          .hasPathStartingWith("Server socket")
+          .hasPathEndingWith(Integer.toString(tester.server.getLocalPort()),
               tester.server.getRemoteSocketAddress().toString(),
               FileDescriptorTrackerRepository.WRITE);
     }

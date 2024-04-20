@@ -51,15 +51,15 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
 
   @Test public void node() throws IOException {
     try (var fisFromFile = new FileInputStream(file)) {
-      TrackTestHelper.assertThatTracker(getStreamTracker(fisFromFile))
-          .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(file.getName());
+      TrackTestHelper.assertThatTrackerNode(getStreamTracker(fisFromFile))
+          .hasPathStartingWith("Files")
+          .hasPathEndingWith(file.getName());
     }
 
     try (var fisFromName = new FileInputStream(file.getPath())) {
-      TrackTestHelper.assertThatTracker(getStreamTracker(fisFromName))
-          .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(file.getName());
+      TrackTestHelper.assertThatTrackerNode(getStreamTracker(fisFromName))
+          .hasPathStartingWith("Files")
+          .hasPathEndingWith(file.getName());
     }
   }
 

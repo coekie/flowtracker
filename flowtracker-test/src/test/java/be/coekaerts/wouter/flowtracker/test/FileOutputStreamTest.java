@@ -34,15 +34,15 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
 
   @Test public void node() throws IOException {
     try (var fosFromFile = new FileOutputStream(file)) {
-      TrackTestHelper.assertThatTracker(getTracker(fosFromFile))
-          .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(file.getName());
+      TrackTestHelper.assertThatTrackerNode(getTracker(fosFromFile))
+          .hasPathStartingWith("Files")
+          .hasPathEndingWith(file.getName());
     }
 
     try (var fosFromName = new FileOutputStream(file.getPath())) {
-      TrackTestHelper.assertThatTracker(getTracker(fosFromName))
-          .hasNodeStartingWith("Files")
-          .hasNodeEndingWith(file.getName());
+      TrackTestHelper.assertThatTrackerNode(getTracker(fosFromName))
+          .hasPathStartingWith("Files")
+          .hasPathEndingWith(file.getName());
     }
   }
 

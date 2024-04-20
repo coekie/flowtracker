@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTrackerNode;
 
 import be.coekaerts.wouter.flowtracker.hook.Reflection;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
@@ -45,26 +45,26 @@ public class SocketChannelTest extends AbstractChannelTest<SocketChannel> {
   @Test
   public void nodeForClient() {
     ByteOriginTracker readTracker = getReadTracker(client);
-    assertThatTracker(readTracker)
-        .hasNodeMatching(n -> n.get(0).equals("Client socket")
+    assertThatTrackerNode(readTracker)
+        .hasPathMatching(n -> n.get(0).equals("Client socket")
             && n.get(2).equals(FileDescriptorTrackerRepository.READ));
 
     ByteSinkTracker writeTracker = getWriteTracker(client);
-    assertThatTracker(writeTracker)
-        .hasNodeMatching(n -> n.get(0).equals("Client socket")
+    assertThatTrackerNode(writeTracker)
+        .hasPathMatching(n -> n.get(0).equals("Client socket")
             && n.get(2).equals(FileDescriptorTrackerRepository.WRITE));
   }
 
   @Test
   public void nodeForServer() {
     ByteOriginTracker readTracker = getReadTracker(server);
-    assertThatTracker(readTracker)
-        .hasNodeMatching(n -> n.get(0).equals("Server socket")
+    assertThatTrackerNode(readTracker)
+        .hasPathMatching(n -> n.get(0).equals("Server socket")
             && n.get(3).equals(FileDescriptorTrackerRepository.READ));
 
     ByteSinkTracker writeTracker = getWriteTracker(server);
-    assertThatTracker(writeTracker)
-        .hasNodeMatching(n -> n.get(0).equals("Server socket")
+    assertThatTrackerNode(writeTracker)
+        .hasPathMatching(n -> n.get(0).equals("Server socket")
             && n.get(3).equals(FileDescriptorTrackerRepository.WRITE));
   }
 

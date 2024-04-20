@@ -42,18 +42,18 @@ public class InflaterInputStreamTest extends AbstractInputStreamTest {
     TrackerRepository.setTracker(src, new TagTracker().addTo(TrackerTree.node("src")));
 
     try (InputStream is = new InflaterInputStream(src)) {
-      TrackTestHelper.assertThatTracker(is)
-          .hasNode("src", "Inflater");
+      TrackTestHelper.assertThatTrackerNode(is)
+          .hasPath("src", "Inflater");
     }
 
     try (InputStream is = new InflaterInputStream(src, new Inflater())) {
-      TrackTestHelper.assertThatTracker(is)
-          .hasNode("src", "Inflater");
+      TrackTestHelper.assertThatTrackerNode(is)
+          .hasPath("src", "Inflater");
     }
 
     try (InputStream is = new InflaterInputStream(src, new Inflater(), 512)) {
-      TrackTestHelper.assertThatTracker(is)
-          .hasNode("src", "Inflater");
+      TrackTestHelper.assertThatTrackerNode(is)
+          .hasPath("src", "Inflater");
     }
   }
 }

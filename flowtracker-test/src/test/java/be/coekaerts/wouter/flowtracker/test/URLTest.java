@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTrackerNode;
 import static java.util.Objects.requireNonNull;
 
 import be.coekaerts.wouter.flowtracker.hook.InputStreamHook;
@@ -17,9 +17,9 @@ public class URLTest {
   @Test public void fileURLConnection() throws IOException {
     URL url = requireNonNull(URLTest.class.getResource("URLTest.class"));
     try (InputStream in = url.openStream()) {
-      assertThatTracker(InputStreamHook.getInputStreamTracker(in))
-          .hasNodeStartingWith("Files")
-          .hasNodeEndingWith("URLTest.class");
+      assertThatTrackerNode(InputStreamHook.getInputStreamTracker(in))
+          .hasPathStartingWith("Files")
+          .hasPathEndingWith("URLTest.class");
     }
   }
 
@@ -27,9 +27,9 @@ public class URLTest {
   @Test public void jarURLConnection() throws IOException {
     URL url = requireNonNull(org.junit.Test.class.getResource("Test.class"));
     try (InputStream in = url.openStream()) {
-      assertThatTracker(InputStreamHook.getInputStreamTracker(in))
-          .hasNodeStartingWith("Files")
-          .hasNodeEndingWith("org", "junit", "Test.class");
+      assertThatTrackerNode(InputStreamHook.getInputStreamTracker(in))
+          .hasPathStartingWith("Files")
+          .hasPathEndingWith("org", "junit", "Test.class");
     }
   }
 }

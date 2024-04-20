@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTracker;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTrackerNode;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -43,8 +43,8 @@ public class FilesTest {
     TrackerSnapshot trackerSnapshot = TrackerSnapshot.of(tracker);
     assertThat(trackerSnapshot.getParts()).hasSize(1);
     Part part = trackerSnapshot.getParts().get(0);
-    assertThatTracker(part.source)
-        .hasNodeStartingWith("Files")
-        .hasNodeEndingWith(file.getName());
+    assertThatTrackerNode(part.source)
+        .hasPathStartingWith("Files")
+        .hasPathEndingWith(file.getName());
   }
 }

@@ -33,10 +33,10 @@ public class ZipFileTest {
     try (ZipFile zipFile = new ZipFile(testZipFilePath)) {
       ZipEntry entry = zipFile.getEntry(testZipFileEntryName);
       try (InputStream in = zipFile.getInputStream(entry)) {
-        TrackTestHelper.assertThatTracker(in)
-            .hasNodeStartingWith("Files")
-            .hasNodeMatching(nodePath -> nodePath.contains(new File(testZipFilePath).getName()))
-            .hasNodeEndingWith("junit", "Test.class");
+        TrackTestHelper.assertThatTrackerNode(in)
+            .hasPathStartingWith("Files")
+            .hasPathMatching(nodePath -> nodePath.contains(new File(testZipFilePath).getName()))
+            .hasPathEndingWith("junit", "Test.class");
 
         // this is tested more in InflaterInputStreamTest
         byte[] bytes = in.readAllBytes();

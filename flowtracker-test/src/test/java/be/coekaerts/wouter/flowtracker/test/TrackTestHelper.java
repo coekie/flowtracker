@@ -6,6 +6,7 @@ import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -68,43 +69,43 @@ public class TrackTestHelper {
   }
 
   /** Fluent API to assert stuff about trackers */
-  public static TrackerAssertions assertThatTracker(Object sut) {
-    return new TrackerAssertions(tracker(sut));
+  public static NodeAssertions assertThatTrackerNode(Object sut) {
+    return new NodeAssertions(tracker(sut));
   }
 
   private static Tracker tracker(Object o) {
     return o instanceof Tracker ? (Tracker) o : TrackerRepository.getTracker(o);
   }
 
-  /** @see #assertThatTracker(Object) */
-  public static class TrackerAssertions {
-    private final Tracker tracker;
+  /** @see #assertThatTrackerNode(Object) */
+  public static class NodeAssertions {
+    private final Node node;
 
-    private TrackerAssertions(Tracker tracker) {
+    private NodeAssertions(Tracker tracker) {
       assertThat(tracker).isNotNull();
-      this.tracker = tracker;
+      this.node = tracker.getNode();
     }
 
-    public TrackerAssertions hasNode(String... expectedNodePath) {
-      assertThat(tracker.getNode().path()).containsExactlyElementsIn(expectedNodePath).inOrder();
+    public NodeAssertions hasPath(String... expectedNodePath) {
+      assertThat(node.path()).containsExactlyElementsIn(expectedNodePath).inOrder();
       return this;
     }
 
-    public TrackerAssertions hasNodeStartingWith(String... expectedNodePath) {
-      assertThat(tracker.getNode().path().subList(0, expectedNodePath.length))
+    public NodeAssertions hasPathStartingWith(String... expectedNodePath) {
+      assertThat(node.path().subList(0, expectedNodePath.length))
           .containsExactlyElementsIn(expectedNodePath).inOrder();
       return this;
     }
 
-    public TrackerAssertions hasNodeEndingWith(String... expectedNodePath) {
-      List<String> path = tracker.getNode().path();
+    public NodeAssertions hasPathEndingWith(String... expectedNodePath) {
+      List<String> path = node.path();
       assertThat(path.subList(path.size() - expectedNodePath.length, path.size()))
           .containsExactlyElementsIn(expectedNodePath).inOrder();
       return this;
     }
 
-    public TrackerAssertions hasNodeMatching(Predicate<List<String>> predicate) {
-      List<String> nodePath = tracker.getNode().path();
+    public NodeAssertions hasPathMatching(Predicate<List<String>> predicate) {
+      List<String> nodePath = node.path();
       if (!predicate.test(nodePath)) {
         throw new AssertionError(nodePath.toString());
       }

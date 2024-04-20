@@ -149,8 +149,8 @@ public class OutputStreamWriterTest {
   }
 
   private void assertNode(OutputStreamWriter writer) {
-    TrackTestHelper.assertThatTracker(writer)
-        .hasNodeStartingWith("Files")
-        .hasNodeEndingWith(file.getName(), "Writer");
+    TrackTestHelper.assertThatTrackerNode(writer)
+        .hasPathStartingWith("Files")
+        .hasPathEndingWith(file.getName(), "Writer");
   }
 }
