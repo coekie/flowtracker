@@ -1,7 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
@@ -54,8 +54,8 @@ class FlowTester {
 //  }
 
   Tracker theSource() {
-    assertEquals("theSource should only be used if there is exactly one source",
-        1, sources.size());
+    assertWithMessage("theSource should only be used if there is exactly one source")
+        .that(sources).hasSize(1);
     return sources.get(0);
   }
 
@@ -98,20 +98,20 @@ class FlowTester {
   static void $tracked_assertTrackedValue(char c, char expected,
       Tracker expectedTracker, int expectedIndex,
       TrackerPoint actual) {
-    assertEquals(expected, c);
-    assertNotNull(actual);
-    assertEquals(expectedTracker, actual.tracker);
-    assertEquals(expectedIndex, actual.index);
+    assertThat(c).isEqualTo(expected);
+    assertThat(actual).isNotNull();
+    assertThat(actual.tracker).isEqualTo(expectedTracker);
+    assertThat(actual.index).isEqualTo(expectedIndex);
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   static void $tracked_assertTrackedValue(byte b, byte expected,
       Tracker expectedTracker, int expectedIndex,
       TrackerPoint actual) {
-    assertEquals(expected, b);
-    assertNotNull(actual);
-    assertEquals(expectedTracker, actual.tracker);
-    assertEquals(expectedIndex, actual.index);
+    assertThat(b).isEqualTo(expected);
+    assertThat(actual).isNotNull();
+    assertThat(actual.tracker).isEqualTo(expectedTracker);
+    assertThat(actual.index).isEqualTo(expectedIndex);
   }
 
   /**
@@ -134,12 +134,12 @@ class FlowTester {
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   void $tracked_assertIsTheTrackedValue(char c, TrackerPoint actual) {
-    assertEquals(theSourcePoint(), actual);
+    assertThat(actual).isEqualTo(theSourcePoint());
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   void $tracked_assertIsTheTrackedValue(byte b, TrackerPoint actual) {
-    assertEquals(theSourcePoint(), actual);
+    assertThat(actual).isEqualTo(theSourcePoint());
   }
 
   /** Returns the Tracker from which the value is tracked as coming */

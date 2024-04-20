@@ -1,8 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
@@ -21,7 +21,7 @@ public abstract class AbstractInputStreamTest {
   public void read() throws IOException {
     try (InputStream is = createInputStream(abc)) {
       byte[] buffer = new byte[5];
-      assertEquals(3, is.read(buffer));
+      assertThat(is.read(buffer)).isEqualTo(3);
 
       assertContentEquals("abc", is);
       snapshotBuilder().part(getStreamTracker(is), 0, 3).assertTrackerOf(buffer);
@@ -41,7 +41,7 @@ public abstract class AbstractInputStreamTest {
   public void readWithOffset() throws IOException {
     try (InputStream fis = createInputStream(abc)) {
       byte[] buffer = new byte[5];
-      assertEquals(3, fis.read(buffer, 1, 4));
+      assertThat(fis.read(buffer, 1, 4)).isEqualTo(3);
 
       assertContentEquals("abc", fis);
       snapshotBuilder().gap(1).part(getStreamTracker(fis), 0, 3)
@@ -60,6 +60,6 @@ public abstract class AbstractInputStreamTest {
 
   void assertContentEquals(String expected, InputStream is) {
     var tracker = (ByteOriginTracker) requireNonNull(getStreamTracker(is));
-    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
+    assertThat(tracker.getByteContent()).isEqualTo(ByteBuffer.wrap(expected.getBytes()));
   }
 }

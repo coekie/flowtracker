@@ -1,7 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import org.junit.Test;
@@ -19,7 +18,7 @@ public class InvocationInstrumentationTest {
     FlowTester flowTester = new FlowTester();
     Sink sink = new Sink(flowTester);
     sink.writeByte(flowTester.createSourceByte((byte) 1));
-    assertTrue(sink.called);
+    assertThat(sink.called).isTrue();
   }
 
   @Test
@@ -27,7 +26,7 @@ public class InvocationInstrumentationTest {
     FlowTester flowTester = new FlowTester();
     Sink sink = new Sink(flowTester);
     sink.writeChar(flowTester.createSourceChar('a'));
-    assertTrue(sink.called);
+    assertThat(sink.called).isTrue();
   }
 
   @Test
@@ -35,7 +34,7 @@ public class InvocationInstrumentationTest {
     FlowTester flowTester = new FlowTester();
     Sink sink = new Sink(flowTester);
     sink.writeInt(flowTester.createSourceChar('a'));
-    assertTrue(sink.called);
+    assertThat(sink.called).isTrue();
   }
 
   /** Test call using super.method(), that is using INVOKESPECIAL */
@@ -44,7 +43,7 @@ public class InvocationInstrumentationTest {
     FlowTester flowTester = new FlowTester();
     SubSink sink = new SubSink(flowTester);
     sink.writeSuper(flowTester.createSourceByte((byte) 1));
-    assertTrue(sink.called);
+    assertThat(sink.called).isTrue();
   }
 
   @Test
@@ -65,7 +64,7 @@ public class InvocationInstrumentationTest {
     sink.write(
         flowTester0.createSourceByte((byte) 1),
         flowTester1.createSourceByte((byte) 1));
-    assertTrue(sink.called);
+    assertThat(sink.called).isTrue();
   }
 
   @Test
@@ -98,7 +97,7 @@ public class InvocationInstrumentationTest {
         flowTester3.createSourceByte((byte) 1),
         flowTester4.createSourceByte((byte) 1),
         flowTester5.createSourceByte((byte) 1));
-    assertTrue(sink.called);
+    assertThat(sink.called).isTrue();
   }
 
   /** Tests SuspendInvocationTransformer */
@@ -106,10 +105,10 @@ public class InvocationInstrumentationTest {
   public void loadClassAtInvocation() {
     FlowTester flowTester = new FlowTester();
     // sanity check: StaticSink should not have loaded yet
-    assertFalse(staticSinkInitialized);
+    assertThat(staticSinkInitialized).isFalse();
     // this call to go with first trigger class loading and initialization before it goes through
     byte result1 = StaticSink.go(flowTester.createSourceByte((byte) 1));
-    assertTrue(StaticSink.called);
+    assertThat(StaticSink.called).isTrue();
     // assert that class loading and initialization didn't disrupt the tracking of the invocation
     flowTester.assertIsTheTrackedValue(result1);
   }
@@ -125,15 +124,17 @@ public class InvocationInstrumentationTest {
       boolean called;
 
       void write(char c0, char c1) {
-        assertTrue(FlowTester.getCharSourcePoint(c0).tracker instanceof ClassOriginTracker);
-        assertTrue(FlowTester.getCharSourcePoint(c1).tracker instanceof ClassOriginTracker);
+        assertThat(FlowTester.getCharSourcePoint(c0).tracker)
+            .isInstanceOf(ClassOriginTracker.class);
+        assertThat(FlowTester.getCharSourcePoint(c1).tracker)
+            .isInstanceOf(ClassOriginTracker.class);
         called = true;
       }
     }
 
     MultiSink sink = new MultiSink();
     sink.write('a', 'b');
-    assertTrue(sink.called);
+    assertThat(sink.called).isTrue();
   }
 
   static boolean staticSinkInitialized = false;

@@ -1,9 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
@@ -100,8 +98,8 @@ public abstract class AbstractByteBufferTest {
     ByteBuffer bb = allocateTracked(4);
     bb.position(2);
     TrackerPoint point = FlowTester.getByteSourcePoint(bb.get());
-    assertSame(getTracker(bb), point.tracker);
-    assertEquals(2 + sliceOffset(), point.index);
+    assertThat(point.tracker).isSameInstanceAs(getTracker(bb));
+    assertThat(point.index).isEqualTo(2 + sliceOffset());
   }
 
   @Test
@@ -124,7 +122,7 @@ public abstract class AbstractByteBufferTest {
   }
 
   Tracker getTracker(ByteBuffer bb) {
-    assertFalse(bb.isDirect()); // direct ByteBuffers not supported here yet
+    assertThat(bb.isDirect()).isFalse(); // direct ByteBuffers not supported here yet
     return TrackerRepository.getTracker(bb.array());
   }
 

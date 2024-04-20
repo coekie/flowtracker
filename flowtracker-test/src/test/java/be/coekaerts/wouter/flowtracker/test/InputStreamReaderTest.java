@@ -1,10 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import be.coekaerts.wouter.flowtracker.hook.InputStreamHook;
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
@@ -31,7 +29,7 @@ public class InputStreamReaderTest {
 
   @Before public void setupReader() {
     stream = InputStreamReaderTest.class.getResourceAsStream(testFileName);
-    assertNotNull(stream);
+    assertThat(stream).isNotNull();
     tracker = requireNonNull(InputStreamHook.getInputStreamTracker(stream));
     reader = new InputStreamReader(stream);
   }
@@ -53,7 +51,7 @@ public class InputStreamReaderTest {
     ByteBuffer slice = byteContent.slice();
     slice.position(byteContent.position());
     slice.limit(expected.getBytes().length - slice.position());
-    assertEquals(ByteBuffer.wrap(expected.getBytes()), slice);
+    assertThat(slice).isEqualTo(ByteBuffer.wrap(expected.getBytes()));
   }
 
   @Test public void readSingleChar() throws IOException {
@@ -63,14 +61,14 @@ public class InputStreamReaderTest {
     assertContentEquals("ab");
 
     // read the rest
-    assertEquals('c', reader.read());
-    assertEquals('d', reader.read());
-    assertEquals('e', reader.read());
-    assertEquals('f', reader.read());
+    assertThat(reader.read()).isEqualTo('c');
+    assertThat(reader.read()).isEqualTo('d');
+    assertThat(reader.read()).isEqualTo('e');
+    assertThat(reader.read()).isEqualTo('f');
     assertContentEquals("abcdef");
 
     // test an extra failed read (eof)
-    assertEquals(-1, reader.read());
+    assertThat(reader.read()).isEqualTo(-1);
     assertContentEquals("abcdef");
   }
 
@@ -81,33 +79,33 @@ public class InputStreamReaderTest {
     char[] buffer = new char[5];
 
     // read 3 characters, 0 offset
-    assertEquals(3, reader.read(buffer, 0, 3));
-    assertArrayEquals(new char[]{'a', 'b', 'c', '\0', '\0'}, buffer);
+    assertThat(reader.read(buffer, 0, 3)).isEqualTo(3);
+    assertThat(buffer).isEqualTo(new char[]{'a', 'b', 'c', '\0', '\0'});
     snapshotBuilder().part(tracker, 0, 3).assertTrackerOf(buffer);
     assertContentEquals("abc");
 
     // read with offset
-    assertEquals(2, reader.read(buffer, 1, 2));
-    assertArrayEquals(new char[]{'a', 'd', 'e', '\0', '\0'}, buffer);
+    assertThat(reader.read(buffer, 1, 2)).isEqualTo(2);
+    assertThat(buffer).isEqualTo(new char[]{'a', 'd', 'e', '\0', '\0'});
     snapshotBuilder().part(tracker, 0, 1).part(tracker, 3, 2).assertTrackerOf(buffer);
     assertContentEquals("abcde");
 
     // incomplete read (only 1 instead of 5 asked chars read)
-    assertEquals(1, reader.read(buffer, 0, 5));
-    assertArrayEquals(new char[]{'f', 'd', 'e', '\0', '\0'}, buffer);
+    assertThat(reader.read(buffer, 0, 5)).isEqualTo(1);
+    assertThat(buffer).isEqualTo(new char[]{'f', 'd', 'e', '\0', '\0'});
     snapshotBuilder().part(tracker, 5, 1).part(tracker, 3, 2).assertTrackerOf(buffer);
     assertContentEquals("abcdef");
 
     // test an extra failed read (eof)
-    assertEquals(-1, reader.read(buffer, 0, 5));
+    assertThat(reader.read(buffer, 0, 5)).isEqualTo(-1);
     snapshotBuilder().part(tracker, 5, 1).part(tracker, 3, 2).assertTrackerOf(buffer);
     assertContentEquals("abcdef");
   }
 
   @Test public void readCharArray() throws IOException {
     char[] buffer = new char[2];
-    assertEquals(2, reader.read(buffer));
-    assertArrayEquals(new char[]{'a', 'b'}, buffer);
+    assertThat(reader.read(buffer)).isEqualTo(2);
+    assertThat(buffer).isEqualTo(new char[]{'a', 'b'});
     snapshotBuilder().part(tracker, 0, 2).assertTrackerOf(buffer);
     assertContentEquals("ab");
   }
@@ -117,8 +115,8 @@ public class InputStreamReaderTest {
   public void readCharArraySize1() throws IOException {
     char[] buffer1 = new char[1];
     // read 1 char
-    assertEquals(1, reader.read(buffer1));
-    assertEquals('a', buffer1[0]);
+    assertThat(reader.read(buffer1)).isEqualTo(1);
+    assertThat(buffer1[0]).isEqualTo('a');
     snapshotBuilder().part(tracker, 0, 1).assertTrackerOf(buffer1);
     assertContentEquals("a");
   }
@@ -126,25 +124,25 @@ public class InputStreamReaderTest {
   @Test public void readCharBuffer() throws IOException {
     CharBuffer buffer = CharBuffer.allocate(3);
 
-    assertEquals(3, reader.read(buffer));
+    assertThat(reader.read(buffer)).isEqualTo(3);
     assertContentEquals("abc");
-    assertArrayEquals("abc".toCharArray(), buffer.array());
+    assertThat(buffer.array()).isEqualTo("abc".toCharArray());
     snapshotBuilder().part(tracker, 0, 3).assertTrackerOf(buffer.array());
 
     buffer.position(1);
-    assertEquals(2, reader.read(buffer));
+    assertThat(reader.read(buffer)).isEqualTo(2);
     assertContentEquals("abcde");
-    assertArrayEquals("ade".toCharArray(), buffer.array());
+    assertThat(buffer.array()).isEqualTo("ade".toCharArray());
     snapshotBuilder().part(tracker, 0, 1).part(tracker, 3, 2).assertTrackerOf(buffer.array());
 
     buffer.position(1);
-    assertEquals(1, reader.read(buffer));
+    assertThat(reader.read(buffer)).isEqualTo(1);
     assertContentEquals("abcdef");
-    assertArrayEquals("afe".toCharArray(), buffer.array());
+    assertThat(buffer.array()).isEqualTo("afe".toCharArray());
     snapshotBuilder().part(tracker, 0, 1).part(tracker, 5, 1).part(tracker, 4, 1)
         .assertTrackerOf(buffer.array());
 
-    assertEquals(-1, reader.read(buffer));
+    assertThat(reader.read(buffer)).isEqualTo(-1);
     assertContentEquals("abcdef");
   }
 }

@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static org.junit.Assert.assertArrayEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
@@ -33,6 +33,6 @@ public class BufferedOutputStreamTest extends AbstractOutputStreamTest<BufferedO
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    assertArrayEquals(expected.getBytes(), bout.toByteArray());
+    assertThat(bout.toByteArray()).isEqualTo(expected.getBytes());
   }
 }

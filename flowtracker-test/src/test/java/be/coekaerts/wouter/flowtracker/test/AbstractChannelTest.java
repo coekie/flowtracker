@@ -2,8 +2,8 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
@@ -23,7 +23,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
   public void read() throws IOException {
     try (C channel = openForRead()) {
       ByteBuffer bb = ByteBuffer.allocate(10);
-      assertEquals(3, channel.read(bb));
+      assertThat(channel.read(bb)).isEqualTo(3);
       assertReadContentEquals("abc", channel);
       snapshotBuilder().part(getReadTracker(channel), 0, 3).assertTrackerOf(bb.array());
     }
@@ -33,12 +33,12 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
   public void readMultiple() throws IOException {
     try (C channel = openForRead()) {
       ByteBuffer bb = ByteBuffer.allocate(2);
-      assertEquals(2, channel.read(bb));
+      assertThat(channel.read(bb)).isEqualTo(2);
       assertReadContentEquals("ab", channel);
       snapshotBuilder().part(getReadTracker(channel), 0, 2).assertTrackerOf(bb.array());
 
       bb.position(0);
-      assertEquals(1, channel.read(bb));
+      assertThat(channel.read(bb)).isEqualTo(1);
       assertReadContentEquals("abc", channel);
       snapshotBuilder().part(getReadTracker(channel), 2, 1).part(getReadTracker(channel), 1, 1)
           .assertTrackerOf(bb.array());
@@ -73,12 +73,12 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
 
   void assertReadContentEquals(String expected, C channel) {
     var tracker = (ByteOriginTracker) requireNonNull(getReadTracker(channel));
-    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
+    assertThat(tracker.getByteContent()).isEqualTo(ByteBuffer.wrap(expected.getBytes()));
   }
 
   void assertWrittenContentEquals(String expected, C channel) {
     var tracker = (ByteSinkTracker) requireNonNull(getWriteTracker(channel));
-    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
+    assertThat(tracker.getByteContent()).isEqualTo(ByteBuffer.wrap(expected.getBytes()));
   }
 
   ByteOriginTracker getReadTracker(C channel) {

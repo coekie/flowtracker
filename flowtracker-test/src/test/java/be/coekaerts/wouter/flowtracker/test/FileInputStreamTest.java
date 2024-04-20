@@ -1,8 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
@@ -29,7 +28,8 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
   }
 
   @AfterClass public static void removeTmpFile() {
-    assertTrue(file.delete());
+    boolean deleted = file.delete();
+    assertThat(deleted).isTrue();
   }
 
   @Override
@@ -68,11 +68,11 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
     try (FileInputStream is = createInputStream("1234".getBytes())) {
       // first read from the FileInputStream
       byte[] buffer = new byte[2];
-      assertEquals(2, is.read(buffer));
+      assertThat(is.read(buffer)).isEqualTo(2);
 
       // then read from the associated FileChannel
       ByteBuffer bb = ByteBuffer.wrap(new byte[2]);
-      assertEquals(2, is.getChannel().read(bb));
+      assertThat(is.getChannel().read(bb)).isEqualTo(2);
       snapshotBuilder().part(getStreamTracker(is), 2, 2).assertTrackerOf(bb.array());
 
       assertContentEquals("1234", is);

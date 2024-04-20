@@ -2,8 +2,7 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -21,19 +20,19 @@ public class CharsetEncoderTest {
     // "Handle ASCII-only prefix" part in sun.nio.cs.UTF_8$Encoder.encodeArrayLoop
     utf8Encoder().encode(CharBuffer.wrap(abc), bb, false);
 
-    assertArrayEquals("abc\0\0".getBytes(), bb.array());
+    assertThat(bb.array()).isEqualTo("abc\0\0".getBytes());
     snapshotBuilder().track(abc, 0, 3).assertTrackerOf(bb.array());
   }
 
   // not a real test, just gathering some good test data
   @Test
   public void examples() {
-    assertEquals(2, "\u00A3".getBytes().length); // $
-    assertEquals(3, "\u0939".getBytes().length); // ह
-    assertEquals(3, "\u20AC".getBytes().length); // €
-    assertEquals(3, "\uD55C".getBytes().length); // 한
+    assertThat("\u00A3".getBytes().length).isEqualTo(2); // $
+    assertThat("\u0939".getBytes().length).isEqualTo(3); // ह
+    assertThat("\u20AC".getBytes().length).isEqualTo(3); // €
+    assertThat("\uD55C".getBytes().length).isEqualTo(3); // 한
     // surrogate pair
-    assertEquals(4, "\ud83c\udf09".getBytes().length); // 🌉
+    assertThat("\ud83c\udf09".getBytes().length).isEqualTo(4); // 🌉
   }
 
   @Test
@@ -42,7 +41,7 @@ public class CharsetEncoderTest {
     char[] chars = trackedCharArray("a\u00A3bc");
     utf8Encoder().encode(CharBuffer.wrap(chars), bb, false);
 
-    assertArrayEquals("a\u00A3bc\0".getBytes(), bb.array());
+    assertThat(bb.array()).isEqualTo("a\u00A3bc\0".getBytes());
     // TODO this isn't right, lost track of the non-ascii char
     snapshotBuilder().track(chars, 0, 1).gap(2).track(chars, 2, 2).assertTrackerOf(bb.array());
   }

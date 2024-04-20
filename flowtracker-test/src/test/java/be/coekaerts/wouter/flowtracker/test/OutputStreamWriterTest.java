@@ -5,8 +5,8 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharAr
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedCharArray;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedString;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharContentTracker;
@@ -51,13 +51,14 @@ public class OutputStreamWriterTest {
 
   private void assertContentEquals(String expected) throws IOException {
     // check content of writer
-    assertEquals(expected,
-        requireNonNull((CharContentTracker)TrackerRepository.getTracker(writer)).getContent()
-            .toString());
+    assertThat(
+        requireNonNull((CharContentTracker) TrackerRepository.getTracker(writer)).getContent()
+            .toString())
+        .isEqualTo(expected);
 
     // check content of FileOutputStream
     writer.flush();
-    assertEquals(ByteBuffer.wrap(expected.getBytes()), streamTracker.getByteContent());
+    assertThat(streamTracker.getByteContent()).isEqualTo(ByteBuffer.wrap(expected.getBytes()));
   }
 
   @Test public void writeSingleChar() throws IOException {

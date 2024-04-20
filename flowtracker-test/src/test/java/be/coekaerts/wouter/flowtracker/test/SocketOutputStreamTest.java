@@ -1,8 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
@@ -30,8 +30,8 @@ public class SocketOutputStreamTest extends AbstractOutputStreamTest<OutputStrea
   @Override
   Tracker getTracker(OutputStream os) {
     try {
-      assertSame("this test only supports the one OutputStream",
-          tester.client.getOutputStream(), os);
+      assertWithMessage("this test only supports the one OutputStream")
+          .that(os).isSameInstanceAs(tester.client.getOutputStream());
       return SocketTester.getWriteTracker(tester.client);
     } catch (IOException e) {
       throw new AssertionError(e);
@@ -41,6 +41,6 @@ public class SocketOutputStreamTest extends AbstractOutputStreamTest<OutputStrea
   @Override
   void assertContentEquals(String expected, OutputStream os) {
     var tracker = (ByteSinkTracker) requireNonNull(getTracker(os));
-    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
+    assertThat(tracker.getByteContent()).isEqualTo(ByteBuffer.wrap(expected.getBytes()));
   }
 }

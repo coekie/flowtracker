@@ -2,9 +2,8 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
@@ -29,7 +28,8 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
 
   @AfterClass
   public static void removeTmpFile() {
-    assertTrue(file.delete());
+    boolean deleted = file.delete();
+    assertThat(deleted).isTrue();
   }
 
   @Test public void node() throws IOException {
@@ -79,6 +79,6 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
   @Override
   void assertContentEquals(String expected, FileOutputStream os) {
     var tracker = (ByteSinkTracker) requireNonNull(getTracker(os));
-    assertEquals(ByteBuffer.wrap(expected.getBytes()), tracker.getByteContent());
+    assertThat(tracker.getByteContent()).isEqualTo(ByteBuffer.wrap(expected.getBytes()));
   }
 }

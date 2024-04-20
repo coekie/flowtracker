@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
 
@@ -51,14 +51,14 @@ public class FlowTesterTest {
   @Test
   public void testGetTracker_char() {
     char a = ft.createSourceChar('a');
-    assertEquals(ft.theSource(), FlowTester.getCharSourceTracker(a));
-    assertEquals(ft.theSourcePoint(), FlowTester.getCharSourcePoint(a));
+    assertThat(FlowTester.getCharSourceTracker(a)).isEqualTo(ft.theSource());
+    assertThat(FlowTester.getCharSourcePoint(a)).isEqualTo(ft.theSourcePoint());
   }
 
   @Test
   public void testGetTracker_byte() {
     byte a = ft.createSourceByte((byte) 'a');
-    assertEquals(ft.theSource(), FlowTester.getByteSourceTracker(a));
-    assertEquals(ft.theSourcePoint(), FlowTester.getByteSourcePoint(a));
+    assertThat(FlowTester.getByteSourceTracker(a)).isEqualTo(ft.theSource());
+    assertThat(FlowTester.getByteSourcePoint(a)).isEqualTo(ft.theSourcePoint());
   }
 }

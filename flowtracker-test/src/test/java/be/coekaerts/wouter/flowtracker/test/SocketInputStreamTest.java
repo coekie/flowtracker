@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.test;
 
-import static org.junit.Assert.assertSame;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import be.coekaerts.wouter.flowtracker.hook.NetSocketInputStreamHook;
 import be.coekaerts.wouter.flowtracker.hook.SocketImplHook;
@@ -45,8 +45,8 @@ public class SocketInputStreamTest extends AbstractInputStreamTest {
   @Override
   Tracker getStreamTracker(InputStream is) {
     try {
-      assertSame("this test only supports the one InputStream",
-          tester.client.getInputStream(), is);
+      assertWithMessage("this test only supports the one InputStream")
+          .that(is).isSameInstanceAs(tester.client.getInputStream());
       return SocketTester.getReadTracker(tester.client);
     } catch (IOException e) {
       throw new RuntimeException(e);

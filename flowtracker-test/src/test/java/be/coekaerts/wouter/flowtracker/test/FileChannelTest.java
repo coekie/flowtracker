@@ -1,7 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.hook.Reflection;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
@@ -35,7 +35,8 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
 
   @AfterClass
   public static void removeTmpFile() {
-    assertTrue(fileToRead.delete());
+    boolean deleted = fileToRead.delete();
+    assertThat(deleted).isTrue();
   }
 
   @Override

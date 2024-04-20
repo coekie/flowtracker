@@ -1,8 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
@@ -42,7 +42,8 @@ public class ZipFileTest {
         byte[] bytes = in.readAllBytes();
         Tracker tracker = TrackerRepository.getTracker(in);
         snapshotBuilder().part(tracker, 0, bytes.length).assertTrackerOf(bytes);
-        assertEquals(ByteBuffer.wrap(bytes), ((ByteOriginTracker) tracker).getByteContent());
+        assertThat(((ByteOriginTracker) tracker).getByteContent())
+            .isEqualTo(ByteBuffer.wrap(bytes));
       }
     }
   }

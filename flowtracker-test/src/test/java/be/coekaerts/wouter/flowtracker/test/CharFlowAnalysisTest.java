@@ -5,8 +5,7 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerRepository.getTracker;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
 
@@ -74,7 +73,7 @@ public class CharFlowAnalysisTest {
 
     // would be nice if this was tracked. for now, we're happy with it not blowing up
     // snapshotBuilder().track(a, 0, 1).assertTrackerOf(bytes);
-    assertNull(getTracker(bytes));
+    assertThat(getTracker(bytes)).isNull();
   }
 
   @Test public void stringBuilderAppendChar() {
@@ -85,7 +84,7 @@ public class CharFlowAnalysisTest {
     }
     String result = sb.toString();
 
-    assertEquals("abc", result);
+    assertThat(result).isEqualTo("abc");
 
     snapshotBuilder().trackString(abc, 0, 3)
         .assertEquals(getStringTracker(result));
@@ -99,7 +98,7 @@ public class CharFlowAnalysisTest {
     }
     String result = sb.toString();
 
-    assertEquals("abc", result);
+    assertThat(result).isEqualTo("abc");
 
     snapshotBuilder().trackString(abc, 0, 3)
         .assertEquals(getStringTracker(result));
@@ -156,7 +155,7 @@ public class CharFlowAnalysisTest {
   //  MergedValue.getCreationInsn is null, so MergedValue.isTrackable() is false
   @Test public void mergeWithParamSwitch() {
     doMergeWithParamSwitch(ft.createSourceChar('a'), 1);
-    assertNull(FlowTester.getCharSourcePoint(chars[0]));
+    assertThat(FlowTester.getCharSourcePoint(chars[0])).isNull();
   }
 
   @SuppressWarnings("all")
@@ -173,7 +172,7 @@ public class CharFlowAnalysisTest {
   // both.
   @Test public void mergeWithParamIf() {
     doMergeWithParamIf(ft.createSourceChar('a'), false);
-    assertNull(FlowTester.getCharSourcePoint(chars[0]));
+    assertThat(FlowTester.getCharSourcePoint(chars[0])).isNull();
   }
 
   @SuppressWarnings("all")

@@ -1,9 +1,8 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.assertThatTracker;
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
@@ -31,7 +30,7 @@ public class FilesTest {
 
   @AfterClass
   public static void removeTmpFile() {
-    assertTrue(file.delete());
+    assertThat(file.delete()).isTrue();
   }
 
   // this is not a test aimed at a specific hook
@@ -39,10 +38,10 @@ public class FilesTest {
   public void copy() throws IOException {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     long result = Files.copy(file.toPath(), bout);
-    assertEquals(3, result);
+    assertThat(result).isEqualTo(3);
     Tracker tracker = requireNonNull(TrackerRepository.getTracker(bout.toByteArray()));
     TrackerSnapshot trackerSnapshot = TrackerSnapshot.of(tracker);
-    assertEquals(1, trackerSnapshot.getParts().size());
+    assertThat(trackerSnapshot.getParts()).hasSize(1);
     Part part = trackerSnapshot.getParts().get(0);
     assertThatTracker(part.source)
         .hasNodeStartingWith("Files")

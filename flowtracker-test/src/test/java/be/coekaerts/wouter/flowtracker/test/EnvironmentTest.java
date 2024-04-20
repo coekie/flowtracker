@@ -8,7 +8,9 @@ public class EnvironmentTest {
 
   @Test public void noAsm() {
     try {
-      EnvironmentTest.class.getClassLoader().loadClass("org.objectweb.asm.ClassReader");
+      // google-truth depends on ASM too, but we want to test that it's just from there that we
+      // get ASM classes on the classpath here, so we test with a class in asm-analysis
+      EnvironmentTest.class.getClassLoader().loadClass("org.objectweb.asm.tree.analysis.Analyzer");
       fail("Asm should not be in the app classpath");
     } catch (ClassNotFoundException expected) {
     }

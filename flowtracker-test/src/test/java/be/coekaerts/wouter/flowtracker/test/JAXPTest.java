@@ -2,7 +2,7 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.assertNull;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import java.io.ByteArrayInputStream;
@@ -33,7 +33,7 @@ public class JAXPTest {
 
     // in com.sun.org.apache.xerces.internal.util.SymbolTable, the names of tags are interned, which
     // makes them very hard to track
-    assertNull(StringHook.getStringTracker(handler.startedElement));
+    assertThat(StringHook.getStringTracker(handler.startedElement)).isNull();
 
     // but content is tracked
     snapshotBuilder().trackString(input, 6, 5)

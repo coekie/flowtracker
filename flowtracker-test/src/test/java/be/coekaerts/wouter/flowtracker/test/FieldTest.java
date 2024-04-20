@@ -1,7 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
 
 import be.coekaerts.wouter.flowtracker.tracker.FieldRepository;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
@@ -19,9 +19,9 @@ public class FieldTest {
     String fieldId =
         FieldRepository.fieldId("be/coekaerts/wouter/flowtracker/test/FieldTest", "c");
     TrackerPoint point = requireNonNull(FieldRepository.getPoint(this, fieldId));
-    assertEquals(tester.theSource(), point.tracker);
-    assertEquals(tester.theSourceIndex(), point.index);
-    assertEquals('a', c);
+    assertThat(point.tracker).isEqualTo(tester.theSource());
+    assertThat(point.index).isEqualTo(tester.theSourceIndex());
+    assertThat(c).isEqualTo('a');
   }
 
   @Test

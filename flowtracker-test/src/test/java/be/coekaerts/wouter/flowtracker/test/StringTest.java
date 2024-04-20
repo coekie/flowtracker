@@ -5,12 +5,7 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackCopy;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.untrackedString;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshotBuilder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
@@ -21,8 +16,8 @@ import org.junit.Test;
 public class StringTest {
   @Test public void testUnknown() {
     String a = untrackedString("unknownTest");
-    assertNull(TrackerRepository.getTracker(a));
-    assertNull(getStringTracker(a));
+    assertThat(TrackerRepository.getTracker(a)).isNull();
+    assertThat(getStringTracker(a)).isNull();
   }
 
   @Test public void testToCharArray() {
@@ -35,7 +30,7 @@ public class StringTest {
     String foo = trackCopy("foo");
     String bar = trackCopy("bar");
     String foobar = foo.concat(bar);
-    assertEquals("foobar", foobar);
+    assertThat(foobar).isEqualTo("foobar");
 
     snapshotBuilder().trackString(foo).trackString(bar)
         .assertEquals(getStringTracker(foobar));
@@ -44,7 +39,7 @@ public class StringTest {
   @Test public void testSubstringBegin() {
     String foobar = trackCopy("foobar");
     String foo = foobar.substring(0, 3);
-    assertEquals("foo", foo);
+    assertThat(foo).isEqualTo("foo");
 
     snapshotBuilder().trackString(foobar, 0, 3)
         .assertEquals(getStringTracker(foo));
@@ -53,7 +48,7 @@ public class StringTest {
   @Test public void testSubstringEnd() {
     String foobar = trackCopy("foobar");
     String bar = foobar.substring(3);
-    assertEquals("bar", bar);
+    assertThat(bar).isEqualTo("bar");
 
     snapshotBuilder().trackString(foobar, 3, 3)
         .assertEquals(getStringTracker(bar));
@@ -82,7 +77,7 @@ public class StringTest {
   @Test public void testGetStringTracker() {
     char[] chars = trackedCharArray("abcd");
     String str = new String(chars, 1, 2); // create String "bc"
-    assertEquals("bc", str);
+    assertThat(str).isEqualTo("bc");
 
     snapshotBuilder().track(chars, 1, 2)
         .assertEquals(getStringTracker(str));
@@ -93,7 +88,7 @@ public class StringTest {
     String src = trackCopy("abcd");
     String replacement = trackCopy("x");
     String result = src.replace("bc", replacement);
-    assertEquals("axd", result);
+    assertThat(result).isEqualTo("axd");
     snapshotBuilder().trackString(src, 0, 1).trackString(replacement).trackString(src, 3, 1)
         .assertEquals(getStringTracker(result));
   }
@@ -103,7 +98,7 @@ public class StringTest {
     String src = trackCopy("abc");
     FlowTester replacementCharTester = new FlowTester();
     String result = src.replace('b', replacementCharTester.createSourceChar('x'));
-    assertEquals("axc", result);
+    assertThat(result).isEqualTo("axc");
     snapshotBuilder().trackString(src, 0, 1)
         .part(replacementCharTester.theSource(), replacementCharTester.theSourceIndex(), 1)
         .trackString(src, 2, 1)
@@ -119,7 +114,7 @@ public class StringTest {
     String src = trackCopy("abc");
     String replacement = trackCopy("x");
     String result = src.replace("b", replacement);
-    assertEquals("axc", result);
+    assertThat(result).isEqualTo("axc");
     snapshotBuilder().trackString(src, 0, 1).trackString(replacement).trackString(src, 2, 1)
         .assertEquals(getStringTracker(result));
   }
@@ -127,16 +122,17 @@ public class StringTest {
   @Test public void testStringConstant() {
     String str = ldcString();
     TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
-    assertEquals(1, snapshot.getParts().size());
+    assertThat(snapshot.getParts()).hasSize(1);
     Part part = snapshot.getParts().get(0);
     ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
-    assertEquals("test-ldc", sourceTracker.getContent()
-        .subSequence(part.sourceIndex, part.sourceIndex + part.length));
-    assertSame(str, ldcString());
+    assertThat(sourceTracker.getContent()
+        .subSequence(part.sourceIndex, part.sourceIndex + part.length))
+        .isEqualTo("test-ldc");
+    assertThat(ldcString()).isSameInstanceAs(str);
   }
 
   // this is a separate method, so that there's only one entry for this in the constant pool for
-  // constant-dynamic, so that the "assertSame" check above passes.
+  // constant-dynamic, so that the "isSameInstanceAs" check above passes.
   // in instrumented code; a constant String referenced in two different places in the code is not
   // always the same instance (our instrumentation breaks String interning).
   private String ldcString() {
@@ -147,14 +143,15 @@ public class StringTest {
   @Test public void testStringConstantNoCondy() {
     String str = NoCondy.ldcNoCondy();
     TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
-    assertEquals(1, snapshot.getParts().size());
+    assertThat(snapshot.getParts()).hasSize(1);
     Part part = snapshot.getParts().get(0);
     ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
-    assertEquals("test-ldc-no-condy", sourceTracker.getContent()
-        .subSequence(part.sourceIndex, part.sourceIndex + part.length));
+    assertThat(sourceTracker.getContent()
+        .subSequence(part.sourceIndex, part.sourceIndex + part.length))
+        .isEqualTo("test-ldc-no-condy");
     // would have been nice if they were, but currently multiple invocations do not return the same
     // instance.
-    assertNotSame(NoCondy.ldcNoCondy(), NoCondy.ldcNoCondy());
+    assertThat(NoCondy.ldcNoCondy()).isNotSameInstanceAs(NoCondy.ldcNoCondy());
   }
 
   /**
@@ -165,9 +162,9 @@ public class StringTest {
   @Test public void testStringEquality() {
     String foo1 = "foo";
     String foo2 = "foo";
-    assertTrue(foo1 == foo2);
-    assertFalse(foo1 != foo2);
-    assertNotSame(foo1, foo2);
+    assertThat(foo1 == foo2).isTrue(); // NOT same as assertThat(foo1).isSameInstanceAs(foo2)!
+    assertThat(foo1 != foo2).isFalse();
+    assertThat(foo1).isNotSameInstanceAs(foo2);
   }
 
   // this class is excluded from using constant-dynamic, to be able to test instrumentation where
