@@ -1,8 +1,7 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
 
@@ -16,11 +15,11 @@ public class InvocationTest {
     // inside the called read() method:
     {
       Invocation calledInvocation = Invocation.start("read");
-      assertSame(callingInvocation, calledInvocation);
+      assertThat(calledInvocation).isSameInstanceAs(callingInvocation);
       Invocation.returning(calledInvocation, trackerPoint);
     }
 
-    assertSame(trackerPoint, callingInvocation.returnPoint);
+    assertThat(callingInvocation.returnPoint).isSameInstanceAs(trackerPoint);
   }
 
   @Test
@@ -33,21 +32,21 @@ public class InvocationTest {
     // inside the called write() method:
     {
       Invocation calledInvocation = requireNonNull(Invocation.start("write"));
-      assertSame(callingInvocation, calledInvocation);
-      assertSame(trackerPoint, Invocation.getArgPoint(calledInvocation, 0));
+      assertThat(calledInvocation).isSameInstanceAs(callingInvocation);
+      assertThat(Invocation.getArgPoint(calledInvocation, 0)).isSameInstanceAs(trackerPoint);
     }
   }
 
   @Test
   public void testStartWithoutCalling() {
-    assertNull(Invocation.start("read"));
+    assertThat(Invocation.start("read")).isNull();
   }
 
   @Test
   public void testUseEachInvocationOnlyOnce() {
     Invocation calling = Invocation.createCalling("read");
     Invocation called = Invocation.start("read");
-    assertSame(calling, called);
-    assertNull(Invocation.start("read"));
+    assertThat(called).isSameInstanceAs(calling);
+    assertThat(Invocation.start("read")).isNull();
   }
 }

@@ -1,21 +1,19 @@
 package be.coekaerts.wouter.flowtracker.tracker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
 
 public class ClassOriginTrackerTest {
   @Test public void test() {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass("myClass");
-    assertSame(tracker, ClassOriginTracker.get(tracker.classId));
+    assertThat(ClassOriginTracker.get(tracker.classId)).isSameInstanceAs(tracker);
 
     tracker.startMethod("myMethod");
     int xOffset = tracker.registerConstant('x');
-    assertEquals("class myClass\n"
+    assertThat(tracker.getContent().toString()).isEqualTo("class myClass\n"
             + "myMethod:\n"
-            + "  x\n",
-        tracker.getContent().toString());
-    assertEquals('x', tracker.getContent().charAt(xOffset));
+            + "  x\n");
+    assertThat(tracker.getContent().charAt(xOffset)).isEqualTo('x');
   }
 }

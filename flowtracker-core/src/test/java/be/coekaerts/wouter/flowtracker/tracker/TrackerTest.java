@@ -26,7 +26,7 @@ public class TrackerTest {
     target.setSource(5, 3, source, 105, Growth.DOUBLE); // setting 5,6,7
 
     snapshotBuilder().gap(5).part(3, source, 105, Growth.DOUBLE)
-            .assertEquals(target);
+        .assertEquals(target);
   }
 
   /** Set one source, then a second one after it, leaving a gap in between */
