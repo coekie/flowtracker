@@ -94,7 +94,7 @@
                 activate the agent, without giving any options to it,
                 except for port to avoid port conflicts (e.g. with other running flowtracker agents)
               -->
-              <argLine>-javaagent:${project.build.directory}/${project.build.finalName}.jar=port=0</argLine>
+              <argLine>-javaagent:${project.build.directory}/${project.build.finalName}.jar=port=0 ${flowtracker.jvmArgs}</argLine>
             </configuration>
           </execution>
         </executions>
