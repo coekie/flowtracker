@@ -32,7 +32,10 @@ public class DevAgent {
       File root = new File(agentJar.getName()).getParentFile().getParentFile().getParentFile();
 
       List<URL> spiderClasspath = new ArrayList<>();
-      for (String module : new String[]{"flowtracker-weaver", "flowtracker-web"}) {
+      String[] modules = config.getBoolean("webmodule", true)
+          ? new String[]{"flowtracker-weaver", "flowtracker-web"}
+          : new String[]{"flowtracker-weaver"};
+      for (String module : modules) {
         File classesPath = new File(root, module + "/target/classes");
         if (!classesPath.exists()) {
           throw new Error("Error building classpath: " + classesPath + " not found");

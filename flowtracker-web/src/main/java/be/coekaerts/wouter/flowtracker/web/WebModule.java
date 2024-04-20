@@ -1,8 +1,11 @@
 package be.coekaerts.wouter.flowtracker.web;
 
+import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import be.coekaerts.wouter.flowtracker.util.Config;
 import jakarta.servlet.DispatcherType;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.EnumSet;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -22,8 +25,20 @@ public class WebModule {
   final Server server;
 
   public WebModule(Config config) throws Exception {
+    if (config.getBoolean("webserver", true)) {
+      server = startServer(config);
+    } else {
+      server = null;
+    }
+    String snapshotOnExitPath = config.get("snapshotOnExit");
+    if (snapshotOnExitPath != null) {
+      snapshotOnExit(snapshotOnExitPath, config);
+    }
+  }
+
+  private static Server startServer(Config config) throws Exception {
     // Setup server and servlet context
-    server = new Server(new TrackerSuspendingThreadPool());
+    Server server = new Server(new TrackerSuspendingThreadPool());
     server.addConnector(createConnector(server, config));
 
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -49,6 +64,8 @@ public class WebModule {
 
     // Start
     server.start();
+
+    return server;
   }
 
   private static Connector createConnector(Server server, Config config) {
@@ -60,6 +77,22 @@ public class WebModule {
 
   int getPort() {
     return ((ServerConnector) server.getConnectors()[0]).getLocalPort();
+  }
+
+  private static void snapshotOnExit(String path, Config config) {
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      @Override public void run() {
+        Trackers.suspendOnCurrentThread();
+        try (var out = new FileOutputStream(path)) {
+          new Snapshot(TrackerTree.ROOT, config.getBoolean("snapshotOnExitMinimized", true))
+              .write(out);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        } finally {
+          Trackers.unsuspendOnCurrentThread();
+        }
+      }
+    });
   }
 
   /**

@@ -79,8 +79,8 @@ public class FlowTrackAgent {
 
     // NICE: generic plugin system would be cleaner
     private static void initWeb(ClassLoader classLoader, Config config) throws Exception {
-      // don't start webserver when "noweb" is set, e.g. for unit tests
-      if (config.getBoolean("noweb", false)) {
+      // don't load web module when "webmodule" is turned off, e.g. for unit tests
+      if (!config.getBoolean("webmodule", true)) {
         return;
       }
 
