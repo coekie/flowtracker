@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -63,7 +63,7 @@ class TransformerTestUtils {
     // verify bytecode using asm. this is not as thorough as the jvm, but gives more helpful error
     // messages when it fails
     CheckClassAdapter.verify(new ClassReader(classWriter.toByteArray()), false, verifyPrintWriter);
-    assertEquals("", verifyStringWriter.toString());
+    assertThat(verifyStringWriter.toString()).isEmpty();
 
     try {
       return loadClass(classType.getClassName() + suffix, classWriter.toByteArray());

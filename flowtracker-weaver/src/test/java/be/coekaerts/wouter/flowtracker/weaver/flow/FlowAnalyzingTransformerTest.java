@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.util.Config;
 import be.coekaerts.wouter.flowtracker.weaver.debug.CommentTextifier;
@@ -1017,8 +1017,8 @@ public class FlowAnalyzingTransformerTest {
    */
   static void testTransform(Object o, String expectOriginalCode, String expectedTransformedCode) {
     testTransformClass(o.getClass().getName(),
-        originalCode -> assertEquals(expectOriginalCode, originalCode),
-        transformedCode -> assertEquals(expectedTransformedCode, transformedCode));
+        originalCode -> assertThat(originalCode).isEqualTo(expectOriginalCode),
+        transformedCode -> assertThat(transformedCode).isEqualTo(expectedTransformedCode));
   }
 
   static void testTransformClass(String className, Consumer<String> assertOriginalCode,
@@ -1049,7 +1049,7 @@ public class FlowAnalyzingTransformerTest {
     // verify bytecode using asm. this is not as thorough as the jvm, but gives more helpful error
     // messages when it fails
     CheckClassAdapter.verify(new ClassReader(classWriter.toByteArray()), false, verifyPrintWriter);
-    assertEquals("", verifyStringWriter.toString());
+    assertThat(verifyStringWriter.toString()).isEmpty();
 
     try {
       verifyBytecodeJvm(className, classWriter.toByteArray());

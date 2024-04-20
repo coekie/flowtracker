@@ -1,6 +1,6 @@
 package be.coekaerts.wouter.flowtracker.generator;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,9 +9,8 @@ import org.junit.Test;
 public class HookSpecGeneratorTest {
   @Test
   public void generatedCodeUpToDate() throws IOException {
-    assertEquals(
-        removeStaticImports(Files.readString(HookSpecGenerator.OUTPUT_FILE)),
-        removeStaticImports(HookSpecGenerator.generate()));
+    assertThat(removeStaticImports(HookSpecGenerator.generate()))
+        .isEqualTo(removeStaticImports(Files.readString(HookSpecGenerator.OUTPUT_FILE)));
   }
 
   // don't fail if IntelliJ optimized the imports

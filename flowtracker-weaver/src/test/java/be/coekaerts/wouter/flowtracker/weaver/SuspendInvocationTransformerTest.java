@@ -1,9 +1,7 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
 import static be.coekaerts.wouter.flowtracker.weaver.TransformerTestUtils.transformAndRun;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Invocation;
@@ -23,9 +21,9 @@ public class SuspendInvocationTransformerTest {
     Invocation suspendedInvocation = Invocation.createCalling("should get suspended")
         .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777));
     transformAndRun(transformer, Type.getType(SuspendInvocationTransformerTestSubject.class));
-    assertTrue(called);
+    assertThat(called).isTrue();
     // invocation should have been restored
-    assertSame(suspendedInvocation, Invocation.peekPending());
+    assertThat(Invocation.peekPending()).isSameInstanceAs(suspendedInvocation);
   }
 }
 
@@ -34,7 +32,7 @@ public class SuspendInvocationTransformerTest {
 class SuspendInvocationTransformerTestSubject implements Runnable {
   @Override
   public void run() {
-    assertNull(Invocation.peekPending()); // test that the active invocation was suspended
+    assertThat(Invocation.peekPending()).isNull(); // test that the active invocation was suspended
     SuspendInvocationTransformerTest.called = true;
   }
 }

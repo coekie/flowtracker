@@ -1,7 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.annotation.HookLocation;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
@@ -32,8 +31,9 @@ public class HookSpecTest {
         Type.getType(MyHook.class), Method.getMethod("void afterBar(java.lang.Object,int)"),
         HookLocation.ON_RETURN,
         HookSpec.THIS, HookSpec.ARG0));
-    assertEquals("bar 5\n"
-        + "afterBar Foo2 5\n", log.toString());
+    assertThat(log.toString()).isEqualTo(
+        "bar 5\n"
+            + "afterBar Foo2 5\n");
   }
 
   @Test
@@ -44,8 +44,9 @@ public class HookSpecTest {
         Method.getMethod("void afterWithReturnValue(java.lang.String,int)"),
         HookLocation.ON_RETURN,
         HookSpec.RETURN, HookSpec.ARG0));
-    assertEquals("withReturnValue 5\n"
-        + "afterWithReturnValue retVal 5\n", log.toString());
+    assertThat(log.toString()).isEqualTo(
+        "withReturnValue 5\n"
+            + "afterWithReturnValue retVal 5\n");
   }
 
   @Test
@@ -64,8 +65,9 @@ public class HookSpecTest {
             Method.getMethod("void afterWithOnEnter(java.lang.String,java.lang.String)"),
             HookLocation.ON_RETURN,
             arg0OnEnter, HookSpec.ARG0));
-    assertEquals("withOnEnter originalArg 2\n"
-        + "afterWithOnEnter originalArg updatedArg\n", log.toString());
+    assertThat(log.toString()).isEqualTo(
+        "withOnEnter originalArg 2\n"
+            + "afterWithOnEnter originalArg updatedArg\n");
   }
 
   @Test
@@ -78,8 +80,9 @@ public class HookSpecTest {
             "void afterWithInvocation(be.coekaerts.wouter.flowtracker.tracker.Invocation)"),
         HookLocation.ON_RETURN,
         HookSpec.INVOCATION));
-    assertEquals("withInvocation\n"
-        + "afterWithInvocation 777\n", log.toString());
+    assertThat(log.toString()).isEqualTo(
+        "withInvocation\n"
+            + "afterWithInvocation 777\n");
   }
 
   @Test
@@ -90,7 +93,7 @@ public class HookSpecTest {
     transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void withField()"),
         Type.getType(MyHook.class), Method.getMethod("void afterWithField(int)"),
         HookLocation.ON_RETURN, hookArguments));
-    assertEquals("afterWithField 10\n", log.toString());
+    assertThat(log.toString()).isEqualTo("afterWithField 10\n");
   }
 
   @Test
@@ -99,8 +102,9 @@ public class HookSpecTest {
     transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void bar(int)"),
         Type.getType(MyHook.class), Method.getMethod("void before(java.lang.Object,int)"),
         HookLocation.ON_ENTER, HookSpec.THIS, HookSpec.ARG0));
-    assertEquals("before Foo2 5\n"
-        + "bar 5\n", log.toString());
+    assertThat(log.toString()).isEqualTo(
+        "before Foo2 5\n"
+            + "bar 5\n");
   }
 
   /**
@@ -136,7 +140,7 @@ public class HookSpecTest {
 
     public static void afterWithSuspendedInvocation(Invocation invocation) {
       log("afterWithSuspendedInvocation", Invocation.getArgPoint(invocation, 0).index);
-      assertNull(Invocation.peekPending());
+      assertThat(Invocation.peekPending()).isNull();
       // to match its only use-case, unsuspend (restore) the invocation in the hook
       Invocation.unsuspend(invocation);
     }

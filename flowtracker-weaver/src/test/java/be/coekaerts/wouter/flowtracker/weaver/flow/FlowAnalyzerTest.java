@@ -1,7 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.ICONST_1;
@@ -56,7 +55,7 @@ public class FlowAnalyzerTest {
         return c;
       }
     });
-    assertTrue(v.getOriginal() instanceof InvocationArgValue);
+    assertThat(v.getOriginal()).isInstanceOf(InvocationArgValue.class);
   }
 
   @Test
@@ -81,7 +80,7 @@ public class FlowAnalyzerTest {
         return b ? c1 : c2;
       }
     });
-    assertEquals(v.values.size(), 2);
+    assertThat(v.values.size()).isEqualTo(2);
   }
 
   // this is a bit of a weird test case. this is testing if when two long values get merged, that
@@ -99,7 +98,7 @@ public class FlowAnalyzerTest {
         return (a = b);
       }
     });
-    assertEquals(Type.LONG, v.getType().getSort());
+    assertThat(v.getType().getSort()).isEqualTo(Type.LONG);
   }
 
   // template for a test case that can be used with output of FlowMethodAdapter.dumpAsm, to test

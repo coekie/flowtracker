@@ -1,19 +1,19 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
 
 public class InvocationArgStoreTest {
   @Test public void testShouldInstrumentInvocationArg() {
-    assertTrue(InvocationArgStore.shouldInstrumentInvocationArg("whatever", "(B)V"));
-    assertTrue(InvocationArgStore.shouldInstrumentInvocationArg("whatever", "(C)V"));
+    assertThat(InvocationArgStore.shouldInstrumentInvocationArg("whatever", "(B)V")).isTrue();
+    assertThat(InvocationArgStore.shouldInstrumentInvocationArg("whatever", "(C)V")).isTrue();
 
     // e.g. OutputStream.write
-    assertTrue(InvocationArgStore.shouldInstrumentInvocationArg("write", "(I)V"));
+    assertThat(InvocationArgStore.shouldInstrumentInvocationArg("write", "(I)V")).isTrue();
     // e.g. BufferedOutputStream.implWrite
-    assertTrue(InvocationArgStore.shouldInstrumentInvocationArg("implWrite", "(I)V"));
+    assertThat(InvocationArgStore.shouldInstrumentInvocationArg("implWrite", "(I)V")).isTrue();
     // e.g. PrintStream.print
-    assertTrue(InvocationArgStore.shouldInstrumentInvocationArg("print", "(I)V"));
+    assertThat(InvocationArgStore.shouldInstrumentInvocationArg("print", "(I)V")).isTrue();
   }
 }
