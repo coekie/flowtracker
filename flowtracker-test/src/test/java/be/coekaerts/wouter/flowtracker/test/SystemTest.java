@@ -2,10 +2,13 @@ package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharArray;
+import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
+import be.coekaerts.wouter.flowtracker.hook.StringHook;
+import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import org.junit.Test;
 
@@ -61,5 +64,17 @@ public class SystemTest {
 				.isNotEmpty();
 		assertThat(TrackerTree.node("System").node("System.err").node("Writer").trackers())
 				.isNotEmpty();
+	}
+
+	@Test
+	public void env() {
+		String home = System.getenv().get("HOME");
+		CharOriginTracker envTracker = (CharOriginTracker)
+				TrackerTree.node("System").node("env").trackers().get(0);
+		String envContent = envTracker.getContent().toString();
+		int indexOfHome = envContent.indexOf("HOME=" + home);
+		assertThat(indexOfHome).isGreaterThan(0);
+		assertThatTracker(StringHook.getStringTracker(home))
+				.matches(snapshot().part(envTracker, indexOfHome + 5, home.length()));
 	}
 }

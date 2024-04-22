@@ -24,6 +24,15 @@ public class StringHook {
     return TrackerRepository.getTracker(getValueArray(str));
   }
 
+  /**
+   * Set the source of the array in the string to the given offset in the given tracker. This is for
+   * when the creation of the string itself wasn't tracked, but we then after-the-fact add (inject)
+   * the tracking of where it came from.
+   */
+  static void setStringTracker(String str, Tracker tracker) {
+    TrackerRepository.setTracker(getValueArray(str), tracker);
+  }
+
   public static void createFixedOriginTracker(String str) {
     TrackerRepository.createFixedOriginTracker(getValueArray(str), str.length());
   }
