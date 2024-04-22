@@ -1,7 +1,6 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
 import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
-import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
@@ -12,7 +11,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class SystemHook {
@@ -28,6 +30,7 @@ public class SystemHook {
     addSystemOutErrTracker(System.out, "System.out");
     addSystemOutErrTracker(System.err, "System.err");
     addEnvTracking();
+    addPropertiesTracking();
   }
 
   private static void addSystemOutErrTracker(PrintStream printStream, String name) {
@@ -54,6 +57,8 @@ public class SystemHook {
 
   /** Track environment variables */
   private static void addEnvTracking() {
+    // a tracker that has as content a dump of all environment variables in "key=value\n" format.
+    // we pretend that the environment variables were read from that content.
     CharOriginTracker tracker = new CharOriginTracker();
     tracker.addTo(TrackerTree.node("System").node("env"));
     StringBuilder sb = new StringBuilder();
@@ -77,8 +82,42 @@ public class SystemHook {
   private static void appendAndSetSource(CharOriginTracker origin, String str) {
     int sourceIndex = origin.getLength();
     origin.append(str);
-    DefaultTracker tracker = new DefaultTracker();
-    tracker.setSource(0, str.length(), origin, sourceIndex);
-    StringHook.setStringTracker(str, tracker);
+    StringHook.setStringSource(str, origin, sourceIndex);
+  }
+
+  /** Track system properties */
+  private static void addPropertiesTracking() {
+    // tracking of properties works a bit different from environment variables, because the values
+    // for properties could have come from different places; the same String instances might be used
+    // elsewhere too (e.g. they could be interned Strings), so pointing all those existing system
+    // property value Strings to the System properties tracker would give incorrect results (~false
+    // positives).
+    // unlike environment variables, system properties are mutable, so we make tracked copies of the
+    // keys and values, and replace them with that.
+
+    // a tracker that has as content a dump of all system properties in "key=value\n" format.
+    // we pretend that the properties were read from that content.
+    CharOriginTracker tracker = new CharOriginTracker();
+    tracker.addTo(TrackerTree.node("System").node("properties"));
+
+    Properties props = System.getProperties();
+    synchronized (props) {
+      List<Object> keys = new ArrayList<>(props.keySet());
+      for (Object key : keys) {
+        Object value = props.get(key);
+        // unlikely, but Properties can get polluted with non-Strings.
+        if (!(key instanceof String && value instanceof String)) {
+          continue;
+        }
+        String keyCopy = new String(((String) key).getBytes());
+        String valueCopy = new String(((String) value).getBytes());
+        appendAndSetSource(tracker, keyCopy);
+        tracker.append('=');
+        appendAndSetSource(tracker, valueCopy);
+        tracker.append('\n');
+        props.remove(key); // remove before overriding so that it keeps our instance of the key
+        props.put(keyCopy, valueCopy);
+      }
+    }
   }
 }

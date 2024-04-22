@@ -10,6 +10,7 @@ import static com.google.common.truth.Truth.assertThat;
 import be.coekaerts.wouter.flowtracker.hook.StringHook;
 import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
+import java.util.Map;
 import org.junit.Test;
 
 /**
@@ -68,13 +69,49 @@ public class SystemTest {
 
 	@Test
 	public void env() {
-		String home = System.getenv().get("HOME");
+		String homeValue = System.getenv().get("HOME");
+		String homeKey = getKey(System.getenv(), "HOME");
 		CharOriginTracker envTracker = (CharOriginTracker)
 				TrackerTree.node("System").node("env").trackers().get(0);
-		String envContent = envTracker.getContent().toString();
-		int indexOfHome = envContent.indexOf("HOME=" + home);
-		assertThat(indexOfHome).isGreaterThan(0);
-		assertThatTracker(StringHook.getStringTracker(home))
-				.matches(snapshot().part(envTracker, indexOfHome + 5, home.length()));
+		testKeyValueTracking(envTracker, homeKey, homeValue);
+	}
+
+	@Test
+	public void properties() {
+		String homeValue = System.getProperty("user.home");
+		String homeKey = getKey(System.getProperties(), "user.home");
+		CharOriginTracker propertiesTracker = (CharOriginTracker)
+				TrackerTree.node("System").node("properties").trackers().get(0);
+		testKeyValueTracking(propertiesTracker, homeKey, homeValue);
+	}
+
+	/**
+	 * Return the key in the map used that is used to represent `key`; that is the String instance
+	 * that is equal to `key`.
+	 */
+	private static String getKey(Map<?, ?> map, String key) {
+		return (String) map.keySet().stream()
+				.filter(k -> k.equals(key))
+				.findFirst()
+				.orElseThrow();
+	}
+
+	/**
+	 * Test that `originTracker` contains "key=value", and that the tracking of `key` and `value`
+	 * point to that place in the originTracker.
+	 */
+	private static void testKeyValueTracking(CharOriginTracker originTracker,
+			String key, String value) {
+		String trackerContent = originTracker.getContent().toString();
+
+		// index in trackerContent where we find key=value, surrounded by \n or at the start
+		int keySourceIndex = ('\n' + trackerContent).indexOf('\n' + key + '=' + value + '\n');
+		assertThat(keySourceIndex).isGreaterThan(0);
+		int valueSourceIndex = keySourceIndex + key.length() + 1; // +1 for the '=' sign
+
+		assertThatTracker(StringHook.getStringTracker(key))
+				.matches(snapshot().part(originTracker, keySourceIndex, key.length()));
+		assertThatTracker(StringHook.getStringTracker(value))
+				.matches(snapshot().part(originTracker, valueSourceIndex, value.length()));
 	}
 }

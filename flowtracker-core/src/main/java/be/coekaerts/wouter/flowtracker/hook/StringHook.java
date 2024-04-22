@@ -1,9 +1,9 @@
 package be.coekaerts.wouter.flowtracker.hook;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
+import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import be.coekaerts.wouter.flowtracker.util.Config;
 import java.lang.invoke.MethodHandles;
@@ -22,15 +22,6 @@ public class StringHook {
 
   public static Tracker getStringTracker(String str) {
     return TrackerRepository.getTracker(getValueArray(str));
-  }
-
-  /**
-   * Set the source of the array in the string to the given offset in the given tracker. This is for
-   * when the creation of the string itself wasn't tracked, but we then after-the-fact add (inject)
-   * the tracking of where it came from.
-   */
-  static void setStringTracker(String str, Tracker tracker) {
-    TrackerRepository.setTracker(getValueArray(str), tracker);
   }
 
   public static void createFixedOriginTracker(String str) {
@@ -78,9 +69,19 @@ public class StringHook {
 
   public static String constantString(String value, int classId, int offset) {
     String str = new String(value.getBytes());
-    byte[] valueArray = (byte[]) getValueArray(str);
-    TrackerUpdater.setSourceTracker(valueArray, 0, valueArray.length,
-        ClassOriginTracker.get(classId), offset);
+    setStringSource(str, ClassOriginTracker.get(classId), offset);
     return str;
+  }
+
+  /**
+   * Set the source of the array in the string to the given offset in the given tracker. This is for
+   * when the creation of the string itself wasn't tracked, but we then after-the-fact add (inject)
+   * the tracking of where it came from.
+   */
+  static void setStringSource(String str, Tracker sourceTracker, int sourceIndex) {
+    byte[] valueArray = (byte[]) getValueArray(str);
+    DefaultTracker tracker = new DefaultTracker();
+    tracker.setSource(0, valueArray.length, sourceTracker, sourceIndex);
+    TrackerRepository.forceSetTracker(valueArray, tracker);
   }
 }
