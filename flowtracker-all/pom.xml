@@ -97,7 +97,7 @@
                 filter instrumentation to make it run faster. note that instrumenting everything
                 (the default) is tested in flowtracker-test-full.
               -->
-              <argLine>-javaagent:${project.build.directory}/${project.build.finalName}.jar=port=0;filter=%recommended,+be.coekaerts.wouter.flowtracker.test.* ${flowtracker.jvmArgs}</argLine>
+              <argLine>-javaagent:${project.build.directory}/${project.build.finalName}.jar=port=0;filter=%recommended,+be.coekaerts.wouter.flowtracker.test.*;${flowtracker.extraAgentArgs} ${flowtracker.jvmArgs}</argLine>
             </configuration>
           </execution>
         </executions>
