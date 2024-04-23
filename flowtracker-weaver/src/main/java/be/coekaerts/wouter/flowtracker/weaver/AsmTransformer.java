@@ -62,7 +62,7 @@ class AsmTransformer implements ClassFileTransformer {
         : null;
     dumpTextPrefix = config.get("dumpTextPrefix", "");
     this.config = config;
-    hookSpecTransformer = GeneratedHookSpecs.createTransformer();
+    hookSpecTransformer = GeneratedHookSpecs.createTransformer(config);
     flowAnalyzingTransformer = new FlowAnalyzingTransformer(config);
   }
 

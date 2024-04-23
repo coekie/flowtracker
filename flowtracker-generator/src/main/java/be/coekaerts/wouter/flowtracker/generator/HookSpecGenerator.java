@@ -53,11 +53,12 @@ public class HookSpecGenerator {
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.THIS;\n"
         + "import static be.coekaerts.wouter.flowtracker.weaver.HookArgs.*;\n"
         + "\n"
+        + "import be.coekaerts.wouter.flowtracker.util.Config;\n"
         + "import javax.annotation.processing.Generated;\n"
         + "\n"
         + "@Generated(\"be.coekaerts.wouter.flowtracker.generator.HookSpecGenerator\")\n"
         + "class GeneratedHookSpecs {\n"
-        + "  static HookSpecTransformer createTransformer() {\n"
+        + "  static HookSpecTransformer createTransformer(Config config) {\n"
         + "    int version = Runtime.version().feature();\n"
         + "    HookSpecTransformer t = new HookSpecTransformer();\n");
 

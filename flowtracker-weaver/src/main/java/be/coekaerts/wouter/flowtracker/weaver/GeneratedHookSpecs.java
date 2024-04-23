@@ -16,11 +16,12 @@ import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.INVOCATION;
 import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.RETURN;
 import static be.coekaerts.wouter.flowtracker.weaver.HookSpec.THIS;
 
+import be.coekaerts.wouter.flowtracker.util.Config;
 import javax.annotation.processing.Generated;
 
 @Generated("be.coekaerts.wouter.flowtracker.generator.HookSpecGenerator")
 class GeneratedHookSpecs {
-  static HookSpecTransformer createTransformer() {
+  static HookSpecTransformer createTransformer(Config config) {
     int version = Runtime.version().feature();
     HookSpecTransformer t = new HookSpecTransformer();
     if (version < 17) t.register("java/nio/DirectByteBuffer",
