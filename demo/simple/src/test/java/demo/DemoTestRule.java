@@ -26,25 +26,28 @@ public class DemoTestRule extends ExternalResource {
     System.setOut(originalOut);
   }
 
-  Tracker outTracker() {
+  private Tracker outTracker() {
     return TrackerRepository.getTracker(bout.getByteContent().array());
   }
 
-  String outContent() {
+  private String outContent() {
     return bout.toString();
+  }
+
+  private TrackerSnapshot snapshotOutput(String expectedOutput) {
+    Tracker tracker = outTracker();
+    String output = outContent();
+    int index = output.indexOf(expectedOutput);
+    assertWithMessage("Find %s in %s", expectedOutput, output).that(index).isGreaterThan(-1);
+    return TrackerSnapshot.of(tracker, index, expectedOutput.length());
   }
 
   /**
    * Checks if the output contains the given String, and returns the Tracker that is tracked as its
    * source in the output.
    */
-  Tracker trackerForOutput(String expectedOutput) {
-    Tracker tracker = outTracker();
-    String output = outContent();
-    int index = output.indexOf(expectedOutput);
-    assertWithMessage("Find %s in %s", expectedOutput, output).that(index).isGreaterThan(-1);
-
-    TrackerSnapshot snapshot = TrackerSnapshot.of(tracker, index, expectedOutput.length());
+  private Tracker trackerForOutput(String expectedOutput) {
+    TrackerSnapshot snapshot = snapshotOutput(expectedOutput);
     assertThat(snapshot.getParts()).hasSize(1);
     return snapshot.getParts().get(0).source;
   }
@@ -52,5 +55,9 @@ public class DemoTestRule extends ExternalResource {
   void assertOutputComesFromConstantIn(String expectedOutput, Class<?> source) {
     ClassOriginTracker tracker = (ClassOriginTracker) trackerForOutput(expectedOutput);
     assertThat(tracker.getContent().toString()).startsWith("class " + source.getName() + "\n");
+  }
+
+  void assertOutputNotTracked(String expectedOutput) {
+    assertThat(trackerForOutput(expectedOutput)).isNull();
   }
 }
