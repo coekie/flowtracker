@@ -38,6 +38,7 @@
     <module>flowtracker-test-jdk17</module>
     <module>flowtracker-test-jdk21</module>
     <module>flowtracker-test-jdk22</module>
+    <module>flowtracker-test-full</module>
     <module>flowtracker-all</module>
     <module>demo</module>
   </modules>
@@ -101,13 +102,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>test-all</id>
-      <modules>
-        <module>flowtracker-test-full</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
