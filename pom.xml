@@ -26,6 +26,9 @@
 
     <!-- keep this in sync with CoreInitializer.java -->
     <flowtracker.jvmArgs>-XX:-UseStringDeduplication -XX:+UnlockDiagnosticVMOptions -XX:DisableIntrinsic=_copyOf -XX:DisableIntrinsic=_copyOfRange -XX:DisableIntrinsic=_String_String -XX:DisableIntrinsic=_StringBuilder_String -XX:DisableIntrinsic=_StringBuilder_append_char -XX:DisableIntrinsic=_StringBuilder_append_String -XX:DisableIntrinsic=_StringBuilder_toString -XX:DisableIntrinsic=_inflateStringC -XX:DisableIntrinsic=_inflateStringB -XX:DisableIntrinsic=_toBytesStringU -XX:DisableIntrinsic=_getCharsStringU -XX:DisableIntrinsic=_getCharStringU -XX:DisableIntrinsic=_putCharStringU -XX:DisableIntrinsic=_compressStringC -XX:DisableIntrinsic=_compressStringB -XX:DisableIntrinsic=_encodeByteISOArray</flowtracker.jvmArgs>
+
+    <!-- building the UI with npm can be skipped with mvn -Pskip-ui ... -->
+    <skip-ui>false</skip-ui>
   </properties>
   <modules>
     <module>flowtracker-agent</module>
@@ -102,4 +105,12 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>skip-ui</id>
+      <properties>
+        <skip-ui>true</skip-ui>
+      </properties>
+    </profile>
+  </profiles>
 </project>

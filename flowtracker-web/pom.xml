@@ -10,13 +10,6 @@
   </parent>
   <artifactId>flowtracker-web</artifactId>
   <name>${project.artifactId}</name>
-  <build>
-    <resources>
-      <resource>
-        <directory>../flowtracker-ui/dist</directory>
-      </resource>
-    </resources>
-  </build>
   <dependencies>
     <dependency>
       <groupId>be.coekaerts.wouter.flowtracker</groupId>
@@ -72,4 +65,77 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Run npm to build ../flowtracker-ui/dist  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>generate-ui</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <skip>${skip-ui}</skip>
+              <workingDirectory>${project.basedir}/../flowtracker-ui</workingDirectory>
+              <executable>npm</executable>
+              <arguments>
+                <argument>run</argument>
+                <argument>build</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>verify-ui</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>verify</phase>
+            <configuration>
+              <skip>${skip-ui}</skip>
+              <workingDirectory>${project.basedir}/../flowtracker-ui</workingDirectory>
+              <executable>npm</executable>
+              <arguments>
+                <argument>run</argument>
+                <argument>verify</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>be.coekaerts.wouter.flowtracker</groupId>
+            <artifactId>flowtracker-generator</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>add-ui</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>add-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/../flowtracker-ui/dist</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
