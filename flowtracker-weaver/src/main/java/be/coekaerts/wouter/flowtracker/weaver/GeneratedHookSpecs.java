@@ -222,7 +222,7 @@ class GeneratedHookSpecs {
       "(Ljava/io/FileOutputStream;[BII)V",
       ON_RETURN,
       THIS, ARG0, ARG1, ARG2);
-    t.register("java/io/OutputStreamWriter",
+    if (config.getBoolean("trackOutputStreamWriter", false)) t.register("java/io/OutputStreamWriter",
       "<init>",
       "(Ljava/io/OutputStream;)V",
       "be/coekaerts/wouter/flowtracker/hook/OutputStreamWriterHook",
@@ -230,7 +230,7 @@ class GeneratedHookSpecs {
       "(Ljava/io/OutputStreamWriter;Ljava/io/OutputStream;)V",
       ON_RETURN,
       THIS, ARG0);
-    t.register("java/io/OutputStreamWriter",
+    if (config.getBoolean("trackOutputStreamWriter", false)) t.register("java/io/OutputStreamWriter",
       "<init>",
       "(Ljava/io/OutputStream;Ljava/lang/String;)V",
       "be/coekaerts/wouter/flowtracker/hook/OutputStreamWriterHook",
@@ -238,7 +238,7 @@ class GeneratedHookSpecs {
       "(Ljava/io/OutputStreamWriter;Ljava/io/OutputStream;)V",
       ON_RETURN,
       THIS, ARG0);
-    t.register("java/io/OutputStreamWriter",
+    if (config.getBoolean("trackOutputStreamWriter", false)) t.register("java/io/OutputStreamWriter",
       "<init>",
       "(Ljava/io/OutputStream;Ljava/nio/charset/Charset;)V",
       "be/coekaerts/wouter/flowtracker/hook/OutputStreamWriterHook",
@@ -246,7 +246,7 @@ class GeneratedHookSpecs {
       "(Ljava/io/OutputStreamWriter;Ljava/io/OutputStream;)V",
       ON_RETURN,
       THIS, ARG0);
-    t.register("java/io/OutputStreamWriter",
+    if (config.getBoolean("trackOutputStreamWriter", false)) t.register("java/io/OutputStreamWriter",
       "<init>",
       "(Ljava/io/OutputStream;Ljava/nio/charset/CharsetEncoder;)V",
       "be/coekaerts/wouter/flowtracker/hook/OutputStreamWriterHook",
@@ -254,7 +254,7 @@ class GeneratedHookSpecs {
       "(Ljava/io/OutputStreamWriter;Ljava/io/OutputStream;)V",
       ON_RETURN,
       THIS, ARG0);
-    t.register("java/io/OutputStreamWriter",
+    if (config.getBoolean("trackOutputStreamWriter", false)) t.register("java/io/OutputStreamWriter",
       "write",
       "(I)V",
       "be/coekaerts/wouter/flowtracker/hook/OutputStreamWriterHook",
@@ -262,7 +262,7 @@ class GeneratedHookSpecs {
       "(Ljava/io/OutputStreamWriter;ILbe/coekaerts/wouter/flowtracker/tracker/Invocation;)V",
       ON_RETURN,
       THIS, ARG0, INVOCATION);
-    t.register("java/io/OutputStreamWriter",
+    if (config.getBoolean("trackOutputStreamWriter", false)) t.register("java/io/OutputStreamWriter",
       "write",
       "([CII)V",
       "be/coekaerts/wouter/flowtracker/hook/OutputStreamWriterHook",
@@ -270,7 +270,7 @@ class GeneratedHookSpecs {
       "(Ljava/io/OutputStreamWriter;[CII)V",
       ON_RETURN,
       THIS, ARG0, ARG1, ARG2);
-    t.register("java/io/OutputStreamWriter",
+    if (config.getBoolean("trackOutputStreamWriter", false)) t.register("java/io/OutputStreamWriter",
       "write",
       "(Ljava/lang/String;II)V",
       "be/coekaerts/wouter/flowtracker/hook/OutputStreamWriterHook",

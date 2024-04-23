@@ -10,6 +10,7 @@ import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
+import be.coekaerts.wouter.flowtracker.util.Config;
 import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -24,17 +25,28 @@ import java.lang.reflect.Field;
  */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class OutputStreamWriterHook {
+  private static final String TRACK_OUTPUT_STREAM_WRITER = "trackOutputStreamWriter";
+  private static final String enabledCondition =
+      "config.getBoolean(\"" + TRACK_OUTPUT_STREAM_WRITER + "\", false)";
   private static final Field filterOutputStreamOut =
       Reflection.getDeclaredField(FilterOutputStream.class, "out");
 
+  static boolean enabled(Config config) {
+    return config.getBoolean(TRACK_OUTPUT_STREAM_WRITER, false);
+  }
+
   @Hook(target = "java.io.OutputStreamWriter",
-      method = "void <init>(java.io.OutputStream)")
+      method = "void <init>(java.io.OutputStream)",
+      condition = enabledCondition)
   @Hook(target = "java.io.OutputStreamWriter",
-      method = "void <init>(java.io.OutputStream,java.lang.String)")
+      method = "void <init>(java.io.OutputStream,java.lang.String)",
+      condition = "config.getBoolean(\"trackOutputStreamWriter\", false)")
   @Hook(target = "java.io.OutputStreamWriter",
-      method = "void <init>(java.io.OutputStream,java.nio.charset.Charset)")
+      method = "void <init>(java.io.OutputStream,java.nio.charset.Charset)",
+      condition = enabledCondition)
   @Hook(target = "java.io.OutputStreamWriter",
-      method = "void <init>(java.io.OutputStream,java.nio.charset.CharsetEncoder)")
+      method = "void <init>(java.io.OutputStream,java.nio.charset.CharsetEncoder)",
+      condition = enabledCondition)
   public static void afterInit(@Arg("THIS") OutputStreamWriter target,
       @Arg("ARG0") OutputStream stream) {
     if (Trackers.isActive()) {
@@ -51,7 +63,8 @@ public class OutputStreamWriterHook {
   }
 
   @Hook(target = "java.io.OutputStreamWriter",
-      method = "void write(int)")
+      method = "void write(int)",
+      condition = enabledCondition)
   public static void afterWrite1(@Arg("THIS") OutputStreamWriter target, @Arg("ARG0") int c,
     @Arg("INVOCATION") Invocation invocation) {
     Tracker tracker = TrackerRepository.getTracker(target);
@@ -65,7 +78,8 @@ public class OutputStreamWriterHook {
   }
 
   @Hook(target = "java.io.OutputStreamWriter",
-      method = "void write(char[],int,int)")
+      method = "void write(char[],int,int)",
+      condition = enabledCondition)
   public static void afterWriteCharArrayOffset(@Arg("THIS") OutputStreamWriter target,
       @Arg("ARG0") char[] cbuf, @Arg("ARG1") int off, @Arg("ARG2") int len) {
     Tracker tracker = TrackerRepository.getTracker(target);
@@ -79,7 +93,8 @@ public class OutputStreamWriterHook {
   }
 
   @Hook(target = "java.io.OutputStreamWriter",
-      method = "void write(java.lang.String,int,int)")
+      method = "void write(java.lang.String,int,int)",
+      condition = enabledCondition)
   public static void afterWriteStringOffset(@Arg("THIS") OutputStreamWriter target,
       @Arg("ARG0") String str, @Arg("ARG1") int off, @Arg("ARG2") int len) {
     Tracker tracker = TrackerRepository.getTracker(target);

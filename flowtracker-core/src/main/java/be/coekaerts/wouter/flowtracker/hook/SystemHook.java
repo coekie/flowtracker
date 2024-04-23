@@ -4,6 +4,7 @@ import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FileDescriptorTrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
+import be.coekaerts.wouter.flowtracker.util.Config;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
@@ -24,16 +25,16 @@ public class SystemHook {
     TrackerUpdater.setSource(dest, destPos, length, src, srcPos);
   }
 
-  public static void initialize() {
+  public static void initialize(Config config) {
     // we have to add trackers to the existing streams, because they were created before flowtracker
     // was initialized.
-    addSystemOutErrTracker(System.out, "System.out");
-    addSystemOutErrTracker(System.err, "System.err");
+    addSystemOutErrTracker(System.out, "System.out", config);
+    addSystemOutErrTracker(System.err, "System.err", config);
     addEnvTracking();
     addPropertiesTracking();
   }
 
-  private static void addSystemOutErrTracker(PrintStream printStream, String name) {
+  private static void addSystemOutErrTracker(PrintStream printStream, String name, Config config) {
     try {
       Field charOutField = PrintStream.class.getDeclaredField("charOut");
 
@@ -46,9 +47,11 @@ public class SystemHook {
           TrackerTree.node("System").node(name));
 
       // track on the OutputStreamWriter level
-      OutputStreamWriter writer =
-          (OutputStreamWriter) Reflection.getFieldValue(printStream, charOutField);
-      OutputStreamWriterHook.createOutputStreamWriterTracker(writer, fileOut);
+      if (OutputStreamWriterHook.enabled(config)) {
+        OutputStreamWriter writer =
+            (OutputStreamWriter) Reflection.getFieldValue(printStream, charOutField);
+        OutputStreamWriterHook.createOutputStreamWriterTracker(writer, fileOut);
+      }
     } catch (ReflectiveOperationException | IOException e) {
       System.err.println("Cannot access PrintStream.charOut. Cannot hook System.out/err:");
       e.printStackTrace(System.err);

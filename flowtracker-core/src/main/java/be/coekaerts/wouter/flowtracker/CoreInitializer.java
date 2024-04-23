@@ -19,7 +19,7 @@ public class CoreInitializer {
     ensureInitialized();
     Tracker.initialize(config);
     ZipFileHook.initialize(config, agentJar);
-    SystemHook.initialize();
+    SystemHook.initialize(config);
     StringHook.initialize(config);
     ClassLoaderHook.initialize(config);
   }
