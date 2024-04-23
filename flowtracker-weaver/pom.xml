@@ -45,4 +45,58 @@
       <version>1.4.2</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Run HookSpecGenerator -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>generate-hook-spec</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <includeProjectDependencies>false</includeProjectDependencies>
+              <includePluginDependencies>true</includePluginDependencies>
+              <mainClass>be.coekaerts.wouter.flowtracker.generator.HookSpecGenerator</mainClass>
+              <executableDependency>
+                <groupId>be.coekaerts.wouter.flowtracker</groupId>
+                <artifactId>flowtracker-generator</artifactId>
+              </executableDependency>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>be.coekaerts.wouter.flowtracker</groupId>
+            <artifactId>flowtracker-generator</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/hook-specs</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

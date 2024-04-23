@@ -31,10 +31,11 @@ public class HookSpecGenerator {
       Paths.get("").toAbsolutePath().getFileName().toString().equals("flowtracker-generator")
           ? "../" : "";
   static final Path OUTPUT_FILE =  Path.of(root +
-      "flowtracker-weaver/src/main/java/be/coekaerts/wouter/flowtracker/weaver/"
-          + "GeneratedHookSpecs.java");
+      "flowtracker-weaver/target/generated-sources/hook-specs/be/coekaerts/wouter/flowtracker/"
+      + "weaver/GeneratedHookSpecs.java");
 
   public static void main(String[] args) throws IOException {
+    Files.createDirectories(OUTPUT_FILE.getParent());
     Files.write(OUTPUT_FILE, generate().getBytes());
   }
 

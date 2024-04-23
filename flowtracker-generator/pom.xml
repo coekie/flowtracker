@@ -37,29 +37,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <!-- mvn exec:exec -pl flowtracker-generator -->
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.1.1</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <executable>java</executable>
-          <arguments>
-            <argument>-classpath</argument>
-            <classpath/>
-            <argument>be.coekaerts.wouter.flowtracker.generator.HookSpecGenerator</argument>
-          </arguments>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
