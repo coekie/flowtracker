@@ -50,7 +50,7 @@ public class ConstantTest {
     TrackerPoint point = FlowTester.getCharSourcePoint(a);
     ClassOriginTracker tracker = (ClassOriginTracker) point.tracker;
     assertThat(tracker.getContent().toString()).isEqualTo(
-        "class be/coekaerts/wouter/flowtracker/test/ConstantTest$MyClass\n"
+        "class be.coekaerts.wouter.flowtracker.test.ConstantTest$MyClass\n"
             + "char myMethod(int, java.lang.String):\n"
             + "  c\n");
   }

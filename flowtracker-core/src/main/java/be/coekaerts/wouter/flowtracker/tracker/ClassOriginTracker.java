@@ -20,7 +20,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
 
   private ClassOriginTracker(String className) {
     this.classId = trackers.size();
-    content.append("class ").append(className).append('\n');
+    content.append("class ").append(className.replace('/', '.')).append('\n');
   }
 
   public static synchronized ClassOriginTracker registerClass(String className) {
