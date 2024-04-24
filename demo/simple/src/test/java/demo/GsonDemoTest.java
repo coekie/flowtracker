@@ -14,7 +14,7 @@ public class GsonDemoTest {
     demo.assertOutputComesFromConstantIn("toJson", GsonDemo.class);
     demo.assertOutputComesFromConstantIn("fromJson", GsonDemo.class);
     demo.assertOutputComesFromConstantIn(":", JsonWriter.class);
-    demo.assertOutputNotTracked("Pojo("); // got lost in StringConcatFactory
+    demo.assertOutputComesFromConstantIn("Pojo(", GsonDemo.Pojo.class);
     demo.assertOutputNotTracked("{"); // haven't looked into why this isn't tracked yet
   }
 }

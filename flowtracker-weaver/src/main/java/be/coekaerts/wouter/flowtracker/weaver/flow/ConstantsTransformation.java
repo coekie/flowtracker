@@ -3,6 +3,8 @@ package be.coekaerts.wouter.flowtracker.weaver.flow;
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.weaver.ClassFilter;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import org.objectweb.asm.ConstantDynamic;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -49,6 +51,22 @@ class ConstantsTransformation {
   int trackConstantString(FlowMethodAdapter methodNode, String value) {
     maybeAddMethodHeader(methodNode);
     return tracker().registerConstantString(value);
+  }
+
+  /**
+   * ConstantDynamic representing the given String value, which should be at `offset` in `tracker`
+   * (the offset returned by {@link #trackConstantString(FlowMethodAdapter, String)}).
+   */
+  ConstantDynamic stringConstantDynamic(int offset, String value) {
+    return new ConstantDynamic("$ft" + offset,
+        "Ljava/lang/String;",
+        new Handle(Opcodes.H_INVOKESTATIC,
+            "be/coekaerts/wouter/flowtracker/hook/StringHook",
+            "constantString",
+            "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;IILjava/lang/String;)"
+                + "Ljava/lang/String;",
+            false),
+        classId(), offset, value);
   }
 
   int classId() {

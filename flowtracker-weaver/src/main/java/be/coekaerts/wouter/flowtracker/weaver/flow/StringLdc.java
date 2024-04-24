@@ -1,8 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
-import org.objectweb.asm.ConstantDynamic;
-import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -38,15 +36,7 @@ public class StringLdc extends Store {
       // to then we could make a ConstantHook.constantPoint variant that still always return the
       // same instance, but we just haven't implemented that.)
       if (methodNode.canUseConstantDynamic()) {
-        insn.cst = new ConstantDynamic("$ft" + offset,
-            "Ljava/lang/String;",
-            new Handle(Opcodes.H_INVOKESTATIC,
-                "be/coekaerts/wouter/flowtracker/hook/StringHook",
-                "constantString",
-                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;IILjava/lang/String;)"
-                    + "Ljava/lang/String;",
-                false),
-            constantsTransformation.classId(), offset, value);
+        insn.cst = constantsTransformation.stringConstantDynamic(offset, value);
       } else {
         InsnList toInsert = new InsnList();
         methodNode.addComment(toInsert, "begin StringLdc.insertTrackStatements");

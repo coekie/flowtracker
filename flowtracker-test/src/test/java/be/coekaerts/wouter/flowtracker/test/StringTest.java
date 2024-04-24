@@ -139,14 +139,23 @@ public class StringTest {
     String str = NoCondy.ldcNoCondy();
     TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
     assertThat(snapshot.getParts()).hasSize(1);
-    Part part = snapshot.getParts().get(0);
-    ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
-    assertThat(sourceTracker.getContent()
-        .subSequence(part.sourceIndex, part.sourceIndex + part.length))
+    assertThat(getClassOriginTrackerContent(snapshot.getParts().get(0)))
         .isEqualTo("test-ldc-no-condy");
     // would have been nice if they were, but currently multiple invocations do not return the same
     // instance.
     assertThat(NoCondy.ldcNoCondy()).isNotSameInstanceAs(NoCondy.ldcNoCondy());
+  }
+
+  /**
+   * Extract the contents of the ClassOriginTracker that the give part points to. This is to
+   * validate that the source that the part points to really contains the expected value.
+   */
+  private String getClassOriginTrackerContent(TrackerSnapshot.Part part) {
+    assertThat(part.source).isInstanceOf(ClassOriginTracker.class);
+    ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
+    return sourceTracker.getContent()
+        .subSequence(part.sourceIndex, part.sourceIndex + part.length)
+        .toString();
   }
 
   /**
@@ -168,5 +177,17 @@ public class StringTest {
     static String ldcNoCondy() {
       return "test-ldc-no-condy";
     }
+  }
+
+  @Test
+  public void testStringConcatFactory() {
+    int i = 1;
+    String str = "(" + i + ")";
+    TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
+    assertThat(snapshot.getParts()).hasSize(3);
+    assertThat(getClassOriginTrackerContent(snapshot.getParts().get(0)))
+        .isEqualTo("(");
+    assertThat(getClassOriginTrackerContent(snapshot.getParts().get(2)))
+        .isEqualTo(")");
   }
 }

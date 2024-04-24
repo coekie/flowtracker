@@ -20,6 +20,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -197,6 +198,15 @@ public class FlowAnalyzingTransformer implements Transformer {
           LdcInsnNode ldcInsn = (LdcInsnNode) insn;
           if (ldcInsn.cst instanceof String) {
             stores.add(new StringLdc(ldcInsn, frame));
+          }
+        } else if (insn.getOpcode() == Opcodes.INVOKEDYNAMIC) {
+          InvokeDynamicInsnNode idInsn = (InvokeDynamicInsnNode) insn;
+          if (idInsn.bsm.getOwner().equals("java/lang/invoke/StringConcatFactory")
+              && idInsn.bsm.getName().equals("makeConcatWithConstants")
+              && idInsn.bsm.getDesc().equals("(Ljava/lang/invoke/MethodHandles$Lookup;"
+              + "Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;"
+              + "[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;")) {
+            stores.add(new StringConcatenation(idInsn, frame));
           }
         } else if (insn.getOpcode() == Opcodes.IF_ACMPEQ || insn.getOpcode() == Opcodes.IF_ACMPNE) {
           boolean firstIsString =
