@@ -1,19 +1,83 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
+import be.coekaerts.wouter.flowtracker.hook.StringConcatFactoryHook;
+import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
+import java.lang.invoke.StringConcatFactory;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 
 /**
  * Handles instrumentation of an invokedynamic instruction to StringConcatFactory.
- *
- * @see StringLdc
+ * <p>
+ * This instruments that call in two ways:<ul>
+ *   <li>Replace string constants with constantsTransformation.stringConstantDynamic. That way e.g.
+ *    String constants that are part of the concatenation (that end up in the recipe) are tracked.
+ *    This is similar to what {@link StringLdc} does for other String literals.
+ *   <li>When there are (non-constant) char values passed into the concatenation (e.g.
+ *     `"foo" + someChar`), then the call to StringConcatFactory is replaced with a call to our hook
+ *     method, passing in the source of the char values as {@link TrackerPoint}s.
+ *     The goal of that is similar to how {@link InvocationArgStore} handles it for char values
+ *     passed into other method calls (but it's implemented very differently).
+ * </ul>
  */
 public class StringConcatenation extends Store {
+  /**
+   * Handle for {@link
+   * StringConcatFactory#makeConcatWithConstants(Lookup, String, MethodType, String, Object...)}
+   */
+  static final Handle realMakeConcatWithConstants =
+      new Handle(Opcodes.H_INVOKESTATIC,
+          "java/lang/invoke/StringConcatFactory",
+          "makeConcatWithConstants",
+          "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;"
+              + "Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;",
+          false);
+  /**
+   * Handle for {@link
+   * StringConcatFactoryHook#makeConcatWithConstants(Lookup, String, MethodType, String, String, Object...)}
+   */
+  private static final Handle hookedMakeConcatWithConstants =
+      new Handle(Opcodes.H_INVOKESTATIC,
+          "be/coekaerts/wouter/flowtracker/hook/StringConcatFactoryHook",
+          "makeConcatWithConstants",
+          "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;"
+              + "Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)"
+              + "Ljava/lang/invoke/CallSite;",
+          false);
+
   private final InvokeDynamicInsnNode insn;
+
+  /**
+   * Arguments of type char that can be tracked. Untracked (e.g. non-char) args are null in this
+   * array. If there are no tracked char args, then the array is null.
+   */
+  private final FlowValue[] trackableCharArgs;
 
   StringConcatenation(InvokeDynamicInsnNode insn, FlowFrame frame) {
     super(frame);
     this.insn = insn;
+
+    // find trackableCharArgs
+    FlowValue[] trackableCharArgs = null;
+    Type[] argTypes = Type.getArgumentTypes(insn.desc);
+    for (int i = 0; i < argTypes.length; i++) {
+      if (Type.CHAR_TYPE.equals(argTypes[i])) {
+        FlowValue value = getStackFromTop(argTypes.length - i - 1);
+        if (value.isTrackable()) {
+          if (trackableCharArgs == null) {
+            trackableCharArgs = new FlowValue[argTypes.length];
+          }
+          trackableCharArgs[i] = value;
+        }
+      }
+    }
+    this.trackableCharArgs = trackableCharArgs;
   }
 
   @Override
@@ -35,6 +99,39 @@ public class StringConcatenation extends Store {
           bsmArgs[i] = constantsTransformation.stringConstantDynamic(offset, argValue);
         }
       }
+    }
+
+    if (trackableCharArgs != null) {
+      // insert code to load the TrackerPoints
+      InsnList toInsert = new InsnList();
+      // the mask, to indicate which parameters are tracked, see StringConcatFactoryHook.parseMask
+      char[] mask = new char[trackableCharArgs.length];
+      int trackedCount = 0;
+      for (int i = 0; i < trackableCharArgs.length; i++) {
+        mask[i] = (trackableCharArgs[i] == null) ? '.' : 'T';
+        if (trackableCharArgs[i] != null) {
+          trackableCharArgs[i].ensureTracked();
+          trackableCharArgs[i].loadSourcePoint(toInsert);
+          trackedCount++;
+        }
+      }
+      methodNode.instructions.insertBefore(insn, toInsert);
+      methodNode.maxStack = Math.max(methodNode.maxStack, frame.fullStackSize() + trackedCount + 1);
+
+      // update signature of called method handle: add the TrackerPoint parameters
+      insn.desc = insn.desc.replace(")",
+          "Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;".repeat(trackedCount) + ')');
+
+      // call our hook method instead of the real makeConcatWithConstants
+      insn.bsm = hookedMakeConcatWithConstants;
+
+      // insert the mask as second bootstrap method argument
+      Object[] newBsmArgs = new Object[insn.bsmArgs.length + 1];
+      newBsmArgs[0] = insn.bsmArgs[0]; // recipe is still the first argument
+      newBsmArgs[1] = new String(mask);
+      // copy over other constants (the "Object... constants" of makeConcatWithConstants)
+      System.arraycopy(insn.bsmArgs, 1, newBsmArgs, 2, insn.bsmArgs.length - 1);
+      insn.bsmArgs = newBsmArgs;
     }
   }
 }

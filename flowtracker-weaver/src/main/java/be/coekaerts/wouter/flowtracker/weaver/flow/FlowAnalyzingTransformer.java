@@ -201,11 +201,7 @@ public class FlowAnalyzingTransformer implements Transformer {
           }
         } else if (insn.getOpcode() == Opcodes.INVOKEDYNAMIC) {
           InvokeDynamicInsnNode idInsn = (InvokeDynamicInsnNode) insn;
-          if (idInsn.bsm.getOwner().equals("java/lang/invoke/StringConcatFactory")
-              && idInsn.bsm.getName().equals("makeConcatWithConstants")
-              && idInsn.bsm.getDesc().equals("(Ljava/lang/invoke/MethodHandles$Lookup;"
-              + "Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;"
-              + "[Ljava/lang/Object;)Ljava/lang/invoke/CallSite;")) {
+          if (idInsn.bsm.equals(StringConcatenation.realMakeConcatWithConstants)) {
             stores.add(new StringConcatenation(idInsn, frame));
           }
         } else if (insn.getOpcode() == Opcodes.IF_ACMPEQ || insn.getOpcode() == Opcodes.IF_ACMPNE) {

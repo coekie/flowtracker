@@ -9,10 +9,12 @@ import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThat
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
+import be.coekaerts.wouter.flowtracker.hook.StringConcatFactoryHook;
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.Part;
+import java.lang.invoke.StringConcatFactory;
 import org.junit.Test;
 
 public class StringTest {
@@ -179,6 +181,11 @@ public class StringTest {
     }
   }
 
+  /**
+   * Test tracking of String literals in concatenation, that is tracking of the recipe ("(\1)")
+   * in {@link StringConcatFactory}.
+   * This case does *not* go through {@link StringConcatFactoryHook}.
+   */
   @Test
   public void testStringConcatFactory() {
     int i = 1;
@@ -188,6 +195,31 @@ public class StringTest {
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(0)))
         .isEqualTo("(");
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(2)))
+        .isEqualTo(")");
+  }
+
+  /** Test {@link StringConcatFactoryHook} */
+  @Test
+  public void testStringConcatFactoryWithCharLiterals() {
+    FlowTester a = new FlowTester();
+    FlowTester b = new FlowTester();
+    int i = 0; // a parameter in between that's not tracked
+    String str = "(" + a.createSourceChar('a') + "," + i + "," + b.createSourceChar('b') + ")";
+    assertThat(str).isEqualTo("(a,0,b)");
+    TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
+    assertThat(snapshot.getParts()).hasSize(7);
+    assertThat(getClassOriginTrackerContent(snapshot.getParts().get(0)))
+        .isEqualTo("(");
+    assertThat(snapshot.getParts().get(1).source).isSameInstanceAs(a.theSource());
+    assertThat(snapshot.getParts().get(1).sourceIndex).isEqualTo(a.theSourceIndex());
+    assertThat(getClassOriginTrackerContent(snapshot.getParts().get(2)))
+        .isEqualTo(",");
+    assertThat(snapshot.getParts().get(3).source).isNull();
+    assertThat(getClassOriginTrackerContent(snapshot.getParts().get(4)))
+        .isEqualTo(",");
+    assertThat(snapshot.getParts().get(5).source).isSameInstanceAs(b.theSource());
+    assertThat(snapshot.getParts().get(5).sourceIndex).isEqualTo(b.theSourceIndex());
+    assertThat(getClassOriginTrackerContent(snapshot.getParts().get(6)))
         .isEqualTo(")");
   }
 }
