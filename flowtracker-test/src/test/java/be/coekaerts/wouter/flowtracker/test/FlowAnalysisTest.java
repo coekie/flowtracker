@@ -12,7 +12,7 @@ import org.junit.Test;
 
 /** Test FlowAnalyzingTransformer and friends */
 @SuppressWarnings("StringBufferMayBeStringBuilder")
-public class CharFlowAnalysisTest {
+public class FlowAnalysisTest {
   private final FlowTester ft = new FlowTester();
 
   @Test public void stringBuilderAppendChar() {
