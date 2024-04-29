@@ -144,6 +144,10 @@ class FlowInterpreter extends Interpreter<FlowValue> {
         InsnNode insn = (InsnNode) aInsn;
         return new ArrayLoadValue(flowMethodAdapter, insn, Type.BYTE_TYPE);
       }
+      case Opcodes.IALOAD: {
+        InsnNode insn = (InsnNode) aInsn;
+        return new ArrayLoadValue(flowMethodAdapter, insn, Type.INT_TYPE);
+      }
       case Opcodes.IAND: {
         // treat `x & constant` as having the same source as x
         if (value2 instanceof ConstantValue) {

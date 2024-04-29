@@ -154,6 +154,16 @@ public class FlowAnalyzingTransformer implements Transformer {
         } else if (insn.getOpcode() == Opcodes.BASTORE
             && Types.BYTE_ARRAY.equals(frame.getStack(frame.getStackSize() - 3).getType())) {
           stores.add(ArrayStore.createByteArrayStore((InsnNode) insn, frame));
+        } else if (insn.getOpcode() == Opcodes.IASTORE) {
+          // dirty heuristic for when we want to instrument array stores.
+          // this is necessary because of some bootstrapping problem leaving to StackOverflowError
+          // in tests, but only if they're being ran from maven, and not if you attach a debugger
+          // (heisenbug).
+          // ideally we'd only do this for arrays that deal with codepoints, which are very rare.
+          if (!owner.startsWith("java/lang")
+              && !owner.startsWith("java/util")) {
+            stores.add(ArrayStore.createIntArrayStore((InsnNode) insn, frame));
+          }
         } else if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL
             || insn.getOpcode() == Opcodes.INVOKESTATIC
             || insn.getOpcode() == Opcodes.INVOKESPECIAL) {
@@ -170,8 +180,9 @@ public class FlowAnalyzingTransformer implements Transformer {
               mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/SystemHook";
             }
           } else if ("clone".equals(mInsn.name)
-              && (mInsn.owner.equals("[C") || mInsn.owner.equals("[B"))) {
-            mInsn.desc = mInsn.owner.equals("[C") ? "([C)[C" : "([B)[B";
+              && (mInsn.owner.equals("[C") || mInsn.owner.equals("[B")
+              || mInsn.owner.equals("[I"))) {
+            mInsn.desc = '(' + mInsn.owner + ')' + mInsn.owner;
             mInsn.owner = "be/coekaerts/wouter/flowtracker/hook/ArrayHook";
             mInsn.setOpcode(Opcodes.INVOKESTATIC);
           } else if (mInsn.owner.equals("be/coekaerts/wouter/flowtracker/test/FlowTester")) {

@@ -61,6 +61,13 @@ public class TrackTestHelper {
     return result;
   }
 
+  /** Create a tracked int array (by a {@link FixedOriginTracker}) */
+  public static int[] trackedIntArray(String str) {
+    int[] result = str.codePoints().toArray();
+    TrackerRepository.createFixedOriginTracker(result, result.length);
+    return result;
+  }
+
   /** Create a String without tracking */
   public static String untrackedString(String str) {
     String result = new String(str.getBytes());

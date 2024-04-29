@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedByteArray;
+import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedIntArray;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerRepository.getTracker;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
@@ -8,6 +9,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
 
+/**
+ * Test for loading values from and storing values in arrays, and other array operations.
+ *
+ * @see ArraysTest
+ */
 public class ArrayTest {
   private final FlowTester ft = new FlowTester();
 
@@ -58,6 +64,11 @@ public class ArrayTest {
     assertThatTrackerOf(array.clone()).matches(snapshot().track(array));
   }
 
+  @Test public void intArrayClone() {
+    int[] array = trackedIntArray("abc");
+    assertThatTrackerOf(array.clone()).matches(snapshot().track(array));
+  }
+
   // regression test for NPE in analysis when byte[] type is null
   @SuppressWarnings("ConstantValue")
   @Test public void byteArrayNull() {
@@ -72,5 +83,17 @@ public class ArrayTest {
     // would be nice if this was tracked. for now, we're happy with it not blowing up
     // snapshotBuilder().track(a, 0, 1).assertTrackerOf(bytes);
     assertThat(getTracker(bytes)).isNull();
+  }
+
+  @Test public void intArrayLoadAndStore() {
+    int[] abc = trackedIntArray("abc");
+
+    int[] array = new int[3];
+    array[0] = abc[1];
+    array[1] = abc[0];
+    array[2] = abc[2];
+
+    assertThatTrackerOf(array).matches(
+        snapshot().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1));
   }
 }

@@ -8,9 +8,9 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /** A value from getting an element of an array (e.g. {@link Opcodes#CALOAD}) */
-// on the stack: char[]/byte[] target, int index
+// on the stack: char[]/byte[]/int[] target, int index
 class ArrayLoadValue extends TrackableValue {
-  /** The {@link Opcodes#CALOAD} call */
+  /** The CALOAD/BALOAD/IALOAD call */
   private final InsnNode insn;
 
   /** Local variable storing the PointTracker for the loaded char or byte */

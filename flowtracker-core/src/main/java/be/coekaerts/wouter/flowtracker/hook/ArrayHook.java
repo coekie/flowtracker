@@ -18,6 +18,12 @@ public class ArrayHook {
     TrackerUpdater.setSourceTrackerPoint(array, arrayIndex, 1, source);
   }
 
+  /** Store a value in an int[] */
+  public static void setInt(int[] array, int arrayIndex, int value, TrackerPoint source) {
+    array[arrayIndex] = value;
+    TrackerUpdater.setSourceTrackerPoint(array, arrayIndex, 1, source);
+  }
+
   /** Hook for calling clone() on a char[] */
   public static char[] clone(char[] array) {
     char[] result = array.clone();
@@ -28,6 +34,13 @@ public class ArrayHook {
   /** Hook for calling clone() on a byte[] */
   public static byte[] clone(byte[] array) {
     byte[] result = array.clone();
+    TrackerUpdater.setSource(result, 0, array.length, array, 0);
+    return result;
+  }
+
+  /** Hook for calling clone() on an int[] */
+  public static int[] clone(int[] array) {
+    int[] result = array.clone();
     TrackerUpdater.setSource(result, 0, array.length, array, 0);
     return result;
   }

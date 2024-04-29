@@ -7,7 +7,11 @@ import static be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot.snapshot;
 import java.util.Arrays;
 import org.junit.Test;
 
-/** Test for {@link Arrays}. */
+/**
+ * Test for {@link Arrays}.
+ *
+ * @see ArrayTest
+ */
 public class ArraysTest {
   @Test public void copyOf() {
     char[] abcdef = TrackTestHelper.trackedCharArray("abcdef");

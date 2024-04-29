@@ -54,4 +54,9 @@ class ArrayStore extends Store {
     return new ArrayStore(storeInsn, frame,
         "void setByte(byte[],int,byte,be.coekaerts.wouter.flowtracker.tracker.TrackerPoint)");
   }
+
+  static ArrayStore createIntArrayStore(InsnNode storeInsn, FlowFrame frame) {
+    return new ArrayStore(storeInsn, frame,
+        "void setInt(int[],int,int,be.coekaerts.wouter.flowtracker.tracker.TrackerPoint)");
+  }
 }
