@@ -17,6 +17,11 @@
       <artifactId>gson</artifactId>
       <version>2.10.1</version>
     </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>2.2</version>
+    </dependency>
 
     <dependency>
       <groupId>be.coekaerts.wouter.flowtracker</groupId>

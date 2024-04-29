@@ -8,6 +8,7 @@ import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot;
+import com.google.common.truth.StringSubject;
 import java.io.PrintStream;
 import org.junit.rules.ExternalResource;
 
@@ -53,8 +54,13 @@ public class DemoTestRule extends ExternalResource {
   }
 
   void assertOutputComesFromConstantIn(String expectedOutput, Class<?> source) {
+    assertOutputComesFromConstantInClassThat(expectedOutput)
+        .startsWith("class " + source.getName() + "\n");
+  }
+
+  StringSubject assertOutputComesFromConstantInClassThat(String expectedOutput) {
     ClassOriginTracker tracker = (ClassOriginTracker) trackerForOutput(expectedOutput);
-    assertThat(tracker.getContent().toString()).startsWith("class " + source.getName() + "\n");
+    return assertThat(tracker.getContent().toString());
   }
 
   void assertOutputNotTracked(String expectedOutput) {

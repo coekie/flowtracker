@@ -13,10 +13,12 @@ public class GsonDemo {
   }
 
   public static void main(String... args) {
+    // parse json
+    System.out.println(new Gson().fromJson("{\"myField\": \"fromJson\"}", Pojo.class));
+
+    // generate json
     Pojo pojo = new Pojo();
     pojo.myField = "toJson";
     System.out.println(new Gson().toJson(pojo));
-
-    System.out.println(new Gson().fromJson("{\"myField\": \"fromJson\"}", Pojo.class));
   }
 }

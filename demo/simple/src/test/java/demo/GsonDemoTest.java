@@ -11,10 +11,12 @@ public class GsonDemoTest {
   @Test
   public void test() {
     GsonDemo.main();
-    demo.assertOutputComesFromConstantIn("toJson", GsonDemo.class);
-    demo.assertOutputComesFromConstantIn("fromJson", GsonDemo.class);
-    demo.assertOutputComesFromConstantIn(":", JsonWriter.class);
     demo.assertOutputComesFromConstantIn("Pojo(", GsonDemo.Pojo.class);
+    demo.assertOutputComesFromConstantIn("fromJson", GsonDemo.class);
+
+    demo.assertOutputNotTracked("myField"); // names of fields (through reflection) are not tracked
+    demo.assertOutputComesFromConstantIn(":", JsonWriter.class);
     demo.assertOutputNotTracked("{"); // haven't looked into why this isn't tracked yet
+    demo.assertOutputComesFromConstantIn("toJson", GsonDemo.class);
   }
 }
