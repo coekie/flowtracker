@@ -156,6 +156,12 @@ class FlowInterpreter extends Interpreter<FlowValue> {
           return value2;
         }
       }
+      case Opcodes.IUSHR: { // >>>
+        // for e.g. DataOutputStream.writeShort/writeChar, Bits.putShort/putInt (in older jdks)
+        if (value2 instanceof ConstantValue) {
+          return value1;
+        }
+      }
     }
     return toFlowValue(basicInterpreter.binaryOperation(aInsn, value1, value2));
   }

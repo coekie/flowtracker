@@ -137,6 +137,17 @@ public class FlowAnalysisTest {
     ft.assertIsTheTrackedValue((char) (255 & b));
   }
 
+  // Test that we track a value through ">>>" (IUSHR).
+  @SuppressWarnings("PointlessBitwiseExpression")
+  @Test public void shift() {
+    int i = ft.createSourceInt(0x6162);
+    // see e.g. DataOutputStream.writeShort/writeChar, Bits.putShort/putInt
+    ft.assertIsTheTrackedValue((byte) (i >>> 8));
+    ft.assertIsTheTrackedValue((byte) (i >>> 0));
+    ft.assertIsTheTrackedValue((byte) ((i >>> 8) & 0xFF));
+    ft.assertIsTheTrackedValue((byte) ((i >>> 0) & 0xFF));
+  }
+
   @Test public void byteToUnsignedInt() {
     byte b = ft.createSourceByte((byte) 'a');
     ft.assertIsTheTrackedValue((byte) Byte.toUnsignedInt(b));
