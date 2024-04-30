@@ -192,7 +192,8 @@ public class FlowAnalyzingTransformer implements Transformer {
                 || mInsn.name.equals("getCharSourceTracker")
                 || mInsn.name.equals("getCharSourcePoint")
                 || mInsn.name.equals("getByteSourceTracker")
-                || mInsn.name.equals("getByteSourcePoint")) {
+                || mInsn.name.equals("getByteSourcePoint")
+                || mInsn.name.equals("getIntSourcePoint")) {
               stores.add(new TesterStore(mInsn, frame, 0));
             }
           } else if (shouldInstrumentInvocationArg(mInsn.name, mInsn.desc)) {

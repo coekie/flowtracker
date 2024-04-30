@@ -172,7 +172,9 @@ class FlowInterpreter extends Interpreter<FlowValue> {
     if (insn instanceof MethodInsnNode) {
       MethodInsnNode mInsn = (MethodInsnNode) insn;
       if ("be/coekaerts/wouter/flowtracker/test/FlowTester".equals(mInsn.owner)) {
-        if ("createSourceChar".equals(mInsn.name) || "createSourceByte".equals(mInsn.name)) {
+        if ("createSourceChar".equals(mInsn.name)
+            || "createSourceByte".equals(mInsn.name)
+            || "createSourceInt".equals(mInsn.name)) {
           return new TesterValue(flowMethodAdapter, mInsn);
         }
       } else if ("java/lang/Byte".equals(mInsn.owner) && "toUnsignedInt".equals(mInsn.name)) {

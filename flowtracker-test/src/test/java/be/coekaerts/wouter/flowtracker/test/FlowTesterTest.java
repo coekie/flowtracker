@@ -49,16 +49,20 @@ public class FlowTesterTest {
   }
 
   @Test
-  public void testGetTracker_char() {
+  public void testGetCharSourcePoint() {
     char a = ft.createSourceChar('a');
-    assertThat(FlowTester.getCharSourceTracker(a)).isEqualTo(ft.theSource());
     assertThat(FlowTester.getCharSourcePoint(a)).isEqualTo(ft.theSourcePoint());
   }
 
   @Test
-  public void testGetTracker_byte() {
+  public void testGetByteSourcePoint() {
     byte a = ft.createSourceByte((byte) 'a');
-    assertThat(FlowTester.getByteSourceTracker(a)).isEqualTo(ft.theSource());
     assertThat(FlowTester.getByteSourcePoint(a)).isEqualTo(ft.theSourcePoint());
+  }
+
+  @Test
+  public void testGetTracker_int() {
+    int a = ft.createSourceInt((byte) 'a');
+    assertThat(FlowTester.getIntSourcePoint(a)).isEqualTo(ft.theSourcePoint());
   }
 }
