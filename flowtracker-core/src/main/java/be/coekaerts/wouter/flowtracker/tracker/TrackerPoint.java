@@ -8,7 +8,7 @@ public class TrackerPoint {
 
   public final Tracker tracker;
   public final int index;
-  final Growth growth;
+  public final Growth growth;
 
   private TrackerPoint(Tracker tracker, int index, Growth growth) {
     this.tracker = tracker;

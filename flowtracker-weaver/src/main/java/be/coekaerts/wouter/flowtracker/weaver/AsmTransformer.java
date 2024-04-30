@@ -23,6 +23,7 @@ class AsmTransformer implements ClassFileTransformer {
   private static final String RECOMMENDED_FILTER = "+java.util.Arrays,"
       + "+java.lang.String*," // String and friends like StringBuilder, StringLatin1
       + "+java.lang.AbstractStringBuilder,"
+      + "+java.lang.Character,"
       + "+java.lang.invoke.StringConcatFactory,"
       + "+java.io.BufferedWriter,"
       + "+java.io.BufferedOutputStream,"

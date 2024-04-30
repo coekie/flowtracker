@@ -16,6 +16,10 @@ public class InvocationReturnValueTest {
     // e.g. StreamDecoder.lockedRead0
     assertThat(InvocationReturnValue.shouldInstrumentInvocation("lockedRead0", "()I")).isTrue();
 
+    // Character.codePointAt,toCodePoint
+    assertThat(InvocationReturnValue.shouldInstrumentInvocation("codePointAt", "([CII)I")).isTrue();
+    assertThat(InvocationReturnValue.shouldInstrumentInvocation("toCodePoint", "(CC)I")).isTrue();
+
     assertThat(InvocationReturnValue.shouldInstrumentInvocation(
         "read", "([C)I")).isFalse();
     assertThat(InvocationReturnValue.shouldInstrumentInvocation(

@@ -34,6 +34,10 @@ public final class Growth {
     return of(numerator * other.numerator, denominator * other.denominator);
   }
 
+  public Growth half() {
+    return of(numerator, denominator * 2);
+  }
+
   // TODO this should probably be more lenient, to account for fractional indexes?
   public boolean lengthMatches(int sourceLength, int targetLength) {
     return sourceLength * numerator == targetLength * denominator;

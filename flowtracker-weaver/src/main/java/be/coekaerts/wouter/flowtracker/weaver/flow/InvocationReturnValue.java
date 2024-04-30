@@ -49,11 +49,19 @@ class InvocationReturnValue extends TrackableValue {
       return true;
     }
 
-    // heuristic guessing which methods are worth tracking the return value of, because that
-    // probably is a char or byte read from somewhere
-    return returnType.equals(Type.INT_TYPE) && (name.contains("read") || name.contains("Read"))
-        // don't instrument methods where the output is going through a buffer passed into it as
-        // parameter. for those, the returned value is probably the length
-        && !desc.contains("[") && !desc.contains("Buffer");
+    if (returnType.equals(Type.INT_TYPE)) {
+      // heuristic guessing which methods are worth tracking the return value of, because that
+      // probably is a char or byte read from somewhere
+      if ((name.contains("read") || name.contains("Read"))
+          // don't instrument methods where the output is going through a buffer passed into it as
+          // parameter. for those, the returned value is probably the length
+          && !desc.contains("[") && !desc.contains("Buffer")) {
+        return true;
+      }
+
+      // e.g. Character.codePointAt
+      return name.contains("codePoint") || name.contains("CodePoint");
+    }
+    return false;
   }
 }
