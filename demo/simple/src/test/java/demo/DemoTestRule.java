@@ -1,15 +1,16 @@
 package demo;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 
 import be.coekaerts.wouter.flowtracker.tracker.ByteSequence;
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot;
+import com.google.common.primitives.Bytes;
 import com.google.common.truth.StringSubject;
 import java.io.PrintStream;
+import java.util.Arrays;
 import org.junit.rules.ExternalResource;
 
 public class DemoTestRule extends ExternalResource {
@@ -31,39 +32,80 @@ public class DemoTestRule extends ExternalResource {
     return TrackerRepository.getTracker(bout.getByteContent().array());
   }
 
-  private String outContent() {
-    return bout.toString();
+  private TrackerSnapshot snapshotOutput(byte[] prefix, byte[] expectedOutput) {
+    Tracker tracker = outTracker();
+    byte[] output = bout.toByteArray();
+
+    int startIndex;
+    if (prefix == null) {
+      startIndex = 0;
+    } else {
+      startIndex = indexOf(output, prefix) + prefix.length;
+    }
+
+    int index =
+        startIndex + indexOf(Arrays.copyOfRange(output, startIndex, output.length), expectedOutput);
+    return TrackerSnapshot.of(tracker, index, expectedOutput.length);
   }
 
-  private TrackerSnapshot snapshotOutput(String expectedOutput) {
-    Tracker tracker = outTracker();
-    String output = outContent();
-    int index = output.indexOf(expectedOutput);
-    assertWithMessage("Find %s in %s", expectedOutput, output).that(index).isGreaterThan(-1);
-    return TrackerSnapshot.of(tracker, index, expectedOutput.length());
+  private int indexOf(byte[] output, byte[] expected) {
+    int index = Bytes.indexOf(output, expected);
+    if (index == -1) {
+      throw new AssertionError("Cannot find '" + new String(expected) + "' in '"
+          + new String(output) + "'");
+    }
+    return index;
   }
 
   /**
-   * Checks if the output contains the given String, and returns the Tracker that is tracked as its
-   * source in the output.
+   * Checks if the output contains the given String, and returns the TrackedSubject for that part
+   * of the output.
    */
-  private Tracker trackerForOutput(String expectedOutput) {
-    TrackerSnapshot snapshot = snapshotOutput(expectedOutput);
-    assertThat(snapshot.getParts()).hasSize(1);
-    return snapshot.getParts().get(0).source;
+  TrackedSubject assertThatOutput(String expectedOutput) {
+    return assertThatOutput(expectedOutput.getBytes());
   }
 
-  void assertOutputComesFromConstantIn(String expectedOutput, Class<?> source) {
-    assertOutputComesFromConstantInClassThat(expectedOutput)
-        .startsWith("class " + source.getName() + "\n");
+  /**
+   * Checks if the output contains `expectedOutput`, after where it contains `prefix`, and returns
+   * the TrackedSubject for that part of the output.
+   */
+  TrackedSubject assertThatOutput(String prefix, String expectedOutput) {
+    return assertThatOutput(prefix.getBytes(), expectedOutput.getBytes());
   }
 
-  StringSubject assertOutputComesFromConstantInClassThat(String expectedOutput) {
-    ClassOriginTracker tracker = (ClassOriginTracker) trackerForOutput(expectedOutput);
-    return assertThat(tracker.getContent().toString());
+  TrackedSubject assertThatOutput(byte[] expectedOutput) {
+    return assertThatOutput(null, expectedOutput);
   }
 
-  void assertOutputNotTracked(String expectedOutput) {
-    assertThat(trackerForOutput(expectedOutput)).isNull();
+  TrackedSubject assertThatOutput(byte[] prefix, byte[] expectedOutput) {
+    return new TrackedSubject(snapshotOutput(prefix, expectedOutput));
+  }
+
+  // like a Truth Subject, but too lazy to actually be one.
+  static class TrackedSubject {
+    private final TrackerSnapshot snapshot;
+
+    private TrackedSubject(TrackerSnapshot snapshot) {
+      this.snapshot = snapshot;
+    }
+
+    private Tracker tracker() {
+      assertThat(snapshot.getParts()).hasSize(1);
+      return snapshot.getParts().get(0).source;
+    }
+
+    void isNotTracked() {
+      assertThat(tracker()).isNull();
+    }
+
+    StringSubject comesFromConstantInClassThat() {
+      ClassOriginTracker tracker = (ClassOriginTracker) tracker();
+      return assertThat(tracker.getContent().toString());
+    }
+
+    void comesFromConstantInClass(Class<?> source) {
+      comesFromConstantInClassThat()
+          .startsWith("class " + source.getName() + "\n");
+    }
   }
 }

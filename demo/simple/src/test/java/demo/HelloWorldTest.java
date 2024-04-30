@@ -9,6 +9,6 @@ public class HelloWorldTest {
   @Test
   public void test() {
     HelloWorld.main();
-    demo.assertOutputComesFromConstantIn("Hello, world!", HelloWorld.class);
+    demo.assertThatOutput("Hello, world!").comesFromConstantInClass(HelloWorld.class);
   }
 }

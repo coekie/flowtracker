@@ -10,10 +10,12 @@ public class SnakeYamlDemoTest {
   @Test
   public void test() {
     SnakeYamlDemo.main();
-    demo.assertOutputComesFromConstantIn("hello", SnakeYamlDemo.class);
-    demo.assertOutputNotTracked("myField"); // names of fields (through reflection) are not tracked
+    demo.assertThatOutput("hello").comesFromConstantInClass(SnakeYamlDemo.class);
+    // names of fields (through reflection) are not tracked
+    demo.assertThatOutput("myField").isNotTracked();
 
-    demo.assertOutputComesFromConstantIn("toDump", SnakeYamlDemo.class);
-    demo.assertOutputComesFromConstantInClassThat(":").startsWith("class org.yaml.snakeyaml");
+    demo.assertThatOutput("toDump").comesFromConstantInClass(SnakeYamlDemo.class);
+    demo.assertThatOutput(":").comesFromConstantInClassThat()
+        .startsWith("class org.yaml.snakeyaml");
   }
 }
