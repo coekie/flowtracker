@@ -125,10 +125,10 @@ public class InvocationArgStore extends Store {
 
     for (int i = 0; i < args.length; i++) {
       Type arg = args[i];
-      // instrument all char and byte args, because they're very likely to be relevant,
+      // instrument all char, byte and short args, because they're very likely to be relevant,
       // but for int arguments only if we're eager to because the name of the method suggests it
       // might be relevant.
-      if (arg.getSort() == Type.CHAR || arg.getSort() == Type.BYTE
+      if (arg.getSort() == Type.CHAR || arg.getSort() == Type.BYTE || arg.getSort() == Type.SHORT
           || (eager && arg.getSort() == Type.INT)) {
         result[i] = true;
         any = true;

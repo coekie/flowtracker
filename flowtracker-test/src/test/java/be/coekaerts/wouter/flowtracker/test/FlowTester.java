@@ -48,6 +48,20 @@ class FlowTester {
   }
 
   /**
+   * Returns the short value, and treats this FlowTester as the source.
+   * Calls to this method should get replaced by {@link #$tracked_createSourceShort(short)}.
+   */
+  short createSourceShort(@SuppressWarnings("unused") short s) {
+    throw sourceNotTrackedError();
+  }
+
+  @SuppressWarnings("unused") // invoked by TesterValue instrumentation
+  short $tracked_createSourceShort(short s) {
+    sources.add(new FixedOriginTracker(-1));
+    return s;
+  }
+
+  /**
    * Returns the int value, and treats this FlowTester as the source.
    * Calls to this method should get replaced by {@link #$tracked_createSourceByte(byte)}.
    */

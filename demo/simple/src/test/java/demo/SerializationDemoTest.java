@@ -27,8 +27,7 @@ public class SerializationDemoTest {
         // TODO .comesFromConstantInClass(ObjectOutputStream.class);
     // version, from ObjectOutputStream.writeStreamHeader
     demo.assertThatOutput(new byte[]{(byte) 5})
-        .isNotTracked();
-        // TODO .comesFromConstantInClass(ObjectOutputStream.class);
+        .comesFromConstantInClass(ObjectOutputStream.class);
 
     // from ObjectOutputStream.writeOrdinaryObject ('s')
     demo.assertThatOutput("s").comesFromConstantInClass(ObjectOutputStream.class);

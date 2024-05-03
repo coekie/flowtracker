@@ -30,6 +30,14 @@ public class InvocationInstrumentationTest {
   }
 
   @Test
+  public void testArgValueShort() {
+    FlowTester flowTester = new FlowTester();
+    Sink sink = new Sink(flowTester);
+    sink.writeShort(flowTester.createSourceShort((short) 1));
+    assertThat(sink.called).isTrue();
+  }
+
+  @Test
   public void testArgValueInt() {
     FlowTester flowTester = new FlowTester();
     Sink sink = new Sink(flowTester);
@@ -178,6 +186,11 @@ public class InvocationInstrumentationTest {
 
     void writeChar(char c) {
       flowTester.assertIsTheTrackedValue(c);
+      called = true;
+    }
+
+    void writeShort(short s) {
+      flowTester.assertIsTheTrackedValue((char) s);
       called = true;
     }
 
