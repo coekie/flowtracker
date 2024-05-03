@@ -13,10 +13,10 @@ public class CharacterHook {
     TrackerPoint point = Invocation.getArgPoint(invocation, 0);
     if (point != null) {
       // the returned value is a combination of the two arguments. for simplicity, we assume/pretend
-      // that the second argument comes from the same source, with the same growth.
+      // that the second argument comes from the same source, with the same length.
       // TODO(growth) if this is combining two characters that in their source were encoded using a
       //  different number of bytes, then this is actually incorrect.
-      invocation.returnPoint = TrackerPoint.of(point.tracker, point.index, point.growth.half());
+      invocation.returnPoint = TrackerPoint.of(point.tracker, point.index, point.length * 2);
     }
   }
 }

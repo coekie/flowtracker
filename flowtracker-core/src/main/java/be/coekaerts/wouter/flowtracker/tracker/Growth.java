@@ -30,7 +30,6 @@ public final class Growth {
   }
 
   public Growth combine(Growth other) {
-    // TODO[growth] simplify the fraction
     return of(numerator * other.numerator, denominator * other.denominator);
   }
 

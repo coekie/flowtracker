@@ -3,7 +3,6 @@ package be.coekaerts.wouter.flowtracker.tracker;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TrackerPointTest {
@@ -16,29 +15,29 @@ public class TrackerPointTest {
 
   @Test
   public void test() {
-    TrackerPoint point = TrackerPoint.of(source, 5);
+    TrackerPoint point = TrackerPoint.of(source, 5, 2);
     assertThat(point.tracker).isSameInstanceAs(source);
     assertThat(point.index).isEqualTo(5);
+    assertThat(point.length).isEqualTo(2);
   }
 
   @Test
   public void testMiddleman() {
     DefaultTracker middleman = new DefaultTracker();
-    middleman.setSource(5, 10, source, 3, Growth.DOUBLE);
-    TrackerPoint point = TrackerPoint.of(middleman, 5);
+    middleman.setSource(5, 10, source, 3, Growth.NONE);
+    TrackerPoint point = TrackerPoint.of(middleman, 5, 2);
     assertThat(point.tracker).isSameInstanceAs(source);
     assertThat(point.index).isEqualTo(3);
-    assertThat(point.growth).isEqualTo(Growth.DOUBLE);
+    assertThat(point.length).isEqualTo(2);
   }
 
   @Test
-  @Ignore // TODO[growth]. this doesn't work because of DefaultTracker growth handling
   public void testMiddlemanGrowth() {
     DefaultTracker middleman = new DefaultTracker();
-    middleman.setSource(5, 10, source, 3, Growth.DOUBLE);
-    TrackerPoint point = TrackerPoint.of(middleman, 7);
+    middleman.setSource(5, 10, source, 3, Growth.HALF);
+    TrackerPoint point = TrackerPoint.of(middleman, 5, 3);
     assertThat(point.tracker).isSameInstanceAs(source);
-    assertThat(point.index).isEqualTo(4);
-    assertThat(point.growth).isEqualTo(Growth.DOUBLE);
+    assertThat(point.index).isEqualTo(3);
+    assertThat(point.length).isEqualTo(6);
   }
 }

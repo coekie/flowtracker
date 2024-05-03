@@ -11,7 +11,7 @@ public class Invocation {
 
   private final String signature;
 
-  // tracker and index for the returned primitive value
+  // source of the returned primitive value
   public TrackerPoint returnPoint;
 
   // tracks source for some primitive values in arguments. null for untracked arguments.
@@ -19,16 +19,6 @@ public class Invocation {
 
   Invocation(String signature) {
     this.signature = signature;
-  }
-
-  @SuppressWarnings("unused") // invoked by instrumentation
-  public Tracker getReturnTracker() {
-    return returnPoint == null ? null : returnPoint.tracker;
-  }
-
-  @SuppressWarnings("unused") // invoked by instrumentation
-  public int getReturnIndex() {
-    return returnPoint == null ? -1 : returnPoint.index;
   }
 
   @SuppressWarnings("unused") // invoked by instrumentation

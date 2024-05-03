@@ -2,20 +2,23 @@ package be.coekaerts.wouter.flowtracker.tracker;
 
 import java.util.Objects;
 
-/** A position in a tracker, representing a single value being tracked, e.g. one byte or one char */
+/**
+ * A position in a tracker, representing a single value being tracked, e.g. one byte or one char.
+ * <p>
+ * A point does have a length, because e.g. a `char` value obtained from a byte[] could come from
+ * two bytes.
+ */
 public class TrackerPoint {
   private static final TrackerDepth depth = TrackerDepth.CONTENT_IMMUTABLE;
 
   public final Tracker tracker;
   public final int index;
-  // TODO instead of growth, this should be length.
-  //   (because growth depends on source _and_ target, and we only know the source here).
-  public final Growth growth;
+  public final int length;
 
-  private TrackerPoint(Tracker tracker, int index, Growth growth) {
+  private TrackerPoint(Tracker tracker, int index, int length) {
     this.tracker = tracker;
     this.index = index;
-    this.growth = growth;
+    this.length = length;
   }
 
   @Override
@@ -27,39 +30,34 @@ public class TrackerPoint {
       return false;
     }
     TrackerPoint that = (TrackerPoint) o;
-    return index == that.index && Objects.equals(tracker, that.tracker)
-        && Objects.equals(growth, that.growth);
+    return index == that.index && Objects.equals(tracker, that.tracker) && length == that.length;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tracker, index, growth);
+    return Objects.hash(tracker, index, length);
   }
 
   /**
-   * Create a TrackerPoint with default growth
-   * @see #of(Tracker, int, Growth)
+   * Create a TrackerPoint with length 1
+   * @see #of(Tracker, int, int)
    */
   public static TrackerPoint of(Tracker tracker, int index) {
-    return of(tracker, index, Growth.NONE);
-  }
-
-  public static TrackerPoint ofNullable(Tracker tracker, int index) {
-    return tracker == null ? null : of(tracker, index);
+    return of(tracker, index, 1);
   }
 
   /**
    * Create a TrackerPoint containing the source of the element at {@code index} in {@code tracker}.
    */
-  public static TrackerPoint of(Tracker tracker, int index, Growth growth) {
+  public static TrackerPoint of(Tracker tracker, int index, int length) {
     if (depth.isAcceptableContent(tracker)) {
-      return new TrackerPoint(tracker, index, growth);
+      return new TrackerPoint(tracker, index, length);
     } else {
       // perhaps we should add method in reader to read a single value directly?
       // instead of reading it, we let it push it to us
       Gimme gimme = new Gimme();
-      tracker.pushSourceTo(index, 1, gimme, 0, growth);
-      return new TrackerPoint(gimme.sourceTracker, gimme.sourceIndex, gimme.growth);
+      tracker.pushSourceTo(index, length, gimme, 0, Growth.NONE);
+      return new TrackerPoint(gimme.sourceTracker, gimme.sourceIndex, gimme.sourceLength);
     }
   }
 
@@ -76,7 +74,7 @@ public class TrackerPoint {
   private static class Gimme implements WritableTracker {
     Tracker sourceTracker;
     int sourceIndex;
-    Growth growth;
+    int sourceLength;
 
     @Override
     public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
@@ -89,7 +87,7 @@ public class TrackerPoint {
         if (depth.isAcceptableContent(sourceTracker)) {
           this.sourceTracker = sourceTracker;
           this.sourceIndex = sourceIndex;
-          this.growth = growth;
+          this.sourceLength = growth.targetToSource(length);
         } else {
           sourceTracker.pushSourceTo(sourceIndex, length, this, index, growth);
         }

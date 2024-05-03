@@ -4,7 +4,6 @@ import static be.coekaerts.wouter.flowtracker.test.TrackTestHelper.trackedCharAr
 import static be.coekaerts.wouter.flowtracker.tracker.TrackerRepository.getTracker;
 import static com.google.common.truth.Truth.assertThat;
 
-import be.coekaerts.wouter.flowtracker.tracker.Growth;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
 import org.junit.Test;
 
@@ -15,7 +14,7 @@ public class CharacterTest {
     FlowTester ft = new FlowTester();
     int codePoint = Character.toCodePoint(ft.createSourceChar('\ud83c'), '\udf09');
     assertThat(FlowTester.getIntSourcePoint(codePoint))
-        .isEqualTo(TrackerPoint.of(ft.theSource(), ft.theSourceIndex(), Growth.HALF));
+        .isEqualTo(TrackerPoint.of(ft.theSource(), ft.theSourceIndex(), 2));
   }
 
   @Test
@@ -31,6 +30,6 @@ public class CharacterTest {
     int b = Character.codePointAt(abc, 1);
     FlowTester.assertTrackedValue(b, 127753, getTracker(abc), 1);
     assertThat(FlowTester.getIntSourcePoint(b))
-        .isEqualTo(TrackerPoint.of(getTracker(abc), 1, Growth.HALF));
+        .isEqualTo(TrackerPoint.of(getTracker(abc), 1, 2));
   }
 }
