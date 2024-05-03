@@ -2,18 +2,32 @@ package be.coekaerts.wouter.flowtracker.tracker;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker.ClassConstant;
 import org.junit.Test;
 
 public class ClassOriginTrackerTest {
-  @Test public void test() {
+  @Test public void testSimpleChar() {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass("myClass");
     assertThat(ClassOriginTracker.get(tracker.classId)).isSameInstanceAs(tracker);
 
     tracker.startMethod("myMethod");
-    int xOffset = tracker.registerConstant('x');
+    ClassConstant constant = tracker.registerConstant('x');
     assertThat(tracker.getContent().toString()).isEqualTo("class myClass\n"
             + "myMethod:\n"
             + "  x\n");
-    assertThat(tracker.getContent().charAt(xOffset)).isEqualTo('x');
+    assertThat(tracker.getContent().charAt(constant.offset)).isEqualTo('x');
+  }
+
+  @Test public void testLargerInt() {
+    ClassOriginTracker tracker = ClassOriginTracker.registerClass("myClass");
+    assertThat(ClassOriginTracker.get(tracker.classId)).isSameInstanceAs(tracker);
+
+    tracker.startMethod("myMethod");
+    ClassConstant constant = tracker.registerConstant(9999);
+    assertThat(tracker.getContent().toString()).isEqualTo("class myClass\n"
+        + "myMethod:\n"
+        + "  0x270f (9999)\n");
+    assertThat(tracker.getContent().subSequence(constant.offset, constant.offset + constant.length))
+        .isEqualTo("0x270f (9999)");
   }
 }

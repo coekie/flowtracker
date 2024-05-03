@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -41,7 +42,27 @@ public class ConstantTest {
     byte b = 1; // gets compiled as ICONST_1 instruction
     TrackerPoint point = FlowTester.getByteSourcePoint(b);
     assertThat(point.tracker).isInstanceOf(ClassOriginTracker.class);
-    assertThat(((ClassOriginTracker) point.tracker).getContent().charAt(point.index)).isEqualTo(1);
+    assertThat(((ClassOriginTracker) point.tracker).getContent()
+        .subSequence(point.index, point.index + point.length)).isEqualTo("0x1 (1)");
+  }
+
+  @Test
+  public void testNonPrintableInt() {
+    int i = 999;
+    TrackerPoint point = FlowTester.getIntSourcePoint(i);
+    assertThat(point.tracker).isInstanceOf(ClassOriginTracker.class);
+    assertThat(((ClassOriginTracker) point.tracker).getContent()
+        .subSequence(point.index, point.index + point.length)).isEqualTo("0x3e7 (999)");
+  }
+
+  @Test
+  @Ignore // TODO larger constants
+  public void testLargeNonPrintableInt() {
+    int i = 999999;
+    TrackerPoint point = FlowTester.getIntSourcePoint(i);
+    assertThat(point.tracker).isInstanceOf(ClassOriginTracker.class);
+    assertThat(((ClassOriginTracker) point.tracker).getContent()
+        .subSequence(point.index, point.index + point.length)).isEqualTo("999999");
   }
 
   @Test

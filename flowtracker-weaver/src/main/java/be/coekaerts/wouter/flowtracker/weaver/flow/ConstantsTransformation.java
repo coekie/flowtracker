@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
+import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker.ClassConstant;
 import be.coekaerts.wouter.flowtracker.weaver.ClassFilter;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.ConstantDynamic;
@@ -43,7 +44,7 @@ class ConstantsTransformation {
     }
   }
 
-  int trackConstant(FlowMethodAdapter methodNode, int value) {
+  ClassConstant trackConstant(FlowMethodAdapter methodNode, int value) {
     maybeAddMethodHeader(methodNode);
     return tracker().registerConstant(value);
   }

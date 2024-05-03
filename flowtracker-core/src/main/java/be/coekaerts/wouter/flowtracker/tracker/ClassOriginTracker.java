@@ -48,11 +48,18 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     content.append(method).append(":\n");
   }
 
-  public synchronized int registerConstant(int value) {
+  public synchronized ClassConstant registerConstant(int value) {
     content.append("  ");
     int offset = content.length();
-    content.append((char) value).append('\n');
-    return offset;
+    if (value >= 32 && value <= 127) { // printable ascii characters
+      content.append((char) value);
+    } else {
+      content.append("0x").append(Integer.toHexString(value))
+          .append(" (").append(value).append(')');
+    }
+    ClassConstant result = new ClassConstant(classId, offset, content.length() - offset);
+    content.append('\n');
+    return result;
   }
 
   public synchronized int registerConstantString(String value) {
@@ -60,5 +67,26 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     int offset = content.length();
     content.append(value).append('\n');
     return offset;
+  }
+
+  public static class ClassConstant {
+    public final int classId;
+    public final int offset;
+    public final int length;
+
+    public ClassConstant(int classId, int offset, int length) {
+      this.classId = classId;
+      this.offset = offset;
+      this.length = length;
+    }
+
+    @Override
+    public String toString() {
+      return "ClassConstant{" +
+          "classId=" + classId +
+          ", offset=" + offset +
+          ", length=" + length +
+          '}';
+    }
   }
 }
