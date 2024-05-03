@@ -8,6 +8,8 @@ public class TrackerPoint {
 
   public final Tracker tracker;
   public final int index;
+  // TODO instead of growth, this should be length.
+  //   (because growth depends on source _and_ target, and we only know the source here).
   public final Growth growth;
 
   private TrackerPoint(Tracker tracker, int index, Growth growth) {

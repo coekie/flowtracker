@@ -114,6 +114,11 @@ public class InvocationArgStore extends Store {
         result[2] = true; // the `value` argument
         return result;
       }
+    } else if (owner.equals("jdk/internal/util/ByteArray")) {
+      if (name.equals("setChar") || name.equals("setUnsignedShort") || name.equals("setInt")) {
+        result[2] = true; // the `value` argument
+        return result;
+      }
     }
 
     boolean eager = name.contains("write") || name.contains("Write") || name.contains("print");

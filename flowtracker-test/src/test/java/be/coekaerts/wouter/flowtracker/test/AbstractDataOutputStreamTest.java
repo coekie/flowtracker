@@ -25,14 +25,19 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
 
   @Test
   public void testWriteChar() throws IOException {
-    JavaVersions.skipInVersionSince(21); // TODO handle ByteArray.setUnsignedShort
     FlowTester ft = new FlowTester();
     try (OS os = createOutputStream()) {
       os.writeChar(ft.createSourceInt(0x6162));
-      assertThatTracker(getTracker(os)).matches(snapshot()
-          // TODO[growth] would be better if this was one part, with Growth.DOUBLE
-          .part(ft.theSource(), ft.theSourceIndex(), 1)
-          .part(ft.theSource(), ft.theSourceIndex(), 1));
+      if (Runtime.version().feature() >= 21) {
+        assertThatTracker(getTracker(os)).matches(snapshot()
+            // TODO[growth] should have Growth.DOUBLE
+            .part(ft.theSource(), ft.theSourceIndex(), 2));
+      } else {
+        assertThatTracker(getTracker(os)).matches(snapshot()
+            // TODO[growth] would be better if this was one part, with Growth.DOUBLE
+            .part(ft.theSource(), ft.theSourceIndex(), 1)
+            .part(ft.theSource(), ft.theSourceIndex(), 1));
+      }
     }
   }
 
@@ -51,16 +56,21 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
 
   @Test
   public void testWriteInt() throws IOException {
-    JavaVersions.skipInVersionSince(21); // TODO handle ByteArray.setInt
     FlowTester ft = new FlowTester();
     try (OS os = createOutputStream()) {
       os.writeInt(ft.createSourceInt(0x61626364));
-      assertThatTracker(getTracker(os)).matches(snapshot()
-          // TODO[growth] would be better if this was one part, with Growth 4
-          .part(ft.theSource(), ft.theSourceIndex(), 1)
-          .part(ft.theSource(), ft.theSourceIndex(), 1)
-          .part(ft.theSource(), ft.theSourceIndex(), 1)
-          .part(ft.theSource(), ft.theSourceIndex(), 1));
+      if (Runtime.version().feature() >= 21) {
+        assertThatTracker(getTracker(os)).matches(snapshot()
+            // TODO[growth] should have Growth 4
+            .part(ft.theSource(), ft.theSourceIndex(), 4));
+      } else {
+        assertThatTracker(getTracker(os)).matches(snapshot()
+            // TODO[growth] would be better if this was one part, with Growth 4
+            .part(ft.theSource(), ft.theSourceIndex(), 1)
+            .part(ft.theSource(), ft.theSourceIndex(), 1)
+            .part(ft.theSource(), ft.theSourceIndex(), 1)
+            .part(ft.theSource(), ft.theSourceIndex(), 1));
       }
+    }
   }
 }
