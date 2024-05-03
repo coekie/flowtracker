@@ -110,12 +110,12 @@ public class InvocationArgStore extends Store {
     boolean any = false;
 
     if (owner.equals("java/io/Bits")) { // in JDK < 21
-      if (name.equals("putChar") || name.equals("putInt")) {
+      if (name.equals("putInt")) {
         result[2] = true; // the `value` argument
         return result;
       }
     } else if (owner.equals("jdk/internal/util/ByteArray")) {
-      if (name.equals("setChar") || name.equals("setUnsignedShort") || name.equals("setInt")) {
+      if (name.equals("setUnsignedShort") || name.equals("setInt")) {
         result[2] = true; // the `value` argument
         return result;
       }

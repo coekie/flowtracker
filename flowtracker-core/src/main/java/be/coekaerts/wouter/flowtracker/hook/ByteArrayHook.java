@@ -17,6 +17,14 @@ public class ByteArrayHook {
 
   @Hook(target = "jdk.internal.util.ByteArray",
       condition = "version >= 21",
+      method = "void setShort(byte[], int, short)")
+  public static void afterSetShort(@Arg("ARG0") byte[] array, @Arg("ARG1") int offset,
+      @Arg("INVOCATION") Invocation invocation) {
+    TrackerUpdater.setSourceTrackerPoint(array, offset, 2, Invocation.getArgPoint(invocation, 2));
+  }
+
+  @Hook(target = "jdk.internal.util.ByteArray",
+      condition = "version >= 21",
       method = "void setUnsignedShort(byte[], int, int)")
   public static void afterSetUnsignedShort(@Arg("ARG0") byte[] array, @Arg("ARG1") int offset,
       @Arg("INVOCATION") Invocation invocation) {

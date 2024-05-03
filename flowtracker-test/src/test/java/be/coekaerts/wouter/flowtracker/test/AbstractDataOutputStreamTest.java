@@ -41,18 +41,23 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
     }
   }
 
-//  TODO shorts
-//  @Test
-//  public void testWriteShort() throws IOException {
-//    FlowTester ft = new FlowTester();
-//    try (OS os = createOutputStream()) {
-//      os.writeShort(ft.createSourceShort(67));
-//      assertThatTracker(getTracker(os)).matches(snapshot()
-//          // TODO[growth] would be better if this was one part, with Growth.DOUBLE
-//          .part(ft.theSource(), ft.theSourceIndex(), 1)
-//          .part(ft.theSource(), ft.theSourceIndex(), 1));
-//    }
-//  }
+  @Test
+  public void testWriteShort() throws IOException {
+    FlowTester ft = new FlowTester();
+    try (OS os = createOutputStream()) {
+      os.writeShort(ft.createSourceShort((short) 67));
+      if (Runtime.version().feature() >= 21) {
+        assertThatTracker(getTracker(os)).matches(snapshot()
+            // TODO[growth] should have Growth.DOUBLE
+            .part(ft.theSource(), ft.theSourceIndex(), 2));
+      } else {
+        assertThatTracker(getTracker(os)).matches(snapshot()
+            // TODO[growth] would be better if this was one part, with Growth.DOUBLE
+            .part(ft.theSource(), ft.theSourceIndex(), 1)
+            .part(ft.theSource(), ft.theSourceIndex(), 1));
+      }
+    }
+  }
 
   @Test
   public void testWriteInt() throws IOException {
