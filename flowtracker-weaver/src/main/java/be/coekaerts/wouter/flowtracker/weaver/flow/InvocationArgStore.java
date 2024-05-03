@@ -26,7 +26,7 @@ public class InvocationArgStore extends Store {
 
   InvocationArgStore(MethodInsnNode mInsn, FlowFrame frame, FlowFrame nextFrame) {
     super(frame);
-    boolean[] toInstrument = requireNonNull(argsToInstrument(mInsn.name, mInsn.desc));
+    boolean[] toInstrument = requireNonNull(argsToInstrument(mInsn.owner, mInsn.name, mInsn.desc));
     this.args = new FlowValue[toInstrument.length];
     for (int i = 0; i < args.length; i++) {
       if (toInstrument[i]) {
@@ -95,12 +95,12 @@ public class InvocationArgStore extends Store {
     return false;
   }
 
-  static boolean shouldInstrumentInvocationArg(String name, String desc) {
-    return argsToInstrument(name, desc) != null;
+  static boolean shouldInstrumentInvocationArg(String owner, String name, String desc) {
+    return argsToInstrument(owner, name, desc) != null;
   }
 
   /** Determines which arguments should be instrumented. null if none of them should be. */
-  static boolean[] argsToInstrument(String name, String desc) {
+  static boolean[] argsToInstrument(String owner, String name, String desc) {
     Type[] args = Type.getArgumentTypes(desc);
     if (args.length > MAX_ARG_NUM_TO_INSTRUMENT + 1 || name.equals("<init>")) {
       return null;
@@ -108,6 +108,13 @@ public class InvocationArgStore extends Store {
 
     boolean[] result = new boolean[args.length];
     boolean any = false;
+
+    if (owner.equals("java/io/Bits")) { // in JDK < 21
+      if (name.equals("putChar") || name.equals("putInt")) {
+        result[2] = true; // the `value` argument
+        return result;
+      }
+    }
 
     boolean eager = name.contains("write") || name.contains("Write") || name.contains("print");
 

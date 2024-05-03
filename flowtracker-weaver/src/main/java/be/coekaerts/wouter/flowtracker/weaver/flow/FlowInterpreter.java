@@ -209,7 +209,8 @@ class FlowInterpreter extends Interpreter<FlowValue> {
     int argNum = local - (isInstanceMethod ? 1 : 0);
     if (argNum >= 0) {
       boolean[] argsToInstrument =
-          InvocationArgStore.argsToInstrument(flowMethodAdapter.name, flowMethodAdapter.desc);
+          InvocationArgStore.argsToInstrument(flowMethodAdapter.owner,
+              flowMethodAdapter.name, flowMethodAdapter.desc);
       if (argsToInstrument != null && argNum < argsToInstrument.length
           && argsToInstrument[argNum]) {
         return new InvocationArgValue(flowMethodAdapter, null, argNum);

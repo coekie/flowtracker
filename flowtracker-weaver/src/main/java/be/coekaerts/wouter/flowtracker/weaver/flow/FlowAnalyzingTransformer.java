@@ -166,7 +166,8 @@ public class FlowAnalyzingTransformer implements Transformer {
           }
         } else if (insn.getOpcode() == Opcodes.INVOKEVIRTUAL
             || insn.getOpcode() == Opcodes.INVOKESTATIC
-            || insn.getOpcode() == Opcodes.INVOKESPECIAL) {
+            || insn.getOpcode() == Opcodes.INVOKESPECIAL
+            || insn.getOpcode() == Opcodes.INVOKEINTERFACE) {
           MethodInsnNode mInsn = (MethodInsnNode) insn;
 
           if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
@@ -196,7 +197,7 @@ public class FlowAnalyzingTransformer implements Transformer {
                 || mInsn.name.equals("getIntSourcePoint")) {
               stores.add(new TesterStore(mInsn, frame, 0));
             }
-          } else if (shouldInstrumentInvocationArg(mInsn.name, mInsn.desc)) {
+          } else if (shouldInstrumentInvocationArg(mInsn.owner, mInsn.name, mInsn.desc)) {
             stores.add(new InvocationArgStore(mInsn, frame,
                 // next frame, might contain the return value of the call
                 i + 1 < frames.length ? (FlowFrame) frames[i+1] : null));
