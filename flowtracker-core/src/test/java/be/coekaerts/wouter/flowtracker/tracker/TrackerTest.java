@@ -323,6 +323,47 @@ public class TrackerTest {
         snapshot().gap(1000).part(source, 200, 1).part(source, 300, 1).part(source, 400, 1));
   }
 
+  // test that it correctly identifies which parts of `middleman` are relevant,
+  // taking Growth into account
+  @Test public void testGrowthParts() {
+    middleman.setSource(0, 1, source, 7, Growth.NONE); // should be ignored
+    middleman.setSource(1, 1, source, 100, Growth.NONE);
+    middleman.setSource(2, 1, source, 200, Growth.NONE);
+    middleman.setSource(3, 1, source, 300, Growth.NONE); // should be ignored
+
+    target.setSource(0, 4, middleman, 1, Growth.DOUBLE);
+
+    assertThatTracker(target).matches(snapshot()
+        .part(2, source, 100, Growth.DOUBLE)
+        .part(2, source, 200, Growth.DOUBLE));
+  }
+
+  // test that it correctly identifies which parts of `middleman` are relevant,
+  // taking Growth into account
+  @Test public void testGrowthPartsHalf() {
+    middleman.setSource(0, 2, source, 7, Growth.NONE); // should be ignored
+    middleman.setSource(2, 2, source, 200, Growth.NONE);
+    middleman.setSource(4, 2, source, 400, Growth.NONE);
+    middleman.setSource(6, 2, source, 600, Growth.NONE); // should be ignored
+
+    target.setSource(0, 2, middleman, 2, Growth.HALF);
+
+    assertThatTracker(target).matches(snapshot()
+        .part(1, source, 200, Growth.HALF)
+        .part(1, source, 400, Growth.HALF));
+
+    // TODO test similar when it's not aligned
+  }
+
+  @Test public void testGrowthCutParts() {
+    middleman.setSource(0, 10, source, 0, Growth.NONE);
+    middleman.setSource(10, 20, source2, 0, Growth.NONE);
+    target.setSource(0, 6, middleman, 8, Growth.DOUBLE);
+    assertThatTracker(target).matches(snapshot()
+        .part(4, source, 8, Growth.DOUBLE)
+        .part(2, source2, 0, Growth.DOUBLE));
+  }
+
   @Test public void testGrowthCombining() {
     middleman.setSource(0, 10, source, 0, Growth.DOUBLE);
     target.setSource(0, 3, middleman, 0, Growth.of(3, 1));

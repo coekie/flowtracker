@@ -48,8 +48,6 @@ public class DefaultTracker extends Tracker {
   }
 
   @Override
-  // TODO really take growth into account, for the indexes. all usages of targetLength here are
-  //  probably wrong
   public void pushSourceTo(int sourceIndex, int targetLength, WritableTracker targetTracker,
       int targetIndex, Growth growth) {
     // we start at the part that contains sourceIndex
@@ -57,9 +55,9 @@ public class DefaultTracker extends Tracker {
     Entry<Integer, PartTracker> startEntry = getEntryAt(sourceIndex);
     int startIndex = startEntry == null ? sourceIndex : startEntry.getKey();
 
-    // TODO[growth] s/targetLength/sourceLength/, probably
+    int sourceLength = growth.targetToSource(targetLength);
     Collection<Entry<Integer, PartTracker>> entriesToPush =
-        map.subMap(startIndex, sourceIndex + targetLength).entrySet();
+        map.subMap(startIndex, sourceIndex + sourceLength).entrySet();
 
     // avoid issues where what we're pushing is being mutated while we're pushing it, when pushing
     // onto ourselves
@@ -67,16 +65,10 @@ public class DefaultTracker extends Tracker {
       entriesToPush = copy(entriesToPush);
     }
 
-    int pos = 0; // how far we are in pushing, from 0 to length
+    int targetPos = 0; // how far we are in pushing, from 0 to targetLength
     for (Entry<Integer, PartTracker> entry : entriesToPush) {
       int partIndex = entry.getKey();
       PartTracker part = entry.getValue();
-
-      // gap before this entry
-      int gapBefore = partIndex - sourceIndex - pos;
-      if (gapBefore > 0) {
-        targetTracker.setSource(targetIndex + pos, gapBefore, null, -1, Growth.NONE);
-      }
 
       // if the beginning of this part is cut off (because this it the first part, and sourceIndex
       // is halfway a part), the size of the cut-off.
@@ -84,26 +76,35 @@ public class DefaultTracker extends Tracker {
       int pushingPartOffset = partIndex < sourceIndex ? sourceIndex - partIndex : 0;
 
       // difference between what we'll start pushing for this part, and where we started overall.
-      // in other words our progress, going from 0 to length.
-      int pushingOffset = (partIndex + pushingPartOffset) - sourceIndex;
+      // in other words our progress, going from 0 to sourceLength.
+      int sourceStartPos = (partIndex + pushingPartOffset) - sourceIndex;
+      // TODO(growth) handle case where sourceStartPos is not a multiple of Growth.denominator
+      int targetStartPos = growth.sourceToTarget(sourceStartPos);
+
+      // gap before this entry
+      int gapBefore = targetStartPos - targetPos;
+      if (gapBefore > 0) {
+        targetTracker.setSource(targetIndex + targetPos, gapBefore, null, -1, Growth.NONE);
+      }
 
       // index in the target of where we start pushing to
-      int pushTargetIndex = targetIndex + pushingOffset;
+      int pushTargetIndex = targetIndex + targetStartPos;
 
       // The length of what we're pushing. This is limited by two things:
       // * the length given in arguments
       // * the available size of the part we're handling
-      int pushLength = Math.min(targetLength - pushingOffset, part.getLength() - pushingPartOffset);
+      int pushLength = Math.min(targetLength - targetStartPos,
+          growth.sourceToTarget(part.getLength() - pushingPartOffset));
 
       // push it!
       part.pushSourceTo(pushingPartOffset, pushLength, targetTracker, pushTargetIndex, growth);
 
-      pos = partIndex + part.getLength() - sourceIndex;
+      targetPos = targetStartPos + pushLength;
     }
 
     // gap at the end
-    if (pos < targetLength) {
-      targetTracker.setSource(targetIndex + pos, targetLength - pos, null, -1);
+    if (targetPos < targetLength) {
+      targetTracker.setSource(targetIndex + targetPos, targetLength - targetPos, null, -1);
     }
   }
 
