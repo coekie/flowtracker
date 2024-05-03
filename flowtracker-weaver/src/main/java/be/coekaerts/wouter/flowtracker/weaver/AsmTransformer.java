@@ -1,5 +1,6 @@
 package be.coekaerts.wouter.flowtracker.weaver;
 
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.util.Config;
 import be.coekaerts.wouter.flowtracker.util.Logger;
 import be.coekaerts.wouter.flowtracker.weaver.debug.DumpTextTransformer;
@@ -74,6 +75,7 @@ class AsmTransformer implements ClassFileTransformer {
   public byte[] transform(ClassLoader loader, String className,
       Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
       byte[] classfileBuffer) {
+    Invocation suspended = Invocation.suspend();
     try {
       Transformer adapterFactory = getAdapterFactory(loader, className);
       if (adapterFactory == null) {
@@ -110,6 +112,8 @@ class AsmTransformer implements ClassFileTransformer {
     } catch (Throwable t) {
       logger.error(t, "Exception transforming %s", className);
       throw new RuntimeException("Exception transforming class " + className, t);
+    } finally {
+      Invocation.unsuspend(suspended);
     }
   }
 
