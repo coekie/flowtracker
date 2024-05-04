@@ -6,28 +6,29 @@ package be.coekaerts.wouter.flowtracker.tracker;
  */
 public interface WritableTracker {
   /**
-   * Set a range of the source of this tracker to the given tracker.
+   * Set a range of the source of this tracker to the given tracker, with {@link Growth#NONE}.
    *
+   * @see #setSource(int, int, Tracker, int, Growth)
+   */
+  default void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
+    setSource(index, length, sourceTracker, sourceIndex, Growth.NONE);
+  }
+
+  /**
+   * Set a range of the source of this tracker to the given tracker.
+   * <p>
    * If <tt>sourceTracker</tt> is not appropriate as a direct source for this tracker
    * (e.g. because it is not immutable, or is not the original source), this may instead use the
    * source of the source (and recurse) using pushContentToTracker on <tt>sourceTracker</tt>.
    *
    * @param index Index in this tracker
-   * @param length Size of the range
+   * @param length Size of the range in this tracker
    * @param sourceTracker Tracker to use as source
    * @param sourceIndex Index into <tt>sourceTracker</tt>
+   * @param growth the correspondence between the source and target range. This also determines the
+   *   length of the relevant range in the source (sourceLength). `length` should be a multiple of
+   *   this {@link Growth#targetBlock}.
    */
-  // TODO remove this overload
-  default void setSource(int index, int length, Tracker sourceTracker, int sourceIndex) {
-    setSource(index, length, sourceTracker, sourceIndex, Growth.NONE);
-  }
-
-  // TODO remove the default implementation
-  // TODO this needs more thought, see NOTES
-  // TODO document behaviour (or intention) for copying part of a block (character) from source:
-  //   in order to know for each index in the target from which source block they come, either
-  //   sourceIndex needs to point to the start of a block, or it needs to be a short length (shorter
-  //   than Growth.something)
   void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
       Growth growth);
 }

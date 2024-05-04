@@ -78,7 +78,7 @@ public class DefaultTracker extends Tracker {
       // difference between what we'll start pushing for this part, and where we started overall.
       // in other words our progress, going from 0 to sourceLength.
       int sourceStartPos = (partIndex + pushingPartOffset) - sourceIndex;
-      // TODO(growth) handle case where sourceStartPos is not a multiple of Growth.denominator
+      // TODO(growth) handle case where sourceStartPos is not a multiple of Growth.sourceBlock
       int targetStartPos = growth.sourceToTarget(sourceStartPos);
 
       // gap before this entry
@@ -170,7 +170,7 @@ public class DefaultTracker extends Tracker {
 
   /**
    * Returns the entry in the tracker for the given index.
-   *
+   * <p>
    * The key of the given entry is the index in this tracker where the entry begins.
    * This may be equal to the given <tt>index</tt>, or less (if {@link PartTracker#getLength()} >
    * 1).

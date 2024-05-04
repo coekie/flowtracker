@@ -20,7 +20,8 @@ public abstract class Tracker implements WritableTracker {
     return trackerId;
   }
 
-  @Override public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex, Growth growth) {
+  @Override public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
+      Growth growth) {
     throw new UnsupportedOperationException();
   }
 
@@ -49,22 +50,30 @@ public abstract class Tracker implements WritableTracker {
   public abstract int getLength();
 
   /**
+   * Put a range of the source of this tracker into the given target tracker, with
+   * {@link Growth#NONE}.
+   *
+   * @see #pushSourceTo(int, int, WritableTracker, int, Growth)
+   */
+  public void pushSourceTo(int sourceIndex, int length, WritableTracker targetTracker,
+      int targetIndex) {
+    pushSourceTo(sourceIndex, length, targetTracker, targetIndex, Growth.NONE);
+  }
+
+  /**
    * Put a range of the source of this tracker into the given target tracker.
    * This should be implemented by calling {@link WritableTracker#setSource} on the target,
    * possibly multiple times.
    * Note that it is not <em>this</em> tracker that should be pushed, but the source of this.
    *
    * @param sourceIndex Index in this tracker of where the range starts.
-   * @param length Size of the range
+   * @param targetLength Size of the range
    * @param targetTracker Tracker of which we're setting the source to this one
    * @param targetIndex Offset in <tt>targetTracker</tt> of where the range starts.
+   * @param growth the correspondence between the source and target range. This also determines the
+   *   length of the relevant range in the source (sourceLength). `targetLength` should be a
+   *   multiple of this {@link Growth#targetBlock}.
    */
-  // TODO make difference between sourceLength and targetLength / growth
-  public void pushSourceTo(int sourceIndex, int length, WritableTracker targetTracker,
-      int targetIndex) {
-    pushSourceTo(sourceIndex, length, targetTracker, targetIndex, Growth.NONE);
-  }
-
   // TODO[growth] now that length is targetLength, the parameter order does not make sense anymore
   public void pushSourceTo(int sourceIndex, int targetLength, WritableTracker targetTracker,
       int targetIndex, Growth growth) {

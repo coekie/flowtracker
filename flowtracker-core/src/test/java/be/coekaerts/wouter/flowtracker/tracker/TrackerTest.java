@@ -372,6 +372,7 @@ public class TrackerTest {
 
   @Test public void testTransitiveGrowthTruncation() {
     middleman.setSource(0, 10, source, 0);
+    // this is actually incorrect API usage: length (3) is not multiple of Growth.targetBlock (2).
     target.setSource(0, 3, middleman, 0, Growth.DOUBLE);
     assertThatTracker(target).matches(snapshot().part(3, source, 0, Growth.DOUBLE));
   }
