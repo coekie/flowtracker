@@ -22,10 +22,10 @@ public class TrackerTest {
     assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 3));
   }
 
-  @Test public void testSetSingleSourceOtherLength() {
-    target.setSource(5, 3, source, 105, Growth.DOUBLE); // setting 5,6,7
+  @Test public void testSetSingleSourceOtherGrowth() {
+    target.setSource(5, 4, source, 105, Growth.DOUBLE); // setting 5,6,7,8
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(3, source, 105, Growth.DOUBLE));
+    assertThatTracker(target).matches(snapshot().gap(5).part(4, source, 105, Growth.DOUBLE));
   }
 
   /** Set one source, then a second one after it, leaving a gap in between */
@@ -331,9 +331,10 @@ public class TrackerTest {
     middleman.setSource(2, 1, source, 200, Growth.NONE);
     middleman.setSource(3, 1, source, 300, Growth.NONE); // should be ignored
 
-    target.setSource(0, 4, middleman, 1, Growth.DOUBLE);
+    target.setSource(50, 4, middleman, 1, Growth.DOUBLE);
 
     assertThatTracker(target).matches(snapshot()
+        .gap(50)
         .part(2, source, 100, Growth.DOUBLE)
         .part(2, source, 200, Growth.DOUBLE));
   }
@@ -346,9 +347,10 @@ public class TrackerTest {
     middleman.setSource(4, 2, source, 400, Growth.NONE);
     middleman.setSource(6, 2, source, 600, Growth.NONE); // should be ignored
 
-    target.setSource(0, 2, middleman, 2, Growth.HALF);
+    target.setSource(50, 2, middleman, 2, Growth.HALF);
 
     assertThatTracker(target).matches(snapshot()
+        .gap(50)
         .part(1, source, 200, Growth.HALF)
         .part(1, source, 400, Growth.HALF));
 
@@ -365,16 +367,70 @@ public class TrackerTest {
   }
 
   @Test public void testGrowthCombining() {
-    middleman.setSource(0, 10, source, 0, Growth.DOUBLE);
-    target.setSource(0, 3, middleman, 0, Growth.of(3, 1));
-    assertThatTracker(target).matches(snapshot().part(3, source, 0, Growth.of(6, 1)));
+    middleman.setSource(100, 10000, source, 5, Growth.DOUBLE);
+    target.setSource(1000, 30, middleman, 120, Growth.of(3, 1));
+    assertThatTracker(target).matches(snapshot()
+        .gap(1000)
+        .part(30, source, 5 + (120-100)/2, Growth.of(6, 1)));
   }
 
   @Test public void testTransitiveGrowthTruncation() {
     middleman.setSource(0, 10, source, 0);
     // this is actually incorrect API usage: length (3) is not multiple of Growth.targetBlock (2).
+    // so maybe this behaviour doesn't need to be preserved.
     target.setSource(0, 3, middleman, 0, Growth.DOUBLE);
-    assertThatTracker(target).matches(snapshot().part(3, source, 0, Growth.DOUBLE));
+    assertThatTracker(target).matches(snapshot()
+        .part(2, source, 0, Growth.DOUBLE)
+        .part(1, source, 1, Growth.NONE));
+  }
+
+  @Test public void testGrowthMisalignedStart() {
+    // blocks in middleman start at 8, 18, 28,...
+    middleman.setSource(8, 100, source, 1000, Growth.of(10, 1));
+    // starting at 25, length 23 => 3 of the 18-28 block, and then 2 blocks of 10
+    target.setSource(50, 23, middleman, 25, Growth.NONE);
+    assertThatTracker(target).matches(snapshot()
+        .gap(50)
+        .part(3, source, 1001, Growth.of(3, 1))
+        .part(20, source, 1002, Growth.of(10, 1)));
+  }
+
+  @Test public void testGrowthMisalignedEnd() {
+    // blocks in middleman start at 8, 18, 28,...
+    middleman.setSource(8, 100, source, 1000, Growth.of(10, 1));
+    // starting at 28, length 23 => 2 blocks of 10 and then 3 of the 48-58 block
+    target.setSource(50, 23, middleman, 28, Growth.NONE);
+    assertThatTracker(target).matches(snapshot()
+        .gap(50)
+        .part(20, source, 1002, Growth.of(10, 1))
+        .part(3, source, 1004, Growth.of(3, 1)));
+  }
+
+  /** Combination of {@link #testGrowthMisalignedStart()} and {@link #testGrowthMisalignedEnd()} */
+  @Test public void testGrowthMisalignedStartAndEnd() {
+    // blocks in middleman start at 8, 18, 28,...
+    middleman.setSource(8, 100, source, 1000, Growth.of(10, 1));
+    // starting at 25, length 25 => 3 of the 18-28 block, and then 2 blocks of 10, then 2 more
+    target.setSource(50, 25, middleman, 25, Growth.NONE);
+    assertThatTracker(target).matches(snapshot()
+        .gap(50)
+        .part(3, source, 1001, Growth.of(3, 1))
+        .part(20, source, 1002, Growth.of(10, 1))
+        .part(2, source, 1004, Growth.of(2, 1)));
+  }
+
+  /**
+   * Different kind of combination of {@link #testGrowthMisalignedStart()} and
+   * {@link #testGrowthMisalignedEnd()} than {@link #testGrowthMisalignedStartAndEnd()}
+   */
+  @Test public void testGrowthMisalignedStartAndEndSmall() {
+    // blocks in middleman start at 8, 18, 28,...
+    middleman.setSource(8, 100, source, 1000, Growth.of(10, 1));
+    // starting at 25, length 2 => one piece of 2, that doesn't align at start nor end
+    target.setSource(50, 2, middleman, 25, Growth.NONE);
+    assertThatTracker(target).matches(snapshot()
+        .gap(50)
+        .part(2, source, 1001, Growth.of(2, 1)));
   }
 
   @Test public void testOverwriteSelfBackwards() {

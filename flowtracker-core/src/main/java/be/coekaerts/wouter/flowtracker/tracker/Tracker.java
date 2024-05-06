@@ -55,9 +55,9 @@ public abstract class Tracker implements WritableTracker {
    *
    * @see #pushSourceTo(int, int, WritableTracker, int, Growth)
    */
-  public void pushSourceTo(int sourceIndex, int length, WritableTracker targetTracker,
+  public void pushSourceTo(int index, int length, WritableTracker targetTracker,
       int targetIndex) {
-    pushSourceTo(sourceIndex, length, targetTracker, targetIndex, Growth.NONE);
+    pushSourceTo(index, length, targetTracker, targetIndex, Growth.NONE);
   }
 
   /**
@@ -66,16 +66,16 @@ public abstract class Tracker implements WritableTracker {
    * possibly multiple times.
    * Note that it is not <em>this</em> tracker that should be pushed, but the source of this.
    *
-   * @param sourceIndex Index in this tracker of where the range starts.
+   * @param index Index in this tracker of where the range starts.
    * @param targetLength Size of the range
    * @param targetTracker Tracker of which we're setting the source to this one
    * @param targetIndex Offset in <tt>targetTracker</tt> of where the range starts.
-   * @param growth the correspondence between the source and target range. This also determines the
-   *   length of the relevant range in the source (sourceLength). `targetLength` should be a
-   *   multiple of this {@link Growth#targetBlock}.
+   * @param growth the correspondence between our and target range. This also determines the
+   *   length of the relevant range in this tracker. `targetLength` should be a multiple of this
+   *   {@link Growth#targetBlock}.
    */
   // TODO[growth] now that length is targetLength, the parameter order does not make sense anymore
-  public void pushSourceTo(int sourceIndex, int targetLength, WritableTracker targetTracker,
+  public void pushSourceTo(int index, int targetLength, WritableTracker targetTracker,
       int targetIndex, Growth growth) {
     throw new UnsupportedOperationException();
   }

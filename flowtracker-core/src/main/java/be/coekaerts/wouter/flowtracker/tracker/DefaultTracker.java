@@ -48,16 +48,16 @@ public class DefaultTracker extends Tracker {
   }
 
   @Override
-  public void pushSourceTo(int sourceIndex, int targetLength, WritableTracker targetTracker,
+  public void pushSourceTo(int index, int targetLength, WritableTracker targetTracker,
       int targetIndex, Growth growth) {
-    // we start at the part that contains sourceIndex
+    // we start at the part that contains index
     // or, if there's no such part, at what comes after
-    Entry<Integer, PartTracker> startEntry = getEntryAt(sourceIndex);
-    int startIndex = startEntry == null ? sourceIndex : startEntry.getKey();
+    Entry<Integer, PartTracker> startEntry = getEntryAt(index);
+    int startIndex = startEntry == null ? index : startEntry.getKey();
 
     int sourceLength = growth.targetToSource(targetLength);
     Collection<Entry<Integer, PartTracker>> entriesToPush =
-        map.subMap(startIndex, sourceIndex + sourceLength).entrySet();
+        map.subMap(startIndex, index + sourceLength).entrySet();
 
     // avoid issues where what we're pushing is being mutated while we're pushing it, when pushing
     // onto ourselves
@@ -70,14 +70,14 @@ public class DefaultTracker extends Tracker {
       int partIndex = entry.getKey();
       PartTracker part = entry.getValue();
 
-      // if the beginning of this part is cut off (because this it the first part, and sourceIndex
+      // if the beginning of this part is cut off (because this it the first part, and index
       // is halfway a part), the size of the cut-off.
       // In other words, the offset in the part of where we want to start pushing.
-      int pushingPartOffset = partIndex < sourceIndex ? sourceIndex - partIndex : 0;
+      int pushingPartOffset = partIndex < index ? index - partIndex : 0;
 
       // difference between what we'll start pushing for this part, and where we started overall.
       // in other words our progress, going from 0 to sourceLength.
-      int sourceStartPos = (partIndex + pushingPartOffset) - sourceIndex;
+      int sourceStartPos = (partIndex + pushingPartOffset) - index;
       // TODO(growth) handle case where sourceStartPos is not a multiple of Growth.sourceBlock
       int targetStartPos = growth.sourceToTarget(sourceStartPos);
 
