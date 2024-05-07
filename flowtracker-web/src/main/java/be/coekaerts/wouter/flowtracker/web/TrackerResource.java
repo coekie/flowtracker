@@ -47,7 +47,8 @@ public class TrackerResource {
             Growth growth) {
           if (sourceTracker != null) {
             regions.add(new Region(tracker, index, length, singletonList(
-                new TrackerPartResponse(sourceTracker, sourceIndex, length))));
+                new TrackerPartResponse(sourceTracker, sourceIndex,
+                    growth.targetToSource(length)))));
           } else {
             regions.add(new Region(tracker, index, length, emptyList()));
           }
@@ -92,15 +93,16 @@ public class TrackerResource {
       @Override
       public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
           Growth growth) {
+        int sourceLength = growth.targetToSource(length);
         if (sourceTracker == tracker) {
           TrackerPartResponse part = new TrackerPartResponse(target, index, length);
           changePoints.computeIfAbsent(sourceIndex, i -> new ArrayList<>())
               .add(() -> activeParts.add(part));
-          changePoints.computeIfAbsent(sourceIndex + length, i -> new ArrayList<>())
+          changePoints.computeIfAbsent(sourceIndex + sourceLength, i -> new ArrayList<>())
               .add(() -> activeParts.remove(part));
         } else if (sourceTracker != null && sourceTracker.getEntryCount() > 0) {
           // recurse to the source of the source
-          sourceTracker.pushSourceTo(sourceIndex, length, this, index, growth);
+          sourceTracker.pushSourceTo(sourceIndex, sourceLength, this, index, growth);
         }
       }
     });
@@ -161,7 +163,6 @@ public class TrackerResource {
     public final TrackerResponse tracker;
     public final int offset;
     public final int length;
-    // TODO growth
 
     public TrackerPartResponse(Tracker tracker, int offset, int length) {
       this.tracker = new TrackerResponse(tracker);

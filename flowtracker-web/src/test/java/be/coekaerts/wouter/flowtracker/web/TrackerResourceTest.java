@@ -8,6 +8,7 @@ import be.coekaerts.wouter.flowtracker.tracker.ByteSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.CharSinkTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Growth;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
@@ -94,6 +95,23 @@ public class TrackerResourceTest {
     assertRegionNoPart(response.regions.get(0), "bc");
   }
 
+  @Test public void growth() {
+    ByteSinkTracker tracker = new ByteSinkTracker();
+    InterestRepository.register(tracker);
+
+    Tracker sourceTracker = new FixedOriginTracker(3);
+
+    tracker.append("ab".getBytes(), 0, 2); // gap, no source tracker
+    tracker.append("cde".getBytes(), 0, 3);
+    tracker.setSource(2, 3, sourceTracker, 0, Growth.of(1, 4));
+
+    TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
+    assertThat(response.regions).hasSize(2);
+
+    assertRegionNoPart(response.regions.get(0), "ab");
+    assertRegionOnePart(response.regions.get(1), "cde", sourceTracker, 0, 12);
+  }
+
   @Test public void reverse() {
     CharSinkTracker target = new CharSinkTracker();
     CharOriginTracker source = new CharOriginTracker();
@@ -110,7 +128,7 @@ public class TrackerResourceTest {
     assertThat(response.regions).hasSize(5);
 
     assertRegionNoPart(response.regions.get(0), "x");
-    assertRegionOnePart(response.regions.get(1), "ab", target, 2);
+    assertRegionOnePart(response.regions.get(1), "ab", target, 2, 3);
 
     // the region with two parts
     Region region = response.regions.get(2);
@@ -123,8 +141,26 @@ public class TrackerResourceTest {
     assertThat(region.parts.get(1).tracker.id).isEqualTo(target.getTrackerId());
     assertThat(region.parts.get(1).offset).isEqualTo(6);
 
-    assertRegionOnePart(response.regions.get(3), "de", target, 6);
+    assertRegionOnePart(response.regions.get(3), "de", target, 6, 3);
     assertRegionNoPart(response.regions.get(4), "x");
+  }
+
+  @Test public void reverseGrowth() {
+    CharSinkTracker target = new CharSinkTracker();
+    CharOriginTracker source = new CharOriginTracker();
+    InterestRepository.register(target);
+    InterestRepository.register(source);
+
+    source.append("xabcx");
+    target.append(".....ss.....", 0, 9);
+    target.setSource(5, 2, source, 1, Growth.of(2, 3));
+
+    TrackerDetailResponse response = trackerResource.reverse(source.getTrackerId(),
+        target.getTrackerId());
+    assertThat(response.regions).hasSize(3);
+
+    assertRegionNoPart(response.regions.get(0), "x");
+    assertRegionOnePart(response.regions.get(1), "abc", target, 5, 2);
   }
 
   /**
@@ -192,9 +228,20 @@ public class TrackerResourceTest {
 
   private void assertRegionOnePart(Region region, String expectedContent, Tracker expectedTracker,
       int expectedOffset) {
+//    assertThat(region.content).isEqualTo(expectedContent);
+//    assertThat(region.parts).hasSize(1);
+//    assertThat(region.parts.get(0).tracker.id).isEqualTo(expectedTracker.getTrackerId());
+//    assertThat(region.parts.get(0).offset).isEqualTo(expectedOffset);
+    assertRegionOnePart(region, expectedContent, expectedTracker, expectedOffset,
+        expectedContent.length());
+  }
+
+  private void assertRegionOnePart(Region region, String expectedContent, Tracker expectedTracker,
+      int expectedOffset, int length) {
     assertThat(region.content).isEqualTo(expectedContent);
     assertThat(region.parts).hasSize(1);
     assertThat(region.parts.get(0).tracker.id).isEqualTo(expectedTracker.getTrackerId());
     assertThat(region.parts.get(0).offset).isEqualTo(expectedOffset);
+    assertThat(region.parts.get(0).length).isEqualTo(length);
   }
 }
