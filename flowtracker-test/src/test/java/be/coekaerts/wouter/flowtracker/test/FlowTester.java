@@ -22,7 +22,10 @@ class FlowTester {
   public FlowTester() {
     this.tracker = new FixedOriginTracker(-1);
     this.index = 42;
-    this.length = 1;
+    // in practice this is usually 1 (or else normally at most 2 or 4). we're using a particular
+    // higher value here to help spot places where the length of a point isn't correctly passed
+    // along, and to make the value recognizable/grep-able.
+    this.length = 77;
   }
 
   private FlowTester(Tracker tracker, int index, int length) {

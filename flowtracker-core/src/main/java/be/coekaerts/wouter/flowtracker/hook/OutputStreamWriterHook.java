@@ -71,7 +71,7 @@ public class OutputStreamWriterHook {
     if (tracker != null) {
       TrackerPoint sourcePoint = Invocation.getArgPoint(invocation, 0);
       if (sourcePoint != null) {
-        tracker.setSource(tracker.getLength(), 1, sourcePoint.tracker, sourcePoint.index);
+        tracker.setSource(tracker.getLength(), 1, sourcePoint);
       }
       ((CharSinkTracker) tracker).append((char) c);
     }

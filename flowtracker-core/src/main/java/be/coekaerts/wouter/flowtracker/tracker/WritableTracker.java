@@ -15,6 +15,15 @@ public interface WritableTracker {
   }
 
   /**
+   * Set a range of the source of this tracker to the given `point`.
+   *
+   * @see #setSource(int, int, Tracker, int, Growth)
+   */
+  default void setSource(int index, int length, TrackerPoint point) {
+    setSource(index, length, point.tracker, point.index, Growth.of(length, point.length));
+  }
+
+  /**
    * Set a range of the source of this tracker to the given tracker.
    * <p>
    * If <tt>sourceTracker</tt> is not appropriate as a direct source for this tracker

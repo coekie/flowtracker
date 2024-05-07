@@ -12,6 +12,11 @@ public class TrackerUpdater {
 
   public static void setSourceTracker(Object target, int targetIndex, int length,
       Tracker sourceTracker, int sourceIndex) {
+    setSourceTracker(target, targetIndex, length, sourceTracker, sourceIndex, Growth.NONE);
+  }
+
+  public static void setSourceTracker(Object target, int targetIndex, int length,
+      Tracker sourceTracker, int sourceIndex, Growth growth) {
     Tracker targetTracker;
     if (sourceTracker == null) {
       targetTracker = TrackerRepository.getTracker(target);
@@ -22,7 +27,7 @@ public class TrackerUpdater {
       // if tracking is disabled, do nothing
       if (targetTracker == null) return;
     }
-    targetTracker.setSource(targetIndex, length, sourceTracker, sourceIndex);
+    targetTracker.setSource(targetIndex, length, sourceTracker, sourceIndex, growth);
   }
 
   public static void setSourceTrackerPoint(Object target, int targetIndex, int length,
@@ -30,7 +35,8 @@ public class TrackerUpdater {
     if (sourcePoint == null) {
       setSourceTracker(target, targetIndex, length, null, -1);
     } else {
-      setSourceTracker(target, targetIndex, length, sourcePoint.tracker, sourcePoint.index);
+      setSourceTracker(target, targetIndex, length, sourcePoint.tracker, sourcePoint.index,
+          Growth.of(length, sourcePoint.length));
     }
   }
 }
