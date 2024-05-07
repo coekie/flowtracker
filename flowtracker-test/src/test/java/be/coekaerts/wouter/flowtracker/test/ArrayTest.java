@@ -27,7 +27,7 @@ public class ArrayTest {
     char[] array = new char[3];
     array[2] = ft.createSourceChar('a');
     assertThatTrackerOf(array).matches(
-        snapshot().gap(2).part(ft.theSource(), ft.theSourceIndex(), 1));
+        snapshot().gap(2).part(1, ft.theSource(), ft.theSourceIndex()));
   }
 
   @Test public void charArrayLoadAndStore() {
@@ -39,7 +39,7 @@ public class ArrayTest {
     array[2] = abc[2];
 
     assertThatTrackerOf(array).matches(
-        snapshot().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1));
+        snapshot().track(1, abc, 1).track(1, abc, 0).track(1, abc, 2));
   }
 
   @Test public void byteArrayLoadAndStore() {
@@ -51,7 +51,7 @@ public class ArrayTest {
     array[2] = abc[2];
 
     assertThatTrackerOf(array).matches(
-        snapshot().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1));
+        snapshot().track(1, abc, 1).track(1, abc, 0).track(1, abc, 2));
   }
 
   @Test public void charArrayClone() {
@@ -94,6 +94,6 @@ public class ArrayTest {
     array[2] = abc[2];
 
     assertThatTrackerOf(array).matches(
-        snapshot().track(abc, 1, 1).track(abc, 0, 1).track(abc, 2, 1));
+        snapshot().track(1, abc, 1).track(1, abc, 0).track(1, abc, 2));
   }
 }

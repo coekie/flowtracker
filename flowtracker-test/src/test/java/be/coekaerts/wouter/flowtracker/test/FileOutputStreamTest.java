@@ -60,7 +60,7 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
 
       assertContentEquals("abcdef", os);
       assertThatTracker(getTracker(os)).matches(
-          snapshot().track(abc, 0, 3).track(bb.array(), 0, 3));
+          snapshot().track(3, abc, 0).track(3, bb.array(), 0));
     }
   }
 

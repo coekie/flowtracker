@@ -17,12 +17,12 @@ public class ArraysTest {
     char[] abcdef = TrackTestHelper.trackedCharArray("abcdef");
     char[] abcd = Arrays.copyOf(abcdef, 4);
 
-    assertThatTracker(getTracker(abcd)).matches(snapshot().track(abcdef, 0, 4));
+    assertThatTracker(getTracker(abcd)).matches(snapshot().track(4, abcdef, 0));
   }
 
   @Test public void copyOfRange() {
     char[] abcdef = TrackTestHelper.trackedCharArray("abcdef");
     char[] bcde = Arrays.copyOfRange(abcdef, 1, 5);
-    assertThatTracker(getTracker(bcde)).matches(snapshot().track(abcdef, 1, 4));
+    assertThatTracker(getTracker(bcde)).matches(snapshot().track(4, abcdef, 1));
   }
 }

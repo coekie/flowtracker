@@ -82,24 +82,24 @@ public class InputStreamReaderTest {
     // read 3 characters, 0 offset
     assertThat(reader.read(buffer, 0, 3)).isEqualTo(3);
     assertThat(buffer).isEqualTo(new char[]{'a', 'b', 'c', '\0', '\0'});
-    assertThatTrackerOf(buffer).matches(snapshot().part(tracker, 0, 3));
+    assertThatTrackerOf(buffer).matches(snapshot().part(3, tracker, 0));
     assertContentEquals("abc");
 
     // read with offset
     assertThat(reader.read(buffer, 1, 2)).isEqualTo(2);
     assertThat(buffer).isEqualTo(new char[]{'a', 'd', 'e', '\0', '\0'});
-    assertThatTrackerOf(buffer).matches(snapshot().part(tracker, 0, 1).part(tracker, 3, 2));
+    assertThatTrackerOf(buffer).matches(snapshot().part(1, tracker, 0).part(2, tracker, 3));
     assertContentEquals("abcde");
 
     // incomplete read (only 1 instead of 5 asked chars read)
     assertThat(reader.read(buffer, 0, 5)).isEqualTo(1);
     assertThat(buffer).isEqualTo(new char[]{'f', 'd', 'e', '\0', '\0'});
-    assertThatTrackerOf(buffer).matches(snapshot().part(tracker, 5, 1).part(tracker, 3, 2));
+    assertThatTrackerOf(buffer).matches(snapshot().part(1, tracker, 5).part(2, tracker, 3));
     assertContentEquals("abcdef");
 
     // test an extra failed read (eof)
     assertThat(reader.read(buffer, 0, 5)).isEqualTo(-1);
-    assertThatTrackerOf(buffer).matches(snapshot().part(tracker, 5, 1).part(tracker, 3, 2));
+    assertThatTrackerOf(buffer).matches(snapshot().part(1, tracker, 5).part(2, tracker, 3));
     assertContentEquals("abcdef");
   }
 
@@ -107,7 +107,7 @@ public class InputStreamReaderTest {
     char[] buffer = new char[2];
     assertThat(reader.read(buffer)).isEqualTo(2);
     assertThat(buffer).isEqualTo(new char[]{'a', 'b'});
-    assertThatTrackerOf(buffer).matches(snapshot().part(tracker, 0, 2));
+    assertThatTrackerOf(buffer).matches(snapshot().part(2, tracker, 0));
     assertContentEquals("ab");
   }
 
@@ -118,7 +118,7 @@ public class InputStreamReaderTest {
     // read 1 char
     assertThat(reader.read(buffer1)).isEqualTo(1);
     assertThat(buffer1[0]).isEqualTo('a');
-    assertThatTrackerOf(buffer1).matches(snapshot().part(tracker, 0, 1));
+    assertThatTrackerOf(buffer1).matches(snapshot().part(1, tracker, 0));
     assertContentEquals("a");
   }
 
@@ -128,20 +128,20 @@ public class InputStreamReaderTest {
     assertThat(reader.read(buffer)).isEqualTo(3);
     assertContentEquals("abc");
     assertThat(buffer.array()).isEqualTo("abc".toCharArray());
-    assertThatTrackerOf(buffer.array()).matches(snapshot().part(tracker, 0, 3));
+    assertThatTrackerOf(buffer.array()).matches(snapshot().part(3, tracker, 0));
 
     buffer.position(1);
     assertThat(reader.read(buffer)).isEqualTo(2);
     assertContentEquals("abcde");
     assertThat(buffer.array()).isEqualTo("ade".toCharArray());
-    assertThatTrackerOf(buffer.array()).matches(snapshot().part(tracker, 0, 1).part(tracker, 3, 2));
+    assertThatTrackerOf(buffer.array()).matches(snapshot().part(1, tracker, 0).part(2, tracker, 3));
 
     buffer.position(1);
     assertThat(reader.read(buffer)).isEqualTo(1);
     assertContentEquals("abcdef");
     assertThat(buffer.array()).isEqualTo("afe".toCharArray());
     assertThatTrackerOf(buffer.array()).matches(
-        snapshot().part(tracker, 0, 1).part(tracker, 5, 1).part(tracker, 4, 1));
+        snapshot().part(1, tracker, 0).part(1, tracker, 5).part(1, tracker, 4));
 
     assertThat(reader.read(buffer)).isEqualTo(-1);
     assertContentEquals("abcdef");

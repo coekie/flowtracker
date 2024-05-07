@@ -74,7 +74,7 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
       // then read from the associated FileChannel
       ByteBuffer bb = ByteBuffer.wrap(new byte[2]);
       assertThat(is.getChannel().read(bb)).isEqualTo(2);
-      assertThatTrackerOf(bb.array()).matches(snapshot().part(getStreamTracker(is), 2, 2));
+      assertThatTrackerOf(bb.array()).matches(snapshot().part(2, getStreamTracker(is), 2));
 
       assertContentEquals("1234", is);
     }

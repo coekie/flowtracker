@@ -38,7 +38,7 @@ public class JAXPTest {
 
     // but content is tracked
     assertThatTracker(StringHook.getStringTracker(handler.characters)).matches(
-        snapshot().trackString(input, 6, 5));
+        snapshot().trackString(5, input, 6));
   }
 
   private static class MyHandler extends DefaultHandler {

@@ -45,7 +45,7 @@ public class StringTest {
     String foo = foobar.substring(0, 3);
     assertThat(foo).isEqualTo("foo");
 
-    assertThatTracker(getStringTracker(foo)).matches(snapshot().trackString(foobar, 0, 3));
+    assertThatTracker(getStringTracker(foo)).matches(snapshot().trackString(3, foobar, 0));
   }
 
   @Test public void testSubstringEnd() {
@@ -53,7 +53,7 @@ public class StringTest {
     String bar = foobar.substring(3);
     assertThat(bar).isEqualTo("bar");
 
-    assertThatTracker(getStringTracker(bar)).matches(snapshot().trackString(foobar, 3, 3));
+    assertThatTracker(getStringTracker(bar)).matches(snapshot().trackString(3, foobar, 3));
   }
 
   @Test public void testCharAt() {
@@ -63,14 +63,14 @@ public class StringTest {
 
   @Test public void testGetBytes() {
     String foobar = trackCopy("foobar");
-    assertThatTrackerOf(foobar.getBytes()).matches(snapshot().trackString(foobar, 0, 6));
+    assertThatTrackerOf(foobar.getBytes()).matches(snapshot().trackString(6, foobar, 0));
   }
 
   @Test public void testGetChars() {
     String foobar = trackCopy("foobar");
     char[] dst = new char[6];
     foobar.getChars(3, 6, dst, 1);
-    assertThatTrackerOf(dst).matches(snapshot().gap(1).trackString(foobar, 3, 3));
+    assertThatTrackerOf(dst).matches(snapshot().gap(1).trackString(3, foobar, 3));
     // TODO test UTF-16 version
   }
 
@@ -79,7 +79,7 @@ public class StringTest {
     String str = new String(chars, 1, 2); // create String "bc"
     assertThat(str).isEqualTo("bc");
 
-    assertThatTracker(getStringTracker(str)).matches(snapshot().track(chars, 1, 2));
+    assertThatTracker(getStringTracker(str)).matches(snapshot().track(2, chars, 1));
   }
 
   /** Test {@link String#replace(CharSequence, CharSequence)} */
@@ -89,7 +89,7 @@ public class StringTest {
     String result = src.replace("bc", replacement);
     assertThat(result).isEqualTo("axd");
     assertThatTracker(getStringTracker(result)).matches(
-        snapshot().trackString(src, 0, 1).trackString(replacement).trackString(src, 3, 1));
+        snapshot().trackString(1, src, 0).trackString(replacement).trackString(1, src, 3));
   }
 
   /** Test {@link String#replace(char, char)} */
@@ -98,9 +98,9 @@ public class StringTest {
     FlowTester replacementCharTester = new FlowTester();
     String result = src.replace('b', replacementCharTester.createSourceChar('x'));
     assertThat(result).isEqualTo("axc");
-    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(src, 0, 1)
-        .part(replacementCharTester.theSource(), replacementCharTester.theSourceIndex(), 1)
-        .trackString(src, 2, 1));
+    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(1, src, 0)
+        .part(1, replacementCharTester.theSource(), replacementCharTester.theSourceIndex())
+        .trackString(1, src, 2));
   }
 
   /**
@@ -114,7 +114,7 @@ public class StringTest {
     String result = src.replace("b", replacement);
     assertThat(result).isEqualTo("axc");
     assertThatTracker(getStringTracker(result)).matches(
-        snapshot().trackString(src, 0, 1).trackString(replacement).trackString(src, 2, 1));
+        snapshot().trackString(1, src, 0).trackString(replacement).trackString(1, src, 2));
   }
 
   @Test public void testStringConstant() {

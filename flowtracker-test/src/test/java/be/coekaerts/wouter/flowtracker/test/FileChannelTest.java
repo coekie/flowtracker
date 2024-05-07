@@ -78,7 +78,7 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
       ByteBuffer bb = ByteBuffer.allocate(10);
       channel.read(bb, 1);
       assertReadContentEquals("bc", channel);
-      assertThatTrackerOf(bb.array()).matches(snapshot().part(getReadTracker(channel), 0, 2));
+      assertThatTrackerOf(bb.array()).matches(snapshot().part(2, getReadTracker(channel), 0));
     }
   }
 

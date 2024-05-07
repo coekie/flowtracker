@@ -28,7 +28,7 @@ public class SystemTest {
 		char[] defabc = new char[6];
 		System.arraycopy(abcdef, 0, defabc, 3, 3); // copy abc
 		System.arraycopy(abcdef, 3, defabc, 0, 3); // copy def
-    assertThatTrackerOf(defabc).matches(snapshot().track(abcdef, 3, 3).track(abcdef, 0, 3));
+    assertThatTrackerOf(defabc).matches(snapshot().track(3, abcdef, 3).track(3, abcdef, 0));
 		assertThat(defabc[0]).isEqualTo('d');
 	}
 
@@ -38,7 +38,7 @@ public class SystemTest {
 		byte[] defabc = new byte[6];
 		System.arraycopy(abcdef, 0, defabc, 3, 3); // copy abc
 		System.arraycopy(abcdef, 3, defabc, 0, 3); // copy def
-    assertThatTrackerOf(defabc).matches(snapshot().track(abcdef, 3, 3).track(abcdef, 0, 3));
+    assertThatTrackerOf(defabc).matches(snapshot().track(3, abcdef, 3).track(3, abcdef, 0));
 		assertThat(defabc[0]).isEqualTo('d');
 	}
 
@@ -49,7 +49,7 @@ public class SystemTest {
 		System.arraycopy(src, 0, a, 0, src.length);
 		System.arraycopy(a, 4, a, 2, 2); // copy ef
 		assertThat(new String(a)).isEqualTo("abefef");
-    assertThatTrackerOf(a).matches(snapshot().track(src, 0, 2).track(src, 4, 2).track(src, 4, 2));
+    assertThatTrackerOf(a).matches(snapshot().track(2, src, 0).track(2, src, 4).track(2, src, 4));
 	}
 
 	@Test
@@ -110,8 +110,8 @@ public class SystemTest {
 		int valueSourceIndex = keySourceIndex + key.length() + 1; // +1 for the '=' sign
 
 		assertThatTracker(StringHook.getStringTracker(key))
-				.matches(snapshot().part(originTracker, keySourceIndex, key.length()));
+				.matches(snapshot().part(key.length(), originTracker, keySourceIndex));
 		assertThatTracker(StringHook.getStringTracker(value))
-				.matches(snapshot().part(originTracker, valueSourceIndex, value.length()));
+				.matches(snapshot().part(value.length(), originTracker, valueSourceIndex));
 	}
 }

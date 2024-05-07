@@ -21,7 +21,7 @@ public abstract class AbstractByteBufferTest {
     bb.put(ft.createSourceByte((byte)'x'));
 
     assertThatTracker(bbTracker(bb)).matches(
-        snapshot().gap(5 + sliceOffset()).part(ft.theSource(), ft.theSourceIndex(), 1));
+        snapshot().gap(5 + sliceOffset()).part(1, ft.theSource(), ft.theSourceIndex()));
   }
 
   @Test
@@ -32,7 +32,7 @@ public abstract class AbstractByteBufferTest {
     bb.position(5);
     bb.put(array, 1, 2);
 
-    assertThatTracker(bbTracker(bb)).matches(snapshot().gap(5 + sliceOffset()).track(array, 1, 2));
+    assertThatTracker(bbTracker(bb)).matches(snapshot().gap(5 + sliceOffset()).track(2, array, 1));
   }
 
   @Test
@@ -44,7 +44,7 @@ public abstract class AbstractByteBufferTest {
     bb.put(src);
 
     assertThatTracker(bbTracker(bb)).matches(
-        snapshot().gap(5 + sliceOffset()).part(bbTracker(src), 0, 3));
+        snapshot().gap(5 + sliceOffset()).part(3, bbTracker(src), 0));
   }
 
   // overwrite part of a tracker buffer with a direct ByteBuffer which we don't track yet.
@@ -63,7 +63,7 @@ public abstract class AbstractByteBufferTest {
     bb.put(src);
 
     assertThatTracker(bbTracker(bb)).matches(
-        snapshot().gap(sliceOffset()).track(array, 0, 1).gap(3).track(array, 4, 2));
+        snapshot().gap(sliceOffset()).track(1, array, 0).gap(3).track(2, array, 4));
   }
 
   @Test
@@ -79,7 +79,7 @@ public abstract class AbstractByteBufferTest {
     bb.put(src);
 
     assertThatTracker(bbTracker(bb)).matches(
-        snapshot().gap(sliceOffset()).track(array, 0, 1).gap(20).track(array, 21, 5));
+        snapshot().gap(sliceOffset()).track(1, array, 0).gap(20).track(5, array, 21));
   }
 
   @Test
@@ -91,7 +91,7 @@ public abstract class AbstractByteBufferTest {
     bb.get(array, 5, 3);
 
     TrackerSnapshot.assertThatTrackerOf(array).matches(
-        snapshot().gap(5).part(bbTracker(bb), 1 + sliceOffset(), 3));
+        snapshot().gap(5).part(3, bbTracker(bb), 1 + sliceOffset()));
   }
 
   @Test
@@ -111,7 +111,7 @@ public abstract class AbstractByteBufferTest {
     bb.position(2);
     bb.compact();
 
-    assertThatTracker(bbTracker(bb)).matches(snapshot().gap(sliceOffset()).track(array, 2, 3));
+    assertThatTracker(bbTracker(bb)).matches(snapshot().gap(sliceOffset()).track(3, array, 2));
   }
 
   /**

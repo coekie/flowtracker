@@ -25,7 +25,7 @@ public abstract class AbstractInputStreamTest {
       assertThat(is.read(buffer)).isEqualTo(3);
 
       assertContentEquals("abc", is);
-      assertThatTrackerOf(buffer).matches(snapshot().part(getStreamTracker(is), 0, 3));
+      assertThatTrackerOf(buffer).matches(snapshot().part(3, getStreamTracker(is), 0));
     }
   }
 
@@ -34,7 +34,7 @@ public abstract class AbstractInputStreamTest {
     try (InputStream is = createInputStream(abc)) {
       byte[] buffer = is.readAllBytes();
       assertContentEquals("abc", is);
-      assertThatTrackerOf(buffer).matches(snapshot().part(getStreamTracker(is), 0, 3));
+      assertThatTrackerOf(buffer).matches(snapshot().part(3, getStreamTracker(is), 0));
     }
   }
 
@@ -45,7 +45,7 @@ public abstract class AbstractInputStreamTest {
       assertThat(fis.read(buffer, 1, 4)).isEqualTo(3);
 
       assertContentEquals("abc", fis);
-      assertThatTrackerOf(buffer).matches(snapshot().gap(1).part(getStreamTracker(fis), 0, 3));
+      assertThatTrackerOf(buffer).matches(snapshot().gap(1).part(3, getStreamTracker(fis), 0));
     }
   }
 

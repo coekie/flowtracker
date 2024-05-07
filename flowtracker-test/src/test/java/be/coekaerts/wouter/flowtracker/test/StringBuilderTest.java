@@ -31,7 +31,7 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("bcd");
 
-    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(abcdef, 1, 3));
+    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(3, abcdef, 1));
   }
 
   @Test public void testInsert() {
@@ -62,7 +62,7 @@ public class StringBuilderTest {
     assertThat(result).isEqualTo("abxyzcd");
 
     assertThatTracker(getStringTracker(result)).matches(
-        snapshot().trackString(abcd, 0, 2).trackString(xyz).trackString(abcd, 2, 2));
+        snapshot().trackString(2, abcd, 0).trackString(xyz).trackString(2, abcd, 2));
   }
 
   @Test
@@ -73,8 +73,8 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("dcba");
     assertThatTracker(getStringTracker(result)).matches(snapshot()
-        .trackString(abcd, 3, 1).trackString(abcd, 2, 1).trackString(abcd, 1, 1)
-        .trackString(abcd, 0, 1));
+        .trackString(1, abcd, 3).trackString(1, abcd, 2).trackString(1, abcd, 1)
+        .trackString(1, abcd, 0));
   }
 
   @Test
@@ -86,6 +86,6 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("axdef");
     assertThatTracker(getStringTracker(result)).matches(snapshot()
-        .trackString(abcd, 0, 1).trackString(x, 0, 1).trackString(abcd, 3, 3));
+        .trackString(1, abcd, 0).trackString(1, x, 0).trackString(3, abcd, 3));
   }
 }

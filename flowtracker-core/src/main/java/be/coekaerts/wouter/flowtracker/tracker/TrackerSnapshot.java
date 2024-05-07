@@ -130,9 +130,8 @@ public class TrackerSnapshot {
 
     private Builder() {}
 
-    /** Append a part */
-    // TODO make order of arguments consistent with setSource & other part() overloads
-    public Builder part(Tracker source, int sourceIndex, int length) {
+    /** Append a part with {@link Growth#NONE} */
+    public Builder part(int length, Tracker source, int sourceIndex) {
       return doPart(length, requireNonNull(source), sourceIndex, Growth.NONE);
     }
 
@@ -143,7 +142,7 @@ public class TrackerSnapshot {
 
     /** Append a part containing everything in {@code source} */
     public Builder part(Tracker source) {
-      return part(source, 0, source.getLength());
+      return part(source.getLength(), source, 0);
     }
 
     public Builder track(Object source) {
@@ -151,17 +150,17 @@ public class TrackerSnapshot {
       return part(TrackerRepository.getTracker(source));
     }
 
-    public Builder track(Object source, int sourceIndex, int length) {
+    public Builder track(int length, Object source, int sourceIndex) {
       if (source instanceof Tracker) throw new IllegalArgumentException("wrong method");
-      return part(TrackerRepository.getTracker(source), sourceIndex, length);
+      return part(length, TrackerRepository.getTracker(source), sourceIndex);
     }
 
     public Builder trackString(String source) {
       return part(StringHook.getStringTracker(source));
     }
 
-    public Builder trackString(String source, int sourceIndex, int length) {
-      return part(StringHook.getStringTracker(source), sourceIndex, length);
+    public Builder trackString(int length, String source, int sourceIndex) {
+      return part(length, StringHook.getStringTracker(source), sourceIndex);
     }
 
     /** Append a part for which the source tracker is unknown */

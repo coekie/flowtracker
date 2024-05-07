@@ -42,7 +42,7 @@ public class ZipFileTest {
         // this is tested more in InflaterInputStreamTest
         byte[] bytes = in.readAllBytes();
         Tracker tracker = TrackerRepository.getTracker(in);
-        assertThatTrackerOf(bytes).matches(snapshot().part(tracker, 0, bytes.length));
+        assertThatTrackerOf(bytes).matches(snapshot().part(bytes.length, tracker, 0));
         assertThat(((ByteOriginTracker) tracker).getByteContent())
             .isEqualTo(ByteBuffer.wrap(bytes));
       }

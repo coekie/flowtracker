@@ -19,7 +19,7 @@ public class TrackerTest {
   @Test public void testSetSingleSource() {
     target.setSource(5, 3, source, 105); // setting 5,6,7
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 3));
+    assertThatTracker(target).matches(snapshot().gap(5).part(3, source, 105));
   }
 
   @Test public void testSetSingleSourceOtherGrowth() {
@@ -34,7 +34,7 @@ public class TrackerTest {
     target.setSource(9, 2, source, 109); // setting 9,10, leaving a gap at 8
 
     assertThatTracker(target).matches(
-        snapshot().gap(5).part(source, 105, 3).gap(1).part(source, 109, 2));
+        snapshot().gap(5).part(3, source, 105).gap(1).part(2, source, 109));
   }
 
   /** Set one source, then a second one before it, leaving a gap in between */
@@ -43,7 +43,7 @@ public class TrackerTest {
     target.setSource(2, 2, source, 102); // setting 2,3, leaving a gap at 4
 
     assertThatTracker(target).matches(
-        snapshot().gap(2).part(source, 102, 2).gap(1).part(source, 105, 3));
+        snapshot().gap(2).part(2, source, 102).gap(1).part(3, source, 105));
   }
 
   /** Merge an entry if it comes after an existing one that matches */
@@ -51,7 +51,7 @@ public class TrackerTest {
     target.setSource(5, 3, source, 105); // setting 5,6,7
     target.setSource(8, 2, source, 108); // setting 8,9
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 5));
+    assertThatTracker(target).matches(snapshot().gap(5).part(5, source, 105));
   }
 
   /** Don't merge an entry if it comes right after one, but the indices don't match */
@@ -59,7 +59,7 @@ public class TrackerTest {
     target.setSource(5, 3, source, 105); // setting 5,6,7 to 105,...
     target.setSource(8, 2, source, 109); // setting 8,9 to 109,... (skipping 108)
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 3).part(source, 109, 2));
+    assertThatTracker(target).matches(snapshot().gap(5).part(3, source, 105).part(2, source, 109));
   }
 
   /** Merge an entry if it comes before an existing one that matches */
@@ -67,7 +67,7 @@ public class TrackerTest {
     target.setSource(5, 3, source, 105); // setting 5,6,7
     target.setSource(3, 2, source, 103); // setting 3,4
 
-    assertThatTracker(target).matches(snapshot().gap(3).part(source, 103, 5));
+    assertThatTracker(target).matches(snapshot().gap(3).part(5, source, 103));
   }
 
   /** Don't merge an entry if it comes right before one, but the indices don't match */
@@ -75,7 +75,7 @@ public class TrackerTest {
     target.setSource(5, 3, source, 105); // setting 5,6,7
     target.setSource(3, 2, source, 102); // setting 3,4
 
-    assertThatTracker(target).matches(snapshot().gap(3).part(source, 102, 2).part(source, 105, 3));
+    assertThatTracker(target).matches(snapshot().gap(3).part(2, source, 102).part(3, source, 105));
   }
 
   /** Don't merge entries with a different source */
@@ -83,7 +83,7 @@ public class TrackerTest {
     target.setSource(5, 3, source, 105); // setting 5,6,7
     target.setSource(8, 2, source2, 108); // setting 8,9
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 3).part(source2, 108, 2));
+    assertThatTracker(target).matches(snapshot().gap(5).part(3, source, 105).part(2, source2, 108));
   }
 
   /** Insert the missing part in between two entries with a hole, expect the three to merge */
@@ -92,49 +92,49 @@ public class TrackerTest {
     target.setSource(5, 3, source, 105); // setting 5,6,7
     target.setSource(8, 2, source, 108); // setting 8,9
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 7));
+    assertThatTracker(target).matches(snapshot().gap(5).part(7, source, 105));
   }
 
   @Test public void testOverlapMergeWithPrevious() {
     target.setSource(5, 3, source, 105); // setting 5,6,7
     target.setSource(6, 4, source, 106); // setting 6,7,8,9
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 5));
+    assertThatTracker(target).matches(snapshot().gap(5).part(5, source, 105));
   }
 
   @Test public void testOverlapMergeWithNext() {
     target.setSource(6, 4, source, 106); // setting 6,7,8,9
     target.setSource(5, 3, source, 105); // setting 5,6,7
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 5));
+    assertThatTracker(target).matches(snapshot().gap(5).part(5, source, 105));
   }
 
   @Test public void testOverlapOverwritePrevious() {
     target.setSource(5, 3, source, 105); // setting 5,6,7
     target.setSource(6, 4, source2, 106); // setting 6,7,8,9
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 1).part(source2, 106, 4));
+    assertThatTracker(target).matches(snapshot().gap(5).part(1, source, 105).part(4, source2, 106));
   }
 
   @Test public void testOverlapOverwriteNext() {
     target.setSource(6, 4, source, 106); // setting 6,7,8,9
     target.setSource(5, 3, source2, 105); // setting 5,6,7
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source2, 105, 3).part(source, 108, 2));
+    assertThatTracker(target).matches(snapshot().gap(5).part(3, source2, 105).part(2, source, 108));
   }
 
   @Test public void testOverlapOverwriteCompletely() {
     target.setSource(5, 3, source, 105); // setting 5,6,7
     target.setSource(4, 5, source2, 104); // setting 4,5,6,7,8
 
-    assertThatTracker(target).matches(snapshot().gap(4).part(source2, 104, 5));
+    assertThatTracker(target).matches(snapshot().gap(4).part(5, source2, 104));
   }
 
   @Test public void testOverwriteSameRange() {
     target.setSource(5, 3, source, 105); // setting 5,6,7
     target.setSource(5, 3, source2, 105); // setting 5,6,7
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source2, 105, 3));
+    assertThatTracker(target).matches(snapshot().gap(5).part(3, source2, 105));
   }
 
   @Test public void testOverlapOverwriteMultiple() {
@@ -145,7 +145,7 @@ public class TrackerTest {
     target.setSource(6, 10, source, 100);
 
     assertThatTracker(target).matches(
-        snapshot().gap(5).part(source, 10, 1).part(source, 100, 10).part(source, 42, 1));
+        snapshot().gap(5).part(1, source, 10).part(10, source, 100).part(1, source, 42));
   }
 
   @Test public void testOverwriteMiddle() {
@@ -153,28 +153,28 @@ public class TrackerTest {
     target.setSource(6, 2, source2, 106); // setting 6,7
 
     assertThatTracker(target).matches(
-        snapshot().gap(5).part(source, 105, 1).part(source2, 106, 2).part(source, 108, 2));
+        snapshot().gap(5).part(1, source, 105).part(2, source2, 106).part(2, source, 108));
   }
 
   @Test public void testOverwriteStart() {
     target.setSource(5, 5, source, 105);
     target.setSource(5, 1, source2, 105);
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source2, 105, 1).part(source, 106, 4));
+    assertThatTracker(target).matches(snapshot().gap(5).part(1, source2, 105).part(4, source, 106));
   }
 
   @Test public void testOverwriteEnd() {
     target.setSource(5, 5, source, 105);
     target.setSource(9, 1, source2, 109);
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 4).part(source2, 109, 1));
+    assertThatTracker(target).matches(snapshot().gap(5).part(4, source, 105).part(1, source2, 109));
   }
 
   @Test public void testOverwriteWithSame() {
     target.setSource(5, 5, source, 105); // setting 5,6,7,8,9
     target.setSource(6, 2, source, 106); // setting 6,7 to the same again
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 5));
+    assertThatTracker(target).matches(snapshot().gap(5).part(5, source, 105));
   }
 
   @Test public void testOverwriteWithUntracked() {
@@ -182,7 +182,7 @@ public class TrackerTest {
     target.setSource(6, 2, null, 999); // overwrite 6,7 with untracked object
 
     assertThatTracker(target).matches(
-        snapshot().gap(5).part(source, 105, 1).gap(2).part(source, 108, 2));
+        snapshot().gap(5).part(1, source, 105).gap(2).part(2, source, 108));
   }
 
   @Test public void testOverwriteWithGap() {
@@ -195,7 +195,7 @@ public class TrackerTest {
     target.setSource(6, 2, middleman, 20); // overwrite 6,7 with gap
 
     assertThatTracker(target).matches(
-        snapshot().gap(5).part(source, 105, 1).gap(2).part(source, 108, 2));
+        snapshot().gap(5).part(1, source, 105).gap(2).part(2, source, 108));
   }
 
   @Test public void testOverwriteWithGapInTheMiddle() {
@@ -209,11 +209,11 @@ public class TrackerTest {
 
     assertThatTracker(target).matches(snapshot()
         .gap(5)
-        .part(source, 105, 1)
-        .part(source2, 220, 1)
+        .part(1, source, 105)
+        .part(1, source2, 220)
         .gap(1)
-        .part(source2, 300, 1)
-        .part(source, 109, 1));
+        .part(1, source2, 300)
+        .part(1, source, 109));
   }
 
   @Test public void testOverwriteWithGapInTheBeginning() {
@@ -225,7 +225,7 @@ public class TrackerTest {
     target.setSource(6, 2, middleman, 20); // overwrite 6,7 where 6 is a gap
 
     assertThatTracker(target).matches(
-        snapshot().gap(5).part(source, 105, 1).gap(1).part(source2, 200, 1).part(source, 108, 2));
+        snapshot().gap(5).part(1, source, 105).gap(1).part(1, source2, 200).part(2, source, 108));
   }
 
   @Test public void testOverwriteWithGapInTheEnd() {
@@ -237,33 +237,33 @@ public class TrackerTest {
     target.setSource(6, 2, middleman, 20); // overwrite 6,7 where 7 is a gap
 
     assertThatTracker(target).matches(
-        snapshot().gap(5).part(source, 105, 1).part(source2, 220, 1).gap(1).part(source, 108, 2));
+        snapshot().gap(5).part(1, source, 105).part(1, source2, 220).gap(1).part(2, source, 108));
   }
 
   @Test public void testOverwriteWithZeroLength() {
     target.setSource(5, 5, source, 105);
     target.setSource(7, 0, source2, 200);
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 5));
+    assertThatTracker(target).matches(snapshot().gap(5).part(5, source, 105));
   }
 
   @Test public void testOverwriteWithZeroLengthUntracked() {
     target.setSource(5, 5, source, 105);
     target.setSource(7, 0, null, 200);
 
-    assertThatTracker(target).matches(snapshot().gap(5).part(source, 105, 5));
+    assertThatTracker(target).matches(snapshot().gap(5).part(5, source, 105));
   }
 
   /** Use the source of the source if the direct source is mutable */
   @Test public void testMutableMiddleman() {
     middleman.setSource(0, 10, source, 0);
     target.setSource(0, 10, middleman, 0);
-    assertThatTracker(target).matches(snapshot().part(source, 0, 10));
+    assertThatTracker(target).matches(snapshot().part(10, source, 0));
 
     // Even after changing middleman to another source,
     middleman.setSource(0, 10, source2, 0);
     // target still knows it came from first source.
-    assertThatTracker(target).matches(snapshot().part(source, 0, 10));
+    assertThatTracker(target).matches(snapshot().part(10, source, 0));
   }
 
   /**
@@ -277,7 +277,7 @@ public class TrackerTest {
     // set target to 101,102,103,104,200,201,202
     target.setSource(0, 7, middleman, 1);
 
-    assertThatTracker(target).matches(snapshot().part(source, 101, 4).part(source2, 200, 3));
+    assertThatTracker(target).matches(snapshot().part(4, source, 101).part(3, source2, 200));
   }
 
   @Test public void testTransitiveEndUnknown() {
@@ -286,7 +286,7 @@ public class TrackerTest {
     // set target to unknown,100,101,102,unknown,unknown
     target.setSource(1, 5, middleman, 0);
 
-    assertThatTracker(target).matches(snapshot().gap(1).part(source, 100, 3));
+    assertThatTracker(target).matches(snapshot().gap(1).part(3, source, 100));
   }
 
   @Test public void testTransitiveStartUnknown() {
@@ -295,7 +295,7 @@ public class TrackerTest {
     // set target to unknown,unknown,unknown,100,101
     target.setSource(1, 4, middleman, 0);
 
-    assertThatTracker(target).matches(snapshot().gap(3).part(source, 100, 2));
+    assertThatTracker(target).matches(snapshot().gap(3).part(2, source, 100));
   }
 
   /** Take only a part of a part of the source of the source */
@@ -305,7 +305,7 @@ public class TrackerTest {
     // set target to 102,103,104,105
     target.setSource(1000, 4, middleman, 2);
 
-    assertThatTracker(target).matches(snapshot().gap(1000).part(source, 102, 4));
+    assertThatTracker(target).matches(snapshot().gap(1000).part(4, source, 102));
   }
 
   /** Make sure entries existing before and after the one involved don't break things */
@@ -320,7 +320,7 @@ public class TrackerTest {
     target.setSource(1000, 3, middleman, 1);
 
     assertThatTracker(target).matches(
-        snapshot().gap(1000).part(source, 200, 1).part(source, 300, 1).part(source, 400, 1));
+        snapshot().gap(1000).part(1, source, 200).part(1, source, 300).part(1, source, 400));
   }
 
   // test that it correctly identifies which parts of `middleman` are relevant,
@@ -437,7 +437,7 @@ public class TrackerTest {
     target.setSource(5, 5, source, 105); // setting 5,6,7,8,9
     target.setSource(6, 2, target, 8);
     assertThatTracker(target).matches(
-        snapshot().gap(5).part(source, 105, 1).part(source, 108, 2).part(source, 108, 2));
+        snapshot().gap(5).part(1, source, 105).part(2, source, 108).part(2, source, 108));
   }
 
   @Test public void testOverwriteSelfForwards() {
@@ -445,6 +445,6 @@ public class TrackerTest {
     target.setSource(6, 2, target, 5);
 
     assertThatTracker(target).matches(
-        snapshot().gap(5).part(source, 105, 1).part(source, 105, 2).part(source, 108, 2));
+        snapshot().gap(5).part(1, source, 105).part(2, source, 105).part(2, source, 108));
   }
 }

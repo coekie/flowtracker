@@ -71,11 +71,11 @@ public class OutputStreamWriterTest {
     writer.write(flowTester1.createSourceChar('b'));
     assertContentEquals("ab");
     assertThatTrackerOf(writer).matches(snapshot()
-        .part(flowTester0.theSource(), flowTester0.theSourceIndex(), 1)
-        .part(flowTester1.theSource(), flowTester1.theSourceIndex(), 1));
+        .part(1, flowTester0.theSource(), flowTester0.theSourceIndex())
+        .part(1, flowTester1.theSource(), flowTester1.theSourceIndex()));
     assertThatTracker(streamTracker).matches(snapshot()
-        .part(flowTester0.theSource(), flowTester0.theSourceIndex(), 1)
-        .part(flowTester1.theSource(), flowTester1.theSourceIndex(), 1));
+        .part(1, flowTester0.theSource(), flowTester0.theSourceIndex())
+        .part(1, flowTester1.theSource(), flowTester1.theSourceIndex()));
   }
 
   @Test public void writeCharArray() throws IOException {
@@ -83,8 +83,8 @@ public class OutputStreamWriterTest {
     writer.write(abc);
     writer.write(abc);
     assertContentEquals("abcabc");
-    assertThatTrackerOf(writer).matches(snapshot().track(abc, 0, 3).track(abc, 0, 3));
-    assertThatTracker(streamTracker).matches(snapshot().track(abc, 0, 3).track(abc, 0, 3));
+    assertThatTrackerOf(writer).matches(snapshot().track(3, abc, 0).track(3, abc, 0));
+    assertThatTracker(streamTracker).matches(snapshot().track(3, abc, 0).track(3, abc, 0));
   }
 
   @Test public void writeUntrackedCharArray() throws IOException {
@@ -95,16 +95,16 @@ public class OutputStreamWriterTest {
     writer.write(def);
 
     assertContentEquals("abcdef");
-    assertThatTrackerOf(writer).matches(snapshot().gap(3).track(def, 0, 3));
-    assertThatTracker(streamTracker).matches(snapshot().gap(3).track(def, 0, 3));
+    assertThatTrackerOf(writer).matches(snapshot().gap(3).track(3, def, 0));
+    assertThatTracker(streamTracker).matches(snapshot().gap(3).track(3, def, 0));
   }
 
   @Test public void writeCharArrayOffset() throws IOException {
     char[] abcd = trackedCharArray("abcd");
     writer.write(abcd, 1, 2);
     assertContentEquals("bc");
-    assertThatTrackerOf(writer).matches(snapshot().track(abcd, 1, 2));
-    assertThatTracker(streamTracker).matches(snapshot().track(abcd, 1, 2));
+    assertThatTrackerOf(writer).matches(snapshot().track(2, abcd, 1));
+    assertThatTracker(streamTracker).matches(snapshot().track(2, abcd, 1));
   }
 
   @Test public void writeString() throws IOException {
@@ -131,7 +131,7 @@ public class OutputStreamWriterTest {
     String abcd = trackCopy("abcd");
     writer.write(abcd, 1, 2);
     assertContentEquals("bc");
-    assertThatTrackerOf(writer).matches(snapshot().trackString(abcd, 1, 2));
+    assertThatTrackerOf(writer).matches(snapshot().trackString(2, abcd, 1));
   }
 
   @SuppressWarnings("CharsetObjectCanBeUsed")

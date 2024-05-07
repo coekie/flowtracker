@@ -27,7 +27,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       ByteBuffer bb = ByteBuffer.allocate(10);
       assertThat(channel.read(bb)).isEqualTo(3);
       assertReadContentEquals("abc", channel);
-      assertThatTrackerOf(bb.array()).matches(snapshot().part(getReadTracker(channel), 0, 3));
+      assertThatTrackerOf(bb.array()).matches(snapshot().part(3, getReadTracker(channel), 0));
     }
   }
 
@@ -37,13 +37,13 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       ByteBuffer bb = ByteBuffer.allocate(2);
       assertThat(channel.read(bb)).isEqualTo(2);
       assertReadContentEquals("ab", channel);
-      assertThatTrackerOf(bb.array()).matches(snapshot().part(getReadTracker(channel), 0, 2));
+      assertThatTrackerOf(bb.array()).matches(snapshot().part(2, getReadTracker(channel), 0));
 
       bb.position(0);
       assertThat(channel.read(bb)).isEqualTo(1);
       assertReadContentEquals("abc", channel);
       assertThatTrackerOf(bb.array()).matches(
-          snapshot().part(getReadTracker(channel), 2, 1).part(getReadTracker(channel), 1, 1));
+          snapshot().part(1, getReadTracker(channel), 2).part(1, getReadTracker(channel), 1));
     }
   }
 

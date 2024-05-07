@@ -25,7 +25,7 @@ public class BufferedWriterTest {
   @Test public void string() throws IOException {
     String str = trackCopy("abcdefg");
     bw.write(str);
-    assertThatTrackerOf(out).matches(snapshot().trackString(str, 0, 6));
+    assertThatTrackerOf(out).matches(snapshot().trackString(6, str, 0));
     bw.flush();
     assertThatTrackerOf(out).matches(snapshot().trackString(str));
   }
@@ -34,7 +34,7 @@ public class BufferedWriterTest {
   @Test public void longCharArray() throws IOException {
     char[] chars = TrackTestHelper.trackedCharArray("abcdef");
     bw.write(chars, 1, 4);
-    assertThatTrackerOf(out).matches(snapshot().track(chars, 1, 4));
+    assertThatTrackerOf(out).matches(snapshot().track(4, chars, 1));
   }
 
   /** writes shorter than size of the buffer */
@@ -44,7 +44,7 @@ public class BufferedWriterTest {
     bw.write(chars, 1, 1);
     bw.write(chars, 0, 2);
     bw.flush();
-    assertThatTrackerOf(out).matches(snapshot().track(chars, 0, 2).track(chars, 0, 2));
+    assertThatTrackerOf(out).matches(snapshot().track(2, chars, 0).track(2, chars, 0));
   }
 
   /** make sure gaps (writes from unknown sources) work properly with the buffer being reused */

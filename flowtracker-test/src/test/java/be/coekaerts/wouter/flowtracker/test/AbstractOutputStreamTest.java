@@ -23,8 +23,8 @@ public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
 
       assertContentEquals("ab", os);
       assertThatTracker(getTracker(os)).matches(snapshot()
-          .part(flowTester0.theSource(), flowTester0.theSourceIndex(), 1)
-          .part(flowTester1.theSource(), flowTester1.theSourceIndex(), 1));
+          .part(1, flowTester0.theSource(), flowTester0.theSourceIndex())
+          .part(1, flowTester1.theSource(), flowTester1.theSourceIndex()));
     }
   }
 
@@ -35,7 +35,7 @@ public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
       os.write(abc);
 
       assertContentEquals("abcabc", os);
-      assertThatTracker(getTracker(os)).matches(snapshot().track(abc, 0, 3).track(abc, 0, 3));
+      assertThatTracker(getTracker(os)).matches(snapshot().track(3, abc, 0).track(3, abc, 0));
     }
   }
 
@@ -47,7 +47,7 @@ public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
       os.write(def);
 
       assertContentEquals("abcdef", os);
-      assertThatTracker(getTracker(os)).matches(snapshot().gap(3).track(def, 0, 3));
+      assertThatTracker(getTracker(os)).matches(snapshot().gap(3).track(3, def, 0));
     }
   }
 
@@ -57,7 +57,7 @@ public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
       os.write(abcd, 1, 2);
 
       assertContentEquals("bc", os);
-      assertThatTracker(getTracker(os)).matches(snapshot().track(abcd, 1, 2));
+      assertThatTracker(getTracker(os)).matches(snapshot().track(2, abcd, 1));
     }
   }
 

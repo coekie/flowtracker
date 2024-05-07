@@ -25,7 +25,7 @@ public class FlowAnalysisTest {
 
     assertThat(result).isEqualTo("abc");
 
-    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(abc, 0, 3));
+    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(3, abc, 0));
   }
 
   @Test public void stringBufferAppendChar() {
@@ -38,7 +38,7 @@ public class FlowAnalysisTest {
 
     assertThat(result).isEqualTo("abc");
 
-    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(abc, 0, 3));
+    assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(3, abc, 0));
   }
 
   // This one is hard.
@@ -62,7 +62,7 @@ public class FlowAnalysisTest {
     array[0] = secondLast;
     array[1] = last;
 
-    assertThatTrackerOf(array).matches(snapshot().gap(1).trackString(abc, 1, 1));
+    assertThatTrackerOf(array).matches(snapshot().gap(1).trackString(1, abc, 1));
     // if we would track secondLast through the loop, then this would be:
     //   snapshotBuilder().trackString(abc, 0, 2).assertTrackerOf(array);
   }
@@ -83,7 +83,7 @@ public class FlowAnalysisTest {
     array[0] = x;
 
     // it still has the old value
-    assertThatTrackerOf(array).matches(snapshot().trackString(abc, 1, 1));
+    assertThatTrackerOf(array).matches(snapshot().trackString(1, abc, 1));
   }
 
   char[] chars = new char[]{FlowTester.untrackedChar('.')};
@@ -163,7 +163,7 @@ public class FlowAnalysisTest {
       dst[i] = (char)(src[i + 1] & 255);
     }
 
-    assertThatTrackerOf(dst).matches(snapshot().track(src, 1, 3));
+    assertThatTrackerOf(dst).matches(snapshot().track(3, src, 1));
   }
 
   /** Test handling of a jump; mostly if frames are correctly updated by the LocalVariablesSorter */
@@ -207,7 +207,7 @@ public class FlowAnalysisTest {
     target[1] = gotB;
 
     assertThatTrackerOf(target).matches(snapshot()
-        .part(ft.theSource(), ft.theSourceIndex(), 1)
-        .part(ft2.theSource(), ft2.theSourceIndex(), 1));
+        .part(1, ft.theSource(), ft.theSourceIndex())
+        .part(1, ft2.theSource(), ft2.theSourceIndex()));
   }
 }
