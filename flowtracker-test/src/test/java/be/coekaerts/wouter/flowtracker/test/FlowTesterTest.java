@@ -11,13 +11,13 @@ public class FlowTesterTest {
   @Test
   public void testCreateAndAssertTrackedValue_char() {
     char a = ft.createSourceChar('a');
-    FlowTester.assertTrackedValue(a, 'a', ft.theSource(), ft.theSourceIndex());
+    FlowTester.assertTrackedValue(a, 'a', ft.tracker(), ft.index());
   }
 
   @Test
   public void testCreateAndAssertTrackedValue_byte() {
     byte a = ft.createSourceByte((byte) 'a');
-    FlowTester.assertTrackedValue(a, (byte) 'a', ft.theSource(), ft.theSourceIndex());
+    FlowTester.assertTrackedValue(a, (byte) 'a', ft.tracker(), ft.index());
   }
 
   @Test
@@ -51,18 +51,18 @@ public class FlowTesterTest {
   @Test
   public void testGetCharSourcePoint() {
     char a = ft.createSourceChar('a');
-    assertThat(FlowTester.getCharSourcePoint(a)).isEqualTo(ft.theSourcePoint());
+    assertThat(FlowTester.getCharSourcePoint(a)).isEqualTo(ft.point());
   }
 
   @Test
   public void testGetByteSourcePoint() {
     byte a = ft.createSourceByte((byte) 'a');
-    assertThat(FlowTester.getByteSourcePoint(a)).isEqualTo(ft.theSourcePoint());
+    assertThat(FlowTester.getByteSourcePoint(a)).isEqualTo(ft.point());
   }
 
   @Test
   public void testGetTracker_int() {
     int a = ft.createSourceInt((byte) 'a');
-    assertThat(FlowTester.getIntSourcePoint(a)).isEqualTo(ft.theSourcePoint());
+    assertThat(FlowTester.getIntSourcePoint(a)).isEqualTo(ft.point());
   }
 }

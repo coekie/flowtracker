@@ -46,7 +46,7 @@ class TesterValue extends TrackableValue {
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
             "be/coekaerts/wouter/flowtracker/test/FlowTester",
-            "theSourcePoint",
+            "point",
             "()Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;"));
   }
 }

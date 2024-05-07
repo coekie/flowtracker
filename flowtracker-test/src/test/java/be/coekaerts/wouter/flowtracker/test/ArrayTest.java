@@ -27,7 +27,7 @@ public class ArrayTest {
     char[] array = new char[3];
     array[2] = ft.createSourceChar('a');
     assertThatTrackerOf(array).matches(
-        snapshot().gap(2).part(1, ft.theSource(), ft.theSourceIndex()));
+        snapshot().gap(2).part(ft.point()));
   }
 
   @Test public void charArrayLoadAndStore() {

@@ -154,6 +154,19 @@ public class TrackerSnapshot {
       return doPart(length, requireNonNull(source), sourceIndex, growth);
     }
 
+    /** Append a part pointing to `point` */
+    public Builder part(int length, TrackerPoint point) {
+      return doPart(length, point.tracker, point.index, Growth.of(length, point.length));
+    }
+
+    /**
+     * Append a part pointing to `point` with length 1 (which is usually the length when referring
+     * to a point, when there is not {@link Growth} involved).
+     */
+    public Builder part(TrackerPoint point) {
+      return part(1, point);
+    }
+
     /** Append a part containing everything in {@code source} */
     public Builder part(Tracker source) {
       return part(source.getLength(), source, 0);

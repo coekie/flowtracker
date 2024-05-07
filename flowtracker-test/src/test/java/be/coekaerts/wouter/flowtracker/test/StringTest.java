@@ -99,7 +99,7 @@ public class StringTest {
     String result = src.replace('b', replacementCharTester.createSourceChar('x'));
     assertThat(result).isEqualTo("axc");
     assertThatTracker(getStringTracker(result)).matches(snapshot().trackString(1, src, 0)
-        .part(1, replacementCharTester.theSource(), replacementCharTester.theSourceIndex())
+        .part(replacementCharTester.point())
         .trackString(1, src, 2));
   }
 
@@ -210,15 +210,15 @@ public class StringTest {
     assertThat(snapshot.getParts()).hasSize(7);
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(0)))
         .isEqualTo("(");
-    assertThat(snapshot.getParts().get(1).source).isSameInstanceAs(a.theSource());
-    assertThat(snapshot.getParts().get(1).sourceIndex).isEqualTo(a.theSourceIndex());
+    assertThat(snapshot.getParts().get(1).source).isSameInstanceAs(a.tracker());
+    assertThat(snapshot.getParts().get(1).sourceIndex).isEqualTo(a.index());
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(2)))
         .isEqualTo(",");
     assertThat(snapshot.getParts().get(3).source).isNull();
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(4)))
         .isEqualTo(",");
-    assertThat(snapshot.getParts().get(5).source).isSameInstanceAs(b.theSource());
-    assertThat(snapshot.getParts().get(5).sourceIndex).isEqualTo(b.theSourceIndex());
+    assertThat(snapshot.getParts().get(5).source).isSameInstanceAs(b.tracker());
+    assertThat(snapshot.getParts().get(5).sourceIndex).isEqualTo(b.index());
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(6)))
         .isEqualTo(")");
   }

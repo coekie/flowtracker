@@ -23,8 +23,8 @@ public abstract class AbstractOutputStreamTest<OS extends OutputStream> {
 
       assertContentEquals("ab", os);
       assertThatTracker(getTracker(os)).matches(snapshot()
-          .part(1, flowTester0.theSource(), flowTester0.theSourceIndex())
-          .part(1, flowTester1.theSource(), flowTester1.theSourceIndex()));
+          .part(flowTester0.point())
+          .part(flowTester1.point()));
     }
   }
 

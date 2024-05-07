@@ -207,7 +207,7 @@ public class FlowAnalysisTest {
     target[1] = gotB;
 
     assertThatTrackerOf(target).matches(snapshot()
-        .part(1, ft.theSource(), ft.theSourceIndex())
-        .part(1, ft2.theSource(), ft2.theSourceIndex()));
+        .part(ft.point())
+        .part(ft2.point()));
   }
 }

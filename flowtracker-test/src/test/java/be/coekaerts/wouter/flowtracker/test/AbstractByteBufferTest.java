@@ -21,7 +21,7 @@ public abstract class AbstractByteBufferTest {
     bb.put(ft.createSourceByte((byte)'x'));
 
     assertThatTracker(bbTracker(bb)).matches(
-        snapshot().gap(5 + sliceOffset()).part(1, ft.theSource(), ft.theSourceIndex()));
+        snapshot().gap(5 + sliceOffset()).part(ft.point()));
   }
 
   @Test

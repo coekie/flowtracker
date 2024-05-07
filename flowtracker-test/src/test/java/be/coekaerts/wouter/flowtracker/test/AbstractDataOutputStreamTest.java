@@ -19,7 +19,7 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
     try (OS os = createOutputStream()) {
       os.writeByte(ft.createSourceInt(67));
       assertThatTracker(getTracker(os)).matches(snapshot()
-          .part(1, ft.theSource(), ft.theSourceIndex()));
+          .part(1, ft.tracker(), ft.index()));
     }
   }
 
@@ -31,12 +31,12 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
       if (Runtime.version().feature() >= 21) {
         assertThatTracker(getTracker(os)).matches(snapshot()
             // TODO[growth] should have Growth.DOUBLE
-            .part(2, ft.theSource(), ft.theSourceIndex()));
+            .part(2, ft.tracker(), ft.index()));
       } else {
         assertThatTracker(getTracker(os)).matches(snapshot()
             // TODO[growth] would be better if this was one part, with Growth.DOUBLE
-            .part(1, ft.theSource(), ft.theSourceIndex())
-            .part(1, ft.theSource(), ft.theSourceIndex()));
+            .part(1, ft.tracker(), ft.index())
+            .part(1, ft.tracker(), ft.index()));
       }
     }
   }
@@ -49,12 +49,12 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
       if (Runtime.version().feature() >= 21) {
         assertThatTracker(getTracker(os)).matches(snapshot()
             // TODO[growth] should have Growth.DOUBLE
-            .part(2, ft.theSource(), ft.theSourceIndex()));
+            .part(2, ft.tracker(), ft.index()));
       } else {
         assertThatTracker(getTracker(os)).matches(snapshot()
             // TODO[growth] would be better if this was one part, with Growth.DOUBLE
-            .part(1, ft.theSource(), ft.theSourceIndex())
-            .part(1, ft.theSource(), ft.theSourceIndex()));
+            .part(1, ft.tracker(), ft.index())
+            .part(1, ft.tracker(), ft.index()));
       }
     }
   }
@@ -67,14 +67,14 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
       if (Runtime.version().feature() >= 21) {
         assertThatTracker(getTracker(os)).matches(snapshot()
             // TODO[growth] should have Growth 4
-            .part(4, ft.theSource(), ft.theSourceIndex()));
+            .part(4, ft.tracker(), ft.index()));
       } else {
         assertThatTracker(getTracker(os)).matches(snapshot()
             // TODO[growth] would be better if this was one part, with Growth 4
-            .part(1, ft.theSource(), ft.theSourceIndex())
-            .part(1, ft.theSource(), ft.theSourceIndex())
-            .part(1, ft.theSource(), ft.theSourceIndex())
-            .part(1, ft.theSource(), ft.theSourceIndex()));
+            .part(1, ft.tracker(), ft.index())
+            .part(1, ft.tracker(), ft.index())
+            .part(1, ft.tracker(), ft.index())
+            .part(1, ft.tracker(), ft.index()));
       }
     }
   }

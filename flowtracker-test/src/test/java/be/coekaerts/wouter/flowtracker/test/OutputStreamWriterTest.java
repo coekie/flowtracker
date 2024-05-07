@@ -71,11 +71,11 @@ public class OutputStreamWriterTest {
     writer.write(flowTester1.createSourceChar('b'));
     assertContentEquals("ab");
     assertThatTrackerOf(writer).matches(snapshot()
-        .part(1, flowTester0.theSource(), flowTester0.theSourceIndex())
-        .part(1, flowTester1.theSource(), flowTester1.theSourceIndex()));
+        .part(flowTester0.point())
+        .part(flowTester1.point()));
     assertThatTracker(streamTracker).matches(snapshot()
-        .part(1, flowTester0.theSource(), flowTester0.theSourceIndex())
-        .part(1, flowTester1.theSource(), flowTester1.theSourceIndex()));
+        .part(flowTester0.point())
+        .part(flowTester1.point()));
   }
 
   @Test public void writeCharArray() throws IOException {

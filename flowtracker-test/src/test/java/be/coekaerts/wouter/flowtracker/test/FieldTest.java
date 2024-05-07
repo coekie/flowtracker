@@ -19,8 +19,7 @@ public class FieldTest {
     String fieldId =
         FieldRepository.fieldId("be/coekaerts/wouter/flowtracker/test/FieldTest", "c");
     TrackerPoint point = requireNonNull(FieldRepository.getPoint(this, fieldId));
-    assertThat(point.tracker).isEqualTo(tester.theSource());
-    assertThat(point.index).isEqualTo(tester.theSourceIndex());
+    assertThat(point).isEqualTo(tester.point());
     assertThat(c).isEqualTo('a');
   }
 

@@ -11,10 +11,10 @@ import org.junit.Test;
 public class CharacterTest {
   @Test
   public void testToCodePoint() {
-    FlowTester ft = new FlowTester();
+    FlowTester ft = new FlowTester().withLength(1);
     int codePoint = Character.toCodePoint(ft.createSourceChar('\ud83c'), '\udf09');
     assertThat(FlowTester.getIntSourcePoint(codePoint))
-        .isEqualTo(TrackerPoint.of(ft.theSource(), ft.theSourceIndex(), 2));
+        .isEqualTo(TrackerPoint.of(ft.tracker(), ft.index(), 2));
   }
 
   @Test

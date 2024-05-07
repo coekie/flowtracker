@@ -1,23 +1,48 @@
 package be.coekaerts.wouter.flowtracker.test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Helper for testing instrumentation of FlowAnalyzingTransformer and its TrackableValues and
- * Stores.
+ * Stores. A FlowTester instance represents a source of a particular TrackableValue (e.g. a byte,
+ * with tracking of where it came from).
  * <p>
  * This class gets some special instrumentation, see {@code TesterStore} and {@code TesterValue} and
  * their usage.
  */
 class FlowTester {
-  private final List<Tracker> sources = new ArrayList<>();
+  private final Tracker tracker;
+  private final int index;
+  private final int length;
+
+  public FlowTester() {
+    this.tracker = new FixedOriginTracker(-1);
+    this.index = 42;
+    this.length = 1;
+  }
+
+  private FlowTester(Tracker tracker, int index, int length) {
+    this.tracker = tracker;
+    this.index = index;
+    this.length = length;
+  }
+
+  /** Returns a FlowTester pointing to another index in the same source as `this` */
+  public FlowTester withIndex(int newIndex) {
+    return new FlowTester(tracker, newIndex, length);
+  }
+
+  /**
+   * Returns a FlowTester pointing to the same index in the same source as `this`, but with a
+   * different length.
+   */
+  public FlowTester withLength(int newLength) {
+    return new FlowTester(tracker, index, newLength);
+  }
 
   /**
    * Returns the char value, and treats this FlowTester as the source.
@@ -29,7 +54,6 @@ class FlowTester {
 
   @SuppressWarnings("unused") // invoked by TesterValue instrumentation
   char $tracked_createSourceChar(char c) {
-    sources.add(new FixedOriginTracker(-1));
     return c;
   }
 
@@ -43,7 +67,6 @@ class FlowTester {
 
   @SuppressWarnings("unused") // invoked by TesterValue instrumentation
   byte $tracked_createSourceByte(byte b) {
-    sources.add(new FixedOriginTracker(-1));
     return b;
   }
 
@@ -57,7 +80,6 @@ class FlowTester {
 
   @SuppressWarnings("unused") // invoked by TesterValue instrumentation
   short $tracked_createSourceShort(short s) {
-    sources.add(new FixedOriginTracker(-1));
     return s;
   }
 
@@ -71,29 +93,25 @@ class FlowTester {
 
   @SuppressWarnings("unused") // invoked by TesterValue instrumentation
   int $tracked_createSourceInt(int i) {
-    sources.add(new FixedOriginTracker(-1));
     return i;
   }
 
   // TODO this might be useful, but unused for now...
 //  <T> T createSource(T t) {
-//    sources.add(TrackerRepository.createFixedOriginTracker(t, -1));
 //    return t;
 //  }
 
-  Tracker theSource() {
-    assertWithMessage("theSource should only be used if there is exactly one source")
-        .that(sources).hasSize(1);
-    return sources.get(0);
+  Tracker tracker() {
+    return tracker;
   }
 
-  /** Index in {@link #theSource()} that we pretend our values in this tester come from */
-  int theSourceIndex() {
-    return 42;
+  /** Index in {@link #tracker()} that we pretend our values in this tester come from */
+  int index() {
+    return index;
   }
 
-  TrackerPoint theSourcePoint() {
-    return TrackerPoint.of(theSource(), theSourceIndex());
+  TrackerPoint point() {
+    return TrackerPoint.of(tracker, index, length);
   }
 
   /**
@@ -185,12 +203,12 @@ class FlowTester {
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   void $tracked_assertIsTheTrackedValue(char c, TrackerPoint actual) {
-    assertThat(actual).isEqualTo(theSourcePoint());
+    assertThat(actual).isEqualTo(point());
   }
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   void $tracked_assertIsTheTrackedValue(byte b, TrackerPoint actual) {
-    assertThat(actual).isEqualTo(theSourcePoint());
+    assertThat(actual).isEqualTo(point());
   }
 
   /**
