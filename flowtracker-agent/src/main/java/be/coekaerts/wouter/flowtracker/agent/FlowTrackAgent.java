@@ -3,7 +3,6 @@ package be.coekaerts.wouter.flowtracker.agent;
 import be.coekaerts.wouter.flowtracker.CoreInitializer;
 import be.coekaerts.wouter.flowtracker.tracker.Trackers;
 import be.coekaerts.wouter.flowtracker.util.Config;
-import be.coekaerts.wouter.flowtracker.util.Logger;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Constructor;
@@ -48,7 +47,7 @@ public class FlowTrackAgent {
       Config config = Config.initialize(agentArgs);
       ClassLoader spiderClassLoader = createSpiderClassLoader(inst, agentJar, config);
 
-      Logger.initLogging(config);
+      CoreInitializer.preInitialize(config);
 
       // do not track our own initialization
       Trackers.suspendOnCurrentThread();

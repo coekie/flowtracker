@@ -47,8 +47,11 @@ class AsmTransformer implements ClassFileTransformer {
       + "+java.net.Socket,"
       + "+java.lang.ClassLoader,"
       + "+com.sun.org.apache.xerces.*,"
+      + "-jdk.internal.misc.Unsafe,"
       + "-java.lang.CharacterData*"; // seems to break the debugger sometimes?
-  private static final String DEFAULT_FILTER = "-java.lang.CharacterData*,+*";
+  private static final String DEFAULT_FILTER = "-java.lang.CharacterData*,"
+      + "-jdk.internal.misc.Unsafe,"
+      + "+*";
 
   private final ClassFilter toInstrumentFilter;
   private final File dumpByteCodePath;

@@ -8,6 +8,8 @@ import be.coekaerts.wouter.flowtracker.tracker.ByteOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.util.Config;
+import be.coekaerts.wouter.flowtracker.util.Logger;
+import be.coekaerts.wouter.flowtracker.util.RecursionChecker;
 import be.coekaerts.wouter.flowtracker.util.ShutdownSuspender;
 import java.lang.management.ManagementFactory;
 import java.util.HashSet;
@@ -15,13 +17,22 @@ import java.util.Set;
 import java.util.jar.JarFile;
 
 public class CoreInitializer {
+
+  /**
+   * Initialization before the weaver is installed
+   */
+  public static void preInitialize(Config config) {
+    Logger.initLogging(config);
+    RecursionChecker.initialize(config);
+    ClassLoaderHook.initialize(config);
+  }
+
   public static void initialize(Config config, JarFile agentJar) {
     ensureInitialized();
     Tracker.initialize(config);
     ZipFileHook.initialize(config, agentJar);
     SystemHook.initialize(config);
     StringHook.initialize(config);
-    ClassLoaderHook.initialize(config);
   }
 
   // call stuff to make sure JDK internals needed for it are initialized, before we enable tracking

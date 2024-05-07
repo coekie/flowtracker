@@ -1,6 +1,7 @@
 package be.coekaerts.wouter.flowtracker.weaver.flow;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker.ClassConstant;
+import be.coekaerts.wouter.flowtracker.util.RecursionChecker;
 import be.coekaerts.wouter.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;
@@ -34,6 +35,10 @@ public class ConstantValue extends TrackableValue {
       flowMethodAdapter.addComment(toInsert,
           "ConstantValue.loadSourcePoint: condy ConstantHook.constantPoint(%s, %s, %s)",
           constant.classId, constant.offset, constant.length);
+      if (RecursionChecker.enabled()) {
+        toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "be/coekaerts/wouter/flowtracker/util/RecursionChecker", "before", "()V"));
+      }
       ConstantDynamic cd = new ConstantDynamic("$ft" + constant.offset,
           "Lbe/coekaerts/wouter/flowtracker/tracker/TrackerPoint;",
           new Handle(Opcodes.H_INVOKESTATIC,
@@ -44,6 +49,10 @@ public class ConstantValue extends TrackableValue {
               false),
           constant.classId, constant.offset, constant.length);
       toInsert.add(new LdcInsnNode(cd));
+      if (RecursionChecker.enabled()) {
+        toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "be/coekaerts/wouter/flowtracker/util/RecursionChecker", "after", "()V"));
+      }
     } else {
       flowMethodAdapter.addComment(toInsert,
           "ConstantValue.loadSourcePoint: ConstantHook.constantPoint(%s, %s)",
