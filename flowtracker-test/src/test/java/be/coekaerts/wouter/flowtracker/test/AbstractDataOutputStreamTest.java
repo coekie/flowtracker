@@ -28,16 +28,12 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
     FlowTester ft = new FlowTester();
     try (OS os = createOutputStream()) {
       os.writeChar(ft.createSourceInt(0x6162));
-      if (Runtime.version().feature() >= 21) {
-        assertThatTracker(getTracker(os)).matches(snapshot()
-            // TODO[growth] should have Growth.DOUBLE
-            .part(2, ft.point()));
-      } else {
-        assertThatTracker(getTracker(os)).matches(snapshot()
-            // TODO[growth] would be better if this was one part, with Growth.DOUBLE
-            .part(1, ft.point())
-            .part(1, ft.point()));
-      }
+      // about the usage of `.simplified()` here:
+      // in this test and tests below, what it looks like exactly depends on the JDK version. in
+      // older JDKs (<21) it's represented as multiple parts after each other pointing to the same
+      // value.
+      assertThatTracker(getTracker(os)).simplified().matches(snapshot()
+          .part(2, ft.point()));
     }
   }
 
@@ -46,16 +42,8 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
     FlowTester ft = new FlowTester();
     try (OS os = createOutputStream()) {
       os.writeShort(ft.createSourceShort((short) 67));
-      if (Runtime.version().feature() >= 21) {
-        assertThatTracker(getTracker(os)).matches(snapshot()
-            // TODO[growth] should have Growth.DOUBLE
-            .part(2, ft.point()));
-      } else {
-        assertThatTracker(getTracker(os)).matches(snapshot()
-            // TODO[growth] would be better if this was one part, with Growth.DOUBLE
-            .part(1, ft.point())
-            .part(1, ft.point()));
-      }
+      assertThatTracker(getTracker(os)).simplified().matches(snapshot()
+          .part(2, ft.point()));
     }
   }
 
@@ -64,18 +52,8 @@ public abstract class AbstractDataOutputStreamTest<OS extends OutputStream & Dat
     FlowTester ft = new FlowTester();
     try (OS os = createOutputStream()) {
       os.writeInt(ft.createSourceInt(0x61626364));
-      if (Runtime.version().feature() >= 21) {
-        assertThatTracker(getTracker(os)).matches(snapshot()
-            // TODO[growth] should have Growth 4
-            .part(4, ft.point()));
-      } else {
-        assertThatTracker(getTracker(os)).matches(snapshot()
-            // TODO[growth] would be better if this was one part, with Growth 4
-            .part(1, ft.point())
-            .part(1, ft.point())
-            .part(1, ft.point())
-            .part(1, ft.point()));
-      }
+      assertThatTracker(getTracker(os)).simplified().matches(snapshot()
+          .part(4, ft.point()));
     }
   }
 }

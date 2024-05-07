@@ -45,6 +45,10 @@ public class TrackerSnapshot {
     }
   }
 
+  /**
+   * Returns a simplified version of this snapshot. This is closer to the state as it would be
+   * presented in the UI.
+   */
   public TrackerSnapshot simplify() {
     Collector collector = new Collector();
     Simplifier simplifier = new Simplifier(collector);
@@ -73,11 +77,11 @@ public class TrackerSnapshot {
   }
 
   public static TrackerSubject assertThatTracker(Tracker tracker) {
-    return new TrackerSubject(tracker);
+    return new TrackerSubject(TrackerSnapshot.of(tracker));
   }
 
   public static TrackerSubject assertThatTrackerOf(Object obj) {
-    return new TrackerSubject(TrackerRepository.getTracker(obj));
+    return new TrackerSubject(TrackerSnapshot.of(TrackerRepository.getTracker(obj)));
   }
 
   private static int length(List<Part> parts) {
@@ -215,10 +219,19 @@ public class TrackerSnapshot {
   // this API follows roughly the google-truth example, but this isn't an actual truth "Subject"
   // because this can't depend on google-truth here.
   public static final class TrackerSubject {
-    private final Tracker tracker;
+    private final TrackerSnapshot snapshot;
 
-    private TrackerSubject(Tracker tracker) {
-      this.tracker = tracker;
+    private TrackerSubject(TrackerSnapshot snapshot) {
+      this.snapshot = snapshot;
+    }
+
+    /**
+     * Assert the simplified version of this tracker. This is usually used when the tracker may have
+     * a slightly awkward way of being represented internally (e.g. because of Growth stuff),
+     * but in the test using this we don't actually care about those details.
+     */
+    public TrackerSubject simplified() {
+      return new TrackerSubject(snapshot.simplify());
     }
 
     public void matches(TrackerSnapshot.Builder expected) {
@@ -226,7 +239,6 @@ public class TrackerSnapshot {
     }
 
     public void matches(TrackerSnapshot expected) {
-      TrackerSnapshot snapshot = TrackerSnapshot.of(tracker);
       if (!expected.equals(snapshot)) {
         // this pattern is used because IntelliJ recognizes it
         throw new AssertionError("expected:<" + expected + "> but was:<" + snapshot + ">");
