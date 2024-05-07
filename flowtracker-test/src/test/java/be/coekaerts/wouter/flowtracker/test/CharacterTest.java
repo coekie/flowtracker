@@ -10,11 +10,36 @@ import org.junit.Test;
 /** Tests for tracking methods in the {@link Character} class */
 public class CharacterTest {
   @Test
-  public void testToCodePoint() {
-    FlowTester ft = new FlowTester().withLength(1);
-    int codePoint = Character.toCodePoint(ft.createSourceChar('\ud83c'), '\udf09');
+  public void testToCodePointCombination() {
+    FlowTester ft = new FlowTester().withIndex(7).withLength(3);
+    FlowTester ft2 = ft.withIndex(10).withLength(2);
+
+    int codePoint = Character.toCodePoint(ft.createSourceChar('\ud83c'),
+        ft2.createSourceChar('\udf09'));
     assertThat(FlowTester.getIntSourcePoint(codePoint))
-        .isEqualTo(TrackerPoint.of(ft.tracker(), ft.index(), 2));
+        .isEqualTo(TrackerPoint.of(ft.tracker(), 7, 3 + 2));
+  }
+
+  @Test
+  public void testToCodePointCombinationWithDifferentTrackers() {
+    FlowTester ft = new FlowTester().withIndex(7).withLength(3);
+    FlowTester ft2 = new FlowTester().withIndex(10).withLength(2);
+
+    int codePoint = Character.toCodePoint(ft.createSourceChar('\ud83c'),
+        ft2.createSourceChar('\udf09'));
+    assertThat(FlowTester.getIntSourcePoint(codePoint))
+        .isEqualTo(ft.point());
+  }
+
+  @Test
+  public void testToCodePointCombinationWithMismatchingIndexes() {
+    FlowTester ft = new FlowTester().withIndex(7).withLength(3);
+    FlowTester ft2 = ft.withIndex(11).withLength(2);
+
+    int codePoint = Character.toCodePoint(ft.createSourceChar('\ud83c'),
+        ft2.createSourceChar('\udf09'));
+    assertThat(FlowTester.getIntSourcePoint(codePoint))
+        .isEqualTo(ft.point());
   }
 
   @Test
