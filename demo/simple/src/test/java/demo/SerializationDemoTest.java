@@ -22,12 +22,7 @@ public class SerializationDemoTest {
     demo.assertThatOutput("java/lang/String").isNotTracked();
 
     // magic, from ObjectOutputStream.writeStreamHeader
-    // TODO[growth] should be tracked as a single part
-//    demo.assertThatOutput(new byte[]{(byte) 0xac, (byte) 0xed})
-//        .comesFromConstantInClass(ObjectOutputStream.class);
-    demo.assertThatOutput(new byte[]{(byte) 0xac})
-        .comesFromConstantInClass(ObjectOutputStream.class);
-    demo.assertThatOutput(new byte[]{(byte) 0xed})
+    demo.assertThatOutput(new byte[]{(byte) 0xac, (byte) 0xed})
         .comesFromConstantInClass(ObjectOutputStream.class);
     // version, from ObjectOutputStream.writeStreamHeader
     demo.assertThatOutput(new byte[]{(byte) 5})

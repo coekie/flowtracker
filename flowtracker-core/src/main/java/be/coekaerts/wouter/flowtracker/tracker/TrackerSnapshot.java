@@ -39,6 +39,20 @@ public class TrackerSnapshot {
     return parts;
   }
 
+  public void pushSourceTo(WritableTracker target) {
+    for (Part part : parts) {
+      target.setSource(part.index, part.length, part.source, part.sourceIndex, part.growth);
+    }
+  }
+
+  public TrackerSnapshot simplify() {
+    Collector collector = new Collector();
+    Simplifier simplifier = new Simplifier(collector);
+    pushSourceTo(simplifier);
+    simplifier.flush();
+    return new TrackerSnapshot(collector.parts);
+  }
+
   @Override public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof TrackerSnapshot)) return false;

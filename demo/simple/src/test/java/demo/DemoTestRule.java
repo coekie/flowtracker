@@ -45,7 +45,7 @@ public class DemoTestRule extends ExternalResource {
 
     int index =
         startIndex + indexOf(Arrays.copyOfRange(output, startIndex, output.length), expectedOutput);
-    return TrackerSnapshot.of(tracker, index, expectedOutput.length);
+    return TrackerSnapshot.of(tracker, index, expectedOutput.length).simplify();
   }
 
   private int indexOf(byte[] output, byte[] expected) {

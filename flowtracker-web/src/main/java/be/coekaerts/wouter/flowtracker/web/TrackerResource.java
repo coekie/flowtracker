@@ -11,6 +11,7 @@ import be.coekaerts.wouter.flowtracker.tracker.DefaultTracker;
 import be.coekaerts.wouter.flowtracker.tracker.FixedOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.Growth;
 import be.coekaerts.wouter.flowtracker.tracker.OriginTracker;
+import be.coekaerts.wouter.flowtracker.tracker.Simplifier;
 import be.coekaerts.wouter.flowtracker.tracker.Tracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerTree.Node;
@@ -40,7 +41,7 @@ public class TrackerResource {
     Tracker tracker = InterestRepository.getContentTracker(id);
     List<Region> regions = new ArrayList<>();
     if (tracker instanceof DefaultTracker) {
-      tracker.pushSourceTo(0, tracker.getLength(), new WritableTracker() {
+      Simplifier.simplifySourceTo(tracker, new WritableTracker() {
         @Override
         public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
             Growth growth) {
@@ -51,7 +52,7 @@ public class TrackerResource {
             regions.add(new Region(tracker, index, length, emptyList()));
           }
         }
-      }, 0);
+      });
     } else {
       regions.add(
           new Region(tracker, 0, getContentLength(tracker), emptyList()));
@@ -87,7 +88,7 @@ public class TrackerResource {
     // maps to indexes in the content of `tracker`
     TreeMap<Integer, List<Runnable>> changePoints = new TreeMap<>();
     changePoints.put(0, new ArrayList<>());
-    target.pushSourceTo(0, target.getLength(), new WritableTracker() {
+    Simplifier.simplifySourceTo(target, new WritableTracker() {
       @Override
       public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
           Growth growth) {
@@ -102,7 +103,7 @@ public class TrackerResource {
           sourceTracker.pushSourceTo(sourceIndex, length, this, index, growth);
         }
       }
-    }, 0);
+    });
 
     // iterate of the content of `tracker`, building up regions.
     for (int i : changePoints.keySet()) {
