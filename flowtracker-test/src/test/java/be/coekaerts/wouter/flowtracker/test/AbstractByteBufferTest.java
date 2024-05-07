@@ -25,6 +25,72 @@ public abstract class AbstractByteBufferTest {
   }
 
   @Test
+  public void testPutChar() {
+    ByteBuffer bb = allocate(10);
+    bb.position(5);
+    FlowTester ft = new FlowTester();
+    bb.putChar(ft.createSourceChar('x'));
+
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(5 + sliceOffset()).part(2, ft.point()));
+  }
+
+  @Test
+  public void testPutCharPosition() {
+    ByteBuffer bb = allocate(10);
+    bb.position(5); // irrelevant
+    FlowTester ft = new FlowTester();
+    bb.putChar(3, ft.createSourceChar('x'));
+
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(3 + sliceOffset()).part(2, ft.point()));
+  }
+
+  @Test
+  public void testPutShort() {
+    ByteBuffer bb = allocate(10);
+    bb.position(5);
+    FlowTester ft = new FlowTester();
+    bb.putShort(ft.createSourceShort((short)'x'));
+
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(5 + sliceOffset()).part(2, ft.point()));
+  }
+
+  @Test
+  public void testPutShortPosition() {
+    ByteBuffer bb = allocate(10);
+    bb.position(5); // irrelevant
+    FlowTester ft = new FlowTester();
+    bb.putShort(3, ft.createSourceShort((short)'x'));
+
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(3 + sliceOffset()).part(2, ft.point()));
+  }
+
+  @Test
+  public void testPutInt() {
+    ByteBuffer bb = allocate(10);
+    bb.position(5);
+    FlowTester ft = new FlowTester();
+    bb.putInt(ft.createSourceInt(123));
+
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(5 + sliceOffset()).part(4, ft.point()));
+  }
+
+  @Test
+  public void testPutIntPosition() {
+    ByteBuffer bb = allocate(10);
+    bb.position(5); // irrelevant
+    FlowTester ft = new FlowTester();
+    bb.putInt(3, ft.createSourceInt(123));
+
+    assertThatTracker(bbTracker(bb)).matches(
+        snapshot().gap(3 + sliceOffset()).part(4, ft.point()));
+  }
+
+  @Test
   public void testPutArray() {
     byte[] array = TrackTestHelper.trackedByteArray("abc");
 

@@ -109,16 +109,25 @@ public class InvocationArgStore extends Store {
     boolean[] result = new boolean[args.length];
     boolean any = false;
 
-    if (owner.equals("java/io/Bits")) { // in JDK < 21
-      if (name.equals("putInt")) {
-        result[2] = true; // the `value` argument
-        return result;
-      }
-    } else if (owner.equals("jdk/internal/util/ByteArray")) {
-      if (name.equals("setUnsignedShort") || name.equals("setInt")) {
-        result[2] = true; // the `value` argument
-        return result;
-      }
+    switch (owner) {
+      case "java/io/Bits": // in JDK < 21
+        if (name.equals("putInt")) {
+          result[2] = true; // the `value` argument
+          return result;
+        }
+        break;
+      case "jdk/internal/util/ByteArray": // used in ByteArrayHook
+        if (name.equals("setUnsignedShort") || name.equals("setInt")) {
+          result[2] = true; // the `value` argument
+          return result;
+        }
+        break;
+      case "java/nio/ByteBuffer": // used in ByteBufferHook
+        if (name.equals("putInt")) {
+          result[result.length - 1] = true; // the `value` argument, for both overloads
+          return result;
+        }
+        break;
     }
 
     boolean eager = name.contains("write") || name.contains("Write") || name.contains("print");

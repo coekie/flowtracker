@@ -2,6 +2,7 @@ package be.coekaerts.wouter.flowtracker.hook;
 
 import be.coekaerts.wouter.flowtracker.annotation.Arg;
 import be.coekaerts.wouter.flowtracker.annotation.Hook;
+import be.coekaerts.wouter.flowtracker.tracker.Invocation;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerUpdater;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
@@ -43,5 +44,65 @@ public class ByteBufferHook {
   public static void afterDirectBufferGet(@Arg("ARG0") byte[] target,
       @Arg("ARG1") int offset, @Arg("ARG2") int length) {
     TrackerUpdater.setSource(target, offset, length, null, -1);
+  }
+
+  @Hook(target = "java.nio.HeapByteBuffer",
+      method = "java.nio.ByteBuffer putChar(char)")
+  public static void afterPutChar(@Arg("THIS") ByteBuffer target,
+      @Arg("INVOCATION") Invocation invocation) {
+    afterPutPrimitive(target, invocation, 2);
+  }
+
+  @Hook(target = "java.nio.HeapByteBuffer",
+      method = "java.nio.ByteBuffer putChar(int,char)")
+  public static void afterPutCharPosition(@Arg("THIS") ByteBuffer target, @Arg("ARG0") int pos,
+      @Arg("INVOCATION") Invocation invocation) {
+    afterPutPrimitivePosition(target, pos, invocation, 2);
+  }
+
+  @Hook(target = "java.nio.HeapByteBuffer",
+      method = "java.nio.ByteBuffer putShort(short)")
+  public static void afterPutShort(@Arg("THIS") ByteBuffer target,
+      @Arg("INVOCATION") Invocation invocation) {
+    afterPutPrimitive(target, invocation, 2);
+  }
+
+  @Hook(target = "java.nio.HeapByteBuffer",
+      method = "java.nio.ByteBuffer putShort(int,short)")
+  public static void afterPutShortPosition(@Arg("THIS") ByteBuffer target, @Arg("ARG0") int pos,
+      @Arg("INVOCATION") Invocation invocation) {
+    afterPutPrimitivePosition(target, pos, invocation, 2);
+  }
+
+  @Hook(target = "java.nio.HeapByteBuffer",
+      method = "java.nio.ByteBuffer putInt(int)")
+  public static void afterPutInt(@Arg("THIS") ByteBuffer target,
+      @Arg("INVOCATION") Invocation invocation) {
+    afterPutPrimitive(target, invocation, 4);
+  }
+
+  @Hook(target = "java.nio.HeapByteBuffer",
+      method = "java.nio.ByteBuffer putInt(int,int)")
+  public static void afterPutIntPosition(@Arg("THIS") ByteBuffer target, @Arg("ARG0") int pos,
+      @Arg("INVOCATION") Invocation invocation) {
+    afterPutPrimitivePosition(target, pos, invocation, 4);
+  }
+
+  /** Hook for putChar/putShort/putInt */
+  private static void afterPutPrimitive(ByteBuffer target, Invocation invocation, int length) {
+    byte[] targetArray = (byte[]) Reflection.getFieldValue(target, byteBufferHb);
+    int pos = target.position() - length; // position before we wrote the value
+    int targetOffset = Reflection.getInt(target, byteBufferOffset);
+    TrackerUpdater.setSourceTrackerPoint(targetArray, targetOffset + pos, length,
+        Invocation.getArgPoint(invocation, 0));
+  }
+
+  /** Hook for putChar/putShort/putInt overload that takes the position as first argument */
+  private static void afterPutPrimitivePosition(ByteBuffer target, int pos,
+      Invocation invocation, int length) {
+    byte[] targetArray = (byte[]) Reflection.getFieldValue(target, byteBufferHb);
+    int targetOffset = Reflection.getInt(target, byteBufferOffset);
+    TrackerUpdater.setSourceTrackerPoint(targetArray, targetOffset + pos, length,
+        Invocation.getArgPoint(invocation, 1));
   }
 }
