@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
 import be.coekaerts.wouter.flowtracker.tracker.TrackerPoint;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -56,13 +55,12 @@ public class ConstantTest {
   }
 
   @Test
-  @Ignore // TODO larger constants
   public void testLargeNonPrintableInt() {
     int i = 999999;
     TrackerPoint point = FlowTester.getIntSourcePoint(i);
     assertThat(point.tracker).isInstanceOf(ClassOriginTracker.class);
     assertThat(((ClassOriginTracker) point.tracker).getContent()
-        .subSequence(point.index, point.index + point.length)).isEqualTo("999999");
+        .subSequence(point.index, point.index + point.length)).isEqualTo("0xf423f (999999)");
   }
 
   @Test
