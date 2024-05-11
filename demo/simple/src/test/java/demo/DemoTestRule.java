@@ -2,11 +2,11 @@ package demo;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import be.coekaerts.wouter.flowtracker.tracker.ByteSequence;
-import be.coekaerts.wouter.flowtracker.tracker.ClassOriginTracker;
-import be.coekaerts.wouter.flowtracker.tracker.Tracker;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerRepository;
-import be.coekaerts.wouter.flowtracker.tracker.TrackerSnapshot;
+import com.coekie.flowtracker.tracker.ByteSequence;
+import com.coekie.flowtracker.tracker.ClassOriginTracker;
+import com.coekie.flowtracker.tracker.Tracker;
+import com.coekie.flowtracker.tracker.TrackerRepository;
+import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import com.google.common.primitives.Bytes;
 import com.google.common.truth.StringSubject;
 import java.io.PrintStream;

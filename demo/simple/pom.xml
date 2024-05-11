@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>flowtracker-demo</artifactId>
-    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-demo-simple</artifactId>
@@ -24,7 +24,7 @@
     </dependency>
 
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-core</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>

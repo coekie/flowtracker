@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>flowtracker</artifactId>
-    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-agent-dev</artifactId>
@@ -104,7 +104,7 @@
           <appendAssemblyId>false</appendAssemblyId>
           <archive>
             <manifestEntries>
-              <Premain-Class>be.coekaerts.wouter.flowtracker.agent.DevAgent</Premain-Class>
+              <Premain-Class>com.coekie.flowtracker.agent.DevAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
               <Boot-Class-Path>

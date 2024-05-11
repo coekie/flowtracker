@@ -1,0 +1,31 @@
+package com.coekie.flowtracker.tracker;
+
+/**
+ * Tracker for writing to a sink of chars.
+ *
+ * @see CharOriginTracker
+ * @see ByteSinkTracker
+ */
+public class CharSinkTracker extends DefaultTracker implements CharContentTracker {
+  private final StringBuilder content = new StringBuilder();
+
+  @Override public CharSequence getContent() {
+    return content;
+  }
+
+  @Override public int getLength() {
+    return content.length();
+  }
+
+  public void append(char c) {
+    content.append(c);
+  }
+
+  public void append(char[] cbuf, int off, int len) {
+    content.append(cbuf, off, len);
+  }
+
+  public void append(String str, int off, int len) {
+    content.append(str, off, off + len);
+  }
+}

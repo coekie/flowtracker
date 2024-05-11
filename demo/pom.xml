@@ -13,7 +13,7 @@
 
   <parent>
     <artifactId>flowtracker</artifactId>
-    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 

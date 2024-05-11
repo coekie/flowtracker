@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>flowtracker</artifactId>
-    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-agent</artifactId>
@@ -13,7 +13,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-core</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
@@ -27,7 +27,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Premain-Class>be.coekaerts.wouter.flowtracker.agent.FlowTrackAgent</Premain-Class>
+              <Premain-Class>com.coekie.flowtracker.agent.FlowTrackAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
             </manifestEntries>

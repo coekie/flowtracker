@@ -5,14 +5,14 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>flowtracker</artifactId>
-    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-weaver</artifactId>
   <name>${project.artifactId}</name>
   <dependencies>
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-core</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
@@ -63,9 +63,9 @@
             <configuration>
               <includeProjectDependencies>false</includeProjectDependencies>
               <includePluginDependencies>true</includePluginDependencies>
-              <mainClass>be.coekaerts.wouter.flowtracker.generator.HookSpecGenerator</mainClass>
+              <mainClass>com.coekie.flowtracker.generator.HookSpecGenerator</mainClass>
               <executableDependency>
-                <groupId>be.coekaerts.wouter.flowtracker</groupId>
+                <groupId>com.coekie.flowtracker</groupId>
                 <artifactId>flowtracker-generator</artifactId>
               </executableDependency>
             </configuration>
@@ -73,7 +73,7 @@
         </executions>
         <dependencies>
           <dependency>
-            <groupId>be.coekaerts.wouter.flowtracker</groupId>
+            <groupId>com.coekie.flowtracker</groupId>
             <artifactId>flowtracker-generator</artifactId>
             <version>${project.version}</version>
           </dependency>

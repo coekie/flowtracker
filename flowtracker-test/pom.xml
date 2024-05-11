@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>flowtracker</artifactId>
-    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-test</artifactId>
@@ -15,7 +15,7 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-core</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -25,7 +25,7 @@
       the agent uses it in a separate classloader.
     -->
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-weaver</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
@@ -57,14 +57,14 @@
           <!-- For cleaner debugging environment, but slower: -->
           <!--<reuseForks>false</reuseForks>-->
           <argLine>
-            -javaagent:../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=webmodule=false;filter=%recommended,+be.coekaerts.wouter.flowtracker.test.*;trackOutputStreamWriter=true;${flowtracker.extraAgentArgs}
+            -javaagent:../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=webmodule=false;filter=%recommended,+com.coekie.flowtracker.test.*;trackOutputStreamWriter=true;${flowtracker.extraAgentArgs}
             ${flowtracker.jvmArgs}
           </argLine>
           <!-- These should not be on the app classpath; the agent should take care of getting this on the classpath (bootstrap classpath and for spider classloader) -->
           <!-- See also EnvironmentTest -->
           <classpathDependencyExcludes>
-            <classpathDependencyExclude>be.coekaerts.wouter.flowtracker:flowtracker-core</classpathDependencyExclude>
-            <classpathDependencyExclude>be.coekaerts.wouter.flowtracker:flowtracker-weaver</classpathDependencyExclude>
+            <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-core</classpathDependencyExclude>
+            <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-weaver</classpathDependencyExclude>
           </classpathDependencyExcludes>
         </configuration>
       </plugin>

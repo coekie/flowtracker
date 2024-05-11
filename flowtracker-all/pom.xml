@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>flowtracker</artifactId>
-    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-all</artifactId>
@@ -13,22 +13,22 @@
 
   <dependencies>
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-weaver</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-web</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-agent</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -51,7 +51,7 @@
           <appendAssemblyId>false</appendAssemblyId>
           <archive>
             <manifestEntries>
-              <Premain-Class>be.coekaerts.wouter.flowtracker.agent.FlowTrackAgent</Premain-Class>
+              <Premain-Class>com.coekie.flowtracker.agent.FlowTrackAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
             </manifestEntries>
@@ -97,7 +97,7 @@
                 filter instrumentation to make it run faster. note that instrumenting everything
                 (the default) is tested in flowtracker-test-full.
               -->
-              <argLine>-javaagent:${project.build.directory}/${project.build.finalName}.jar=port=0;filter=%recommended,+be.coekaerts.wouter.flowtracker.test.*;${flowtracker.extraAgentArgs} ${flowtracker.jvmArgs}</argLine>
+              <argLine>-javaagent:${project.build.directory}/${project.build.finalName}.jar=port=0;filter=%recommended,+com.coekie.flowtracker.test.*;${flowtracker.extraAgentArgs} ${flowtracker.jvmArgs}</argLine>
             </configuration>
           </execution>
         </executions>

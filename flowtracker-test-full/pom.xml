@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>flowtracker</artifactId>
-    <groupId>be.coekaerts.wouter.flowtracker</groupId>
+    <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>flowtracker-test-full</artifactId>
@@ -16,7 +16,7 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>be.coekaerts.wouter.flowtracker</groupId>
+      <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-core</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
@@ -49,7 +49,7 @@
             ${flowtracker.jvmArgs}
           </argLine>
           <classpathDependencyExcludes>
-            <classpathDependencyExclude>be.coekaerts.wouter.flowtracker:flowtracker-core</classpathDependencyExclude>
+            <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-core</classpathDependencyExclude>
           </classpathDependencyExcludes>
         </configuration>
       </plugin>
