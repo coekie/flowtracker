@@ -14,6 +14,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <repository.url>git@github.com:coekie/flowtracker.git</repository.url>
     <!-- cannot use asm 9.7 because of https://gitlab.ow2.org/asm/asm/-/issues/318014 -->
     <asm.version>9.6</asm.version>
     <java.version>11</java.version>
@@ -47,6 +48,37 @@
     <module>flowtracker-all</module>
     <module>demo</module>
   </modules>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>coekie</id>
+      <name>Wouter Coekaerts</name>
+      <url>https://wouter.coekaerts</url>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <issueManagement>
+    <system>github.com</system>
+    <url>https://github.com/coekie/flowtracker/issues</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:git:${repository.url}</connection>
+    <developerConnection>scm:git:${repository.url}</developerConnection>
+    <url>${repository.url}</url>
+  </scm>
 
   <dependencyManagement>
     <dependencies>
@@ -104,6 +136,35 @@
             </jdk>
           </toolchains>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>4.5</version>
+        <configuration>
+          <licenseSets>
+            <licenseSet>
+              <header>LICENSE_HEADER</header>
+              <includes>
+                <include>**/main/java/**/*.java</include>
+              </includes>
+              <excludes>
+                <exclude>**/demo/**</exclude>
+              </excludes>
+            </licenseSet>
+          </licenseSets>
+          <mapping>
+            <java>JAVAPKG_STYLE</java>
+          </mapping>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>format</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
