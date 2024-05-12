@@ -16,43 +16,65 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 import sun.misc.Unsafe;
 
 /**
- * Does reflection, circumventing accessibility and module access checks.
- *
- * <p>This is currently a simple wrapper around Unsafe, mostly kept to make it easy to change
- * (again) how we access fields if JDK changes require it.
+ * Enables access to private fields in JDK classes, circumventing accessibility and module access
+ * checks.
  */
 public class Reflection {
-  private static final Unsafe unsafe = Unsafe.getUnsafe();
+  /** Trusted lookup, has full access */
+  private static final Lookup lookup = initLookup();
 
-  public static Field getDeclaredField(String className, String name) {
+  public static Class<?> clazz(String className) {
     try {
-      return getDeclaredField(Class.forName(className, false, null), name);
+      return Class.forName(className, false, null);
     } catch (ClassNotFoundException e) {
       throw new Error("Cannot find " + className, e);
     }
   }
 
-  public static Field getDeclaredField(Class<?> clazz, String name) {
+  /** Returns a MethodHandle that reads the requested field */
+  public static MethodHandle getter(Class<?> owner, String name, Class<?> fieldType) {
     try {
-      return clazz.getDeclaredField(name);
-    } catch (NoSuchFieldException e) {
-      throw new Error("Cannot find " + clazz + "." + name, e);
+      return lookup.findGetter(owner, name, fieldType);
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      throw new Error(e);
     }
   }
 
-  // TODO optimize: instead of getting field offset every time, have something like FieldAccessor
-  //  that is stored in a static field in the class that calls this (instead of the Field instance)
-  public static Object getFieldValue(Object o, Field f) {
-    long offset = unsafe.objectFieldOffset(f);
-    return unsafe.getObject(o, offset);
+  /**
+   * Looks up the method handle to access the field and gets its value.
+   * <p>
+   * This is slow because it looks up the handle every time, instead of caching it. The advantage is
+   * that this is less verbose. That is fine for code paths that are rarely executed, and tests.
+   */
+  public static <T> T getSlow(Class<?> ownerClass, String name, Class<T> fieldType,
+      Object o) {
+    try {
+      return fieldType.cast(getter(ownerClass, name, fieldType).invoke(o));
+    } catch (Throwable e) {
+      throw new Error(e);
+    }
   }
 
-  public static int getInt(Object o, Field f) {
-    long offset = unsafe.objectFieldOffset(f);
-    return unsafe.getInt(o, offset);
+  /**
+   * Steals the Lookup with full access.
+   * This implementation uses Unsafe, which will likely have to change in future JDK versions.
+   */
+  private static Lookup initLookup() {
+    try {
+      // we're running in the bootstrap classloader, so we don't need special tricks to use Unsafe.
+      Unsafe unsafe = Unsafe.getUnsafe();
+      Field field = Lookup.class.getDeclaredField("IMPL_LOOKUP");
+      return (Lookup) unsafe.getObject(
+          unsafe.staticFieldBase(field),
+          unsafe.staticFieldOffset(field));
+    } catch (Throwable t) {
+      throw new Error(t);
+    }
   }
 }

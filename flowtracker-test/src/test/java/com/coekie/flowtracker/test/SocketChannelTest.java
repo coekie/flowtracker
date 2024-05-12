@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.hook.Reflection.clazz;
 import static com.coekie.flowtracker.test.TrackTestHelper.assertThatTrackerNode;
 
 import com.coekie.flowtracker.hook.Reflection;
@@ -8,7 +9,6 @@ import com.coekie.flowtracker.tracker.ByteSinkTracker;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -17,8 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class SocketChannelTest extends AbstractChannelTest<SocketChannel> {
-  private static final Field fdField = fdField();
-
   SocketChannel server;
   SocketChannel client;
 
@@ -81,15 +79,7 @@ public class SocketChannelTest extends AbstractChannelTest<SocketChannel> {
 
   @Override
   FileDescriptor getFd(SocketChannel channel) {
-    return (FileDescriptor) Reflection.getFieldValue(channel, fdField);
-  }
-
-  private static Field fdField() {
-    try {
-      Class<?> clazz = Class.forName("sun.nio.ch.SocketChannelImpl");
-      return Reflection.getDeclaredField(clazz, "fd");
-    } catch (ClassNotFoundException e) {
-      throw new Error(e);
-    }
+    return Reflection.getSlow(clazz("sun.nio.ch.SocketChannelImpl"), "fd", FileDescriptor.class,
+        channel);
   }
 }

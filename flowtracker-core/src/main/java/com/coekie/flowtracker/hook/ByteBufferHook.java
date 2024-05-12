@@ -20,15 +20,15 @@ import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandle;
 import java.nio.ByteBuffer;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class ByteBufferHook {
-  private static final Field byteBufferHb =
-      Reflection.getDeclaredField(ByteBuffer.class, "hb");
-  private static final Field byteBufferOffset =
-      Reflection.getDeclaredField(ByteBuffer.class, "offset");
+  private static final MethodHandle hbHandle =
+      Reflection.getter(ByteBuffer.class, "hb", byte[].class);
+  private static final MethodHandle offsetHandle =
+      Reflection.getter(ByteBuffer.class, "offset", int.class);
 
   @Hook(target = "java.nio.ByteBuffer",
       condition = "version > 11",
@@ -39,14 +39,14 @@ public class ByteBufferHook {
       return;
     }
 
-    byte[] targetArray = (byte[]) Reflection.getFieldValue(target, byteBufferHb);
-    int targetOffset = Reflection.getInt(target, byteBufferOffset);
+    byte[] targetArray = hb(target);
+    int targetOffset = offset(target);
 
 
     // note: when it's a direct buffer then srcArray is null, and that's fine: we just don't track
     // that yet.
-    byte[] srcArray = (byte[]) Reflection.getFieldValue(src, byteBufferHb);
-    int srcOffset = Reflection.getInt(src, byteBufferOffset);
+    byte[] srcArray = hb(src);
+    int srcOffset = offset(src);
 
     // alternative: we could look at the address that SCOPED_MEMORY_ACCESS.copyMemory is being
     // called with, and from there calculate what offset into the array we're reading from and
@@ -106,9 +106,9 @@ public class ByteBufferHook {
 
   /** Hook for putChar/putShort/putInt */
   private static void afterPutPrimitive(ByteBuffer target, Invocation invocation, int length) {
-    byte[] targetArray = (byte[]) Reflection.getFieldValue(target, byteBufferHb);
+    byte[] targetArray = hb(target);
     int pos = target.position() - length; // position before we wrote the value
-    int targetOffset = Reflection.getInt(target, byteBufferOffset);
+    int targetOffset = offset(target);
     TrackerUpdater.setSourceTrackerPoint(targetArray, targetOffset + pos, length,
         Invocation.getArgPoint(invocation, 0));
   }
@@ -116,9 +116,25 @@ public class ByteBufferHook {
   /** Hook for putChar/putShort/putInt overload that takes the position as first argument */
   private static void afterPutPrimitivePosition(ByteBuffer target, int pos,
       Invocation invocation, int length) {
-    byte[] targetArray = (byte[]) Reflection.getFieldValue(target, byteBufferHb);
-    int targetOffset = Reflection.getInt(target, byteBufferOffset);
+    byte[] targetArray = hb(target);
+    int targetOffset = offset(target);
     TrackerUpdater.setSourceTrackerPoint(targetArray, targetOffset + pos, length,
         Invocation.getArgPoint(invocation, 1));
+  }
+
+  private static byte[] hb(ByteBuffer o) {
+    try {
+      return (byte[]) hbHandle.invokeExact(o);
+    } catch (Throwable e) {
+      throw new Error(e);
+    }
+  }
+
+  private static int offset(ByteBuffer o) {
+    try {
+      return (int) offsetHandle.invokeExact(o);
+    } catch (Throwable e) {
+      throw new Error(e);
+    }
   }
 }

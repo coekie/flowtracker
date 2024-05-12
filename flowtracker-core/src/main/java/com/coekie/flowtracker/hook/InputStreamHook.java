@@ -23,11 +23,11 @@ import java.io.FileInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandle;
 
 public class InputStreamHook {
-  private static final Field filterInputStreamIn =
-      Reflection.getDeclaredField(FilterInputStream.class, "in");
+  private static final MethodHandle filterInputStream_in =
+      Reflection.getter(FilterInputStream.class, "in", InputStream.class);
 
   /** Returns the tracker of an input stream, ignoring wrapping FilterInputStreams */
   public static Tracker getInputStreamTracker(InputStream stream) {
@@ -35,8 +35,7 @@ public class InputStreamHook {
     if (tracker != null) {
       return tracker;
     } else if (stream instanceof FilterInputStream) {
-      return getInputStreamTracker(
-          (InputStream) Reflection.getFieldValue(stream, filterInputStreamIn));
+      return getInputStreamTracker(filterInputStream_in((FilterInputStream) stream));
     } else if (stream instanceof FileInputStream) {
       try {
         return FileDescriptorTrackerRepository.getReadTracker(((FileInputStream) stream).getFD());
@@ -45,6 +44,14 @@ public class InputStreamHook {
       }
     } else {
       return null;
+    }
+  }
+
+  private static InputStream filterInputStream_in(FilterInputStream o) {
+    try {
+      return (InputStream) filterInputStream_in.invokeExact(o);
+    } catch (Throwable e) {
+      throw new Error(e);
     }
   }
 }

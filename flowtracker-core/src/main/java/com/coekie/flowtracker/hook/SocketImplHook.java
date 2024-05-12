@@ -23,7 +23,7 @@ import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import com.coekie.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandle;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -34,10 +34,12 @@ import java.net.SocketImpl;
  * */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class SocketImplHook {
-  private static final Field fdField = Reflection.getDeclaredField(SocketImpl.class, "fd");
-  private static final Field addressField
-      = Reflection.getDeclaredField(SocketImpl.class, "address");
-  private static final Field portField = Reflection.getDeclaredField(SocketImpl.class, "port");
+  private static final MethodHandle fdHandle =
+      Reflection.getter(SocketImpl.class, "fd", FileDescriptor.class);
+  private static final MethodHandle addressHandle =
+      Reflection.getter(SocketImpl.class, "address", InetAddress.class);
+  private static final MethodHandle portHandle =
+      Reflection.getter(SocketImpl.class, "port", int.class);
 
   @Hook(target = "sun.nio.ch.NioSocketImpl",
       condition = "version >= 17",
@@ -61,9 +63,9 @@ public class SocketImplHook {
   public static void afterAccept(@Arg("ARG0") SocketImpl si,
       @Arg("SocketImpl_localport") int localport) {
     if (Trackers.isActive()) {
-      FileDescriptor fd = (FileDescriptor) Reflection.getFieldValue(si, fdField);
-      InetAddress address = (InetAddress) Reflection.getFieldValue(si, addressField);
-      int port = Reflection.getInt(si, portField);
+      FileDescriptor fd = fd(si);
+      InetAddress address = address(si);
+      int port = port(si);
       FileDescriptorTrackerRepository.createTracker(fd, true, true,
           serverSocketNode(Integer.toString(localport), address + ":" + port));
     }
@@ -104,5 +106,29 @@ public class SocketImplHook {
 
   static TrackerTree.Node clientSocketNode(String remote) {
     return TrackerTree.node("Client socket").node(remote);
+  }
+
+  private static FileDescriptor fd(SocketImpl channel) {
+    try {
+      return (FileDescriptor) fdHandle.invokeExact(channel);
+    } catch (Throwable e) {
+      throw new Error(e);
+    }
+  }
+
+  private static InetAddress address(SocketImpl channel) {
+    try {
+      return (InetAddress) addressHandle.invokeExact(channel);
+    } catch (Throwable e) {
+      throw new Error(e);
+    }
+  }
+
+  private static int port(SocketImpl channel) {
+    try {
+      return (int) portHandle.invokeExact(channel);
+    } catch (Throwable e) {
+      throw new Error(e);
+    }
   }
 }

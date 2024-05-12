@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -19,8 +18,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class FileChannelTest extends AbstractChannelTest<FileChannel> {
-  private static final Field fdField = fdField();
-
   private static File fileToRead;
   private static File fileToWrite;
 
@@ -87,15 +84,7 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
 
   @Override
   FileDescriptor getFd(FileChannel channel) {
-    return (FileDescriptor) Reflection.getFieldValue(channel, fdField);
-  }
-
-  private static Field fdField() {
-    try {
-      Class<?> clazz = Class.forName("sun.nio.ch.FileChannelImpl");
-      return Reflection.getDeclaredField(clazz, "fd");
-    } catch (ClassNotFoundException e) {
-      throw new Error(e);
-    }
+    return Reflection.getSlow(Reflection.clazz("sun.nio.ch.FileChannelImpl"), "fd",
+        FileDescriptor.class, channel);
   }
 }

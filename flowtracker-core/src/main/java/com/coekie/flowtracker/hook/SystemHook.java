@@ -24,10 +24,10 @@ import com.coekie.flowtracker.util.Config;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
-import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -52,12 +52,10 @@ public class SystemHook {
 
   private static void addSystemOutErrTracker(PrintStream printStream, String name, Config config) {
     try {
-      Field charOutField = PrintStream.class.getDeclaredField("charOut");
-
       // track on the OutputStream level
-      Field outField = FilterOutputStream.class.getDeclaredField("out");
-      FileOutputStream fileOut = (FileOutputStream)
-          Reflection.getFieldValue(Reflection.getFieldValue(printStream, outField), outField);
+      MethodHandle outHandle = Reflection.getter(FilterOutputStream.class, "out",
+          OutputStream.class);
+      FileOutputStream fileOut = (FileOutputStream) outHandle.invoke(outHandle.invoke(printStream));
       FileDescriptor fd = fileOut.getFD();
       FileDescriptorTrackerRepository.createTracker(fd, false, true,
           TrackerTree.node("System").node(name));
@@ -65,12 +63,12 @@ public class SystemHook {
       // track on the OutputStreamWriter level
       if (OutputStreamWriterHook.enabled(config)) {
         OutputStreamWriter writer =
-            (OutputStreamWriter) Reflection.getFieldValue(printStream, charOutField);
+            Reflection.getSlow(PrintStream.class, "charOut", OutputStreamWriter.class, printStream);
         OutputStreamWriterHook.createOutputStreamWriterTracker(writer, fileOut);
       }
-    } catch (ReflectiveOperationException | IOException e) {
-      System.err.println("Cannot access PrintStream.charOut. Cannot hook System.out/err:");
-      e.printStackTrace(System.err);
+    } catch (Throwable t) {
+      System.err.println("Cannot hook System.out/err:");
+      t.printStackTrace(System.err);
     }
   }
 

@@ -22,11 +22,12 @@ import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.Trackers;
 import com.coekie.flowtracker.util.Config;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
 
 public class StringHook {
-  private static final Field valueField = Reflection.getDeclaredField(String.class, "value");
+  private static final MethodHandle valueGetter =
+      Reflection.getter(String.class, "value", byte[].class);
 
   public static final String DEBUG_UNTRACKED = "debugUntracked";
 
@@ -49,8 +50,12 @@ public class StringHook {
   }
 
   /** Get the "value" field from a String */
-  private static Object getValueArray(String str) {
-    return Reflection.getFieldValue(str, valueField);
+  private static byte[] getValueArray(String str) {
+    try {
+      return (byte[]) valueGetter.invokeExact(str);
+    } catch (Throwable t) {
+      throw new Error(t);
+    }
   }
 
   @SuppressWarnings({"UnusedDeclaration", "CallToPrintStackTrace"}) // used by instrumented code

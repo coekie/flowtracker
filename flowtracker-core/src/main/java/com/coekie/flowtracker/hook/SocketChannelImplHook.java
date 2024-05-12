@@ -21,28 +21,29 @@ import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandle;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class SocketChannelImplHook {
-  private static final Field remoteAddressField =
-      Reflection.getDeclaredField("sun.nio.ch.SocketChannelImpl", "remoteAddress");
-  private static final Field localAddressField =
-      Reflection.getDeclaredField("sun.nio.ch.SocketChannelImpl", "localAddress");
-  private static final Field fdField =
-      Reflection.getDeclaredField("sun.nio.ch.SocketChannelImpl", "fd");
+  public static final Class<?> CLASS = Reflection.clazz("sun.nio.ch.SocketChannelImpl");
+  private static final MethodHandle remoteAddressHandle =
+      Reflection.getter(CLASS, "remoteAddress",
+          Runtime.version().feature() > 11 ? SocketAddress.class : InetSocketAddress.class);
+  private static final MethodHandle localAddressHandle =
+      Reflection.getter(CLASS, "localAddress",
+          Runtime.version().feature() > 11 ? SocketAddress.class : InetSocketAddress.class);
+  private static final MethodHandle fdHandle = Reflection.getter(CLASS, "fd", FileDescriptor.class);
 
   @Hook(target = "sun.nio.ch.SocketChannelImpl",
       method = "boolean connect(java.net.SocketAddress)")
   public static void afterConnect(@Arg("RETURN") boolean result, @Arg("THIS") SocketChannel channel,
       @Arg("SocketChannelImpl_fd") FileDescriptor fd) {
     if (Trackers.isActive()) {
-      SocketAddress remoteAddress =
-          (SocketAddress) Reflection.getFieldValue(channel, remoteAddressField);
-      SocketAddress localAddress =
-          (SocketAddress) Reflection.getFieldValue(channel, localAddressField);
+      SocketAddress remoteAddress = remoteAddress(channel);
+      SocketAddress localAddress = localAddress(channel);
       FileDescriptorTrackerRepository.createTracker(fd, true, true,
           SocketImplHook.clientSocketNode(remoteAddress));
     }
@@ -54,10 +55,8 @@ public class SocketChannelImplHook {
   public static void afterFinishAccept(@Arg("RETURN") SocketChannel channel,
       @Arg("ARG0") FileDescriptor fd) {
     if (Trackers.isActive()) {
-      SocketAddress remoteAddress =
-          (SocketAddress) Reflection.getFieldValue(channel, remoteAddressField);
-      SocketAddress localAddress =
-          (SocketAddress) Reflection.getFieldValue(channel, localAddressField);
+      SocketAddress remoteAddress = remoteAddress(channel);
+      SocketAddress localAddress = localAddress(channel);
       FileDescriptorTrackerRepository.createTracker(fd, true, true,
           SocketImplHook.serverSocketNode(localAddress, remoteAddress));
     }
@@ -68,14 +67,35 @@ public class SocketChannelImplHook {
       method = "java.nio.channels.SocketChannel accept()")
   public static void afterAccept(@Arg("RETURN") SocketChannel channel) {
     if (Trackers.isActive()) {
-      SocketAddress remoteAddress =
-          (SocketAddress) Reflection.getFieldValue(channel, remoteAddressField);
-      SocketAddress localAddress =
-          (SocketAddress) Reflection.getFieldValue(channel, localAddressField);
-      FileDescriptor fd =
-          (FileDescriptor) Reflection.getFieldValue(channel, fdField);
+      SocketAddress remoteAddress = remoteAddress(channel);
+      SocketAddress localAddress = localAddress(channel);
+      FileDescriptor fd = fd(channel);
       FileDescriptorTrackerRepository.createTracker(fd, true, true,
           SocketImplHook.serverSocketNode(localAddress, remoteAddress));
+    }
+  }
+
+  private static SocketAddress remoteAddress(SocketChannel channel) {
+    try {
+      return (SocketAddress) remoteAddressHandle.invoke(channel);
+    } catch (Throwable e) {
+      throw new Error(e);
+    }
+  }
+
+  private static SocketAddress localAddress(SocketChannel channel) {
+    try {
+      return (SocketAddress) localAddressHandle.invoke(channel);
+    } catch (Throwable e) {
+      throw new Error(e);
+    }
+  }
+
+  private static FileDescriptor fd(SocketChannel channel) {
+    try {
+      return (FileDescriptor) fdHandle.invoke(channel);
+    } catch (Throwable e) {
+      throw new Error(e);
     }
   }
 }

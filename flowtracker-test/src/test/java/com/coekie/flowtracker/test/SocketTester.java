@@ -1,12 +1,13 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.hook.Reflection.clazz;
+
 import com.coekie.flowtracker.hook.Reflection;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Tracker;
 import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -41,22 +42,19 @@ class SocketTester implements Closeable {
   }
 
   private static FileDescriptor getFd(Socket socket) {
-    Field implField = Reflection.getDeclaredField(Socket.class, "impl");
-    Object impl = Reflection.getFieldValue(socket, implField);
+    SocketImpl impl = Reflection.getSlow(Socket.class, "impl", SocketImpl.class, socket);
 
     // find the fd either in the SocketImpl, or in one that it (SocksSocketImpl) delegates to.
     // if there's a delegation going on depends both on if it's a client or server socket, and the
     // JDK version
     while (true) {
-      Field fdField = Reflection.getDeclaredField(SocketImpl.class, "fd");
-      FileDescriptor fd = (FileDescriptor) Reflection.getFieldValue(impl, fdField);
+      FileDescriptor fd = Reflection.getSlow(SocketImpl.class, "fd", FileDescriptor.class, impl);
       if (fd != null) {
         return fd;
       }
       if (impl.getClass().getSimpleName().equals("SocksSocketImpl")) {
-        Field delegateField =
-            Reflection.getDeclaredField(impl.getClass().getSuperclass(), "delegate");
-        impl = Reflection.getFieldValue(impl, delegateField);
+        impl = Reflection.getSlow(clazz("java.net.SocksSocketImpl"), "delegate",
+            SocketImpl.class, impl);
       } else {
         throw new RuntimeException("Cannot find fd");
       }
