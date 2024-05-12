@@ -37,6 +37,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,17 +58,13 @@ public class TrackerResource {
     Tracker tracker = InterestRepository.getContentTracker(id);
     List<Region> regions = new ArrayList<>();
     if (tracker instanceof DefaultTracker) {
-      Simplifier.simplifySourceTo(tracker, new WritableTracker() {
-        @Override
-        public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
-            Growth growth) {
-          if (sourceTracker != null) {
-            regions.add(new Region(tracker, index, length, singletonList(
-                new TrackerPartResponse(sourceTracker, sourceIndex,
-                    growth.targetToSource(length)))));
-          } else {
-            regions.add(new Region(tracker, index, length, emptyList()));
-          }
+      Simplifier.simplifySourceTo(tracker, (index, length, sourceTracker, sourceIndex, growth) -> {
+        if (sourceTracker != null) {
+          regions.add(new Region(tracker, index, length, singletonList(
+              new TrackerPartResponse(sourceTracker, sourceIndex,
+                  growth.targetToSource(length)))));
+        } else {
+          regions.add(new Region(tracker, index, length, emptyList()));
         }
       });
     } else {
@@ -193,8 +190,10 @@ public class TrackerResource {
       return charTracker.getContent().subSequence(start, end).toString();
     } else if (tracker instanceof ByteContentTracker) {
       ByteContentTracker byteTracker = (ByteContentTracker) tracker;
-      // TODO encoding
-      return new String(byteTracker.getContent().getByteContent().array(), start, end - start);
+      ByteBuffer slice = byteTracker.getContent().getByteContent().slice();
+      slice.position(start);
+      slice.limit(end);
+      return escape(slice);
     } else if (tracker instanceof FixedOriginTracker) {
       return "<not implemented>";
     } else {
@@ -251,5 +250,44 @@ public class TrackerResource {
       sb.append("at ").append(element).append('\n');
     }
     return sb.toString();
+  }
+
+  /**
+   * Convert a ByteBuffer to a String, how we render those bytes in the UI.
+   * <p>
+   * Concretely, anything that's not a printable ascii character is shown as hex values, surrounded
+   * by ❲ and ❳
+   */
+  private static String escape(ByteBuffer buf) {
+    StringBuilder result = new StringBuilder(buf.limit() - buf.position());
+    boolean escaped = false;
+    for (int i = buf.position(); i < buf.limit(); i++) {
+      int b = buf.get(i) & 0xff;
+      if (b >= 32 && b <= 127) { // printable ascii characters
+        if (escaped) {
+          result.append('❳'); // close them if they were open
+          escaped = false;
+        }
+        result.append((char) b);
+      } else {
+        if (escaped) {
+          result.append(' '); // multiple escaped chars in a row are delimited by space
+        } else {
+          result.append('❲'); // open them if they weren't already
+          escaped = true;
+        }
+        // an escaped byte is rendered as two 0-F chars
+        appendHex(result, b / 16);
+        appendHex(result, b % 16);
+      }
+    }
+    if (escaped) {
+      result.append('❳');
+    }
+    return result.toString();
+  }
+
+  private static void appendHex(StringBuilder sb, int value) {
+    sb.append((char) (value < 10 ? ('0' + value) : ('A' + value - 10)));
   }
 }

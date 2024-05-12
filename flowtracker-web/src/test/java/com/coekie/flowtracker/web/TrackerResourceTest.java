@@ -83,16 +83,44 @@ public class TrackerResourceTest {
     assertRegionNoPart(response.regions.get(4), "h");
   }
 
-  @Test public void getOriginTracker() {
+  @Test public void getCharOriginTracker() {
     CharOriginTracker tracker = new CharOriginTracker();
     InterestRepository.register(tracker);
 
-    tracker.append(new char[] {'a', 'b', 'c', 'd'}, 1, 2);
+    tracker.append("abc");
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
     assertThat(response.regions).hasSize(1);
 
-    assertRegionNoPart(response.regions.get(0), "bc");
+    assertRegionNoPart(response.regions.get(0), "abc");
+  }
+
+  @Test public void getByteOriginTracker() {
+    ByteOriginTracker tracker = new ByteOriginTracker();
+    InterestRepository.register(tracker);
+
+    tracker.append("abc".getBytes(), 0, 3);
+
+    TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
+    assertThat(response.regions).hasSize(1);
+
+    assertRegionNoPart(response.regions.get(0), "abc");
+  }
+
+  @Test public void escapeBytes() {
+    ByteOriginTracker tracker = new ByteOriginTracker();
+    InterestRepository.register(tracker);
+
+    tracker.append("abc".getBytes(), 0, 3);
+    tracker.append((byte) 1);
+    tracker.append((byte) 2);
+    tracker.append((byte) 255);
+    tracker.append("def".getBytes(), 0, 3);
+
+    TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
+    assertThat(response.regions).hasSize(1);
+
+    assertRegionNoPart(response.regions.get(0), "abc❲01 02 FF❳def");
   }
 
   @Test public void growth() {
@@ -228,10 +256,6 @@ public class TrackerResourceTest {
 
   private void assertRegionOnePart(Region region, String expectedContent, Tracker expectedTracker,
       int expectedOffset) {
-//    assertThat(region.content).isEqualTo(expectedContent);
-//    assertThat(region.parts).hasSize(1);
-//    assertThat(region.parts.get(0).tracker.id).isEqualTo(expectedTracker.getTrackerId());
-//    assertThat(region.parts.get(0).offset).isEqualTo(expectedOffset);
     assertRegionOnePart(region, expectedContent, expectedTracker, expectedOffset,
         expectedContent.length());
   }
