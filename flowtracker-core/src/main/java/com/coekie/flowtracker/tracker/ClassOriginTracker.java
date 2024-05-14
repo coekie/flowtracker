@@ -67,7 +67,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
   public synchronized ClassConstant registerConstant(int value) {
     content.append("  ");
     int offset = content.length();
-    if (value >= 32 && value <= 127) { // printable ascii characters
+    if (value >= 32 && value < 127) { // printable ascii characters
       content.append((char) value);
     } else {
       content.append("0x").append(Integer.toHexString(value))

@@ -115,12 +115,12 @@ public class TrackerResourceTest {
     tracker.append((byte) 1);
     tracker.append((byte) 2);
     tracker.append((byte) 255);
-    tracker.append("def".getBytes(), 0, 3);
+    tracker.append("def\r\n".getBytes(), 0, 5);
 
     TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
     assertThat(response.regions).hasSize(1);
 
-    assertRegionNoPart(response.regions.get(0), "abc❲01 02 FF❳def");
+    assertRegionNoPart(response.regions.get(0), "abc❲01 02 FF❳def\r\n");
   }
 
   @Test public void growth() {

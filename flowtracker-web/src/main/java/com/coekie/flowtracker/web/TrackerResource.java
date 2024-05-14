@@ -263,7 +263,7 @@ public class TrackerResource {
     boolean escaped = false;
     for (int i = buf.position(); i < buf.limit(); i++) {
       int b = buf.get(i) & 0xff;
-      if (b >= 32 && b <= 127) { // printable ascii characters
+      if ((b >= 32 && b < 127) || b == '\n' || b == '\r') { // printable ascii characters
         if (escaped) {
           result.append('❳'); // close them if they were open
           escaped = false;
