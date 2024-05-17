@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class Tracker implements WritableTracker {
 
   private static final AtomicLong idGenerator = new AtomicLong();
-  private final long trackerId = idGenerator.getAndIncrement();
+  private final long trackerId = nextId();
   public static boolean trackCreation = false;
 
   private TrackerTree.Node node;
@@ -122,5 +122,9 @@ public abstract class Tracker implements WritableTracker {
 
   public static void initialize(Config config) {
     trackCreation = config.getBoolean("trackCreation", false);
+  }
+
+  public static long nextId() {
+    return idGenerator.getAndIncrement();
   }
 }

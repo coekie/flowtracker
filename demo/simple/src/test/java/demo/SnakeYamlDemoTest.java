@@ -1,5 +1,6 @@
 package demo;
 
+import demo.DemoTestRule.TrackerSubject;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -10,12 +11,14 @@ public class SnakeYamlDemoTest {
   @Test
   public void test() {
     SnakeYamlDemo.main();
-    demo.assertThatOutput("hello").comesFromConstantInClass(SnakeYamlDemo.class);
-    // names of fields (through reflection) are not tracked
-    demo.assertThatOutput("myField").isNotTracked();
+    TrackerSubject out = demo.out();
 
-    demo.assertThatOutput("toDump").comesFromConstantInClass(SnakeYamlDemo.class);
-    demo.assertThatOutput(":").comesFromConstantInClassThat()
+    out.assertThatPart("hello").comesFromConstantInClass(SnakeYamlDemo.class);
+    // names of fields (through reflection) are not tracked
+    out.assertThatPart("myField").isNotTracked();
+
+    out.assertThatPart("toDump").comesFromConstantInClass(SnakeYamlDemo.class);
+    out.assertThatPart(":").comesFromConstantInClassThat()
         .startsWith("class org.yaml.snakeyaml");
   }
 }

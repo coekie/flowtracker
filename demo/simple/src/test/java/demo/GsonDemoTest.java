@@ -1,6 +1,7 @@
 package demo;
 
 import com.google.gson.stream.JsonWriter;
+import demo.DemoTestRule.TrackerSubject;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -11,15 +12,16 @@ public class GsonDemoTest {
   @Test
   public void test() {
     GsonDemo.main();
-    demo.assertThatOutput("Pojo(").comesFromConstantInClass(GsonDemo.Pojo.class);
-    demo.assertThatOutput("fromJson").comesFromConstantInClass(GsonDemo.class);
+    TrackerSubject out = demo.out();
+    out.assertThatPart("Pojo(").comesFromConstantInClass(GsonDemo.Pojo.class);
+    out.assertThatPart("fromJson").comesFromConstantInClass(GsonDemo.class);
 
     // names of fields (through reflection) are not tracked
-    demo.assertThatOutput("myField").isNotTracked();
-    demo.assertThatOutput(":").comesFromConstantInClass(JsonWriter.class);
+    out.assertThatPart("myField").isNotTracked();
+    out.assertThatPart(":").comesFromConstantInClass(JsonWriter.class);
     // haven't looked into why this isn't tracked yet
-    demo.assertThatOutput("{").isNotTracked();
+    out.assertThatPart("{").isNotTracked();
 
-    demo.assertThatOutput("toJson").comesFromConstantInClass(GsonDemo.class);
+    out.assertThatPart("toJson").comesFromConstantInClass(GsonDemo.class);
   }
 }

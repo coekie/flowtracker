@@ -1,5 +1,6 @@
 package demo;
 
+import demo.DemoTestRule.TrackerSubject;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamConstants;
 import org.junit.Rule;
@@ -12,29 +13,30 @@ public class SerializationDemoTest {
   @Test
   public void test() throws Exception {
     SerializationDemo.main();
+    TrackerSubject out = demo.out();
 
-    demo.assertThatOutput("myValue").comesFromConstantInClass(SerializationDemo.class);
-    demo.assertThatOutput("Deserialized: ", "myValue")
+    out.assertThatPart("myValue").comesFromConstantInClass(SerializationDemo.class);
+    out.assertThatPart("Deserialized: ", "myValue")
         .comesFromConstantInClass(SerializationDemo.class);
 
     // names of fields and classes (through reflection) are not tracked
-    demo.assertThatOutput("myField").isNotTracked();
-    demo.assertThatOutput("java/lang/String").isNotTracked();
+    out.assertThatPart("myField").isNotTracked();
+    out.assertThatPart("java/lang/String").isNotTracked();
 
     // magic, from ObjectOutputStream.writeStreamHeader
-    demo.assertThatOutput(new byte[]{(byte) 0xac, (byte) 0xed})
+    out.assertThatPart(new byte[]{(byte) 0xac, (byte) 0xed})
         .comesFromConstantInClass(ObjectOutputStream.class);
     // version, from ObjectOutputStream.writeStreamHeader
-    demo.assertThatOutput(new byte[]{(byte) 5})
+    out.assertThatPart(new byte[]{(byte) 5})
         .comesFromConstantInClass(ObjectOutputStream.class);
 
     // from ObjectOutputStream.writeOrdinaryObject ('s')
-    demo.assertThatOutput("s").comesFromConstantInClass(ObjectOutputStream.class);
-    demo.assertThatOutput("Serialized: ".getBytes(), new byte[]{ObjectStreamConstants.TC_OBJECT})
+    out.assertThatPart("s").comesFromConstantInClass(ObjectOutputStream.class);
+    out.assertThatPart("Serialized: ".getBytes(), new byte[]{ObjectStreamConstants.TC_OBJECT})
         .comesFromConstantInClass(ObjectOutputStream.class);
 
     // from ObjectOutputStream.writeNonProxyDesc ('r')
-    demo.assertThatOutput("Serialized: ".getBytes(), new byte[]{ObjectStreamConstants.TC_CLASSDESC})
+    out.assertThatPart("Serialized: ".getBytes(), new byte[]{ObjectStreamConstants.TC_CLASSDESC})
         .comesFromConstantInClass(ObjectOutputStream.class);
   }
 }
