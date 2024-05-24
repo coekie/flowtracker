@@ -74,9 +74,10 @@ public class FlowAnalyzingTransformer implements Transformer {
     this.listener = listener;
     this.breakStringInterningFilter = new ClassFilter(
         config.get("breakStringInterning", "%recommended,+*"),
-        // by default, we allow most JDK classes to depend on interning to work, but not other
-        // libraries. this probably breaks some libraries.
-        "-java.*,-sun.*,-jdk.*");
+        // by default, we don't break String interning in most JDK classes, because some of them
+        // depend on interning to work. we don't do that for other libraries, so this probably
+        // breaks some libraries.
+        "+java.net.*,-java.*,+sun.net.*,-sun.*,+jdk.internal.net.*,-jdk.*");
   }
 
   private class FlowClassAdapter extends ClassVisitor {
