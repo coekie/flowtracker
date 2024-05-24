@@ -77,11 +77,12 @@ public class IOUtilHook {
   public static void afterWriteByteBufferArray(@Arg("RETURN") long result,
       @Arg("ARG0") FileDescriptor fd,
       @Arg("ARG1") ByteBuffer[] srcs,
+      @Arg("ARG2") int srcsOffset,
       @Arg("IOUtilHookSpec.BUFFER_POSITIONS") int[] startPositions) {
     ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
     if (fdTracker != null && result > 0) {
       long remaining = result;
-      int i = 0; // index in srcs
+      int i = srcsOffset; // index in srcs
       while (remaining > 0) {
         ByteBuffer src = srcs[i];
         int length = src.position() - startPositions[i];

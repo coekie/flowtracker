@@ -130,7 +130,24 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
     }
   }
 
-  // TODO "offset" argument in GatheringByteChannel (offset into ByteBuffer[])
+  /**
+   * Test writing using GatheringByteChannel, with an offset.
+   * Note that this is about an offset into the ByteBuffer[], not to be confused with an offset in
+   * the ByteBuffer itself (like in {@link #writeGatheringWithBufferOffsetAndPosition}).
+   */
+  @Test
+  public void writeGatheringOffset() throws IOException {
+    try (C channel = openForWrite()) {
+      ByteBuffer bb1 = ByteBuffer.wrap(trackedByteArray("abc"));
+      ByteBuffer bb2 = ByteBuffer.wrap(trackedByteArray("def"));
+      ByteBuffer bb3 = ByteBuffer.wrap(trackedByteArray("ghi"));
+      ((GatheringByteChannel) channel).write(new ByteBuffer[]{bb1, bb2, bb3}, 1, 2);
+      assertWrittenContentEquals("defghi", channel);
+      TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
+          TrackerSnapshot.snapshot().track(bb2.array()).track(bb3.array()));
+    }
+  }
+
   // TODO hook read methods that take a ByteBuffer[] (ScatteringByteChannel)
   // TODO handle direct ByteBuffers
 
