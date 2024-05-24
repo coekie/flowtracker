@@ -191,6 +191,12 @@ public class TrackerResource {
     } else if (tracker instanceof ByteContentTracker) {
       ByteContentTracker byteTracker = (ByteContentTracker) tracker;
       ByteBuffer slice = byteTracker.getContent().getByteContent().slice();
+      if (end > slice.limit()) {
+        // this probably means we have tracking on a part where we did not record the content for.
+        // that shouldn't happen; but it at least does in some unit tests where we were too lazy to
+        // populate content.
+        return "<invalid>";
+      }
       slice.position(start);
       slice.limit(end);
       return escape(slice);
