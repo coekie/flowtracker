@@ -79,7 +79,17 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
     }
   }
 
-  // TODO test write with read-only buffer (use ByteBufferHook.hb and offset?)
+  /** Test with read-only buffer. (This means we cannot call ByteBuffer.array() or arrayOffset()) */
+  @Test
+  public void writeReadOnly() throws IOException {
+    try (C channel = openForWrite()) {
+      ByteBuffer bb = ByteBuffer.wrap(trackedByteArray("abc"));
+      channel.write(bb.asReadOnlyBuffer());
+      assertWrittenContentEquals("abc", channel);
+      TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
+          TrackerSnapshot.snapshot().track(bb.array()));
+    }
+  }
 
   @Test
   public void writeMultiple() throws IOException {
@@ -145,6 +155,21 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       assertWrittenContentEquals("defghi", channel);
       TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
           TrackerSnapshot.snapshot().track(bb2.array()).track(bb3.array()));
+    }
+  }
+
+  /**
+   * Test writing using GatheringByteChannel with read-only buffer.
+   * @see #writeReadOnly()
+   */
+  @Test
+  public void writeGatheringReadOnly() throws IOException {
+    try (C channel = openForWrite()) {
+      ByteBuffer bb1 = ByteBuffer.wrap(trackedByteArray("abc"));
+      ((GatheringByteChannel) channel).write(new ByteBuffer[]{bb1.asReadOnlyBuffer()});
+      assertWrittenContentEquals("abc", channel);
+      TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
+          TrackerSnapshot.snapshot().track(bb1.array()));
     }
   }
 

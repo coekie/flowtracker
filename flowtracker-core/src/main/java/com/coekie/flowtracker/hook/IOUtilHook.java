@@ -59,12 +59,13 @@ public class IOUtilHook {
     // TODO do something with position (seeking)
     ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
     if (fdTracker != null && result > 0 && !src.isDirect()) {
-      Tracker srcTracker = TrackerRepository.getTracker(src.array());
-      int startIndex = src.arrayOffset() + src.position() - result;
+      byte[] hb = ByteBufferHook.hb(src);
+      Tracker srcTracker = TrackerRepository.getTracker(hb);
+      int startIndex = ByteBufferHook.offset(src) + src.position() - result;
       if (srcTracker != null) {
         fdTracker.setSource(fdTracker.getLength(), result, srcTracker, startIndex);
       }
-      fdTracker.append(src.array(), startIndex, result);
+      fdTracker.append(hb, startIndex, result);
     }
   }
 
@@ -87,12 +88,14 @@ public class IOUtilHook {
         ByteBuffer src = srcs[i];
         int length = src.position() - startPositions[i];
         if (!src.isDirect()) { // direct buffers are not supported yet
-          Tracker srcTracker = TrackerRepository.getTracker(src.array());
+          byte[] hb = ByteBufferHook.hb(src);
+          int startIndex = ByteBufferHook.offset(src) + startPositions[i];
+          Tracker srcTracker = TrackerRepository.getTracker(hb);
           if (srcTracker != null) {
             fdTracker.setSource(fdTracker.getLength(), length,
-                srcTracker, src.arrayOffset() + startPositions[i]);
+                srcTracker, startIndex);
           }
-          fdTracker.append(src.array(), src.arrayOffset() + startPositions[i], length);
+          fdTracker.append(hb, startIndex, length);
         }
         remaining -= length;
         i++;

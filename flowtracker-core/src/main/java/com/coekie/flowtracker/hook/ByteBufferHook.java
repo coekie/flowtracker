@@ -122,7 +122,7 @@ public class ByteBufferHook {
         Invocation.getArgPoint(invocation, 1));
   }
 
-  private static byte[] hb(ByteBuffer o) {
+  static byte[] hb(ByteBuffer o) {
     try {
       return (byte[]) hbHandle.invokeExact(o);
     } catch (Throwable e) {
@@ -130,7 +130,7 @@ public class ByteBufferHook {
     }
   }
 
-  private static int offset(ByteBuffer o) {
+  static int offset(ByteBuffer o) {
     try {
       return (int) offsetHandle.invokeExact(o);
     } catch (Throwable e) {
