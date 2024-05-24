@@ -42,9 +42,10 @@ public class IOUtilHook {
     // TODO do something with position (seeking)
     ByteOriginTracker fdTracker = FileDescriptorTrackerRepository.getReadTracker(fd);
     if (fdTracker != null && result > 0 && !dst.isDirect()) {
-      TrackerUpdater.setSourceTracker(dst.array(), dst.position() - result, result, fdTracker,
+      int startIndex = ByteBufferHook.offset(dst) + dst.position() - result;
+      TrackerUpdater.setSourceTracker(dst.array(), startIndex, result, fdTracker,
           fdTracker.getLength());
-      fdTracker.append(dst.array(), dst.position() - result, result);
+      fdTracker.append(dst.array(), startIndex, result);
     }
   }
 

@@ -1,6 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedByteArray;
+import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -27,12 +28,25 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       assertThat(channel.read(bb)).isEqualTo(3);
       assertReadContentEquals("abc", channel);
       TrackerSnapshot.assertThatTrackerOf(bb.array()).matches(
-          TrackerSnapshot.snapshot().part(3, getReadTracker(channel), 0));
+          snapshot().part(3, getReadTracker(channel), 0));
     }
   }
 
-  // TODO test read with ByteBuffer with non-zero offset and position
-  //  (like writeWithBufferOffsetAndPosition)
+  @Test
+  public void readWithOffsetAndPosition() throws IOException {
+    try (C channel = openForRead()) {
+      ByteBuffer orig = ByteBuffer.allocate(10);
+      orig.position(1);
+      ByteBuffer bb = orig.slice();
+      bb.position(2);
+
+      assertThat(channel.read(bb)).isEqualTo(3);
+      assertReadContentEquals("abc", channel);
+      // bb has offset=1, position=2, so should start at (has a gap at the start of) 1+2=3
+      TrackerSnapshot.assertThatTrackerOf(orig.array()).matches(
+          snapshot().gap(3).part(3, getReadTracker(channel), 0));
+    }
+  }
 
   @Test
   public void readMultiple() throws IOException {
@@ -41,13 +55,13 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       assertThat(channel.read(bb)).isEqualTo(2);
       assertReadContentEquals("ab", channel);
       TrackerSnapshot.assertThatTrackerOf(bb.array()).matches(
-          TrackerSnapshot.snapshot().part(2, getReadTracker(channel), 0));
+          snapshot().part(2, getReadTracker(channel), 0));
 
       bb.position(0);
       assertThat(channel.read(bb)).isEqualTo(1);
       assertReadContentEquals("abc", channel);
       TrackerSnapshot.assertThatTrackerOf(bb.array()).matches(
-          TrackerSnapshot.snapshot().part(1, getReadTracker(channel), 2).part(1, getReadTracker(channel), 1));
+          snapshot().part(1, getReadTracker(channel), 2).part(1, getReadTracker(channel), 1));
     }
   }
 
@@ -58,7 +72,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       channel.write(bb);
       assertWrittenContentEquals("abc", channel);
       TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
-          TrackerSnapshot.snapshot().track(bb.array()));
+          snapshot().track(bb.array()));
     }
   }
 
@@ -75,7 +89,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       // bb has offset=1, position=2, so write should start at 1+2=3
       assertWrittenContentEquals("def", channel);
       TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
-          TrackerSnapshot.snapshot().track(3, orig.array(), 3));
+          snapshot().track(3, orig.array(), 3));
     }
   }
 
@@ -87,7 +101,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       channel.write(bb.asReadOnlyBuffer());
       assertWrittenContentEquals("abc", channel);
       TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
-          TrackerSnapshot.snapshot().track(bb.array()));
+          snapshot().track(bb.array()));
     }
   }
 
@@ -100,7 +114,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       channel.write(bb2);
       assertWrittenContentEquals("abcdef", channel);
       TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
-          TrackerSnapshot.snapshot().track(bb1.array()).track(bb2.array()));
+          snapshot().track(bb1.array()).track(bb2.array()));
     }
   }
 
@@ -113,7 +127,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       ((GatheringByteChannel) channel).write(new ByteBuffer[]{bb1, bb2});
       assertWrittenContentEquals("abcdef", channel);
       TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
-          TrackerSnapshot.snapshot().track(bb1.array()).track(bb2.array()));
+          snapshot().track(bb1.array()).track(bb2.array()));
     }
   }
 
@@ -136,7 +150,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       // bb1 has offset=1, position=2, so write should start at 1+2=3
       assertWrittenContentEquals("defxyz", channel);
       TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
-          TrackerSnapshot.snapshot().track(3, bb1.array(), 3).track(bb2.array()));
+          snapshot().track(3, bb1.array(), 3).track(bb2.array()));
     }
   }
 
@@ -154,7 +168,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       ((GatheringByteChannel) channel).write(new ByteBuffer[]{bb1, bb2, bb3}, 1, 2);
       assertWrittenContentEquals("defghi", channel);
       TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
-          TrackerSnapshot.snapshot().track(bb2.array()).track(bb3.array()));
+          snapshot().track(bb2.array()).track(bb3.array()));
     }
   }
 
@@ -169,7 +183,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
       ((GatheringByteChannel) channel).write(new ByteBuffer[]{bb1.asReadOnlyBuffer()});
       assertWrittenContentEquals("abc", channel);
       TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
-          TrackerSnapshot.snapshot().track(bb1.array()));
+          snapshot().track(bb1.array()));
     }
   }
 
