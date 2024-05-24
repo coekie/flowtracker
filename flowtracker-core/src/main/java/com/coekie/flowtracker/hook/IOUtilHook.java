@@ -60,10 +60,11 @@ public class IOUtilHook {
     ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
     if (fdTracker != null && result > 0 && !src.isDirect()) {
       Tracker srcTracker = TrackerRepository.getTracker(src.array());
+      int startIndex = src.arrayOffset() + src.position() - result;
       if (srcTracker != null) {
-        fdTracker.setSource(fdTracker.getLength(), result, srcTracker, src.position() - result);
+        fdTracker.setSource(fdTracker.getLength(), result, srcTracker, startIndex);
       }
-      fdTracker.append(src.array(), src.position() - result, result);
+      fdTracker.append(src.array(), startIndex, result);
     }
   }
 
@@ -88,9 +89,9 @@ public class IOUtilHook {
           Tracker srcTracker = TrackerRepository.getTracker(src.array());
           if (srcTracker != null) {
             fdTracker.setSource(fdTracker.getLength(), length,
-                srcTracker, startPositions[i]);
+                srcTracker, src.arrayOffset() + startPositions[i]);
           }
-          fdTracker.append(src.array(), startPositions[i], length);
+          fdTracker.append(src.array(), src.arrayOffset() + startPositions[i], length);
         }
         remaining -= length;
         i++;

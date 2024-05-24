@@ -31,6 +31,9 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
     }
   }
 
+  // TODO test read with ByteBuffer with non-zero offset and position
+  //  (like writeWithBufferOffsetAndPosition)
+
   @Test
   public void readMultiple() throws IOException {
     try (C channel = openForRead()) {
@@ -59,7 +62,24 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
     }
   }
 
-  // TODO test write with buffer with non-zero position and offset (slice)
+  /** Test writing with a ByteBuffer with non-zero ByteBuffer.offset and position */
+  @Test
+  public void writeWithBufferOffsetAndPosition() throws IOException {
+    try (C channel = openForWrite()) {
+      ByteBuffer orig = ByteBuffer.wrap(trackedByteArray("abcdefg"));
+      orig.position(1);
+      ByteBuffer bb = orig.slice();
+      bb.position(2);
+      bb.limit(5);
+      channel.write(bb);
+      // bb has offset=1, position=2, so write should start at 1+2=3
+      assertWrittenContentEquals("def", channel);
+      TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
+          TrackerSnapshot.snapshot().track(3, orig.array(), 3));
+    }
+  }
+
+  // TODO test write with read-only buffer (use ByteBufferHook.hb and offset?)
 
   @Test
   public void writeMultiple() throws IOException {
@@ -74,6 +94,7 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
     }
   }
 
+  /** Test writing using GatheringByteChannel */
   @Test
   public void writeGathering() throws IOException {
     try (C channel = openForWrite()) {
@@ -86,6 +107,30 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
     }
   }
 
+  /**
+   * Test writing using GatheringByteChannel with a ByteBuffer with non-zero ByteBuffer.offset and
+   * position
+   */
+  @Test
+  public void writeGatheringWithBufferOffsetAndPosition() throws IOException {
+    try (C channel = openForWrite()) {
+      ByteBuffer orig1 = ByteBuffer.wrap(trackedByteArray("abcdefghij"));
+      orig1.position(1);
+      ByteBuffer bb1 = orig1.slice();
+      bb1.position(2);
+      bb1.limit(5);
+
+      ByteBuffer bb2 = ByteBuffer.wrap(trackedByteArray("xyz"));
+      ((GatheringByteChannel) channel).write(new ByteBuffer[]{bb1, bb2});
+
+      // bb1 has offset=1, position=2, so write should start at 1+2=3
+      assertWrittenContentEquals("defxyz", channel);
+      TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
+          TrackerSnapshot.snapshot().track(3, bb1.array(), 3).track(bb2.array()));
+    }
+  }
+
+  // TODO "offset" argument in GatheringByteChannel (offset into ByteBuffer[])
   // TODO hook read methods that take a ByteBuffer[] (ScatteringByteChannel)
   // TODO handle direct ByteBuffers
 
