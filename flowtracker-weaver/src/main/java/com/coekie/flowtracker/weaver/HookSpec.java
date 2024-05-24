@@ -58,7 +58,11 @@ public class HookSpec {
   /** Return value. Only works as first argument; assumes the return value is on top of the stack */
   static final HookArgument RETURN = spec -> new HookArgumentInstance() {
     @Override public void load(GeneratorAdapter generator) {
-      generator.dup();
+      if (spec.targetMethod.getReturnType().getSize() == 1) {
+        generator.dup();
+      } else {
+        generator.dup2();
+      }
     }
 
     @Override public Type getType(HookSpec hookSpec) {

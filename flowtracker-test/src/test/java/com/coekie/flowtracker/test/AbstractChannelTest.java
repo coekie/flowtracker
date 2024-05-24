@@ -12,6 +12,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.GatheringByteChannel;
 import org.junit.Test;
 
 abstract class AbstractChannelTest<C extends ByteChannel> {
@@ -58,6 +59,8 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
     }
   }
 
+  // TODO test write with buffer with non-zero position and offset (slice)
+
   @Test
   public void writeMultiple() throws IOException {
     try (C channel = openForWrite()) {
@@ -71,7 +74,19 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
     }
   }
 
-  // TODO hook read methods that take a ByteBuffer[] (GatheringByteChannel, ScatteringByteChannel)
+  @Test
+  public void writeGathering() throws IOException {
+    try (C channel = openForWrite()) {
+      ByteBuffer bb1 = ByteBuffer.wrap(trackedByteArray("abc"));
+      ByteBuffer bb2 = ByteBuffer.wrap(trackedByteArray("def"));
+      ((GatheringByteChannel) channel).write(new ByteBuffer[]{bb1, bb2});
+      assertWrittenContentEquals("abcdef", channel);
+      TrackerSnapshot.assertThatTracker(getWriteTracker(channel)).matches(
+          TrackerSnapshot.snapshot().track(bb1.array()).track(bb2.array()));
+    }
+  }
+
+  // TODO hook read methods that take a ByteBuffer[] (ScatteringByteChannel)
   // TODO handle direct ByteBuffers
 
   void assertReadContentEquals(String expected, C channel) {
@@ -81,7 +96,15 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
 
   void assertWrittenContentEquals(String expected, C channel) {
     var tracker = (ByteSinkTracker) requireNonNull(getWriteTracker(channel));
-    assertThat(tracker.getByteContent()).isEqualTo(ByteBuffer.wrap(expected.getBytes()));
+    assertThat(toArray(tracker.getByteContent())).isEqualTo(expected.getBytes());
+  }
+
+  private byte[] toArray(ByteBuffer buf) {
+    byte[] result = new byte[buf.remaining()];
+    int pos = buf.position();
+    buf.get(result);
+    buf.position(pos); // restore buffer position
+    return result;
   }
 
   ByteOriginTracker getReadTracker(C channel) {

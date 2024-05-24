@@ -66,4 +66,44 @@ public class IOUtilHook {
       fdTracker.append(src.array(), src.position() - result, result);
     }
   }
+
+  @Hook(target = "sun.nio.ch.IOUtil",
+      condition = "version >= 17", // between JDK 11 and 17 an extra argument "async" was added
+      method = "long write(java.io.FileDescriptor,java.nio.ByteBuffer[],int,int,boolean,boolean,int,sun.nio.ch.NativeDispatcher)")
+  @Hook(target = "sun.nio.ch.IOUtil",
+      condition = "version < 17",
+      method = "long write(java.io.FileDescriptor,java.nio.ByteBuffer[],int,int,boolean,int,sun.nio.ch.NativeDispatcher)")
+  public static void afterWriteByteBufferArray(@Arg("RETURN") long result,
+      @Arg("ARG0") FileDescriptor fd,
+      @Arg("ARG1") ByteBuffer[] srcs,
+      @Arg("IOUtilHookSpec.BUFFER_POSITIONS") int[] startPositions) {
+    ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
+    if (fdTracker != null && result > 0) {
+      long remaining = result;
+      int i = 0; // index in srcs
+      while (remaining > 0) {
+        ByteBuffer src = srcs[i];
+        int length = src.position() - startPositions[i];
+        if (!src.isDirect()) { // direct buffers are not supported yet
+          Tracker srcTracker = TrackerRepository.getTracker(src.array());
+          if (srcTracker != null) {
+            fdTracker.setSource(fdTracker.getLength(), length,
+                srcTracker, startPositions[i]);
+          }
+          fdTracker.append(src.array(), startPositions[i], length);
+        }
+        remaining -= length;
+        i++;
+      }
+    }
+  }
+
+  /** Returns the position for each ByteBuffer. Invoked by instrumentation in IOUtilHookSpec. */
+  public static int[] positions(ByteBuffer[] src) {
+    int[] result = new int[src.length];
+    for (int i = 0; i < src.length; i++) {
+      result[i] = src[i].position();
+    }
+    return result;
+  }
 }
