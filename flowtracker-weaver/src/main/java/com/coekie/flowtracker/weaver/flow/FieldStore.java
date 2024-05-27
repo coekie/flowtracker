@@ -36,7 +36,7 @@ class FieldStore extends Store {
     this.storeInsn = storeInsn;
   }
 
-  void insertTrackStatements(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethodAdapter methodNode) {
     // only track char or byte
     if (!FieldValue.shouldTrack(storedValue.getType(), storeInsn)) {
       return;

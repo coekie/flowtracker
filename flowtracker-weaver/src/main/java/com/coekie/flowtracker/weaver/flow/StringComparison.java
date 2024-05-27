@@ -30,17 +30,16 @@ import org.objectweb.asm.tree.MethodInsnNode;
  * practice contain Strings, doesn't fix identityHashCode,....
  * And it also causes false positives" it makes all Strings with equal contents "==" each other.
  */
-public class StringComparison extends Store {
+public class StringComparison extends Instrumentable {
   private final JumpInsnNode insn;
   private final boolean firstIsString;
 
-  StringComparison(JumpInsnNode insn, FlowFrame frame, boolean firstIsString) {
-    super(frame);
+  StringComparison(JumpInsnNode insn, boolean firstIsString) {
     this.insn = insn;
     this.firstIsString = firstIsString;
   }
 
-  void insertTrackStatements(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethodAdapter methodNode) {
     InsnList toInsert = new InsnList();
     methodNode.addComment(toInsert, "StringComparison.insertTrackStatements");
 

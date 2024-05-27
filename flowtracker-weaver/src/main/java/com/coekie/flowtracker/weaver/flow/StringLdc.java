@@ -24,22 +24,18 @@ import org.objectweb.asm.tree.MethodInsnNode;
 
 /**
  * Handles instrumentation of an LDC instruction that loads a String.
- * <p>
- * This isn't really a "store", it's not storing a value, but the instrumentation works the same as
- * instrumentation of storing of values in {@link FlowAnalyzingTransformer}, so this extends
- * {@link Store} to make that work.
- * (Perhaps we should rename "Store", or extract a common superclass for real Stores and this).
  */
-public class StringLdc extends Store {
+public class StringLdc extends Instrumentable {
   private final LdcInsnNode insn;
+  private final FlowFrame frame;
 
   StringLdc(LdcInsnNode insn, FlowFrame frame) {
-    super(frame);
     this.insn = insn;
+    this.frame = frame;
   }
 
   @Override
-  void insertTrackStatements(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethodAdapter methodNode) {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
     if (constantsTransformation.canBreakStringInterning(methodNode)) {
       String value = (String) insn.cst;

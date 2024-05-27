@@ -181,17 +181,17 @@ public class FlowAnalyzerTest {
 
   static class TestAnalysisListener extends AnalysisListener {
     Frame<FlowValue>[] frames;
-    List<Store> stores;
+    List<Instrumentable> toInstrument;
     Throwable error;
 
     @Override
     void analysed(FlowMethodAdapter flowMethodAdapter, Frame<FlowValue>[] frames,
-        List<Store> stores) {
+        List<Instrumentable> toInstrument) {
       if (flowMethodAdapter.name.equals("<init>")) {
         return;
       }
       this.frames = frames;
-      this.stores = stores;
+      this.toInstrument = toInstrument;
     }
 
     @Override
@@ -203,7 +203,7 @@ public class FlowAnalyzerTest {
       if (error != null) {
         throw new AssertionError("Analysis failed", error);
       }
-      if (frames == null || stores == null) {
+      if (frames == null || toInstrument == null) {
         throw new AssertionError("Analysis did not succeed");
       }
     }

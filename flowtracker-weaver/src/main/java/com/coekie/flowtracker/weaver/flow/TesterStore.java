@@ -35,7 +35,7 @@ class TesterStore extends Store {
     this.storedValue = getStackFromTop(valueStackIndexFromTop);
   }
 
-  void insertTrackStatements(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethodAdapter methodNode) {
     if (storedValue.isTrackable()) { // if we know where the value we are storing came from
       storedValue.ensureTracked();
 

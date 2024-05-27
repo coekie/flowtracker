@@ -97,7 +97,7 @@ public class StringConcatenation extends Store {
   }
 
   @Override
-  void insertTrackStatements(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethodAdapter methodNode) {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
 
     // StringConcatFactory was introduced in jdk 9, condy in 11. for simplicity, we don't handle

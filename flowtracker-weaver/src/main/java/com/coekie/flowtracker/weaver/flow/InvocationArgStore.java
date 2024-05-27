@@ -69,7 +69,7 @@ public class InvocationArgStore extends Store {
   }
 
   @Override
-  void insertTrackStatements(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethodAdapter methodNode) {
     if (!anyArgIsTrackable()) {
       return;
     }

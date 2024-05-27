@@ -16,17 +16,13 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
-
 /** Represents an instruction that stores a (possibly tracked) value in an object. */
-abstract class Store {
+abstract class Store extends Instrumentable {
   final FlowFrame frame;
 
   Store(FlowFrame frame) {
     this.frame = frame;
   }
-
-  abstract void insertTrackStatements(FlowMethodAdapter methodNode);
 
   FlowValue getStackFromTop(int indexFromTop) {
     FlowValue value = frame.getStack(frame.getStackSize() - indexFromTop - 1);

@@ -37,7 +37,7 @@ class ArrayStore extends Store {
     this.hookMethod = hookMethod;
   }
 
-  void insertTrackStatements(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethodAdapter methodNode) {
     InsnList toInsert = new InsnList();
 
     methodNode.addComment(toInsert, "begin ArrayStore.insertTrackStatements: "

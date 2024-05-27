@@ -159,18 +159,18 @@ public class FlowAnalyzingTransformer implements Transformer {
         return;
       }
 
-      List<Store> stores = new ArrayList<>();
+      List<Instrumentable> toInstrument = new ArrayList<>();
 
       for (int i = 0; i < instructions.size(); i++) {
         AbstractInsnNode insn = instructions.get(i);
         FlowFrame frame = (FlowFrame) frames[i];
         switch (insn.getOpcode()) {
           case Opcodes.CASTORE:
-            stores.add(ArrayStore.createCharArrayStore((InsnNode) insn, frame));
+            toInstrument.add(ArrayStore.createCharArrayStore((InsnNode) insn, frame));
             break;
           case Opcodes.BASTORE:
             if (Types.BYTE_ARRAY.equals(frame.getStack(frame.getStackSize() - 3).getType())) {
-              stores.add(ArrayStore.createByteArrayStore((InsnNode) insn, frame));
+              toInstrument.add(ArrayStore.createByteArrayStore((InsnNode) insn, frame));
             }
             break;
           case Opcodes.IASTORE:
@@ -180,7 +180,7 @@ public class FlowAnalyzingTransformer implements Transformer {
             // (heisenbug).
             // ideally we'd only do this for arrays that deal with codepoints, which are very rare.
             if (!owner.startsWith("java/lang") && !owner.startsWith("java/util")) {
-              stores.add(ArrayStore.createIntArrayStore((InsnNode) insn, frame));
+              toInstrument.add(ArrayStore.createIntArrayStore((InsnNode) insn, frame));
             }
             break;
           case Opcodes.INVOKEVIRTUAL:
@@ -206,40 +206,40 @@ public class FlowAnalyzingTransformer implements Transformer {
               mInsn.setOpcode(Opcodes.INVOKESTATIC);
             } else if (mInsn.owner.equals("com/coekie/flowtracker/test/FlowTester")) {
               if (mInsn.name.equals("assertTrackedValue")) {
-                stores.add(new TesterStore(mInsn, frame, 3));
+                toInstrument.add(new TesterStore(mInsn, frame, 3));
               } else if (mInsn.name.equals("assertIsTheTrackedValue")
                   || mInsn.name.equals("getCharSourceTracker")
                   || mInsn.name.equals("getCharSourcePoint")
                   || mInsn.name.equals("getByteSourceTracker")
                   || mInsn.name.equals("getByteSourcePoint")
                   || mInsn.name.equals("getIntSourcePoint")) {
-                stores.add(new TesterStore(mInsn, frame, 0));
+                toInstrument.add(new TesterStore(mInsn, frame, 0));
               }
             } else if (InvocationArgStore.shouldInstrumentInvocationArg(mInsn.owner, mInsn.name,
                 mInsn.desc)) {
-              stores.add(new InvocationArgStore(mInsn, frame,
+              toInstrument.add(new InvocationArgStore(mInsn, frame,
                   // next frame, might contain the return value of the call
                   i + 1 < frames.length ? (FlowFrame) frames[i + 1] : null));
             }
             break;
           case Opcodes.IRETURN:
             if (InvocationReturnValue.shouldInstrumentInvocation(name, desc)) {
-              stores.add(new InvocationReturnStore((InsnNode) insn, frame, invocation));
+              toInstrument.add(new InvocationReturnStore((InsnNode) insn, frame, invocation));
             }
             break;
           case Opcodes.PUTFIELD:
-            stores.add(new FieldStore((FieldInsnNode) insn, frame));
+            toInstrument.add(new FieldStore((FieldInsnNode) insn, frame));
             break;
           case Opcodes.LDC:
             LdcInsnNode ldcInsn = (LdcInsnNode) insn;
             if (ldcInsn.cst instanceof String) {
-              stores.add(new StringLdc(ldcInsn, frame));
+              toInstrument.add(new StringLdc(ldcInsn, frame));
             }
             break;
           case Opcodes.INVOKEDYNAMIC:
             InvokeDynamicInsnNode idInsn = (InvokeDynamicInsnNode) insn;
             if (idInsn.bsm.equals(StringConcatenation.realMakeConcatWithConstants)) {
-              stores.add(new StringConcatenation(idInsn, frame));
+              toInstrument.add(new StringConcatenation(idInsn, frame));
             }
             break;
           case Opcodes.IF_ACMPEQ:
@@ -249,16 +249,16 @@ public class FlowAnalyzingTransformer implements Transformer {
             boolean secondIsString =
                 Types.STRING.equals(frame.getStack(frame.getStackSize() - 1).getType());
             if ((firstIsString || secondIsString) && !owner.startsWith("java/lang/")) {
-              stores.add(new StringComparison((JumpInsnNode) insn, frame, firstIsString));
+              toInstrument.add(new StringComparison((JumpInsnNode) insn, firstIsString));
             }
             break;
         }
       }
 
-      listener.analysed(this, frames, stores);
+      listener.analysed(this, frames, toInstrument);
 
-      for (Store store : stores) {
-        store.insertTrackStatements(this);
+      for (Instrumentable instrumentable : toInstrument) {
+        instrumentable.instrument(this);
       }
 
       this.instructions.insert(intro);
@@ -337,7 +337,7 @@ public class FlowAnalyzingTransformer implements Transformer {
 
   public static class AnalysisListener {
     void analysed(FlowMethodAdapter flowMethodAdapter, Frame<FlowValue>[] frames,
-        List<Store> stores) {
+        List<Instrumentable> toInstrument) {
     }
 
     void error(Throwable t) {
