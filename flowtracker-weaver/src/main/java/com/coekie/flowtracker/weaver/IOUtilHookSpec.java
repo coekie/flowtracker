@@ -23,7 +23,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 /** Special arguments for {@link com.coekie.flowtracker.hook.IOUtilHook} */
-public class IOUtilHookSpec {
+class IOUtilHookSpec {
   /** Positions of ByteBuffers passed into a method as an array, on method enter */
   @SuppressWarnings("unused") // used in IOUtilHook
   static final HookArgument BUFFER_POSITIONS = spec -> new OnEnterHookArgumentInstance(

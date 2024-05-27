@@ -31,7 +31,7 @@ import org.objectweb.asm.tree.analysis.Frame;
  * The passing of a value as argument into the invocation of another method that may be instrumented
  * with {@link Invocation}.
  */
-public class InvocationArgStore extends Store {
+class InvocationArgStore extends Store {
   // Two reasons we don't want to instrument arguments beyond this:
   // - the ICONST_0 + i doesn't work for higher ones (we could fix that by using LdcInsNode)
   // - in Invocation we have getArg0Tracker/getArg0Index methods up to arg 5

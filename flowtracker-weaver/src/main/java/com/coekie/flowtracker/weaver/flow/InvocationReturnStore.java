@@ -25,7 +25,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /** The returning of a value of a method that may be instrumented with {@link Invocation} */
-public class InvocationReturnStore extends Store {
+class InvocationReturnStore extends Store {
   private final InsnNode returnInsn;
   private final InvocationIncomingTransformation invocation;
   private final FlowValue returnedValue = getStackFromTop(0);

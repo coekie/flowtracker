@@ -43,7 +43,7 @@ import org.objectweb.asm.tree.InvokeDynamicInsnNode;
  *     passed into other method calls (but it's implemented very differently).
  * </ul>
  */
-public class StringConcatenation extends Store {
+class StringConcatenation extends Store {
   /**
    * Handle for {@link
    * StringConcatFactory#makeConcatWithConstants(Lookup, String, MethodType, String, Object...)}

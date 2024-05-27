@@ -26,7 +26,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 /**
  * Handles instrumentation of an LDC instruction that loads a String.
  */
-public class StringLdc extends Instrumentable {
+class StringLdc extends Instrumentable {
   private final LdcInsnNode insn;
   private final FlowFrame frame;
 

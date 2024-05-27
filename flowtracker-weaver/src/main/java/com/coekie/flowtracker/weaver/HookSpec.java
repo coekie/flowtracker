@@ -27,7 +27,7 @@ import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-public class HookSpec {
+class HookSpec {
   interface HookArgument {
     HookArgumentInstance applyTo(HookSpec hookSpec);
   }

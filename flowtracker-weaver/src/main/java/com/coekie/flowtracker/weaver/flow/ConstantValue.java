@@ -28,7 +28,7 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-public class ConstantValue extends TrackableValue {
+class ConstantValue extends TrackableValue {
   private final int value;
   private ClassConstant constant;
 

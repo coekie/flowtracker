@@ -29,7 +29,7 @@ import org.objectweb.asm.tree.InsnNode;
  * A value that can come from more than one source due to control flow (e.g. due to if-statements or
  * ternary operator).
  */
-public class MergedValue extends FlowValue {
+class MergedValue extends FlowValue {
   final FlowFrame mergingFrame;
   // NICE: we could optimize this for small sets, like in SourceInterpreter with SmallSet
   final Set<FlowValue> values;
