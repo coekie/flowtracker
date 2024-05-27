@@ -43,7 +43,7 @@ import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
 public class FlowAnalyzingTransformer implements Transformer {
-  private static final Logger logger = new Logger("AsmTransformer");
+  private static final Logger logger = new Logger("FlowAnalyzingTransformer");
 
   private final Commentator commentator;
   private final AnalysisListener listener;
