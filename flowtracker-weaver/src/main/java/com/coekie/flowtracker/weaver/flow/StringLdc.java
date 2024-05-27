@@ -17,6 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -29,7 +30,7 @@ public class StringLdc extends Instrumentable {
   private final LdcInsnNode insn;
   private final FlowFrame frame;
 
-  StringLdc(LdcInsnNode insn, FlowFrame frame) {
+  private StringLdc(LdcInsnNode insn, FlowFrame frame) {
     this.insn = insn;
     this.frame = frame;
   }
@@ -61,6 +62,13 @@ public class StringLdc extends Instrumentable {
         methodNode.instructions.insert(insn, toInsert);
         methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
       }
+    }
+  }
+
+  /** Add a {@link StringLdc} to `toInstrument` when we need to instrument it */
+  static void analyze(List<Instrumentable> toInstrument, LdcInsnNode insn, FlowFrame frame) {
+    if (insn.cst instanceof String) {
+      toInstrument.add(new StringLdc(insn, frame));
     }
   }
 }

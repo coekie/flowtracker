@@ -20,7 +20,6 @@ import com.coekie.flowtracker.util.Config;
 import com.coekie.flowtracker.util.Logger;
 import com.coekie.flowtracker.weaver.ClassFilter;
 import com.coekie.flowtracker.weaver.Transformer;
-import com.coekie.flowtracker.weaver.Types;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -166,91 +165,42 @@ public class FlowAnalyzingTransformer implements Transformer {
         FlowFrame frame = (FlowFrame) frames[i];
         switch (insn.getOpcode()) {
           case Opcodes.CASTORE:
-            toInstrument.add(ArrayStore.createCharArrayStore((InsnNode) insn, frame));
+            ArrayStore.analyzeCharArrayStore(toInstrument, (InsnNode) insn, frame);
             break;
           case Opcodes.BASTORE:
-            if (Types.BYTE_ARRAY.equals(frame.getStack(frame.getStackSize() - 3).getType())) {
-              toInstrument.add(ArrayStore.createByteArrayStore((InsnNode) insn, frame));
-            }
+            ArrayStore.analyzeByteArrayStore(toInstrument, (InsnNode) insn, frame);
             break;
           case Opcodes.IASTORE:
-            // dirty heuristic for when we want to instrument array stores.
-            // this is necessary because of some bootstrapping problem leaving to StackOverflowError
-            // in tests, but only if they're being ran from maven, and not if you attach a debugger
-            // (heisenbug).
-            // ideally we'd only do this for arrays that deal with codepoints, which are very rare.
-            if (!owner.startsWith("java/lang") && !owner.startsWith("java/util")) {
-              toInstrument.add(ArrayStore.createIntArrayStore((InsnNode) insn, frame));
-            }
+            ArrayStore.analyzeIntArrayStore(toInstrument, (InsnNode) insn, frame, owner);
             break;
           case Opcodes.INVOKEVIRTUAL:
           case Opcodes.INVOKESTATIC:
           case Opcodes.INVOKESPECIAL:
           case Opcodes.INVOKEINTERFACE:
             MethodInsnNode mInsn = (MethodInsnNode) insn;
-            if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
-                && "(Ljava/lang/Object;ILjava/lang/Object;II)V".equals(mInsn.desc)) {
-              // if it is a copy from char[] to char[] or from byte[] to byte[]
-              Type sourceType = frame.getStack(frame.getStackSize() - 5).getType();
-              Type destType = frame.getStack(frame.getStackSize() - 3).getType();
-              if ((Types.CHAR_ARRAY.equals(sourceType) && Types.CHAR_ARRAY.equals(destType))
-                  || (Types.BYTE_ARRAY.equals(sourceType) && Types.BYTE_ARRAY.equals(destType))) {
-                // replace it with a call to our hook instead
-                mInsn.owner = "com/coekie/flowtracker/hook/SystemHook";
-              }
-            } else if ("clone".equals(mInsn.name)
-                && (mInsn.owner.equals("[C") || mInsn.owner.equals("[B")
-                || mInsn.owner.equals("[I"))) {
-              mInsn.desc = '(' + mInsn.owner + ')' + mInsn.owner;
-              mInsn.owner = "com/coekie/flowtracker/hook/ArrayHook";
-              mInsn.setOpcode(Opcodes.INVOKESTATIC);
-            } else if (mInsn.owner.equals("com/coekie/flowtracker/test/FlowTester")) {
-              if (mInsn.name.equals("assertTrackedValue")) {
-                toInstrument.add(new TesterStore(mInsn, frame, 3));
-              } else if (mInsn.name.equals("assertIsTheTrackedValue")
-                  || mInsn.name.equals("getCharSourceTracker")
-                  || mInsn.name.equals("getCharSourcePoint")
-                  || mInsn.name.equals("getByteSourceTracker")
-                  || mInsn.name.equals("getByteSourcePoint")
-                  || mInsn.name.equals("getIntSourcePoint")) {
-                toInstrument.add(new TesterStore(mInsn, frame, 0));
-              }
-            } else if (InvocationArgStore.shouldInstrumentInvocationArg(mInsn.owner, mInsn.name,
-                mInsn.desc)) {
-              toInstrument.add(new InvocationArgStore(mInsn, frame,
-                  // next frame, might contain the return value of the call
-                  i + 1 < frames.length ? (FlowFrame) frames[i + 1] : null));
-            }
-            break;
-          case Opcodes.IRETURN:
-            if (InvocationReturnValue.shouldInstrumentInvocation(name, desc)) {
-              toInstrument.add(new InvocationReturnStore((InsnNode) insn, frame, invocation));
-            }
-            break;
-          case Opcodes.PUTFIELD:
-            toInstrument.add(new FieldStore((FieldInsnNode) insn, frame));
-            break;
-          case Opcodes.LDC:
-            LdcInsnNode ldcInsn = (LdcInsnNode) insn;
-            if (ldcInsn.cst instanceof String) {
-              toInstrument.add(new StringLdc(ldcInsn, frame));
+            boolean instrumented =
+                ArrayCopyCall.analyze(toInstrument, mInsn, frame)
+              || ArrayCloneCall.analyze(toInstrument, mInsn)
+              || TesterStore.analyze(toInstrument, mInsn, frame);
+            if (!instrumented) { // don't instrument twice for invocations already handled above
+              InvocationArgStore.analyze(toInstrument, mInsn, frame, frames, i);
             }
             break;
           case Opcodes.INVOKEDYNAMIC:
-            InvokeDynamicInsnNode idInsn = (InvokeDynamicInsnNode) insn;
-            if (idInsn.bsm.equals(StringConcatenation.realMakeConcatWithConstants)) {
-              toInstrument.add(new StringConcatenation(idInsn, frame));
-            }
+            StringConcatenation.analyze(toInstrument, (InvokeDynamicInsnNode) insn, frame);
+            break;
+          case Opcodes.IRETURN:
+            InvocationReturnStore.analyze(toInstrument, (InsnNode) insn, frame, this);
+            break;
+          case Opcodes.PUTFIELD:
+            FieldStore.analyze(toInstrument, (FieldInsnNode) insn, frame);
+            break;
+          case Opcodes.LDC:
+            StringLdc.analyze(toInstrument, (LdcInsnNode) insn, frame);
             break;
           case Opcodes.IF_ACMPEQ:
           case Opcodes.IF_ACMPNE:
-            boolean firstIsString =
-                Types.STRING.equals(frame.getStack(frame.getStackSize() - 2).getType());
-            boolean secondIsString =
-                Types.STRING.equals(frame.getStack(frame.getStackSize() - 1).getType());
-            if ((firstIsString || secondIsString) && !owner.startsWith("java/lang/")) {
-              toInstrument.add(new StringComparison((JumpInsnNode) insn, firstIsString));
-            }
+            StringComparison.analyze(toInstrument, (JumpInsnNode) insn, frame, owner);
             break;
         }
       }
@@ -331,6 +281,7 @@ public class FlowAnalyzingTransformer implements Transformer {
     }
   }
 
+  @Override
   public ClassVisitor transform(String className, ClassVisitor cv) {
     return new FlowClassAdapter(className, cv);
   }

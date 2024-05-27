@@ -16,7 +16,9 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
+import com.coekie.flowtracker.weaver.Types;
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -34,7 +36,7 @@ public class StringComparison extends Instrumentable {
   private final JumpInsnNode insn;
   private final boolean firstIsString;
 
-  StringComparison(JumpInsnNode insn, boolean firstIsString) {
+  private StringComparison(JumpInsnNode insn, boolean firstIsString) {
     this.insn = insn;
     this.firstIsString = firstIsString;
   }
@@ -61,6 +63,18 @@ public class StringComparison extends Instrumentable {
       insn.setOpcode(Opcodes.IFEQ);
     } else {
       throw new IllegalStateException();
+    }
+  }
+
+  /** Add a {@link StringComparison} to `toInstrument` when we need to instrument it */
+  static void analyze(List<Instrumentable> toInstrument, JumpInsnNode insn, FlowFrame frame,
+      String owner) {
+    boolean firstIsString =
+        Types.STRING.equals(frame.getStack(frame.getStackSize() - 2).getType());
+    boolean secondIsString =
+        Types.STRING.equals(frame.getStack(frame.getStackSize() - 1).getType());
+    if ((firstIsString || secondIsString) && !owner.startsWith("java/lang/")) {
+      toInstrument.add(new StringComparison(insn, firstIsString));
     }
   }
 }

@@ -17,6 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import java.util.List;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 
@@ -29,7 +30,7 @@ class TesterStore extends Store {
   private final MethodInsnNode invokeInsn;
   private final FlowValue storedValue;
 
-  TesterStore(MethodInsnNode invokeInsn, FlowFrame frame, int valueStackIndexFromTop) {
+  private TesterStore(MethodInsnNode invokeInsn, FlowFrame frame, int valueStackIndexFromTop) {
     super(frame);
     this.invokeInsn = invokeInsn;
     this.storedValue = getStackFromTop(valueStackIndexFromTop);
@@ -57,5 +58,24 @@ class TesterStore extends Store {
 
       methodNode.instructions.insertBefore(invokeInsn, toInsert);
     }
+  }
+
+  /** Add a {@link TesterStore} to `toInstrument` when we need to instrument it */
+  static boolean analyze(List<Instrumentable> toInstrument, MethodInsnNode mInsn, FlowFrame frame) {
+    if (mInsn.owner.equals("com/coekie/flowtracker/test/FlowTester")) {
+      if (mInsn.name.equals("assertTrackedValue")) {
+        toInstrument.add(new TesterStore(mInsn, frame, 3));
+        return true;
+      } else if (mInsn.name.equals("assertIsTheTrackedValue")
+          || mInsn.name.equals("getCharSourceTracker")
+          || mInsn.name.equals("getCharSourcePoint")
+          || mInsn.name.equals("getByteSourceTracker")
+          || mInsn.name.equals("getByteSourcePoint")
+          || mInsn.name.equals("getIntSourcePoint")) {
+        toInstrument.add(new TesterStore(mInsn, frame, 0));
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -18,6 +18,7 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.tracker.FieldRepository;
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -31,7 +32,7 @@ class FieldStore extends Store {
   private final FieldInsnNode storeInsn;
   private final FlowValue storedValue = getStackFromTop(0);
 
-  FieldStore(FieldInsnNode storeInsn, FlowFrame frame) {
+  private FieldStore(FieldInsnNode storeInsn, FlowFrame frame) {
     super(frame);
     this.storeInsn = storeInsn;
   }
@@ -67,5 +68,10 @@ class FieldStore extends Store {
     methodNode.addComment(toInsert, "end FieldStore.insertTrackStatements");
 
     methodNode.instructions.insertBefore(storeInsn, toInsert);
+  }
+
+  /** Add a {@link FieldStore} to `toInstrument` when we need to instrument it */
+  static void analyze(List<Instrumentable> toInstrument, FieldInsnNode insn, FlowFrame frame) {
+    toInstrument.add(new FieldStore(insn, frame));
   }
 }

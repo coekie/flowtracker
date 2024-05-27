@@ -18,6 +18,7 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -29,7 +30,8 @@ public class InvocationReturnStore extends Store {
   private final InvocationIncomingTransformation invocation;
   private final FlowValue returnedValue = getStackFromTop(0);
 
-  InvocationReturnStore(InsnNode returnInsn, FlowFrame frame, InvocationIncomingTransformation invocation) {
+  private InvocationReturnStore(InsnNode returnInsn, FlowFrame frame,
+      InvocationIncomingTransformation invocation) {
     super(frame);
     this.returnInsn = returnInsn;
     this.invocation = invocation;
@@ -58,6 +60,14 @@ public class InvocationReturnStore extends Store {
       methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
 
       methodNode.instructions.insertBefore(returnInsn, toInsert);
+    }
+  }
+
+  /** Add a {@link InvocationReturnStore} to `toInstrument` when we need to instrument it */
+  static void analyze(List<Instrumentable> toInstrument, InsnNode insn, FlowFrame frame,
+      FlowMethodAdapter method) {
+    if (InvocationReturnValue.shouldInstrumentInvocation(method.name, method.desc)) {
+      toInstrument.add(new InvocationReturnStore(insn, frame, method.invocation));
     }
   }
 }

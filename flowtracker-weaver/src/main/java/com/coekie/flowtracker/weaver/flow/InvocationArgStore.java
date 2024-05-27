@@ -20,10 +20,12 @@ import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.analysis.Frame;
 
 /**
  * The passing of a value as argument into the invocation of another method that may be instrumented
@@ -40,7 +42,7 @@ public class InvocationArgStore extends Store {
   private final FlowValue[] args;
   private final InvocationOutgoingTransformation transformation;
 
-  InvocationArgStore(MethodInsnNode mInsn, FlowFrame frame, FlowFrame nextFrame) {
+  private InvocationArgStore(MethodInsnNode mInsn, FlowFrame frame, FlowFrame nextFrame) {
     super(frame);
     boolean[] toInstrument = requireNonNull(argsToInstrument(mInsn.owner, mInsn.name, mInsn.desc));
     this.args = new FlowValue[toInstrument.length];
@@ -160,5 +162,15 @@ public class InvocationArgStore extends Store {
       }
     }
     return any ? result : null;
+  }
+
+  /** Add a {@link InvocationArgStore} to `toInstrument` when we need to instrument it */
+  static void analyze(List<Instrumentable> toInstrument, MethodInsnNode mInsn, FlowFrame frame,
+      Frame<FlowValue>[] frames, int insnIndex) {
+    if (InvocationArgStore.shouldInstrumentInvocationArg(mInsn.owner, mInsn.name, mInsn.desc)) {
+      toInstrument.add(new InvocationArgStore(mInsn, frame,
+          // next frame, might contain the return value of the call
+          insnIndex + 1 < frames.length ? (FlowFrame) frames[insnIndex + 1] : null));
+    }
   }
 }

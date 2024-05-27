@@ -22,6 +22,7 @@ import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAda
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.StringConcatFactory;
+import java.util.List;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -75,7 +76,7 @@ public class StringConcatenation extends Store {
    */
   private final FlowValue[] trackableCharArgs;
 
-  StringConcatenation(InvokeDynamicInsnNode insn, FlowFrame frame) {
+  private StringConcatenation(InvokeDynamicInsnNode insn, FlowFrame frame) {
     super(frame);
     this.insn = insn;
 
@@ -148,6 +149,14 @@ public class StringConcatenation extends Store {
       // copy over other constants (the "Object... constants" of makeConcatWithConstants)
       System.arraycopy(insn.bsmArgs, 1, newBsmArgs, 2, insn.bsmArgs.length - 1);
       insn.bsmArgs = newBsmArgs;
+    }
+  }
+
+  /** Add a {@link StringConcatenation} to `toInstrument` when we need to instrument it */
+  static void analyze(List<Instrumentable> toInstrument, InvokeDynamicInsnNode idInsn,
+      FlowFrame frame) {
+    if (idInsn.bsm.equals(StringConcatenation.realMakeConcatWithConstants)) {
+      toInstrument.add(new StringConcatenation(idInsn, frame));
     }
   }
 }
