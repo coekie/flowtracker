@@ -16,34 +16,38 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.hook.ArrayHook;
+import com.coekie.flowtracker.hook.ClassHook;
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /**
- * A call to .clone() on a primitive array, that we replace by a call to {@link ArrayHook}
+ * A call to {@link Class#getName()} that we can replace with a call to {@link ClassHook}
  */
-class ArrayCloneCall extends Instrumentable {
+class ClassNameCall extends Instrumentable {
   private final MethodInsnNode mInsn;
 
-  private ArrayCloneCall(MethodInsnNode mInsn) {
+  private ClassNameCall(MethodInsnNode mInsn) {
     this.mInsn = mInsn;
   }
 
   @Override
   void instrument(FlowMethodAdapter methodNode) {
-    mInsn.desc = '(' + mInsn.owner + ')' + mInsn.owner;
-    mInsn.owner = "com/coekie/flowtracker/hook/ArrayHook";
-    mInsn.setOpcode(Opcodes.INVOKESTATIC);
+    ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
+    if (constantsTransformation.canBreakStringInterning()) {
+      mInsn.desc = "(Ljava/lang/Class;)Ljava/lang/String;";
+      mInsn.owner = "com/coekie/flowtracker/hook/ClassHook";
+      mInsn.setOpcode(Opcodes.INVOKESTATIC);
+    }
   }
 
-  /** Add a {@link ArrayCloneCall} to `toInstrument` when we need to instrument it */
+  /** Add a {@link ClassNameCall} to `toInstrument` when we need to instrument it */
   static boolean analyze(List<Instrumentable> toInstrument, MethodInsnNode mInsn) {
-    if ("clone".equals(mInsn.name)
-        && (mInsn.owner.equals("[C") || mInsn.owner.equals("[B") || mInsn.owner.equals("[I"))) {
-      toInstrument.add(new ArrayCloneCall(mInsn));
+    if ("java/lang/Class".equals(mInsn.owner)
+        && "getName".equals(mInsn.name)
+        && "()Ljava/lang/String;".equals(mInsn.desc)) {
+      toInstrument.add(new ClassNameCall(mInsn));
       return true;
     }
     return false;

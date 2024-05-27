@@ -41,7 +41,8 @@ class ArrayCopyCall extends Instrumentable {
 
   /** Add a {@link ArrayCopyCall} to `toInstrument` when we need to instrument it */
   static boolean analyze(List<Instrumentable> toInstrument, MethodInsnNode mInsn, FlowFrame frame) {
-    if ("java/lang/System".equals(mInsn.owner) && "arraycopy".equals(mInsn.name)
+    if ("java/lang/System".equals(mInsn.owner)
+        && "arraycopy".equals(mInsn.name)
         && "(Ljava/lang/Object;ILjava/lang/Object;II)V".equals(mInsn.desc)) {
       // if it is a copy from char[] to char[] or from byte[] to byte[]
       Type sourceType = frame.getStack(frame.getStackSize() - 5).getType();

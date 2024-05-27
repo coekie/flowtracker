@@ -89,8 +89,12 @@ public class StringHook {
   }
 
   public static String constantString(String value, int classId, int offset) {
+    return constantString(value, ClassOriginTracker.get(classId), offset);
+  }
+
+  public static String constantString(String value, ClassOriginTracker tracker, int offset) {
     String str = new String(value.getBytes());
-    setStringSource(str, ClassOriginTracker.get(classId), offset);
+    setStringSource(str, tracker, offset);
     return str;
   }
 
@@ -100,7 +104,7 @@ public class StringHook {
    * the tracking of where it came from.
    */
   static void setStringSource(String str, Tracker sourceTracker, int sourceIndex) {
-    byte[] valueArray = (byte[]) getValueArray(str);
+    byte[] valueArray = getValueArray(str);
     DefaultTracker tracker = new DefaultTracker();
     tracker.setSource(0, valueArray.length, sourceTracker, sourceIndex);
     TrackerRepository.forceSetTracker(valueArray, tracker);

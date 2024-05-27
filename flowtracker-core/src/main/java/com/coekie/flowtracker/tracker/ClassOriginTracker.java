@@ -31,6 +31,14 @@ import java.util.List;
 public class ClassOriginTracker extends OriginTracker implements CharContentTracker {
   private static final List<ClassOriginTracker> trackers = new ArrayList<>();
 
+  /** Cache for finding ClassOriginTracker from a java.lang.Class */
+  private static final ClassValue<ClassOriginTracker> byClassCache = new ClassValue<>() {
+    @Override
+    protected ClassOriginTracker computeValue(Class<?> type) {
+      return getUncached(type);
+    }
+  };
+
   public final int classId;
   private final StringBuilder content = new StringBuilder();
 
@@ -48,6 +56,23 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
 
   public static ClassOriginTracker get(int classId) {
     return trackers.get(classId);
+  }
+
+  public static ClassOriginTracker get(Class<?> clazz) {
+    return byClassCache.get(clazz);
+  }
+
+  private static ClassOriginTracker getUncached(Class<?> clazz) {
+    String internalName = clazz.getName().replace('.', '/');
+    List<Tracker> trackers = TrackerTree.CLASS.pathNode(internalName).trackers();
+    if (trackers.isEmpty()) {
+      return registerClass(internalName);
+    } else {
+      // TODO if there are multiple classes with the same name, from different ClassLoaders, then
+      //   we should pick the right one. To do that we'd have to pass along the ClassLoader in
+      //   transformers, ConstantsTransformation and friends. For now we just don't care.
+      return (ClassOriginTracker) trackers.get(0);
+    }
   }
 
   @Override

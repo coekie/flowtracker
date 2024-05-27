@@ -13,7 +13,6 @@ import com.coekie.flowtracker.hook.StringConcatFactoryHook;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
-import com.coekie.flowtracker.tracker.TrackerSnapshot.Part;
 import java.lang.invoke.StringConcatFactory;
 import org.junit.Test;
 
@@ -121,10 +120,7 @@ public class StringTest {
     String str = ldcString();
     TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
     assertThat(snapshot.getParts()).hasSize(1);
-    Part part = snapshot.getParts().get(0);
-    ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
-    assertThat(sourceTracker.getContent()
-        .subSequence(part.sourceIndex, part.sourceIndex + part.length))
+    assertThat(getClassOriginTrackerContent(snapshot.getParts().get(0)))
         .isEqualTo("test-ldc");
     assertThat(ldcString()).isSameInstanceAs(str);
   }
@@ -152,7 +148,7 @@ public class StringTest {
    * Extract the contents of the ClassOriginTracker that the give part points to. This is to
    * validate that the source that the part points to really contains the expected value.
    */
-  private String getClassOriginTrackerContent(TrackerSnapshot.Part part) {
+  static String getClassOriginTrackerContent(TrackerSnapshot.Part part) {
     assertThat(part.source).isInstanceOf(ClassOriginTracker.class);
     ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
     return sourceTracker.getContent()
