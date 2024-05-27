@@ -90,8 +90,8 @@ class ConstantsTransformation {
     return tracker().classId;
   }
 
-  boolean canBreakStringInterning(FlowMethodAdapter methodNode) {
-    return breakStringInterningFilter.include(methodNode.owner);
+  boolean canBreakStringInterning() {
+    return breakStringInterningFilter.include(className);
   }
 
   /** Human-friendly String representation of a method signature */

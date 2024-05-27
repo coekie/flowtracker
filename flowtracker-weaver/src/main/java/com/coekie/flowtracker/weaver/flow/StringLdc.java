@@ -38,7 +38,7 @@ public class StringLdc extends Instrumentable {
   @Override
   void instrument(FlowMethodAdapter methodNode) {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
-    if (constantsTransformation.canBreakStringInterning(methodNode)) {
+    if (constantsTransformation.canBreakStringInterning()) {
       String value = (String) insn.cst;
       int offset = constantsTransformation.trackConstantString(methodNode, value);
       // we prefer to use constant-dynamic, that is replacing just the LDC value. That is better for
