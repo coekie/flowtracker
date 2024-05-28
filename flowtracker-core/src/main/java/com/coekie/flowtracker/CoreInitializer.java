@@ -41,10 +41,10 @@ public class CoreInitializer {
     Logger.initLogging(config);
     RecursionChecker.initialize(config);
     ClassLoaderHook.initialize(config);
+    ensureInitialized();
   }
 
   public static void initialize(Config config, JarFile agentJar) {
-    ensureInitialized();
     Tracker.initialize(config);
     ZipFileHook.initialize(config, agentJar);
     SystemHook.initialize(config);

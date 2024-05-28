@@ -311,6 +311,7 @@ public class FlowTransformer implements Transformer {
           && !owner.startsWith("java/lang/invoke")
           && !owner.startsWith("java/lang/Class")
           && !owner.startsWith("java/lang/String")
+          && !owner.equals("java/lang/Integer")
           && !owner.startsWith("sun/invoke")
           && !owner.startsWith("jdk/internal/org/objectweb/asm")
           // for testing
