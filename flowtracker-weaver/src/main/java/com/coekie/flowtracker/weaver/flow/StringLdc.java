@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
@@ -36,7 +36,7 @@ class StringLdc extends Instrumentable {
   }
 
   @Override
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
     if (constantsTransformation.canBreakStringInterning()) {
       String value = (String) insn.cst;

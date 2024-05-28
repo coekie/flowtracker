@@ -11,7 +11,7 @@ import static org.objectweb.asm.Opcodes.RETURN;
 
 import com.coekie.flowtracker.util.Config;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.AnalysisListener;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
@@ -101,7 +101,7 @@ public class FlowAnalyzerTest {
     assertThat(v.getType().getSort()).isEqualTo(Type.LONG);
   }
 
-  // template for a test case that can be used with output of FlowMethodAdapter.dumpAsm, to test
+  // template for a test case that can be used with output of FlowMethod.dumpAsm, to test
   // analysis/transformation of extracted bytecode.
   @Test public void testAsm() {
     TestAnalysisListener listener = new TestAnalysisListener();
@@ -185,9 +185,9 @@ public class FlowAnalyzerTest {
     Throwable error;
 
     @Override
-    void analysed(FlowMethodAdapter flowMethodAdapter, Frame<FlowValue>[] frames,
+    void analysed(FlowMethod method, Frame<FlowValue>[] frames,
         List<Instrumentable> toInstrument) {
-      if (flowMethodAdapter.name.equals("<init>")) {
+      if (method.name.equals("<init>")) {
         return;
       }
       this.frames = frames;

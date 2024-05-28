@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.weaver.Types;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
@@ -41,7 +41,7 @@ class StringComparison extends Instrumentable {
     this.firstIsString = firstIsString;
   }
 
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     InsnList toInsert = new InsnList();
     methodNode.addComment(toInsert, "StringComparison.insertTrackStatements");
 

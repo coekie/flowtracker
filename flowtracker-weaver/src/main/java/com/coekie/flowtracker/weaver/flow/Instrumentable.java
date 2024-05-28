@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 
 /**
  * A place in the code (an instruction) that can be instrumented.
@@ -25,5 +25,5 @@ import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
  *
  */
 abstract class Instrumentable {
-  abstract void instrument(FlowMethodAdapter methodNode);
+  abstract void instrument(FlowMethod methodNode);
 }

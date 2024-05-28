@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
@@ -31,14 +31,14 @@ class TesterValue extends TrackableValue {
   /** Local variable storing the target FlowTester */
   private TrackLocal testerLocal;
 
-  TesterValue(FlowMethodAdapter flowMethodAdapter, MethodInsnNode mInsn) {
-    super(flowMethodAdapter, Type.getReturnType(mInsn.desc), mInsn);
+  TesterValue(FlowMethod method, MethodInsnNode mInsn) {
+    super(method, Type.getReturnType(mInsn.desc), mInsn);
     this.mInsn = mInsn;
   }
 
   @Override void insertTrackStatements() {
     // on the stack before the call: FlowTester tester, char c
-    testerLocal = flowMethodAdapter.newLocalForObject(
+    testerLocal = method.newLocalForObject(
         Type.getObjectType("com/coekie/flowtracker/test/FlowTester"),
         "TesterValue tester");
 
@@ -51,12 +51,12 @@ class TesterValue extends TrackableValue {
 
     mInsn.name = "$tracked_" + mInsn.name;
 
-    flowMethodAdapter.instructions.insertBefore(mInsn, toInsert);
+    method.instructions.insertBefore(mInsn, toInsert);
   }
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert,
+    method.addComment(toInsert,
         "TesterValue.loadSourcePoint: testerLocal.theSourcePoint()");
     toInsert.add(testerLocal.load());
     toInsert.add(

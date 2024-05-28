@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.weaver.Types;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -45,7 +45,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
     return basicValue == null ? null : newValue(basicValue.getType());
   }
 
-  private final FlowMethodAdapter flowMethodAdapter;
+  private final FlowMethod method;
 
   /**
    * Frame for which we are merging. That is, for which {@link #merge(FlowValue, FlowValue)}
@@ -54,9 +54,9 @@ class FlowInterpreter extends Interpreter<FlowValue> {
    */
   private FlowFrame mergingFrame;
 
-  FlowInterpreter(FlowMethodAdapter flowMethodAdapter) {
+  FlowInterpreter(FlowMethod method) {
     super(Opcodes.ASM9);
-    this.flowMethodAdapter = flowMethodAdapter;
+    this.method = method;
   }
 
   @Override
@@ -110,16 +110,16 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       case Opcodes.ICONST_3:
       case Opcodes.ICONST_4:
       case Opcodes.ICONST_5:
-        return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, insn,
+        return new ConstantValue(method, Type.INT_TYPE, insn,
             insn.getOpcode() - Opcodes.ICONST_0);
       case Opcodes.SIPUSH:
       case Opcodes.BIPUSH:
-        return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, insn,
+        return new ConstantValue(method, Type.INT_TYPE, insn,
             ((IntInsnNode) insn).operand);
       case Opcodes.LDC:
         LdcInsnNode ldcInsn = (LdcInsnNode) insn;
         if (ldcInsn.cst instanceof Integer) {
-          return new ConstantValue(flowMethodAdapter, Type.INT_TYPE, insn, (Integer) ldcInsn.cst);
+          return new ConstantValue(method, Type.INT_TYPE, insn, (Integer) ldcInsn.cst);
         }
     }
     return toFlowValue(basicInterpreter.newOperation(insn));
@@ -146,7 +146,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
         FieldInsnNode fieldInsn = (FieldInsnNode) insn;
         Type fieldType = Type.getType(((FieldInsnNode) insn).desc);
         if (FieldValue.shouldTrack(fieldType, fieldInsn)) {
-          return new FieldValue(flowMethodAdapter, fieldInsn, fieldType);
+          return new FieldValue(method, fieldInsn, fieldType);
         }
         break;
     }
@@ -160,15 +160,15 @@ class FlowInterpreter extends Interpreter<FlowValue> {
     switch (aInsn.getOpcode()) {
       case Opcodes.CALOAD: {
         InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(flowMethodAdapter, insn, Type.CHAR_TYPE);
+        return new ArrayLoadValue(method, insn, Type.CHAR_TYPE);
       }
       case Opcodes.BALOAD: {
         InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(flowMethodAdapter, insn, Type.BYTE_TYPE);
+        return new ArrayLoadValue(method, insn, Type.BYTE_TYPE);
       }
       case Opcodes.IALOAD: {
         InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(flowMethodAdapter, insn, Type.INT_TYPE);
+        return new ArrayLoadValue(method, insn, Type.INT_TYPE);
       }
       case Opcodes.IAND: {
         // treat `x & constant` as having the same source as x
@@ -204,12 +204,12 @@ class FlowInterpreter extends Interpreter<FlowValue> {
             || "createSourceShort".equals(mInsn.name)
             || "createSourceByte".equals(mInsn.name)
             || "createSourceInt".equals(mInsn.name)) {
-          return new TesterValue(flowMethodAdapter, mInsn);
+          return new TesterValue(method, mInsn);
         }
       } else if ("java/lang/Byte".equals(mInsn.owner) && "toUnsignedInt".equals(mInsn.name)) {
         return values.get(0);
       } else if (InvocationReturnValue.shouldInstrumentInvocation(mInsn.name, mInsn.desc)) {
-        return new InvocationReturnValue(flowMethodAdapter, mInsn);
+        return new InvocationReturnValue(method, mInsn);
       }
     }
     return toFlowValue(basicInterpreter.naryOperation(insn, values));
@@ -232,11 +232,11 @@ class FlowInterpreter extends Interpreter<FlowValue> {
     int argNum = local - (isInstanceMethod ? 1 : 0);
     if (argNum >= 0) {
       boolean[] argsToInstrument =
-          InvocationArgStore.argsToInstrument(flowMethodAdapter.owner,
-              flowMethodAdapter.name, flowMethodAdapter.desc);
+          InvocationArgStore.argsToInstrument(method.owner,
+              method.name, method.desc);
       if (argsToInstrument != null && argNum < argsToInstrument.length
           && argsToInstrument[argNum]) {
-        return new InvocationArgValue(flowMethodAdapter, null, argNum);
+        return new InvocationArgValue(method, null, argNum);
       }
     }
     return super.newParameterValue(isInstanceMethod, local, type);

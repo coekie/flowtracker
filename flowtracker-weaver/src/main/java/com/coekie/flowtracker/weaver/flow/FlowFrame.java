@@ -18,7 +18,7 @@ package com.coekie.flowtracker.weaver.flow;
 
 import static java.util.Objects.requireNonNull;
 
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
@@ -53,11 +53,11 @@ class FlowFrame extends Frame<FlowValue> {
     if (analyzer.getFrames()[insnIndex] != this) {
       throw new IllegalStateException("Wrong instruction index");
     }
-    insn = requireNonNull(analyzer.methodAdapter.instructions.get(insnIndex));
+    insn = requireNonNull(analyzer.method.instructions.get(insnIndex));
   }
 
-  FlowMethodAdapter getFlowMethodAdapter() {
-    return analyzer.methodAdapter;
+  FlowMethod getMethod() {
+    return analyzer.method;
   }
 
   /** Stack size as should be reported in byte code, counting long and double as two */

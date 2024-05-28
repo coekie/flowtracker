@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -36,7 +36,7 @@ class TesterStore extends Store {
     this.storedValue = getStackFromTop(valueStackIndexFromTop);
   }
 
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     if (storedValue.isTrackable()) { // if we know where the value we are storing came from
       storedValue.ensureTracked();
 

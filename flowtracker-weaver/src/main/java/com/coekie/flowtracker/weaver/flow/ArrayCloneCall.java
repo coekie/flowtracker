@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.hook.ArrayHook;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -33,7 +33,7 @@ class ArrayCloneCall extends Instrumentable {
   }
 
   @Override
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     mInsn.desc = '(' + mInsn.owner + ')' + mInsn.owner;
     mInsn.owner = "com/coekie/flowtracker/hook/ArrayHook";
     mInsn.setOpcode(Opcodes.INVOKESTATIC);

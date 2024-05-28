@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
@@ -25,11 +25,11 @@ import org.objectweb.asm.tree.analysis.Frame;
 
 /** Extension of {@link Analyzer}, used for flow analysis */
 class FlowAnalyzer extends Analyzer<FlowValue> {
-  final FlowMethodAdapter methodAdapter;
+  final FlowMethod method;
 
-  FlowAnalyzer(FlowInterpreter interpreter, FlowMethodAdapter methodAdapter) {
+  FlowAnalyzer(FlowInterpreter interpreter, FlowMethod method) {
     super(interpreter);
-    this.methodAdapter = methodAdapter;
+    this.method = method;
   }
 
   @Override
@@ -64,7 +64,7 @@ class FlowAnalyzer extends Analyzer<FlowValue> {
    * made.
    */
   FlowFrame getFrame(AbstractInsnNode insn) {
-    int index = methodAdapter.instructions.indexOf(insn);
+    int index = method.instructions.indexOf(insn);
     FlowFrame frame = (FlowFrame) getFrames()[index];
     if (frame.getInsn() != insn) {
       throw new IllegalStateException("Instruction and frame index don't match");

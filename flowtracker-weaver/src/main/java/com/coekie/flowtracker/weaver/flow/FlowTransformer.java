@@ -109,12 +109,12 @@ public class FlowTransformer implements Transformer {
     public MethodVisitor visitMethod(int access, String name, String desc, String signature,
         String[] exceptions) {
       MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-      return new FlowMethodAdapter(mv, className, version, access, name, desc, signature,
+      return new FlowMethod(mv, className, version, access, name, desc, signature,
           exceptions, constantsTransformation);
     }
   }
 
-  class FlowMethodAdapter extends MethodNode {
+  class FlowMethod extends MethodNode {
     final String owner;
     final int version;
     /** The next visitor in the chain after this one */
@@ -123,7 +123,7 @@ public class FlowTransformer implements Transformer {
     final InvocationIncomingTransformation invocation = new InvocationIncomingTransformation();
     final ConstantsTransformation constantsTransformation;
 
-    private FlowMethodAdapter(MethodVisitor mv, String owner, int version, int access, String name,
+    private FlowMethod(MethodVisitor mv, String owner, int version, int access, String name,
         String desc, String signature, String[] exceptions,
         ConstantsTransformation constantsTransformation) {
       super(Opcodes.ASM9, access, name, desc, signature, exceptions);
@@ -298,7 +298,7 @@ public class FlowTransformer implements Transformer {
   }
 
   public static class AnalysisListener {
-    void analysed(FlowMethodAdapter flowMethodAdapter, Frame<FlowValue>[] frames,
+    void analysed(FlowMethod method, Frame<FlowValue>[] frames,
         List<Instrumentable> toInstrument) {
     }
 

@@ -18,7 +18,7 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassConstant;
 import com.coekie.flowtracker.util.RecursionChecker;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
@@ -32,23 +32,23 @@ class ConstantValue extends TrackableValue {
   private final int value;
   private ClassConstant constant;
 
-  ConstantValue(FlowMethodAdapter flowMethodAdapter, Type type,
+  ConstantValue(FlowMethod method, Type type,
       AbstractInsnNode insn, int value) {
-    super(flowMethodAdapter, type, insn);
+    super(method, type, insn);
     this.value = value;
   }
 
   @Override
   void insertTrackStatements() {
-    constant = flowMethodAdapter.constantsTransformation.trackConstant(flowMethodAdapter, value);
+    constant = method.constantsTransformation.trackConstant(method, value);
   }
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
     // we prefer to use constant-dynamic, for performance, but fall back to invoking
     // ConstantHook.constantPoint every time when necessary.
-    if (flowMethodAdapter.canUseConstantDynamic()) {
-      flowMethodAdapter.addComment(toInsert,
+    if (method.canUseConstantDynamic()) {
+      method.addComment(toInsert,
           "ConstantValue.loadSourcePoint: condy ConstantHook.constantPoint(%s, %s, %s)",
           constant.classId, constant.offset, constant.length);
       if (RecursionChecker.enabled()) {
@@ -70,7 +70,7 @@ class ConstantValue extends TrackableValue {
             "com/coekie/flowtracker/util/RecursionChecker", "after", "()V"));
       }
     } else {
-      flowMethodAdapter.addComment(toInsert,
+      method.addComment(toInsert,
           "ConstantValue.loadSourcePoint: ConstantHook.constantPoint(%s, %s)",
           constant.classId, constant.offset);
       toInsert.add(ConstantsTransformation.iconst(constant.classId));
@@ -81,7 +81,7 @@ class ConstantValue extends TrackableValue {
               "constantPoint",
               "(II)Lcom/coekie/flowtracker/tracker/TrackerPoint;"));
       if (constant.length != 1) {
-        flowMethodAdapter.addComment(toInsert,
+        method.addComment(toInsert,
             "ConstantValue.loadSourcePoint: ConstantHook.withLength(%s)", constant.length);
         toInsert.add(ConstantsTransformation.iconst(constant.length));
         toInsert.add(

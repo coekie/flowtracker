@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
@@ -32,20 +32,20 @@ class ArrayLoadValue extends TrackableValue {
   /** Local variable storing the PointTracker for the loaded char or byte */
   private TrackLocal pointTrackerLocal;
 
-  ArrayLoadValue(FlowMethodAdapter flowMethodAdapter, InsnNode insn, Type type) {
-    super(flowMethodAdapter, type, insn);
+  ArrayLoadValue(FlowMethod method, InsnNode insn, Type type) {
+    super(method, type, insn);
     this.insn = insn;
   }
 
   @Override void insertTrackStatements() {
     // on the stack before the CALOAD call: char[] target, int index
 
-    pointTrackerLocal = flowMethodAdapter.newLocalForObject(
+    pointTrackerLocal = method.newLocalForObject(
         Type.getType("Lcom/coekie/flowtracker/tracker/TrackerPoint;"),
         "ArrayLoadValue PointTracker");
 
     InsnList toInsert = new InsnList();
-    flowMethodAdapter.addComment(toInsert, "begin ArrayLoadValue.insertTrackStatements");
+    method.addComment(toInsert, "begin ArrayLoadValue.insertTrackStatements");
 
     // insert code for: pointTracker = ArrayLoadHook.getElementTracker(target, index)
     // use DUP2 to copy target and index for getElementTracker while leaving it on the stack for the
@@ -58,17 +58,17 @@ class ArrayLoadValue extends TrackableValue {
             "(Ljava/lang/Object;I)Lcom/coekie/flowtracker/tracker/TrackerPoint;",
             false));
     toInsert.add(pointTrackerLocal.store());
-    flowMethodAdapter.maxStack = Math.max(flowMethodAdapter.maxStack,
+    method.maxStack = Math.max(method.maxStack,
         getCreationFrame().fullStackSize() + 2);
 
-    flowMethodAdapter.addComment(toInsert, "end ArrayLoadValue.insertTrackStatements");
+    method.addComment(toInsert, "end ArrayLoadValue.insertTrackStatements");
 
-    flowMethodAdapter.instructions.insertBefore(insn, toInsert);
+    method.instructions.insertBefore(insn, toInsert);
   }
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert, "ArrayLoadValue.loadSourcePoint");
+    method.addComment(toInsert, "ArrayLoadValue.loadSourcePoint");
     toInsert.add(pointTrackerLocal.load());
   }
 }

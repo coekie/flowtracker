@@ -18,7 +18,7 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.hook.SystemHook;
 import com.coekie.flowtracker.weaver.Types;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -35,7 +35,7 @@ class ArrayCopyCall extends Instrumentable {
   }
 
   @Override
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     mInsn.owner = "com/coekie/flowtracker/hook/SystemHook";
   }
 

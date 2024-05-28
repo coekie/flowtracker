@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.tracker.Invocation;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -35,7 +35,7 @@ import org.objectweb.asm.tree.VarInsnNode;
  */
 class InvocationOutgoingTransformation {
   private final MethodInsnNode mInsn;
-  private final FlowMethodAdapter methodNode;
+  private final FlowMethod methodNode;
 
   /**
    * The instruction that creates the Invocation. Initially this is a call to
@@ -51,7 +51,7 @@ class InvocationOutgoingTransformation {
   /** Last instruction of our instrumentation, that removes the {@link Invocation} from the stack */
   private AbstractInsnNode endInsn;
 
-  InvocationOutgoingTransformation(MethodInsnNode mInsn, FlowMethodAdapter methodNode) {
+  InvocationOutgoingTransformation(MethodInsnNode mInsn, FlowMethod methodNode) {
     this.mInsn = mInsn;
     this.methodNode = methodNode;
   }

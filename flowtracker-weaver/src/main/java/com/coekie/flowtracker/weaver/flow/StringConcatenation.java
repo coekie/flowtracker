@@ -18,7 +18,7 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.hook.StringConcatFactoryHook;
 import com.coekie.flowtracker.tracker.TrackerPoint;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.StringConcatFactory;
@@ -98,7 +98,7 @@ class StringConcatenation extends Store {
   }
 
   @Override
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
 
     // StringConcatFactory was introduced in jdk 9, condy in 11. for simplicity, we don't handle

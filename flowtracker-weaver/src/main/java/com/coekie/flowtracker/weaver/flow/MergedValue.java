@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.HashSet;
 import java.util.Set;
 import org.objectweb.asm.Opcodes;
@@ -79,7 +79,7 @@ class MergedValue extends FlowValue {
   }
 
   private void insertTrackStatements() {
-    FlowMethodAdapter methodNode = mergingFrame.getFlowMethodAdapter();
+    FlowMethod methodNode = mergingFrame.getMethod();
     pointTrackerLocal = methodNode.newLocalForObject(
         Type.getType("Lcom/coekie/flowtracker/tracker/TrackerPoint;"),
         "MergedValue PointTracker");
@@ -110,7 +110,7 @@ class MergedValue extends FlowValue {
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
-    mergingFrame.getFlowMethodAdapter().addComment(toInsert, "MergedValue.loadSourcePoint");
+    mergingFrame.getMethod().addComment(toInsert, "MergedValue.loadSourcePoint");
     if (isTrackable()) {
       toInsert.add(pointTrackerLocal.load());
     } else {

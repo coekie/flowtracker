@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.hook.ReflectionHook;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -35,7 +35,7 @@ class ClassNameCall extends Instrumentable {
   }
 
   @Override
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
     if (constantsTransformation.canBreakStringInterning()) {
       mInsn.owner = "com/coekie/flowtracker/hook/ReflectionHook";

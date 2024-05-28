@@ -19,7 +19,7 @@ package com.coekie.flowtracker.weaver.flow;
 import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.tracker.Invocation;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -67,11 +67,11 @@ class InvocationArgStore extends Store {
         return invocationReturnValue.transformation;
       }
     }
-    return new InvocationOutgoingTransformation(mInsn, frame.getFlowMethodAdapter());
+    return new InvocationOutgoingTransformation(mInsn, frame.getMethod());
   }
 
   @Override
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     if (!anyArgIsTrackable()) {
       return;
     }

@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.tracker.Invocation;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
@@ -38,7 +38,7 @@ class InvocationReturnStore extends Store {
   }
 
   @Override
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     // if we know where the value we are returning came from
     if (returnedValue.isTrackable()) {
       InsnList toInsert = new InsnList();
@@ -65,7 +65,7 @@ class InvocationReturnStore extends Store {
 
   /** Add a {@link InvocationReturnStore} to `toInstrument` when we need to instrument it */
   static void analyze(List<Instrumentable> toInstrument, InsnNode insn, FlowFrame frame,
-      FlowMethodAdapter method) {
+      FlowMethod method) {
     if (InvocationReturnValue.shouldInstrumentInvocation(method.name, method.desc)) {
       toInstrument.add(new InvocationReturnStore(insn, frame, method.invocation));
     }

@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.weaver.Types;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.Method;
@@ -39,7 +39,7 @@ class ArrayStore extends Store {
     this.hookMethod = hookMethod;
   }
 
-  void instrument(FlowMethodAdapter methodNode) {
+  void instrument(FlowMethod methodNode) {
     InsnList toInsert = new InsnList();
 
     methodNode.addComment(toInsert, "begin ArrayStore.insertTrackStatements: "

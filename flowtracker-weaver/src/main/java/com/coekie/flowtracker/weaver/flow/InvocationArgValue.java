@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.tracker.Invocation;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -28,8 +28,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 /** Value passed as an argument in a method that we track using {@link Invocation} */
 class InvocationArgValue extends TrackableValue {
   private final int argNum;
-  InvocationArgValue(FlowMethodAdapter flowMethodAdapter, AbstractInsnNode insn, int argNum) {
-    super(flowMethodAdapter, Type.getArgumentTypes(flowMethodAdapter.desc)[argNum], insn);
+  InvocationArgValue(FlowMethod method, AbstractInsnNode insn, int argNum) {
+    super(method, Type.getArgumentTypes(method.desc)[argNum], insn);
     if (argNum > InvocationArgStore.MAX_ARG_NUM_TO_INSTRUMENT + 1) {
       throw new IllegalArgumentException();
     }
@@ -37,13 +37,13 @@ class InvocationArgValue extends TrackableValue {
   }
 
   @Override void insertTrackStatements() {
-    flowMethodAdapter.invocation.ensureStarted(flowMethodAdapter);
+    method.invocation.ensureStarted(method);
   }
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert, "InvocationArgValue.loadSourcePoint");
-    toInsert.add(flowMethodAdapter.invocation.invocationLocal.load());
+    method.addComment(toInsert, "InvocationArgValue.loadSourcePoint");
+    toInsert.add(method.invocation.invocationLocal.load());
     toInsert.add(new InsnNode(Opcodes.ICONST_0 + argNum));
     toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
         "com/coekie/flowtracker/tracker/Invocation",

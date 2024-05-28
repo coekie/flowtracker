@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.tracker.FieldRepository;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -34,20 +34,20 @@ class FieldValue extends TrackableValue {
   /** Local variable storing the PointTracker for the loaded char or byte */
   private TrackLocal pointTrackerLocal;
 
-  FieldValue(FlowMethodAdapter flowMethodAdapter, FieldInsnNode insn, Type type) {
-    super(flowMethodAdapter, type, insn);
+  FieldValue(FlowMethod method, FieldInsnNode insn, Type type) {
+    super(method, type, insn);
     this.insn = insn;
   }
 
   @Override void insertTrackStatements() {
     // on the stack before the GETFIELD call: target
 
-    pointTrackerLocal = flowMethodAdapter.newLocalForObject(
+    pointTrackerLocal = method.newLocalForObject(
         Type.getType("Lcom/coekie/flowtracker/tracker/TrackerPoint;"),
         "FieldValue PointTracker");
 
     InsnList toInsert = new InsnList();
-    flowMethodAdapter.addComment(toInsert, "begin FieldValue.insertTrackStatements");
+    method.addComment(toInsert, "begin FieldValue.insertTrackStatements");
 
     // insert code for: pointTracker = FieldRepository.getPoint(target, fieldId)
     // use DUP to copy target for getPoint while leaving it on the stack for the actual GETFIELD
@@ -62,17 +62,17 @@ class FieldValue extends TrackableValue {
             false));
     toInsert.add(pointTrackerLocal.store());
 
-    flowMethodAdapter.maxStack = Math.max(flowMethodAdapter.maxStack,
+    method.maxStack = Math.max(method.maxStack,
         getCreationFrame().fullStackSize() + 2);
 
-    flowMethodAdapter.addComment(toInsert, "end FieldValue.insertTrackStatements");
+    method.addComment(toInsert, "end FieldValue.insertTrackStatements");
 
-    flowMethodAdapter.instructions.insertBefore(insn, toInsert);
+    method.instructions.insertBefore(insn, toInsert);
   }
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert, "FieldValue.loadSourcePoint");
+    method.addComment(toInsert, "FieldValue.loadSourcePoint");
     toInsert.add(pointTrackerLocal.load());
   }
 

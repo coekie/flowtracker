@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.tracker.Invocation;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -37,7 +37,7 @@ class InvocationIncomingTransformation {
   TrackLocal invocationLocal;
 
   /** Ensure that we called {@link Invocation#start(String)} at the beginning */
-  void ensureStarted(FlowMethodAdapter methodNode) {
+  void ensureStarted(FlowMethod methodNode) {
     if (invocationLocal != null) {
       return;
     }

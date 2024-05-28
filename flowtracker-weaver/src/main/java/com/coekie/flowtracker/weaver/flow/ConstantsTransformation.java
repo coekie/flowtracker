@@ -19,7 +19,7 @@ package com.coekie.flowtracker.weaver.flow;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassConstant;
 import com.coekie.flowtracker.weaver.ClassFilter;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
@@ -34,7 +34,7 @@ class ConstantsTransformation {
   private final String className;
   private final ClassFilter breakStringInterningFilter;
   private ClassOriginTracker tracker;
-  private FlowMethodAdapter lastMethod;
+  private FlowMethod lastMethod;
 
   ConstantsTransformation(String className, ClassFilter breakStringInterningFilter) {
     this.className = className;
@@ -53,26 +53,26 @@ class ConstantsTransformation {
   }
 
   /** Adds a header indicating a new method starts, if this is a new method */
-  private void maybeAddMethodHeader(FlowMethodAdapter methodNode) {
+  private void maybeAddMethodHeader(FlowMethod methodNode) {
     if (lastMethod != methodNode) {
       tracker().startMethod(methodDescription(methodNode));
       lastMethod = methodNode;
     }
   }
 
-  ClassConstant trackConstant(FlowMethodAdapter methodNode, int value) {
+  ClassConstant trackConstant(FlowMethod methodNode, int value) {
     maybeAddMethodHeader(methodNode);
     return tracker().registerConstant(value);
   }
 
-  int trackConstantString(FlowMethodAdapter methodNode, String value) {
+  int trackConstantString(FlowMethod methodNode, String value) {
     maybeAddMethodHeader(methodNode);
     return tracker().registerConstantString(value);
   }
 
   /**
    * ConstantDynamic representing the given String value, which should be at `offset` in `tracker`
-   * (the offset returned by {@link #trackConstantString(FlowMethodAdapter, String)}).
+   * (the offset returned by {@link #trackConstantString(FlowMethod, String)}).
    */
   ConstantDynamic stringConstantDynamic(int offset, String value) {
     return new ConstantDynamic("$ft" + offset,
@@ -95,7 +95,7 @@ class ConstantsTransformation {
   }
 
   /** Human-friendly String representation of a method signature */
-  private static String methodDescription(FlowMethodAdapter methodNode) {
+  private static String methodDescription(FlowMethod methodNode) {
     Type methodType = Type.getMethodType(methodNode.desc);
     StringBuilder sb = new StringBuilder();
     sb.append(methodType.getReturnType().getClassName());

@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.tracker.Invocation;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -31,13 +31,13 @@ class InvocationReturnValue extends TrackableValue {
   /** Local variable storing the Invocation */
   private TrackLocal invocationLocal;
 
-  InvocationReturnValue(FlowMethodAdapter flowMethodAdapter, MethodInsnNode mInsn) {
-    super(flowMethodAdapter, Type.getReturnType(mInsn.desc), mInsn);
-    this.transformation = new InvocationOutgoingTransformation(mInsn, flowMethodAdapter);
+  InvocationReturnValue(FlowMethod method, MethodInsnNode mInsn) {
+    super(method, Type.getReturnType(mInsn.desc), mInsn);
+    this.transformation = new InvocationOutgoingTransformation(mInsn, method);
   }
 
   @Override void insertTrackStatements() {
-    invocationLocal = flowMethodAdapter.newLocalForObject(
+    invocationLocal = method.newLocalForObject(
         Type.getType("Lcom/coekie/flowtracker/tracker/Invocation;"),
         "InvocationReturnValue invocation");
 
@@ -45,13 +45,13 @@ class InvocationReturnValue extends TrackableValue {
     transformation.storeInvocation(invocationLocal);
 
     // ensureInstrumented puts one extra value on the stack
-    flowMethodAdapter.maxStack = Math.max(flowMethodAdapter.maxStack,
+    method.maxStack = Math.max(method.maxStack,
         getCreationFrame().fullStackSize() + 1);
   }
 
   @Override
   void loadSourcePoint(InsnList toInsert) {
-    flowMethodAdapter.addComment(toInsert, "InvocationReturnValue.loadSourcePoint");
+    method.addComment(toInsert, "InvocationReturnValue.loadSourcePoint");
     toInsert.add(invocationLocal.load());
     toInsert.add(new FieldInsnNode(Opcodes.GETFIELD,
         "com/coekie/flowtracker/tracker/Invocation",

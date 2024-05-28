@@ -16,19 +16,19 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 
 /** A value of which we can track where it came from */
 abstract class TrackableValue extends FlowValue {
-  final FlowMethodAdapter flowMethodAdapter;
+  final FlowMethod method;
   private final AbstractInsnNode insn;
   private boolean tracked;
 
-  TrackableValue(FlowMethodAdapter flowMethodAdapter, Type type, AbstractInsnNode insn) {
+  TrackableValue(FlowMethod method, Type type, AbstractInsnNode insn) {
     super(type);
-    this.flowMethodAdapter = flowMethodAdapter;
+    this.method = method;
     this.insn = insn;
   }
 
