@@ -48,7 +48,7 @@ class InvocationReturnStore extends Store {
       invocation.ensureStarted(methodNode);
 
       toInsert.add(invocation.invocationLocal.load());
-      returnedValue.loadSourcePoint(toInsert);
+      returnedValue.loadSourcePoint(toInsert, this);
 
       toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
           "com/coekie/flowtracker/tracker/Invocation", "returning",

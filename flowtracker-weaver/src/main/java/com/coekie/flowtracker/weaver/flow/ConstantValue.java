@@ -45,7 +45,7 @@ class ConstantValue extends TrackableValue {
   }
 
   @Override
-  void loadSourcePoint(InsnList toInsert) {
+  void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     // we prefer to use constant-dynamic, for performance, but fall back to invoking
     // ConstantHook.constantPoint every time when necessary.
     if (method.canUseConstantDynamic()) {

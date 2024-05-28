@@ -18,9 +18,11 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import java.util.Objects;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
 /**
@@ -43,9 +45,10 @@ abstract class FlowValue extends BasicValue {
   /**
    * Returns if we can know where this value came from.
    * <p>
-   * If this is false, then {@link #loadSourcePoint(InsnList)} will always load {@code null}.
-   * If this return true, then that's no guarantee that {@link #loadSourcePoint(InsnList)} is
-   * never {@code null}.
+   * If this is false, then {@link #loadSourcePoint(InsnList, FallbackSource)} will always load
+   * {@code null}.
+   * If this return true, then that's no guarantee that
+   * {@link #loadSourcePoint(InsnList, FallbackSource)} is never {@code null}.
    */
   abstract boolean isTrackable();
 
@@ -75,7 +78,7 @@ abstract class FlowValue extends BasicValue {
    *
    * @param toInsert list of instructions where the needed statements are added to at the end
    */
-  abstract void loadSourcePoint(InsnList toInsert);
+  abstract void loadSourcePoint(InsnList toInsert, FallbackSource fallback);
 
   @Override
   public boolean equals(Object o) {
@@ -98,4 +101,30 @@ abstract class FlowValue extends BasicValue {
    * mergingFrame. Used to detect loops in the data flow.
    */
   abstract boolean hasMergeAt(FlowFrame mergingFrame);
+
+  /**
+   * Fallback for {@link #loadSourcePoint}. If we're not tracking the source of a value,
+   * we can use this as a source instead, so that instead we point to where in the code this value
+   * first started to get tracked.
+   * <p>
+   * This fallback is only applicable to UntrackedValue, not to a TrackableValue with a null value.
+   * In other words, if we use the fallback is determined statically at code analysis time, not
+   * dynamically based on runtime values.
+   * So e.g. a value returned from a method invocation for a method that's not tracked will use this
+   * fallback (it comes directly from something that's not tracked), but getting a value out of a
+   * byte[] where the byte[] instance hasn't got a tracker does not use the fallback.
+   * (We could also consider such a dynamic fallback in the future).
+   */
+  interface FallbackSource {
+    void loadSourcePointFallback(InsnList toInsert);
+  }
+
+  enum NullFallbackSource implements FallbackSource {
+    INSTANCE;
+
+    @Override
+    public void loadSourcePointFallback(InsnList toInsert) {
+      toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+    }
+  }
 }

@@ -50,7 +50,7 @@ class InvocationReturnValue extends TrackableValue {
   }
 
   @Override
-  void loadSourcePoint(InsnList toInsert) {
+  void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     method.addComment(toInsert, "InvocationReturnValue.loadSourcePoint");
     toInsert.add(invocationLocal.load());
     toInsert.add(new FieldInsnNode(Opcodes.GETFIELD,

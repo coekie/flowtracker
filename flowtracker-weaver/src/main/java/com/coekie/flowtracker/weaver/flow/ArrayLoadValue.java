@@ -67,7 +67,7 @@ class ArrayLoadValue extends TrackableValue {
   }
 
   @Override
-  void loadSourcePoint(InsnList toInsert) {
+  void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     method.addComment(toInsert, "ArrayLoadValue.loadSourcePoint");
     toInsert.add(pointTrackerLocal.load());
   }

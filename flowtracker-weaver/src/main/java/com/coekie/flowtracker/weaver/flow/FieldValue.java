@@ -71,7 +71,7 @@ class FieldValue extends TrackableValue {
   }
 
   @Override
-  void loadSourcePoint(InsnList toInsert) {
+  void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     method.addComment(toInsert, "FieldValue.loadSourcePoint");
     toInsert.add(pointTrackerLocal.load());
   }

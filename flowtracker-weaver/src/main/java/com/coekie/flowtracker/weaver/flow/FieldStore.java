@@ -56,7 +56,7 @@ class FieldStore extends Store {
 
     // note: we do this even for UntrackableValues
     storedValue.ensureTracked();
-    storedValue.loadSourcePoint(toInsert);
+    storedValue.loadSourcePoint(toInsert, this);
 
     methodNode.maxStack = Math.max(frame.fullStackSize() + 5, methodNode.maxStack);
 

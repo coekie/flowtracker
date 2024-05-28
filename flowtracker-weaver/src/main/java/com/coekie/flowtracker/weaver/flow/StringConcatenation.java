@@ -130,7 +130,7 @@ class StringConcatenation extends Store {
         mask[i] = (trackableCharArgs[i] == null) ? '.' : 'T';
         if (trackableCharArgs[i] != null) {
           trackableCharArgs[i].ensureTracked();
-          trackableCharArgs[i].loadSourcePoint(toInsert);
+          trackableCharArgs[i].loadSourcePoint(toInsert, this);
           trackedCount++;
         }
       }

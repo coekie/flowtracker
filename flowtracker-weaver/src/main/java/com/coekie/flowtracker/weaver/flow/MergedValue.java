@@ -92,7 +92,7 @@ class MergedValue extends FlowValue {
           pointTrackerLocal.getIndex());
       // at the place the value came from, already store its source in our pointTrackerLocal, so
       // that when we get to the point where they get merged, it already has the right TrackerPoint
-      value.loadSourcePoint(toInsert);
+      value.loadSourcePoint(toInsert, NullFallbackSource.INSTANCE);
       toInsert.add(pointTrackerLocal.store());
       methodNode.instructions.insert(value.getCreationInsn(), toInsert);
     }
@@ -109,7 +109,7 @@ class MergedValue extends FlowValue {
   }
 
   @Override
-  void loadSourcePoint(InsnList toInsert) {
+  void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     mergingFrame.getMethod().addComment(toInsert, "MergedValue.loadSourcePoint");
     if (isTrackable()) {
       toInsert.add(pointTrackerLocal.load());

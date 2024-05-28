@@ -59,8 +59,8 @@ class CopyValue extends FlowValue {
   }
 
   @Override
-  void loadSourcePoint(InsnList toInsert) {
-    original.loadSourcePoint(toInsert);
+  void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
+    original.loadSourcePoint(toInsert, fallback);
   }
 
   @Override

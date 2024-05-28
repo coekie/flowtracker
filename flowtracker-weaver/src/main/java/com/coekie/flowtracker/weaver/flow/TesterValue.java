@@ -55,7 +55,7 @@ class TesterValue extends TrackableValue {
   }
 
   @Override
-  void loadSourcePoint(InsnList toInsert) {
+  void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     method.addComment(toInsert,
         "TesterValue.loadSourcePoint: testerLocal.theSourcePoint()");
     toInsert.add(testerLocal.load());

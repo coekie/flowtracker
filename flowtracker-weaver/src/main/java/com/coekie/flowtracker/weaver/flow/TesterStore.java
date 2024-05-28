@@ -45,7 +45,7 @@ class TesterStore extends Store {
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "begin TesterStore.insertTrackStatements");
 
-      storedValue.loadSourcePoint(toInsert);
+      storedValue.loadSourcePoint(toInsert, this);
 
       methodNode.addComment(toInsert,
           "end TesterStore.insertTrackStatements. also replaced next invocation");

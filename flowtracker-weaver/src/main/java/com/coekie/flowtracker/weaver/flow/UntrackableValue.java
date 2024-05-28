@@ -17,11 +17,9 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.weaver.Types;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
 /** Value for we can't track where it came from */
@@ -69,8 +67,8 @@ class UntrackableValue extends FlowValue {
   }
 
   @Override
-  void loadSourcePoint(InsnList toInsert) {
-    toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+  void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
+    fallback.loadSourcePointFallback(toInsert);
   }
 
   @Override

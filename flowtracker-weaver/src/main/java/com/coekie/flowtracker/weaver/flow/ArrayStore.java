@@ -47,7 +47,7 @@ class ArrayStore extends Store {
 
     // note: we do this even for UntrackableValues
     storedValue.ensureTracked();
-    storedValue.loadSourcePoint(toInsert);
+    storedValue.loadSourcePoint(toInsert, this);
 
     methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
 

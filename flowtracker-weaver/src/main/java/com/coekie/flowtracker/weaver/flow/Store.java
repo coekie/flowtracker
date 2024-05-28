@@ -16,8 +16,12 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+
 /** Represents an instruction that stores a (possibly tracked) value in an object. */
-abstract class Store extends Instrumentable {
+abstract class Store extends Instrumentable implements FlowValue.FallbackSource {
   final FlowFrame frame;
 
   Store(FlowFrame frame) {
@@ -34,5 +38,10 @@ abstract class Store extends Instrumentable {
     // frame.
     value.initCreationFrame(frame.analyzer);
     return value;
+  }
+
+  @Override
+  public void loadSourcePointFallback(InsnList toInsert) {
+    toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
   }
 }

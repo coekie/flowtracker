@@ -41,7 +41,7 @@ class InvocationArgValue extends TrackableValue {
   }
 
   @Override
-  void loadSourcePoint(InsnList toInsert) {
+  void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     method.addComment(toInsert, "InvocationArgValue.loadSourcePoint");
     toInsert.add(method.invocation.invocationLocal.load());
     toInsert.add(new InsnNode(Opcodes.ICONST_0 + argNum));
