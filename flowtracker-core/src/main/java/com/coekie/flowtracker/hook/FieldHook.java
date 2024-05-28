@@ -17,12 +17,13 @@ package com.coekie.flowtracker.hook;
  */
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
+import java.lang.reflect.Field;
 
-@SuppressWarnings("unused")
-public class ClassHook {
-  /** Hook for {@link Class#getName()}, used in `ClassNameCall` */
-  public static String getName(Class<?> clazz) {
-    return StringHook.constantString(clazz.getName(), ClassOriginTracker.get(clazz),
-        6 /* after "class " */);
+public class FieldHook {
+  /** Hook for {@link Field#getName()}, used in `FieldNameCall` */
+  public static String getName(Field field) {
+    String name = field.getName();
+    ClassOriginTracker classTracker = ClassOriginTracker.get(field.getDeclaringClass());
+    return StringHook.constantString(name, classTracker, classTracker.getFieldOffset(name));
   }
 }

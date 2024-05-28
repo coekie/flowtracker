@@ -15,9 +15,8 @@ public class GsonDemoTest {
     TrackerSubject out = demo.out();
     out.assertThatPart("Pojo(").comesFromConstantInClass(GsonDemo.Pojo.class);
     out.assertThatPart("fromJson").comesFromConstantInClass(GsonDemo.class);
+    out.assertThatPart("myField").comesFromConstantInClass(GsonDemo.Pojo.class);
 
-    // names of fields (through reflection) are not tracked
-    out.assertThatPart("myField").isNotTracked();
     out.assertThatPart(":").comesFromConstantInClass(JsonWriter.class);
     // haven't looked into why this isn't tracked yet
     out.assertThatPart("{").isNotTracked();

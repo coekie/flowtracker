@@ -13,9 +13,8 @@ public class SnakeYamlDemoTest {
     SnakeYamlDemo.main();
     TrackerSubject out = demo.out();
 
+    out.assertThatPart("myField").comesFromConstantInClass(SnakeYamlDemo.Pojo.class);
     out.assertThatPart("hello").comesFromConstantInClass(SnakeYamlDemo.class);
-    // names of fields (through reflection) are not tracked
-    out.assertThatPart("myField").isNotTracked();
 
     out.assertThatPart("toDump").comesFromConstantInClass(SnakeYamlDemo.class);
     out.assertThatPart(":").comesFromConstantInClassThat()

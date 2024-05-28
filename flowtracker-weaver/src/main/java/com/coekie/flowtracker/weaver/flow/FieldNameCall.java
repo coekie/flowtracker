@@ -16,21 +16,22 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.hook.ClassHook;
+import com.coekie.flowtracker.hook.FieldHook;
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import java.lang.reflect.Field;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /**
- * A call to {@link Class#getName()} that we can replace with a call to {@link ClassHook}
+ * A call to {@link Field#getName()} that we can replace with a call to {@link FieldHook}
  *
- * @see FieldNameCall
+ * @see ClassNameCall
  */
-class ClassNameCall extends Instrumentable {
+class FieldNameCall extends Instrumentable {
   private final MethodInsnNode mInsn;
 
-  private ClassNameCall(MethodInsnNode mInsn) {
+  private FieldNameCall(MethodInsnNode mInsn) {
     this.mInsn = mInsn;
   }
 
@@ -38,18 +39,18 @@ class ClassNameCall extends Instrumentable {
   void instrument(FlowMethodAdapter methodNode) {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
     if (constantsTransformation.canBreakStringInterning()) {
-      mInsn.desc = "(Ljava/lang/Class;)Ljava/lang/String;";
-      mInsn.owner = "com/coekie/flowtracker/hook/ClassHook";
+      mInsn.desc = "(Ljava/lang/reflect/Field;)Ljava/lang/String;";
+      mInsn.owner = "com/coekie/flowtracker/hook/FieldHook";
       mInsn.setOpcode(Opcodes.INVOKESTATIC);
     }
   }
 
-  /** Add a {@link ClassNameCall} to `toInstrument` when we need to instrument it */
+  /** Add a {@link FieldNameCall} to `toInstrument` when we need to instrument it */
   static boolean analyze(List<Instrumentable> toInstrument, MethodInsnNode mInsn) {
-    if ("java/lang/Class".equals(mInsn.owner)
+    if ("java/lang/reflect/Field".equals(mInsn.owner)
         && "getName".equals(mInsn.name)
         && "()Ljava/lang/String;".equals(mInsn.desc)) {
-      toInstrument.add(new ClassNameCall(mInsn));
+      toInstrument.add(new FieldNameCall(mInsn));
       return true;
     }
     return false;

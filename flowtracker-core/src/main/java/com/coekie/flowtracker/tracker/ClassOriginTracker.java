@@ -18,6 +18,8 @@ package com.coekie.flowtracker.tracker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Tracker for constants (literals) defined in a class.
@@ -41,6 +43,9 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
 
   public final int classId;
   private final StringBuilder content = new StringBuilder();
+
+  /** Map field name to offset in content */
+  private final ConcurrentMap<String, Integer> fields = new ConcurrentHashMap<>();
 
   private ClassOriginTracker(String className) {
     this.classId = trackers.size();
@@ -108,6 +113,16 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     int offset = content.length();
     content.append(value).append('\n');
     return offset;
+  }
+
+  public synchronized int getFieldOffset(String name) {
+    return fields.computeIfAbsent(name, n -> {
+      content.append("field: ");
+      int offset = content.length();
+      content.append(name);
+      content.append('\n');
+      return offset;
+    });
   }
 
   public static class ClassConstant {
