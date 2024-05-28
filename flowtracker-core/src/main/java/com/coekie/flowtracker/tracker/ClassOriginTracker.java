@@ -46,6 +46,8 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
 
   /** Map field name to offset in content */
   private final ConcurrentMap<String, Integer> fields = new ConcurrentHashMap<>();
+  /** Map method name to offset in content */
+  private final ConcurrentMap<String, Integer> methods = new ConcurrentHashMap<>();
 
   private ClassOriginTracker(String className) {
     this.classId = trackers.size();
@@ -118,6 +120,16 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
   public synchronized int getFieldOffset(String name) {
     return fields.computeIfAbsent(name, n -> {
       content.append("field: ");
+      int offset = content.length();
+      content.append(name);
+      content.append('\n');
+      return offset;
+    });
+  }
+
+  public synchronized int getMethodOffset(String name) {
+    return methods.computeIfAbsent(name, n -> {
+      content.append("method: ");
       int offset = content.length();
       content.append(name);
       content.append('\n');

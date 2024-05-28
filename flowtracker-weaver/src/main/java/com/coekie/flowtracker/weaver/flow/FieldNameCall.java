@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.hook.FieldHook;
+import com.coekie.flowtracker.hook.ReflectionHook;
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -24,9 +24,9 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /**
- * A call to {@link Field#getName()} that we can replace with a call to {@link FieldHook}
- *
- * @see ClassNameCall
+ * A call to {@link Field#getName()} that we can replace with a call to {@link ReflectionHook}.
+ * <p>
+ * Similar to {@link ClassNameCall} and {@link MethodNameCall}.
  */
 class FieldNameCall extends Instrumentable {
   private final MethodInsnNode mInsn;
@@ -39,8 +39,9 @@ class FieldNameCall extends Instrumentable {
   void instrument(FlowMethodAdapter methodNode) {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
     if (constantsTransformation.canBreakStringInterning()) {
+      mInsn.owner = "com/coekie/flowtracker/hook/ReflectionHook";
+      mInsn.name = "getFieldName";
       mInsn.desc = "(Ljava/lang/reflect/Field;)Ljava/lang/String;";
-      mInsn.owner = "com/coekie/flowtracker/hook/FieldHook";
       mInsn.setOpcode(Opcodes.INVOKESTATIC);
     }
   }

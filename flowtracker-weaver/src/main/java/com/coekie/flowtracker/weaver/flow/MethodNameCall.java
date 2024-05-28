@@ -18,19 +18,20 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.hook.ReflectionHook;
 import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import java.lang.reflect.Method;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 /**
- * A call to {@link Class#getName()} that we can replace with a call to {@link ReflectionHook}
+ * A call to {@link Method#getName()} that we can replace with a call to {@link ReflectionHook}
  * <p>
- * Similar to {@link FieldNameCall} and {@link MethodNameCall}.
+ * Similar to {@link ClassNameCall} and {@link FieldNameCall}.
  */
-class ClassNameCall extends Instrumentable {
+class MethodNameCall extends Instrumentable {
   private final MethodInsnNode mInsn;
 
-  private ClassNameCall(MethodInsnNode mInsn) {
+  private MethodNameCall(MethodInsnNode mInsn) {
     this.mInsn = mInsn;
   }
 
@@ -38,19 +39,19 @@ class ClassNameCall extends Instrumentable {
   void instrument(FlowMethodAdapter methodNode) {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
     if (constantsTransformation.canBreakStringInterning()) {
+      mInsn.desc = "(Ljava/lang/reflect/Method;)Ljava/lang/String;";
+      mInsn.name = "getMethodName";
       mInsn.owner = "com/coekie/flowtracker/hook/ReflectionHook";
-      mInsn.name = "getClassName";
-      mInsn.desc = "(Ljava/lang/Class;)Ljava/lang/String;";
       mInsn.setOpcode(Opcodes.INVOKESTATIC);
     }
   }
 
-  /** Add a {@link ClassNameCall} to `toInstrument` when we need to instrument it */
+  /** Add a {@link MethodNameCall} to `toInstrument` when we need to instrument it */
   static boolean analyze(List<Instrumentable> toInstrument, MethodInsnNode mInsn) {
-    if ("java/lang/Class".equals(mInsn.owner)
+    if ("java/lang/reflect/Method".equals(mInsn.owner)
         && "getName".equals(mInsn.name)
         && "()Ljava/lang/String;".equals(mInsn.desc)) {
-      toInstrument.add(new ClassNameCall(mInsn));
+      toInstrument.add(new MethodNameCall(mInsn));
       return true;
     }
     return false;

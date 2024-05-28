@@ -18,12 +18,28 @@ package com.coekie.flowtracker.hook;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
-public class FieldHook {
+/** Hooks for calls to reflection */
+@SuppressWarnings("unused") // used by instrumented code
+public class ReflectionHook {
+  /** Hook for {@link Class#getName()}, used in `ClassNameCall` */
+  public static String getClassName(Class<?> clazz) {
+    return StringHook.constantString(clazz.getName(), ClassOriginTracker.get(clazz),
+        6 /* after "class " */);
+  }
+
   /** Hook for {@link Field#getName()}, used in `FieldNameCall` */
-  public static String getName(Field field) {
+  public static String getFieldName(Field field) {
     String name = field.getName();
     ClassOriginTracker classTracker = ClassOriginTracker.get(field.getDeclaringClass());
     return StringHook.constantString(name, classTracker, classTracker.getFieldOffset(name));
+  }
+
+  /** Hook for {@link Method#getName()}, used in `MethodNameCall` */
+  public static String getMethodName(Method method) {
+    String name = method.getName();
+    ClassOriginTracker classTracker = ClassOriginTracker.get(method.getDeclaringClass());
+    return StringHook.constantString(name, classTracker, classTracker.getMethodOffset(name));
   }
 }

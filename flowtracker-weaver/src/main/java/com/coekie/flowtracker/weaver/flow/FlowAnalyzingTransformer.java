@@ -183,6 +183,7 @@ public class FlowAnalyzingTransformer implements Transformer {
                     || ArrayCloneCall.analyze(toInstrument, mInsn)
                     || ClassNameCall.analyze(toInstrument, mInsn)
                     || FieldNameCall.analyze(toInstrument, mInsn)
+                    || MethodNameCall.analyze(toInstrument, mInsn)
                     || TesterStore.analyze(toInstrument, mInsn, frame);
             if (!instrumented) { // don't instrument twice for invocations already handled above
               InvocationArgStore.analyze(toInstrument, mInsn, frame, frames, i);
