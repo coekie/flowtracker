@@ -76,7 +76,7 @@ public class FlowAnalyzingTransformer implements Transformer {
         // by default, we don't break String interning in most JDK classes, because some of them
         // depend on interning to work. we don't do that for other libraries, so this probably
         // breaks some libraries.
-        "+java.net.*,-java.*,+sun.net.*,-sun.*,+jdk.internal.net.*,-jdk.*");
+        "+java.net.*,+java.io.*,-java.*,+sun.net.*,-sun.*,+jdk.internal.net.*,-jdk.*");
   }
 
   private class FlowClassAdapter extends ClassVisitor {

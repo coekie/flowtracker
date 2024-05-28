@@ -19,8 +19,12 @@ public class SerializationDemoTest {
     out.assertThatPart("Deserialized: ", "myValue")
         .comesFromConstantInClass(SerializationDemo.class);
 
-    // names of fields and classes (through reflection) are not tracked
+    // class descriptor
+    out.assertThatPart("demo.SerializationDemo$Pojo")
+        .comesFromConstantInClass(SerializationDemo.Pojo.class);
+    // names of fields (through reflection) are not tracked
     out.assertThatPart("myField").isNotTracked();
+    // not tracked because of the call to String.intern() in java.io.ObjectStreamField.getSignature
     out.assertThatPart("java/lang/String").isNotTracked();
 
     // magic, from ObjectOutputStream.writeStreamHeader
