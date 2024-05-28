@@ -42,6 +42,10 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
+/** Our main bytecode {@link Transformer}, that runs dataflow analysis on code (using
+ * {@link FlowAnalyzer} and {@link FlowInterpreter}), finds relevant places to instrument
+ * ({@link Instrumentable}s), and instruments them.
+ */
 public class FlowAnalyzingTransformer implements Transformer {
   private static final Logger logger = new Logger("FlowAnalyzingTransformer");
 
@@ -143,9 +147,13 @@ public class FlowAnalyzingTransformer implements Transformer {
       FlowInterpreter interpreter = new FlowInterpreter(this);
       FlowAnalyzer analyzer = new FlowAnalyzer(interpreter, this);
       Frame<FlowValue>[] frames;
+      List<Instrumentable> toInstrument = new ArrayList<>();
 
       try {
         frames = analyzer.analyze(owner, this);
+        for (int i = 0; i < instructions.size(); i++) {
+          analyzeInstruction(toInstrument, i, frames);
+        }
       } catch (Exception e) {
         // up to this point we haven't made any changes yet, so we can handle failures somewhat
         // gracefully by just outputting what we have now. that way at least the other methods in
@@ -158,56 +166,6 @@ public class FlowAnalyzingTransformer implements Transformer {
         return;
       }
 
-      List<Instrumentable> toInstrument = new ArrayList<>();
-
-      for (int i = 0; i < instructions.size(); i++) {
-        AbstractInsnNode insn = instructions.get(i);
-        FlowFrame frame = (FlowFrame) frames[i];
-        switch (insn.getOpcode()) {
-          case Opcodes.CASTORE:
-            ArrayStore.analyzeCharArrayStore(toInstrument, (InsnNode) insn, frame);
-            break;
-          case Opcodes.BASTORE:
-            ArrayStore.analyzeByteArrayStore(toInstrument, (InsnNode) insn, frame);
-            break;
-          case Opcodes.IASTORE:
-            ArrayStore.analyzeIntArrayStore(toInstrument, (InsnNode) insn, frame, owner);
-            break;
-          case Opcodes.INVOKEVIRTUAL:
-          case Opcodes.INVOKESTATIC:
-          case Opcodes.INVOKESPECIAL:
-          case Opcodes.INVOKEINTERFACE:
-            MethodInsnNode mInsn = (MethodInsnNode) insn;
-            boolean instrumented =
-                ArrayCopyCall.analyze(toInstrument, mInsn, frame)
-                    || ArrayCloneCall.analyze(toInstrument, mInsn)
-                    || ClassNameCall.analyze(toInstrument, mInsn)
-                    || FieldNameCall.analyze(toInstrument, mInsn)
-                    || MethodNameCall.analyze(toInstrument, mInsn)
-                    || TesterStore.analyze(toInstrument, mInsn, frame);
-            if (!instrumented) { // don't instrument twice for invocations already handled above
-              InvocationArgStore.analyze(toInstrument, mInsn, frame, frames, i);
-            }
-            break;
-          case Opcodes.INVOKEDYNAMIC:
-            StringConcatenation.analyze(toInstrument, (InvokeDynamicInsnNode) insn, frame);
-            break;
-          case Opcodes.IRETURN:
-            InvocationReturnStore.analyze(toInstrument, (InsnNode) insn, frame, this);
-            break;
-          case Opcodes.PUTFIELD:
-            FieldStore.analyze(toInstrument, (FieldInsnNode) insn, frame);
-            break;
-          case Opcodes.LDC:
-            StringLdc.analyze(toInstrument, (LdcInsnNode) insn, frame);
-            break;
-          case Opcodes.IF_ACMPEQ:
-          case Opcodes.IF_ACMPNE:
-            StringComparison.analyze(toInstrument, (JumpInsnNode) insn, frame, owner);
-            break;
-        }
-      }
-
       listener.analysed(this, frames, toInstrument);
 
       for (Instrumentable instrumentable : toInstrument) {
@@ -218,6 +176,56 @@ public class FlowAnalyzingTransformer implements Transformer {
 
       // send the result to the next MethodVisitor
       this.accept(varSorter);
+    }
+
+    /** Analyze a single instruction, adding to `toInstrument` when we need to instrument it */
+    private void analyzeInstruction(List<Instrumentable> toInstrument, int insnIndex,
+        Frame<FlowValue>[] frames) {
+      AbstractInsnNode insn = instructions.get(insnIndex);
+      FlowFrame frame = (FlowFrame) frames[insnIndex];
+      switch (insn.getOpcode()) {
+        case Opcodes.CASTORE:
+          ArrayStore.analyzeCharArrayStore(toInstrument, (InsnNode) insn, frame);
+          break;
+        case Opcodes.BASTORE:
+          ArrayStore.analyzeByteArrayStore(toInstrument, (InsnNode) insn, frame);
+          break;
+        case Opcodes.IASTORE:
+          ArrayStore.analyzeIntArrayStore(toInstrument, (InsnNode) insn, frame, owner);
+          break;
+        case Opcodes.INVOKEVIRTUAL:
+        case Opcodes.INVOKESTATIC:
+        case Opcodes.INVOKESPECIAL:
+        case Opcodes.INVOKEINTERFACE:
+          MethodInsnNode mInsn = (MethodInsnNode) insn;
+          boolean instrumented =
+              ArrayCopyCall.analyze(toInstrument, mInsn, frame)
+                  || ArrayCloneCall.analyze(toInstrument, mInsn)
+                  || ClassNameCall.analyze(toInstrument, mInsn)
+                  || FieldNameCall.analyze(toInstrument, mInsn)
+                  || MethodNameCall.analyze(toInstrument, mInsn)
+                  || TesterStore.analyze(toInstrument, mInsn, frame);
+          if (!instrumented) { // don't instrument twice for invocations already handled above
+            InvocationArgStore.analyze(toInstrument, mInsn, frame, frames, insnIndex);
+          }
+          break;
+        case Opcodes.INVOKEDYNAMIC:
+          StringConcatenation.analyze(toInstrument, (InvokeDynamicInsnNode) insn, frame);
+          break;
+        case Opcodes.IRETURN:
+          InvocationReturnStore.analyze(toInstrument, (InsnNode) insn, frame, this);
+          break;
+        case Opcodes.PUTFIELD:
+          FieldStore.analyze(toInstrument, (FieldInsnNode) insn, frame);
+          break;
+        case Opcodes.LDC:
+          StringLdc.analyze(toInstrument, (LdcInsnNode) insn, frame);
+          break;
+        case Opcodes.IF_ACMPEQ:
+        case Opcodes.IF_ACMPNE:
+          StringComparison.analyze(toInstrument, (JumpInsnNode) insn, frame, owner);
+          break;
+      }
     }
 
     /** Create a new local variable for storing an object, initialized to null */
