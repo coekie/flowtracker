@@ -36,6 +36,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Frame;
@@ -122,6 +123,7 @@ public class FlowTransformer implements Transformer {
     final InsnList intro = new InsnList();
     final InvocationIncomingTransformation invocation = new InvocationIncomingTransformation();
     final ConstantsTransformation constantsTransformation;
+    int[] lineNumbers;
 
     private FlowMethod(MethodVisitor mv, String owner, int version, int access, String name,
         String desc, String signature, String[] exceptions,
@@ -140,6 +142,30 @@ public class FlowTransformer implements Transformer {
       } catch (Exception e) {
         throw new RuntimeException("Exception handling " + owner + " " + name + " " + desc, e);
       }
+    }
+
+    private void initLineNumbers() {
+      if (lineNumbers == null) {
+        lineNumbers = new int[instructions.size()];
+        int line = -1;
+        for (int i = 0; i < instructions.size(); i++) {
+          AbstractInsnNode insn = instructions.get(i);
+          if (insn instanceof LineNumberNode) {
+            LineNumberNode lnn = (LineNumberNode) insn;
+            line = lnn.line;
+          }
+          lineNumbers[i] = line;
+        }
+      }
+    }
+
+    int getLine(AbstractInsnNode insn) {
+      initLineNumbers();
+      if (instructions.size() != lineNumbers.length) {
+        // getLine should be called before we start instrumenting
+        throw new IllegalStateException("Cannot get line numbers after instructions were modified");
+      }
+      return lineNumbers[instructions.indexOf(insn)];
     }
 
     private void doVisitEnd() {

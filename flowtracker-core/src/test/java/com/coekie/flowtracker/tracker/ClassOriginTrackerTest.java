@@ -11,10 +11,10 @@ public class ClassOriginTrackerTest {
     assertThat(ClassOriginTracker.get(tracker.classId)).isSameInstanceAs(tracker);
 
     tracker.startMethod("myMethod");
-    ClassConstant constant = tracker.registerConstant('x');
+    ClassConstant constant = tracker.registerConstant('x', 7);
     assertThat(tracker.getContent().toString()).isEqualTo("class myClass\n"
             + "myMethod:\n"
-            + "  x\n");
+            + "  (line 7) x\n");
     assertThat(tracker.getContent().charAt(constant.offset)).isEqualTo('x');
   }
 
@@ -23,10 +23,10 @@ public class ClassOriginTrackerTest {
     assertThat(ClassOriginTracker.get(tracker.classId)).isSameInstanceAs(tracker);
 
     tracker.startMethod("myMethod");
-    ClassConstant constant = tracker.registerConstant(9999);
+    ClassConstant constant = tracker.registerConstant(9999, 7);
     assertThat(tracker.getContent().toString()).isEqualTo("class myClass\n"
         + "myMethod:\n"
-        + "  0x270f (9999)\n");
+        + "  (line 7) 0x270f (9999)\n");
     assertThat(tracker.getContent().subSequence(constant.offset, constant.offset + constant.length))
         .isEqualTo("0x270f (9999)");
   }

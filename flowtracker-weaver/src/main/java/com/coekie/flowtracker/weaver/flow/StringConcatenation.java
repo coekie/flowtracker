@@ -75,6 +75,7 @@ class StringConcatenation extends Store {
    * array. If there are no tracked char args, then the array is null.
    */
   private final FlowValue[] trackableCharArgs;
+  private final int line;
 
   private StringConcatenation(InvokeDynamicInsnNode insn, FlowFrame frame) {
     super(frame);
@@ -95,6 +96,7 @@ class StringConcatenation extends Store {
       }
     }
     this.trackableCharArgs = trackableCharArgs;
+    this.line = frame.getLine();
   }
 
   @Override
@@ -112,7 +114,7 @@ class StringConcatenation extends Store {
       for (int i = 0; i < bsmArgs.length; i++) {
         if (bsmArgs[i] instanceof String) {
           String argValue = (String) bsmArgs[i];
-          int offset = constantsTransformation.trackConstantString(methodNode, argValue);
+          int offset = constantsTransformation.trackConstantString(methodNode, argValue, line);
           bsmArgs[i] = constantsTransformation.stringConstantDynamic(offset, argValue);
         }
       }

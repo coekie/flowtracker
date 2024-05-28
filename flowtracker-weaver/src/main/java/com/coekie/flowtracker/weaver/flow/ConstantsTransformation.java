@@ -60,19 +60,19 @@ class ConstantsTransformation {
     }
   }
 
-  ClassConstant trackConstant(FlowMethod methodNode, int value) {
+  ClassConstant trackConstant(FlowMethod methodNode, int value, int line) {
     maybeAddMethodHeader(methodNode);
-    return tracker().registerConstant(value);
+    return tracker().registerConstant(value, line);
   }
 
-  int trackConstantString(FlowMethod methodNode, String value) {
+  int trackConstantString(FlowMethod methodNode, String value, int line) {
     maybeAddMethodHeader(methodNode);
-    return tracker().registerConstantString(value);
+    return tracker().registerConstantString(value, line);
   }
 
   /**
    * ConstantDynamic representing the given String value, which should be at `offset` in `tracker`
-   * (the offset returned by {@link #trackConstantString(FlowMethod, String)}).
+   * (the offset returned by {@link #trackConstantString(FlowMethod, String, int)}).
    */
   ConstantDynamic stringConstantDynamic(int offset, String value) {
     return new ConstantDynamic("$ft" + offset,

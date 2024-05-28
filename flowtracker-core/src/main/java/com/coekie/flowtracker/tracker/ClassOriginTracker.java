@@ -96,8 +96,8 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     content.append(method).append(":\n");
   }
 
-  public synchronized ClassConstant registerConstant(int value) {
-    content.append("  ");
+  public synchronized ClassConstant registerConstant(int value, int line) {
+    appendConstantPrefix(line);
     int offset = content.length();
     if (value >= 32 && value < 127) { // printable ascii characters
       content.append((char) value);
@@ -110,11 +110,18 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     return result;
   }
 
-  public synchronized int registerConstantString(String value) {
-    content.append("  ");
+  public synchronized int registerConstantString(String value, int line) {
+    appendConstantPrefix(line);
     int offset = content.length();
     content.append(value).append('\n');
     return offset;
+  }
+
+  private void appendConstantPrefix(int line) {
+    content.append("  ");
+    if (line != -1) {
+      content.append("(line ").append(line).append(") ");
+    }
   }
 
   public synchronized int getFieldOffset(String name) {

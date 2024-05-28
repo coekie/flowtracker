@@ -30,17 +30,18 @@ import org.objectweb.asm.tree.MethodInsnNode;
 
 class ConstantValue extends TrackableValue {
   private final int value;
+  private final int line;
   private ClassConstant constant;
 
-  ConstantValue(FlowMethod method, Type type,
-      AbstractInsnNode insn, int value) {
+  ConstantValue(FlowMethod method, Type type, AbstractInsnNode insn, int value) {
     super(method, type, insn);
     this.value = value;
+    this.line = method.getLine(insn);
   }
 
   @Override
   void insertTrackStatements() {
-    constant = method.constantsTransformation.trackConstant(method, value);
+    constant = method.constantsTransformation.trackConstant(method, value, line);
   }
 
   @Override

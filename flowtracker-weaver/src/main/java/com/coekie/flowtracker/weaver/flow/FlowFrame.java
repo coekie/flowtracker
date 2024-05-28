@@ -60,6 +60,10 @@ class FlowFrame extends Frame<FlowValue> {
     return analyzer.method;
   }
 
+  int getLine() {
+    return getMethod().getLine(getInsn());
+  }
+
   /** Stack size as should be reported in byte code, counting long and double as two */
   int fullStackSize() {
     int stackSize = 0;

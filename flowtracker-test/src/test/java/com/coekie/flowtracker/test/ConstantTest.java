@@ -71,7 +71,7 @@ public class ConstantTest {
     assertThat(tracker.getContent().toString()).isEqualTo(
         "class com.coekie.flowtracker.test.ConstantTest$MyClass\n"
             + "char myMethod(int, java.lang.String):\n"
-            + "  c\n");
+            + "  (line 81) c\n");
   }
 
   static class MyClass {

@@ -29,10 +29,12 @@ import org.objectweb.asm.tree.MethodInsnNode;
 class StringLdc extends Instrumentable {
   private final LdcInsnNode insn;
   private final FlowFrame frame;
+  private final int line;
 
   private StringLdc(LdcInsnNode insn, FlowFrame frame) {
     this.insn = insn;
     this.frame = frame;
+    this.line = frame.getLine();
   }
 
   @Override
@@ -40,7 +42,7 @@ class StringLdc extends Instrumentable {
     ConstantsTransformation constantsTransformation = methodNode.constantsTransformation;
     if (constantsTransformation.canBreakStringInterning()) {
       String value = (String) insn.cst;
-      int offset = constantsTransformation.trackConstantString(methodNode, value);
+      int offset = constantsTransformation.trackConstantString(methodNode, value, line);
       // we prefer to use constant-dynamic, that is replacing just the LDC value. That is better for
       // performance, and at least partially maintains the properties of String interning: the
       // literal String loaded from the same location in the code will still always be the same
