@@ -194,7 +194,15 @@ class HookSpec {
 
     @Override
     public void visitMaxs(int maxStack, int maxLocals) {
-      super.visitMaxs(Math.max(maxStack, hookArguments.length + 1), maxLocals);
+      int hookStackSize = 0;
+      for (HookArgumentInstance argumentInstance : argumentInstances) {
+        hookStackSize += argumentInstance.getType(HookSpec.this).getSize();
+      }
+      // in theory anything could be on the stack at the point where we call our hook; but in
+      // practice it's either nothing or only the return value
+      hookStackSize += HookSpec.this.targetMethod.getReturnType().getSize();
+
+      super.visitMaxs(Math.max(maxStack, hookStackSize), maxLocals);
     }
   }
 
