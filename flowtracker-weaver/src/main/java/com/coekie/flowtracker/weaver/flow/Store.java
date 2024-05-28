@@ -23,9 +23,11 @@ import org.objectweb.asm.tree.InsnNode;
 /** Represents an instruction that stores a (possibly tracked) value in an object. */
 abstract class Store extends Instrumentable implements FlowValue.FallbackSource {
   final FlowFrame frame;
+  final int line;
 
   Store(FlowFrame frame) {
     this.frame = frame;
+    this.line = frame.getLine();
   }
 
   FlowValue getStackFromTop(int indexFromTop) {
@@ -42,6 +44,26 @@ abstract class Store extends Instrumentable implements FlowValue.FallbackSource 
 
   @Override
   public void loadSourcePointFallback(InsnList toInsert) {
+//    FlowMethod method = frame.getMethod();
+//    ClassConstant untracked = method.constantsTransformation.untracked(method,
+//        line);
+    // TODO debugging...
+    //ConstantsTransformation.loadClassConstantPoint(toInsert, method, untracked);
+    //toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+//    if (method.canUseConstantDynamic()) {
+//      ConstantsTransformation.loadClassConstantPointWithCondy(toInsert, method, untracked);
+//    } else {
+//      toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+//    }
     toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+  }
+
+  boolean shouldTrack(FlowValue v) {
+    // TODO debugging...
+    // a more conservative approach (which we used to do) here would be:
+    return v.isTrackable();
+    // but to see where in code "untracked" values come from, we load sources even of values that
+    // are not trackable.
+    //return true;
   }
 }

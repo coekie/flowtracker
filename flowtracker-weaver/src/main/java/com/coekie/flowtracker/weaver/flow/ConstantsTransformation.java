@@ -18,6 +18,7 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassConstant;
+import com.coekie.flowtracker.util.RecursionChecker;
 import com.coekie.flowtracker.weaver.ClassFilter;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.ConstantDynamic;
@@ -25,9 +26,11 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 
 /** Manages transformation for constant values ({@link ConstantValue}, and String constants) */
 class ConstantsTransformation {
@@ -63,6 +66,11 @@ class ConstantsTransformation {
   ClassConstant trackConstant(FlowMethod methodNode, int value, int line) {
     maybeAddMethodHeader(methodNode);
     return tracker().registerConstant(value, line);
+  }
+
+  ClassConstant untracked(FlowMethod methodNode, int line) {
+    maybeAddMethodHeader(methodNode);
+    return tracker().registerUntracked(line);
   }
 
   int trackConstantString(FlowMethod methodNode, String value, int line) {
@@ -125,6 +133,65 @@ class ConstantsTransformation {
       return new IntInsnNode(Opcodes.SIPUSH, intValue);
     } else {
       return new LdcInsnNode(intValue);
+    }
+  }
+
+  static void loadClassConstantPoint(InsnList toInsert, FlowMethod method, ClassConstant constant) {
+    // we prefer to use constant-dynamic, for performance, but fall back to invoking
+    // ConstantHook.constantPoint every time when necessary.
+    if (method.canUseConstantDynamic()) {
+      loadClassConstantPointWithCondy(toInsert, method, constant);
+    } else {
+      loadClassConstantPointWithoutCondy(toInsert, method, constant);
+    }
+  }
+
+  static void loadClassConstantPointWithCondy(InsnList toInsert, FlowMethod method,
+      ClassConstant constant) {
+    method.addComment(toInsert,
+        "loadClassConstantPoint: condy ConstantHook.constantPoint(%s, %s, %s)",
+        constant.classId, constant.offset, constant.length);
+    if (RecursionChecker.enabled()) {
+      toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+          "com/coekie/flowtracker/util/RecursionChecker", "before", "()V"));
+    }
+    ConstantDynamic cd = new ConstantDynamic("$ft" + constant.offset,
+        "Lcom/coekie/flowtracker/tracker/TrackerPoint;",
+        new Handle(Opcodes.H_INVOKESTATIC,
+            "com/coekie/flowtracker/hook/ConstantHook",
+            "constantPoint",
+            "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;III)"
+                + "Lcom/coekie/flowtracker/tracker/TrackerPoint;",
+            false),
+        constant.classId, constant.offset, constant.length);
+    toInsert.add(new LdcInsnNode(cd));
+    if (RecursionChecker.enabled()) {
+      toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
+          "com/coekie/flowtracker/util/RecursionChecker", "after", "()V"));
+    }
+  }
+
+  private static void loadClassConstantPointWithoutCondy(InsnList toInsert, FlowMethod method,
+      ClassConstant constant) {
+    method.addComment(toInsert,
+        "loadClassConstantPoint: ConstantHook.constantPoint(%s, %s)",
+        constant.classId, constant.offset);
+    toInsert.add(iconst(constant.classId));
+    toInsert.add(iconst(constant.offset));
+    toInsert.add(
+        new MethodInsnNode(Opcodes.INVOKESTATIC,
+            "com/coekie/flowtracker/hook/ConstantHook",
+            "constantPoint",
+            "(II)Lcom/coekie/flowtracker/tracker/TrackerPoint;"));
+    if (constant.length != 1) {
+      method.addComment(toInsert,
+          "ConstantValue.loadSourcePoint: ConstantHook.withLength(%s)", constant.length);
+      toInsert.add(iconst(constant.length));
+      toInsert.add(
+          new MethodInsnNode(Opcodes.INVOKESTATIC,
+              "com/coekie/flowtracker/hook/ConstantHook",
+              "withLength",
+              "(Lcom/coekie/flowtracker/tracker/TrackerPoint;I)Lcom/coekie/flowtracker/tracker/TrackerPoint;"));
     }
   }
 }

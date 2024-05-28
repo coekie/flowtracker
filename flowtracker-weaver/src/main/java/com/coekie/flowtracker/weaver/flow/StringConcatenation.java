@@ -75,7 +75,6 @@ class StringConcatenation extends Store {
    * array. If there are no tracked char args, then the array is null.
    */
   private final FlowValue[] trackableCharArgs;
-  private final int line;
 
   private StringConcatenation(InvokeDynamicInsnNode insn, FlowFrame frame) {
     super(frame);
@@ -96,7 +95,6 @@ class StringConcatenation extends Store {
       }
     }
     this.trackableCharArgs = trackableCharArgs;
-    this.line = frame.getLine();
   }
 
   @Override

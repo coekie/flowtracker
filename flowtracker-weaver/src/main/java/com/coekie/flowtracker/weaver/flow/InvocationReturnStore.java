@@ -40,7 +40,7 @@ class InvocationReturnStore extends Store {
   @Override
   void instrument(FlowMethod methodNode) {
     // if we know where the value we are returning came from
-    if (returnedValue.isTrackable()) {
+    if (shouldTrack(returnedValue)) {
       InsnList toInsert = new InsnList();
       methodNode.addComment(toInsert, "begin InvocationReturnStore.insertTrackStatements");
 

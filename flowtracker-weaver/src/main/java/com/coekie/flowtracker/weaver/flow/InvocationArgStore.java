@@ -84,7 +84,7 @@ class InvocationArgStore extends Store {
     for (int i = 0; i < args.length; i++) {
       FlowValue arg = args[i];
       // if we know where the value passed in as argument came from
-      if (arg != null && arg.isTrackable()) {
+      if (arg != null && shouldTrack(arg)) {
         arg.ensureTracked();
         arg.loadSourcePoint(toInsert, this);
         toInsert.add(
@@ -106,7 +106,7 @@ class InvocationArgStore extends Store {
 
   private boolean anyArgIsTrackable() {
     for (FlowValue arg : args) {
-      if (arg != null && arg.isTrackable()) {
+      if (arg != null && shouldTrack(arg)) {
         return true;
       }
     }

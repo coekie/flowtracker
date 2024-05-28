@@ -110,6 +110,15 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     return result;
   }
 
+  public synchronized ClassConstant registerUntracked(int line) {
+    appendConstantPrefix(line);
+    int offset = content.length();
+    content.append("<untracked>");
+    ClassConstant result = new ClassConstant(classId, offset, content.length() - offset);
+    content.append('\n');
+    return result;
+  }
+
   public synchronized int registerConstantString(String value, int line) {
     appendConstantPrefix(line);
     int offset = content.length();
