@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.hook.ReflectionHook;
-import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
 import java.lang.reflect.Method;
 import java.util.List;
 import org.objectweb.asm.Opcodes;

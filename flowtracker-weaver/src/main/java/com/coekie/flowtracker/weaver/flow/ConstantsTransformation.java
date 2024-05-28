@@ -19,7 +19,7 @@ package com.coekie.flowtracker.weaver.flow;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassConstant;
 import com.coekie.flowtracker.weaver.ClassFilter;
-import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;

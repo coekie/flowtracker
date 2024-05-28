@@ -10,8 +10,8 @@ import static org.objectweb.asm.Opcodes.RET;
 import static org.objectweb.asm.Opcodes.RETURN;
 
 import com.coekie.flowtracker.util.Config;
-import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.AnalysisListener;
-import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer.FlowMethodAdapter;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.AnalysisListener;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethodAdapter;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
@@ -105,7 +105,7 @@ public class FlowAnalyzerTest {
   // analysis/transformation of extracted bytecode.
   @Test public void testAsm() {
     TestAnalysisListener listener = new TestAnalysisListener();
-    ClassVisitor classVisitor = new FlowAnalyzingTransformer(Config.empty(), listener).transform(
+    ClassVisitor classVisitor = new FlowTransformer(Config.empty(), listener).transform(
         "java/Example", new ClassWriter(0));
     classVisitor.visit(0, 0, "java/Example", null, null, null);
     {
@@ -124,7 +124,7 @@ public class FlowAnalyzerTest {
   // JSR is only used by code compiled for older java versions.
   @Test public void testJsr() {
     TestAnalysisListener listener = new TestAnalysisListener();
-    ClassVisitor classVisitor = new FlowAnalyzingTransformer(Config.empty(), listener).transform(
+    ClassVisitor classVisitor = new FlowTransformer(Config.empty(), listener).transform(
         "java/Example", new ClassWriter(0));
     classVisitor.visit(0, 0, "java/Example", null, null, null);
     {
@@ -166,7 +166,7 @@ public class FlowAnalyzerTest {
     TestAnalysisListener listener = new TestAnalysisListener();
 
     ClassVisitor transformer =
-        new FlowAnalyzingTransformer(Config.empty(), listener)
+        new FlowTransformer(Config.empty(), listener)
             .transform(Type.getInternalName(o.getClass()), new ClassWriter(0));
 
     try {

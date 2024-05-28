@@ -8,7 +8,7 @@ import com.coekie.flowtracker.hook.StringHook;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import org.junit.Test;
 
-/** Test FlowAnalyzingTransformer and friends */
+/** Test FlowTransformer and friends */
 @SuppressWarnings("StringBufferMayBeStringBuilder")
 public class FlowAnalysisTest {
   private final FlowTester ft = new FlowTester();

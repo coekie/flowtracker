@@ -21,7 +21,7 @@ import com.coekie.flowtracker.util.Config;
 import com.coekie.flowtracker.util.Logger;
 import com.coekie.flowtracker.weaver.debug.DumpTextTransformer;
 import com.coekie.flowtracker.weaver.debug.RealCommentator;
-import com.coekie.flowtracker.weaver.flow.FlowAnalyzingTransformer;
+import com.coekie.flowtracker.weaver.flow.FlowTransformer;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,7 +75,7 @@ class AsmTransformer implements ClassFileTransformer {
   private final String dumpTextPrefix;
   private final Config config;
   private final HookSpecTransformer hookSpecTransformer;
-  private final FlowAnalyzingTransformer flowAnalyzingTransformer;
+  private final FlowTransformer flowTransformer;
 
   public AsmTransformer(Config config) {
     toInstrumentFilter = new ClassFilter(config.get("filter", DEFAULT_FILTER), RECOMMENDED_FILTER);
@@ -88,7 +88,7 @@ class AsmTransformer implements ClassFileTransformer {
     dumpTextPrefix = config.get("dumpTextPrefix", "");
     this.config = config;
     hookSpecTransformer = GeneratedHookSpecs.createTransformer(config);
-    flowAnalyzingTransformer = new FlowAnalyzingTransformer(config);
+    flowTransformer = new FlowTransformer(config);
   }
 
   public byte[] transform(ClassLoader loader, String className,
@@ -175,12 +175,12 @@ class AsmTransformer implements ClassFileTransformer {
     if (toInstrumentFilter.include(className)) {
       result = Transformer.and(result, new SuspendInvocationTransformer());
       if (dumpTextPath == null || !className.startsWith(dumpTextPrefix)) {
-        result = Transformer.and(result, flowAnalyzingTransformer);
+        result = Transformer.and(result, flowTransformer);
       } else {
         // if we're dumping the text, then use RealCommentator to instrument it, so that the dumped
         // text includes comments
-        FlowAnalyzingTransformer flowTransformer
-            = new FlowAnalyzingTransformer(config, new RealCommentator());
+        FlowTransformer flowTransformer
+            = new FlowTransformer(config, new RealCommentator());
         result = Transformer.and(result,
             new DumpTextTransformer(flowTransformer, dumpTextPath));
       }

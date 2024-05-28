@@ -7,7 +7,7 @@ import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 
 /**
- * Helper for testing instrumentation of FlowAnalyzingTransformer and its TrackableValues and
+ * Helper for testing instrumentation of FlowTransformer and its TrackableValues and
  * Stores. A FlowTester instance represents a source of a particular TrackableValue (e.g. a byte,
  * with tracking of where it came from).
  * <p>

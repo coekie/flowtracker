@@ -46,32 +46,32 @@ import org.objectweb.asm.util.TraceMethodVisitor;
  * {@link FlowAnalyzer} and {@link FlowInterpreter}), finds relevant places to instrument
  * ({@link Instrumentable}s), and instruments them.
  */
-public class FlowAnalyzingTransformer implements Transformer {
-  private static final Logger logger = new Logger("FlowAnalyzingTransformer");
+public class FlowTransformer implements Transformer {
+  private static final Logger logger = new Logger("FlowTransformer");
 
   private final Commentator commentator;
   private final AnalysisListener listener;
   private final ClassFilter breakStringInterningFilter;
 
-  public FlowAnalyzingTransformer(Config config) {
+  public FlowTransformer(Config config) {
     this(config,
         new Commentator(), // noop Commentator
         new AnalysisListener()); // noop Listener
 
   }
 
-  public FlowAnalyzingTransformer(Config config, Commentator commentator) {
+  public FlowTransformer(Config config, Commentator commentator) {
     this(config, commentator,
         new AnalysisListener()); // noop Listener
   }
 
-  public FlowAnalyzingTransformer(Config config, AnalysisListener listener) {
+  public FlowTransformer(Config config, AnalysisListener listener) {
     this(config,
         new Commentator(), // noop Commentator
         listener);
   }
 
-  private FlowAnalyzingTransformer(Config config, Commentator commentator,
+  private FlowTransformer(Config config, Commentator commentator,
       AnalysisListener listener) {
     this.commentator = commentator;
     this.listener = listener;
