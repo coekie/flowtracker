@@ -1,6 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.hook.StringHook.getStringTracker;
+import static com.coekie.flowtracker.test.TrackTestHelper.getClassOriginTrackerContent;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static com.coekie.flowtracker.test.TrackTestHelper.untrackedString;
@@ -10,7 +11,6 @@ import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.hook.StringConcatFactoryHook;
-import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import java.lang.invoke.StringConcatFactory;
@@ -142,18 +142,6 @@ public class StringTest {
     // would have been nice if they were, but currently multiple invocations do not return the same
     // instance.
     assertThat(NoCondy.ldcNoCondy()).isNotSameInstanceAs(NoCondy.ldcNoCondy());
-  }
-
-  /**
-   * Extract the contents of the ClassOriginTracker that the give part points to. This is to
-   * validate that the source that the part points to really contains the expected value.
-   */
-  static String getClassOriginTrackerContent(TrackerSnapshot.Part part) {
-    assertThat(part.source).isInstanceOf(ClassOriginTracker.class);
-    ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
-    return sourceTracker.getContent()
-        .subSequence(part.sourceIndex, part.sourceIndex + part.length)
-        .toString();
   }
 
   /**

@@ -1,5 +1,8 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.test.FlowTester.getCharSourcePoint;
+import static com.coekie.flowtracker.test.FlowTester.untrackedChar;
+import static com.coekie.flowtracker.test.TrackTestHelper.assertIsFallbackIn;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static com.google.common.truth.Truth.assertThat;
@@ -41,12 +44,18 @@ public class FlowAnalysisTest {
         TrackerSnapshot.snapshot().trackString(3, abc, 0));
   }
 
+  @Test public void fallback() {
+    char[] array = new char[2];
+    array[0] = untrackedChar('c');
+    assertIsFallbackIn(getCharSourcePoint(array[0]), FlowAnalysisTest.class.getName());
+  }
+
   // This one is hard.
   // Both assignments into array come from the same statement,
   // but "secondLast" does not contain the *last* execution of that statement anymore.
   // Ideally, we would follow the flow of these local variables; but that's not so important now.
-  // But we must detect this, and mark the origin as unknown.
-  @Test public void charAtFlow() {
+  // But we must detect this, and mark the origin as unknown (fallback).
+  @Test public void delayedFlow() {
     String abc = trackCopy("abc");
 
     char[] array = new char[2];
@@ -62,30 +71,13 @@ public class FlowAnalysisTest {
     array[0] = secondLast;
     array[1] = last;
 
-    TrackerSnapshot.assertThatTrackerOf(array).matches(
-        TrackerSnapshot.snapshot().gap(1).trackString(1, abc, 1));
+    // because of FallbackSource, it's not actually a gap. but it is _almost_ this:
+//    TrackerSnapshot.assertThatTrackerOf(array).matches(
+//        TrackerSnapshot.snapshot().gap(1).trackString(1, abc, 1));
+    assertIsFallbackIn(getCharSourcePoint(array[0]), FlowAnalysisTest.class.getName());
+
     // if we would track secondLast through the loop, then this would be:
     //   snapshotBuilder().trackString(abc, 0, 2).assertTrackerOf(array);
-  }
-
-  // we store the origin of a value before we actually call the method,
-  // so what happens if it throws an exception...
-  @Test public void charAtException() {
-    String abc = trackCopy("abc");
-
-    char[] array = new char[10];
-
-    char x = abc.charAt(1);
-
-    try {
-      x = abc.charAt(1000);
-    } catch (IndexOutOfBoundsException ignore) {
-    }
-    array[0] = x;
-
-    // it still has the old value
-    TrackerSnapshot.assertThatTrackerOf(array).matches(
-        TrackerSnapshot.snapshot().trackString(1, abc, 1));
   }
 
   char[] chars = new char[]{FlowTester.untrackedChar('.')};
@@ -94,7 +86,7 @@ public class FlowAnalysisTest {
   //  MergedValue.getCreationInsn is null, so MergedValue.isTrackable() is false
   @Test public void mergeWithParamSwitch() {
     doMergeWithParamSwitch(ft.createSourceChar('a'), 1);
-    assertThat(FlowTester.getCharSourcePoint(chars[0])).isNull();
+    assertThat(getCharSourcePoint(chars[0]).tracker).isNull();
   }
 
   @SuppressWarnings("all")
@@ -111,7 +103,7 @@ public class FlowAnalysisTest {
   // both.
   @Test public void mergeWithParamIf() {
     doMergeWithParamIf(ft.createSourceChar('a'), false);
-    assertThat(FlowTester.getCharSourcePoint(chars[0])).isNull();
+    assertIsFallbackIn(getCharSourcePoint(chars[0]), FlowAnalysisTest.class.getName());
   }
 
   @SuppressWarnings("all")

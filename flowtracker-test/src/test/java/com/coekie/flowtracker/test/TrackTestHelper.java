@@ -3,9 +3,12 @@ package com.coekie.flowtracker.test;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.hook.StringHook;
+import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.FixedOriginTracker;
 import com.coekie.flowtracker.tracker.Tracker;
+import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
+import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import java.util.List;
 import java.util.function.Predicate;
@@ -75,6 +78,15 @@ public class TrackTestHelper {
     return result;
   }
 
+  /**
+   * We use this instead of {@link FlowTester#untrackedChar(char)}, because we don't want the
+   * "fallback" to kick in (we don't want to test a TrackerPoint pointing to a
+   * {@link ClassOriginTracker#FALLBACK}; we want a null TrackerPoint).
+   */
+  static char nullSourceChar(char c) {
+    return FlowTester.withNullTracker().createSourceChar(c);
+  }
+
   /** Fluent API to assert stuff about trackers */
   public static NodeAssertions assertThatTrackerNode(Object sut) {
     return new NodeAssertions(tracker(sut));
@@ -82,6 +94,36 @@ public class TrackTestHelper {
 
   private static Tracker tracker(Object o) {
     return o instanceof Tracker ? (Tracker) o : TrackerRepository.getTracker(o);
+  }
+
+  /**
+   * Extract the contents of the ClassOriginTracker that the give part points to. This is to
+   * validate that the source that the part points to really contains the expected value.
+   */
+  static String getClassOriginTrackerContent(TrackerSnapshot.Part part) {
+    assertThat(part.source).isInstanceOf(ClassOriginTracker.class);
+    ClassOriginTracker sourceTracker = (ClassOriginTracker) part.source;
+    return sourceTracker.getContent()
+        .subSequence(part.sourceIndex, part.sourceIndex + part.growth.targetToSource(part.length))
+        .toString();
+  }
+
+  static String getClassOriginTrackerContent(TrackerPoint point) {
+    return getClassOriginTrackerContent(TrackerSnapshot.Part.ofPoint(point));
+  }
+
+  /**
+   * Assert that the part of the snapshot is essentially untracked, that it used the
+   * {@link ClassOriginTracker#FALLBACK}.
+   */
+  static void assertIsFallbackIn(TrackerSnapshot.Part part, String className) {
+    assertThat(getClassOriginTrackerContent(part)).isEqualTo(ClassOriginTracker.FALLBACK);
+    assertThat(((ClassOriginTracker) part.source).getContent().toString())
+        .startsWith("class " + className);
+  }
+
+  static void assertIsFallbackIn(TrackerPoint point, String className) {
+    assertIsFallbackIn(TrackerSnapshot.Part.ofPoint(point), className);
   }
 
   /** @see #assertThatTrackerNode(Object) */

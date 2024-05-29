@@ -62,13 +62,21 @@ class InvocationReturnValue extends TrackableValue {
   static boolean shouldInstrumentInvocation(String name, String desc) {
     Type returnType = Type.getReturnType(desc);
     if (returnType.equals(Type.BYTE_TYPE) || returnType.equals(Type.CHAR_TYPE)) {
+
+      // exclude String.coder() and AbstractStringBuilder.getCoder() for performance and
+      // circularity problems
+      if (name.equals("coder") || name.equals("getCoder")) {
+        return false;
+      }
+
       return true;
     }
 
     if (returnType.equals(Type.INT_TYPE)) {
       // heuristic guessing which methods are worth tracking the return value of, because that
       // probably is a char or byte read from somewhere
-      if ((name.contains("read") || name.contains("Read"))
+      // (but avoiding ConcurrentHashMap.spread because of circularity)
+      if (((name.contains("read") && !name.contains("spread")) || name.contains("Read"))
           // don't instrument methods where the output is going through a buffer passed into it as
           // parameter. for those, the returned value is probably the length
           && !desc.contains("[") && !desc.contains("Buffer")) {

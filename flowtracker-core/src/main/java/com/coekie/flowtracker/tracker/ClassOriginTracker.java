@@ -31,6 +31,12 @@ import java.util.concurrent.ConcurrentMap;
  * contains everything that _could_ be tracked. That's simpler to implement.
  */
 public class ClassOriginTracker extends OriginTracker implements CharContentTracker {
+  /**
+   * Content in the tracker for untracked values; that is values where we didn't track where they
+   * originally came from, but we point to where in the code we started tracking them.
+   */
+  public static final String FALLBACK = "<untracked>";
+
   private static final List<ClassOriginTracker> trackers = new ArrayList<>();
 
   /** Cache for finding ClassOriginTracker from a java.lang.Class */
@@ -113,7 +119,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
   public synchronized ClassConstant registerUntracked(int line) {
     appendConstantPrefix(line);
     int offset = content.length();
-    content.append("<untracked>");
+    content.append(FALLBACK);
     ClassConstant result = new ClassConstant(classId, offset, content.length() - offset);
     content.append('\n');
     return result;

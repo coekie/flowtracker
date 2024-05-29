@@ -1,6 +1,6 @@
 package com.coekie.flowtracker.test;
 
-import static com.coekie.flowtracker.test.FlowTester.untrackedChar;
+import static com.coekie.flowtracker.test.TrackTestHelper.nullSourceChar;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
@@ -52,7 +52,7 @@ public class BufferedWriterTest {
   @Test public void gaps() throws IOException {
     String str = trackCopy("abcd");
     bw.write(str);
-    bw.write(untrackedChar('e'));
+    bw.write(nullSourceChar('e'));
     bw.write(str);
     bw.flush();
     TrackerSnapshot.assertThatTrackerOf(out).matches(
@@ -68,10 +68,14 @@ public class BufferedWriterTest {
     outerBw.write(str);
     // testing that a gap also gets properly written *out* of a BufferedWriter
     // (from outerBw into bw, overwriting the previous tracker there)
-    outerBw.write(untrackedChar('c'));
+    outerBw.write(nullSourceChar('c'));
     outerBw.write(str);
     outerBw.flush();
-    TrackerSnapshot.assertThatTrackerOf(out).matches(
-        TrackerSnapshot.snapshot().trackString(str).trackString(str).trackString(str).gap(1).trackString(str));
+    TrackerSnapshot.assertThatTrackerOf(out).matches(TrackerSnapshot.snapshot()
+        .trackString(str)
+        .trackString(str)
+        .trackString(str)
+        .gap(1)
+        .trackString(str));
   }
 }

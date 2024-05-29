@@ -1,10 +1,13 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.test.TrackTestHelper.assertIsFallbackIn;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
+import com.coekie.flowtracker.tracker.TrackerRepository;
+import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharsetEncoder;
@@ -43,9 +46,11 @@ public class CharsetEncoderTest {
     utf8Encoder().encode(CharBuffer.wrap(chars), bb, false);
 
     assertThat(bb.array()).isEqualTo("a\u00A3bc\0".getBytes());
-    // TODO this isn't right, lost track of the non-ascii char
-    assertThatTrackerOf(bb.array()).matches(snapshot()
-        .track(1, chars, 0).gap(2).track(2, chars, 2));
+    // TODO this isn't right, lost track of the non-ascii char.
+    // note: because of the `FallbackSource` it's not actually a "gap"; but it points to coming from
+    // the encoder (which is still better than nothing, I guess).
+    TrackerSnapshot snapshot = TrackerSnapshot.of(TrackerRepository.getTracker(bb.array()));
+    assertIsFallbackIn(snapshot.getParts().get(1), "sun.nio.cs.UTF_8$Encoder");
   }
 
   // TODO test non-ASCII chars. also test cases with surrogate pairs (especially tricky with

@@ -146,6 +146,12 @@ class InvocationArgStore extends Store {
           return result;
         }
         break;
+      case "java/lang/String":
+        // don't track "coder"
+        if (name.equals("getBytes")) {
+          return null;
+        }
+        break;
     }
 
     boolean eager = name.contains("write") || name.contains("Write") || name.contains("print");

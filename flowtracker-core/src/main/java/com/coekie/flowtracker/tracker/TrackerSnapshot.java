@@ -144,6 +144,10 @@ public class TrackerSnapshot {
           * 31 + Objects.hashCode(source.hashCode()))
           * 31 + sourceIndex;
     }
+
+    public static Part ofPoint(TrackerPoint point) {
+      return new Part(0, point.length, point.tracker, point.index, Growth.NONE);
+    }
   }
 
   private static class Collector implements WritableTracker {

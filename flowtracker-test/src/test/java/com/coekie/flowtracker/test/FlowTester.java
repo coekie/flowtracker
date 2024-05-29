@@ -114,7 +114,7 @@ class FlowTester {
   }
 
   TrackerPoint point() {
-    return TrackerPoint.of(tracker, index, length);
+    return tracker == null ? null : TrackerPoint.of(tracker, index, length);
   }
 
   /**
@@ -252,6 +252,10 @@ class FlowTester {
 
   static char untrackedChar(char c) {
     return c;
+  }
+
+  static FlowTester withNullTracker() {
+    return new FlowTester(null, -1, -1);
   }
 
   private static AssertionError sourceNotTrackedError() {

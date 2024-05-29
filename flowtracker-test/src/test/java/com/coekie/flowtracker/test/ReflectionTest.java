@@ -1,7 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.hook.StringHook.getStringTracker;
-import static com.coekie.flowtracker.test.StringTest.getClassOriginTrackerContent;
+import static com.coekie.flowtracker.test.TrackTestHelper.getClassOriginTrackerContent;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
