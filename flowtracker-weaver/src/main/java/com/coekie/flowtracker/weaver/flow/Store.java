@@ -18,9 +18,7 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassConstant;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
 
 /** Represents an instruction that stores a (possibly tracked) value in an object. */
 abstract class Store extends Instrumentable implements FlowValue.FallbackSource {
@@ -47,23 +45,15 @@ abstract class Store extends Instrumentable implements FlowValue.FallbackSource 
   @Override
   public void loadSourcePointFallback(InsnList toInsert) {
     FlowMethod method = frame.getMethod();
-    ClassConstant untracked = method.constantsTransformation.untracked(method,
-        line);
-    // TODO debugging...
-    //ConstantsTransformation.loadClassConstantPoint(toInsert, method, untracked);
-    if (method.canUseConstantDynamic()) {
-      ConstantsTransformation.loadClassConstantPointWithCondy(toInsert, method, untracked);
-    } else {
-      toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
-    }
-//    toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+    ClassConstant untracked = method.constantsTransformation.untracked(method, line);
+    ConstantsTransformation.loadClassConstantPoint(toInsert, method, untracked);
   }
 
   boolean shouldTrack(FlowValue v) {
     // a more conservative approach (which we used to do) here would be:
     //return v.isTrackable();
-    // but to see where in code "untracked" values come from, we load sources even of values that
-    // are not trackable.
+    // but to see where in code untracked values come from (fallback), we load sources even of
+    // values that are not trackable.
     return true;
   }
 }

@@ -1,6 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.hook.StringHook.getStringTracker;
+import static com.coekie.flowtracker.test.TrackTestHelper.assertIsFallbackIn;
 import static com.coekie.flowtracker.test.TrackTestHelper.getClassOriginTrackerContent;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedCharArray;
@@ -198,7 +199,16 @@ public class StringTest {
     assertThat(snapshot.getParts().get(1).sourceIndex).isEqualTo(a.index());
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(2)))
         .isEqualTo(",");
-    assertThat(snapshot.getParts().get(3).source).isNull();
+    if (Runtime.version().feature() < 22) {
+      assertThat(snapshot.getParts().get(3).source).isNull();
+    } else {
+      // due to some changes, since jdk 22, we see it as coming from the StringLatin1.getChars
+      // method that converts integers to strings.
+      // that isn't exactly ideal, but good enough for now.
+      // (perhaps we should do something that maps it to a String earlier, so it becomes a fallback
+      //  pointing to the location of the string concatenation).
+      assertIsFallbackIn(snapshot.getParts().get(3), "java.lang.StringLatin1");
+    }
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(4)))
         .isEqualTo(",");
     assertThat(snapshot.getParts().get(5).source).isSameInstanceAs(b.tracker());

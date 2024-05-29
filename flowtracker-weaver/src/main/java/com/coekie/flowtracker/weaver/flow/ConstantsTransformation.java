@@ -146,7 +146,7 @@ class ConstantsTransformation {
     }
   }
 
-  static void loadClassConstantPointWithCondy(InsnList toInsert, FlowMethod method,
+  private static void loadClassConstantPointWithCondy(InsnList toInsert, FlowMethod method,
       ClassConstant constant) {
     method.addComment(toInsert,
         "loadClassConstantPoint: condy ConstantHook.constantPoint(%s, %s, %s)",
