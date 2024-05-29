@@ -35,7 +35,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
    * Content in the tracker for untracked values; that is values where we didn't track where they
    * originally came from, but we point to where in the code we started tracking them.
    */
-  public static final String FALLBACK = "<untracked>";
+  public static final String FALLBACK = "<?>";
 
   private static final List<ClassOriginTracker> trackers = new ArrayList<>();
 
@@ -116,7 +116,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     return result;
   }
 
-  public synchronized ClassConstant registerUntracked(int line) {
+  public synchronized ClassConstant registerFallback(int line) {
     appendConstantPrefix(line);
     int offset = content.length();
     content.append(FALLBACK);

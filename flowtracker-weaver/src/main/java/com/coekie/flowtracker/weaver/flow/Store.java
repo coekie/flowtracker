@@ -45,8 +45,8 @@ abstract class Store extends Instrumentable implements FlowValue.FallbackSource 
   @Override
   public void loadSourcePointFallback(InsnList toInsert) {
     FlowMethod method = frame.getMethod();
-    ClassConstant untracked = method.constantsTransformation.untracked(method, line);
-    ConstantsTransformation.loadClassConstantPoint(toInsert, method, untracked);
+    ClassConstant fallback = method.constantsTransformation.fallback(method, line);
+    ConstantsTransformation.loadClassConstantPoint(toInsert, method, fallback);
   }
 
   boolean shouldTrack(FlowValue v) {

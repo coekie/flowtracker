@@ -68,9 +68,9 @@ class ConstantsTransformation {
     return tracker().registerConstant(value, line);
   }
 
-  ClassConstant untracked(FlowMethod methodNode, int line) {
+  ClassConstant fallback(FlowMethod methodNode, int line) {
     maybeAddMethodHeader(methodNode);
-    return tracker().registerUntracked(line);
+    return tracker().registerFallback(line);
   }
 
   int trackConstantString(FlowMethod methodNode, String value, int line) {
