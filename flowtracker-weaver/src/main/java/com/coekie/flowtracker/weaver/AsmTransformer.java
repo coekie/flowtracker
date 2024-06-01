@@ -115,7 +115,7 @@ class AsmTransformer implements ClassFileTransformer {
       // verifying the frames
       ClassVisitor wrappedWriter = new CheckClassAdapter(new ClassVisitor(Opcodes.ASM9, writer) {});
 
-      ClassVisitor adapter = adapterFactory.transform(className, wrappedWriter);
+      ClassVisitor adapter = adapterFactory.transform(loader, className, wrappedWriter);
       if (className.equals("java/lang/String")) {
         adapter = new StringAdapter(adapter, config);
       }
@@ -147,7 +147,7 @@ class AsmTransformer implements ClassFileTransformer {
     Transformer transformer =
         getAdapterFactory(clazz.getClassLoader(), Type.getInternalName(clazz));
     return transformer != null
-        && transformer.transform(Type.getInternalName(clazz), null) != null;
+        && transformer.transform(clazz.getClassLoader(), Type.getInternalName(clazz), null) != null;
   }
 
   private Transformer getAdapterFactory(ClassLoader classLoader, String className) {

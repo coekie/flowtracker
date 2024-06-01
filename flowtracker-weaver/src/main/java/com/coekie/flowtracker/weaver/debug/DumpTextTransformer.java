@@ -36,7 +36,7 @@ public class DumpTextTransformer implements Transformer {
   }
 
   @Override
-  public ClassVisitor transform(String className, ClassVisitor cv) {
+  public ClassVisitor transform(ClassLoader classLoader, String className, ClassVisitor cv) {
     try {
       String fileName = className.replaceAll("[/.$]", "_") + ".asm";
       FileOutputStream out = new FileOutputStream(new File(dumpTextPath, fileName));
@@ -49,7 +49,7 @@ public class DumpTextTransformer implements Transformer {
           pw.close();
         }
       };
-      return delegate.transform(className, closingVisitor);
+      return delegate.transform(classLoader, className, closingVisitor);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

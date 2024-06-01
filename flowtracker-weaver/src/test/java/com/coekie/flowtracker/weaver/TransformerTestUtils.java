@@ -45,7 +45,7 @@ class TransformerTestUtils {
     TraceClassVisitor afterVisitor =
         new TraceClassVisitor(new CheckClassAdapter(classWriter), afterPrintWriter);
     ClassVisitor transformingVisitor =
-        transformer.transform(classType.getInternalName(), afterVisitor);
+        transformer.transform(null, classType.getInternalName(), afterVisitor);
     // writes out original bytecode to text
     TraceClassVisitor beforeVisitor =
         new TraceClassVisitor(transformingVisitor, beforePrintWriter);

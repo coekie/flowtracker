@@ -48,6 +48,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
   };
 
   public final int classId;
+  public final ClassLoader loader;
   private final StringBuilder content = new StringBuilder();
 
   /** Map field name to offset in content */
@@ -55,13 +56,15 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
   /** Map method name to offset in content */
   private final ConcurrentMap<String, Integer> methods = new ConcurrentHashMap<>();
 
-  private ClassOriginTracker(String className) {
+  private ClassOriginTracker(ClassLoader loader, String className) {
+    this.loader = loader;
     this.classId = trackers.size();
     content.append("class ").append(className.replace('/', '.')).append('\n');
   }
 
-  public static synchronized ClassOriginTracker registerClass(String className) {
-    ClassOriginTracker tracker = new ClassOriginTracker(className);
+  public static synchronized ClassOriginTracker registerClass(
+      ClassLoader loader, String className) {
+    ClassOriginTracker tracker = new ClassOriginTracker(loader, className);
     trackers.add(tracker);
     tracker.addTo(TrackerTree.CLASS.pathNode(className));
     return tracker;
@@ -78,14 +81,15 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
   private static ClassOriginTracker getUncached(Class<?> clazz) {
     String internalName = clazz.getName().replace('.', '/');
     List<Tracker> trackers = TrackerTree.CLASS.pathNode(internalName).trackers();
-    if (trackers.isEmpty()) {
-      return registerClass(internalName);
-    } else {
-      // TODO if there are multiple classes with the same name, from different ClassLoaders, then
-      //   we should pick the right one. To do that we'd have to pass along the ClassLoader in
-      //   transformers, ConstantsTransformation and friends. For now we just don't care.
-      return (ClassOriginTracker) trackers.get(0);
+    for (Tracker tracker : trackers) {
+      if (tracker instanceof ClassOriginTracker) {
+        ClassOriginTracker coTracker = (ClassOriginTracker) tracker;
+        if (coTracker.loader == clazz.getClassLoader()) {
+          return coTracker;
+        }
+      }
     }
+    return registerClass(clazz.getClassLoader(), internalName);
   }
 
   @Override

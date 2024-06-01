@@ -1034,7 +1034,7 @@ public class FlowTransformerTest {
         new MethodPrintingClassVisitor(new CheckClassAdapter(classWriter), classInternalName);
     ClassVisitor transformingVisitor =
         new FlowTransformer(Config.empty(), new RealCommentator())
-            .transform(classInternalName, afterVisitor);
+            .transform(null, classInternalName, afterVisitor);
     // writes out original bytecode to text
     MethodPrintingClassVisitor beforeVisitor =
         new MethodPrintingClassVisitor(transformingVisitor, classInternalName);

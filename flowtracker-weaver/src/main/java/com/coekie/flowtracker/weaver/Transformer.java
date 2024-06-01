@@ -21,12 +21,13 @@ import org.objectweb.asm.ClassVisitor;
 /** Creates adapters by wrapping a {@link ClassVisitor} */
 public interface Transformer {
   /** Wrap the given {@link ClassVisitor} in an adapter. */
-  ClassVisitor transform(String className, ClassVisitor cv);
+  ClassVisitor transform(ClassLoader classLoader, String className, ClassVisitor cv);
 
   /** Combine two ClassAdapterFactories */
   static Transformer and(Transformer first, Transformer andThen) {
     if (first == null) return andThen;
     if (andThen == null) return first;
-    return (className, cv) -> andThen.transform(className, first.transform(className, cv));
+    return (classLoader, className, cv) ->
+        andThen.transform(classLoader, className, first.transform(classLoader, className, cv));
   }
 }

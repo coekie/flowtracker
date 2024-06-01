@@ -106,7 +106,7 @@ public class FlowAnalyzerTest {
   @Test public void testAsm() {
     TestAnalysisListener listener = new TestAnalysisListener();
     ClassVisitor classVisitor = new FlowTransformer(Config.empty(), listener).transform(
-        "java/Example", new ClassWriter(0));
+        null, "java/Example", new ClassWriter(0));
     classVisitor.visit(0, 0, "java/Example", null, null, null);
     {
       MethodVisitor methodVisitor =
@@ -125,7 +125,7 @@ public class FlowAnalyzerTest {
   @Test public void testJsr() {
     TestAnalysisListener listener = new TestAnalysisListener();
     ClassVisitor classVisitor = new FlowTransformer(Config.empty(), listener).transform(
-        "java/Example", new ClassWriter(0));
+        null, "java/Example", new ClassWriter(0));
     classVisitor.visit(0, 0, "java/Example", null, null, null);
     {
       MethodVisitor methodVisitor =
@@ -167,7 +167,7 @@ public class FlowAnalyzerTest {
 
     ClassVisitor transformer =
         new FlowTransformer(Config.empty(), listener)
-            .transform(Type.getInternalName(o.getClass()), new ClassWriter(0));
+            .transform(null, Type.getInternalName(o.getClass()), new ClassWriter(0));
 
     try {
       new ClassReader(className)

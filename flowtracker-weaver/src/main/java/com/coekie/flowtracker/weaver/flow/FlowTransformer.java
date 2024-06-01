@@ -89,11 +89,11 @@ public class FlowTransformer implements Transformer {
     private final ConstantsTransformation constantsTransformation;
     private int version;
 
-    private FlowClassAdapter(String className, ClassVisitor cv) {
+    private FlowClassAdapter(ClassLoader classLoader, String className, ClassVisitor cv) {
       super(Opcodes.ASM9, cv);
       this.className = className;
       this.constantsTransformation =
-          new ConstantsTransformation(className, breakStringInterningFilter);
+          new ConstantsTransformation(classLoader, className, breakStringInterningFilter);
     }
 
     @Override
@@ -320,8 +320,8 @@ public class FlowTransformer implements Transformer {
   }
 
   @Override
-  public ClassVisitor transform(String className, ClassVisitor cv) {
-    return new FlowClassAdapter(className, cv);
+  public ClassVisitor transform(ClassLoader classLoader, String className, ClassVisitor cv) {
+    return new FlowClassAdapter(classLoader, className, cv);
   }
 
   public static class AnalysisListener {

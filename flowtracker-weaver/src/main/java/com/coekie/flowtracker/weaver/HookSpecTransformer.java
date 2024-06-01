@@ -61,9 +61,9 @@ class HookSpecTransformer implements Transformer {
   }
 
   @Override
-  public ClassVisitor transform(String className, ClassVisitor cv) {
+  public ClassVisitor transform(ClassLoader classLoader, String className, ClassVisitor cv) {
     ClassHookSpec spec = getSpec(className);
-    return spec == null ? cv : spec.transform(className, cv);
+    return spec == null ? cv : spec.transform(classLoader, className, cv);
   }
 
   void typeCheck() {

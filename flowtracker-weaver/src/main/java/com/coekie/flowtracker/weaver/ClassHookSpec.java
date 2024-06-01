@@ -66,7 +66,8 @@ class ClassHookSpec implements Transformer {
     return this;
   }
 
-  public ClassVisitor transform(String className, ClassVisitor cv) {
+  @Override
+  public ClassVisitor transform(ClassLoader classLoader, String className, ClassVisitor cv) {
     return new HookClassAdapter(cv);
   }
 

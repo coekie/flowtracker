@@ -40,7 +40,7 @@ class SuspendInvocationTransformer implements Transformer {
   }
 
   @Override
-  public ClassVisitor transform(String className, ClassVisitor cv) {
+  public ClassVisitor transform(ClassLoader classLoader, String className, ClassVisitor cv) {
     return new SuspendInvocationClassVisitor(className, cv);
   }
 

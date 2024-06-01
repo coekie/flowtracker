@@ -34,12 +34,15 @@ import org.objectweb.asm.tree.MethodInsnNode;
 
 /** Manages transformation for constant values ({@link ConstantValue}, and String constants) */
 class ConstantsTransformation {
+  private final ClassLoader classLoader;
   private final String className;
   private final ClassFilter breakStringInterningFilter;
   private ClassOriginTracker tracker;
   private FlowMethod lastMethod;
 
-  ConstantsTransformation(String className, ClassFilter breakStringInterningFilter) {
+  ConstantsTransformation(ClassLoader classLoader, String className,
+      ClassFilter breakStringInterningFilter) {
+    this.classLoader = classLoader;
     this.className = className;
     this.breakStringInterningFilter = breakStringInterningFilter;
   }
@@ -50,7 +53,7 @@ class ConstantsTransformation {
    */
   private ClassOriginTracker tracker() {
     if (tracker == null) {
-      tracker = ClassOriginTracker.registerClass(className);
+      tracker = ClassOriginTracker.registerClass(classLoader, className);
     }
     return tracker;
   }
