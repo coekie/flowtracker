@@ -23,6 +23,7 @@ import com.coekie.flowtracker.tracker.ByteContentTracker;
 import com.coekie.flowtracker.tracker.ByteSinkTracker;
 import com.coekie.flowtracker.tracker.CharContentTracker;
 import com.coekie.flowtracker.tracker.CharSinkTracker;
+import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.DefaultTracker;
 import com.coekie.flowtracker.tracker.FixedOriginTracker;
 import com.coekie.flowtracker.tracker.Growth;
@@ -120,6 +121,17 @@ public class TrackerResource {
       }
     });
 
+    // similarly, for ClassOriginTracker, track line number changes
+    int[] activeLineNumber = {-1}; // using array as a mutable int.
+    if (tracker instanceof ClassOriginTracker) {
+      ((ClassOriginTracker) tracker).pushLineNumbers((start, end, line) -> {
+        changePoints.computeIfAbsent(start, i -> new ArrayList<>())
+            .add(() -> activeLineNumber[0] = line);
+        changePoints.computeIfAbsent(end, i -> new ArrayList<>())
+            .add(() -> activeLineNumber[0] = -1);
+      });
+    }
+
     // iterate of the content of `tracker`, building up regions.
     for (int i : changePoints.keySet()) {
       // update activeParts to match the parts active at i
@@ -137,7 +149,8 @@ public class TrackerResource {
         break;
       }
 
-      regions.add(new Region(tracker, i, endIndex - i, new ArrayList<>(activeParts)));
+      regions.add(new Region(tracker, i, endIndex - i, new ArrayList<>(activeParts),
+          activeLineNumber[0]));
     }
 
     return new TrackerDetailResponse(tracker, regions);
@@ -163,11 +176,23 @@ public class TrackerResource {
     public final String content;
     public final List<TrackerPartResponse> parts;
 
+    /** For {@link ClassOriginTracker}, indicates the line number in the source code */
+    public final Integer line;
+
     Region(Tracker tracker, int offset, int length, List<TrackerPartResponse> parts) {
       this.offset = offset;
       this.length =length;
       this.content = getContentAsString(tracker, offset, offset + length);
       this.parts = parts;
+      this.line = null;
+    }
+
+    Region(Tracker tracker, int offset, int length, List<TrackerPartResponse> parts, int line) {
+      this.offset = offset;
+      this.length =length;
+      this.content = getContentAsString(tracker, offset, offset + length);
+      this.parts = parts;
+      this.line = line == -1 ? null : line;
     }
   }
 

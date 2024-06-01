@@ -7,6 +7,7 @@ import com.coekie.flowtracker.tracker.ByteOriginTracker;
 import com.coekie.flowtracker.tracker.ByteSinkTracker;
 import com.coekie.flowtracker.tracker.CharOriginTracker;
 import com.coekie.flowtracker.tracker.CharSinkTracker;
+import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.FixedOriginTracker;
 import com.coekie.flowtracker.tracker.Growth;
 import com.coekie.flowtracker.tracker.Tracker;
@@ -209,6 +210,30 @@ public class TrackerResourceTest {
         target.getTrackerId());
     assertThat(response.regions).hasSize(1);
     assertRegionOnePart(response.regions.get(0), "bc", target, 1);
+  }
+
+  @Test public void reverseClassOriginTrackerSource() {
+    CharSinkTracker target = new CharSinkTracker();
+    ClassOriginTracker source = ClassOriginTracker.registerClass(null, "myClass");
+    InterestRepository.register(target);
+    InterestRepository.register(source);
+
+    source.startMethod("testing");
+    source.registerConstantString("hello", 7);
+
+    TrackerDetailResponse response = trackerResource.reverse(source.getTrackerId(),
+        target.getTrackerId());
+    assertThat(response.regions).hasSize(3);
+
+    assertRegionNoPart(response.regions.get(0), "class myClass\n"
+        + "testing:\n"
+        + "  (line 7) ");
+    assertRegionNoPart(response.regions.get(1), "hello");
+    assertRegionNoPart(response.regions.get(2), "\n");
+
+    assertThat(response.regions.get(0).line).isNull();
+    assertThat(response.regions.get(1).line).isEqualTo(7);
+    assertThat(response.regions.get(2).line).isNull();
   }
 
   @Test public void path() {
