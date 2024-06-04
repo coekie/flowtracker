@@ -24,12 +24,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.util.Textifier;
-import org.objectweb.asm.util.TraceClassVisitor;
 
 /** Serves source code for classes referenced by {@link ClassOriginTracker}. */
 @Path("/src")
@@ -39,31 +34,10 @@ public class SourceResource {
   @Path("{id}")
   public SourceResponse get(@PathParam("id") long id) throws IOException {
     ClassOriginTracker tracker = (ClassOriginTracker) InterestRepository.getContentTracker(id);
-
-    // TODO use tracker.sourceFile to find read source
-
-    return getWithAsm(tracker);
+    return AsmSourceGenerator.getSource(tracker);
   }
 
-  /** Use ASM to dump the bytecode */
-  private SourceResponse getWithAsm(ClassOriginTracker tracker) throws IOException {
-    try (InputStream is = getAsStream(tracker.loader, tracker.className + ".class")) {
-      if (is == null) {
-        return null;
-      }
-
-      StringWriter sw = new StringWriter();
-      // TODO enhance Textifier to track line numbers
-      TraceClassVisitor traceClassVisitor =
-          new TraceClassVisitor(null, new Textifier(), new PrintWriter(sw));
-      ClassReader reader = new ClassReader(is);
-      reader.accept(traceClassVisitor, ClassReader.SKIP_FRAMES);
-
-      return new SourceResponse(List.of(new Line(null, sw.toString())));
-    }
-  }
-
-  private static InputStream getAsStream(ClassLoader loader, String path) {
+  static InputStream getAsStream(ClassLoader loader, String path) {
     if (loader == null) { // class from the bootstrap classloader
       return String.class.getResourceAsStream('/' + path);
     } else {
@@ -79,8 +53,17 @@ public class SourceResource {
     }
   }
 
+  /** Block of source code (or bytecode representation) that maps to one line in the source code */
   public static class Line {
+    /**
+     * The line number, or null if this part (as far as we know) does not correspond to a line in
+     * the source
+     */
     public final Integer line;
+
+    /** Content of this line. This can consist of multiple lines of text (that all correspond to one
+     * line in the original source code). Includes a newline at the end.
+     */
     public final String content;
 
     public Line(Integer line, String content) {
