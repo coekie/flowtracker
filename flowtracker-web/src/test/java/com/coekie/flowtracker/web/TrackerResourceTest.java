@@ -214,7 +214,7 @@ public class TrackerResourceTest {
 
   @Test public void reverseClassOriginTrackerSource() {
     CharSinkTracker target = new CharSinkTracker();
-    ClassOriginTracker source = ClassOriginTracker.registerClass(null, "myClass");
+    ClassOriginTracker source = ClassOriginTracker.registerClass(null, "myClass", null);
     InterestRepository.register(target);
     InterestRepository.register(source);
 

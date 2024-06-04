@@ -48,7 +48,9 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
   };
 
   public final int classId;
-  private final ClassLoader loader;
+  public final ClassLoader loader;
+  public final String className;
+  public final String sourceFile;
   private final StringBuilder content = new StringBuilder();
   private final List<ClassConstant> entries = new ArrayList<>();
 
@@ -57,15 +59,17 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
   /** Map method name to offset in content */
   private final ConcurrentMap<String, Integer> methods = new ConcurrentHashMap<>();
 
-  private ClassOriginTracker(ClassLoader loader, String className) {
+  private ClassOriginTracker(ClassLoader loader, String className, String sourceFile) {
     this.loader = loader;
+    this.className = className;
+    this.sourceFile = sourceFile;
     this.classId = trackers.size();
     content.append("class ").append(className.replace('/', '.')).append('\n');
   }
 
   public static synchronized ClassOriginTracker registerClass(
-      ClassLoader loader, String className) {
-    ClassOriginTracker tracker = new ClassOriginTracker(loader, className);
+      ClassLoader loader, String className, String sourceFile) {
+    ClassOriginTracker tracker = new ClassOriginTracker(loader, className, sourceFile);
     trackers.add(tracker);
     tracker.addTo(TrackerTree.CLASS.pathNode(className));
     return tracker;
@@ -90,7 +94,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
         }
       }
     }
-    return registerClass(clazz.getClassLoader(), internalName);
+    return registerClass(clazz.getClassLoader(), internalName, null);
   }
 
   @Override

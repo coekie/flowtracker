@@ -39,6 +39,7 @@ class ConstantsTransformation {
   private final ClassFilter breakStringInterningFilter;
   private ClassOriginTracker tracker;
   private FlowMethod lastMethod;
+  private String sourceFile;
 
   ConstantsTransformation(ClassLoader classLoader, String className,
       ClassFilter breakStringInterningFilter) {
@@ -53,7 +54,7 @@ class ConstantsTransformation {
    */
   private ClassOriginTracker tracker() {
     if (tracker == null) {
-      tracker = ClassOriginTracker.registerClass(classLoader, className);
+      tracker = ClassOriginTracker.registerClass(classLoader, className, sourceFile);
     }
     return tracker;
   }
@@ -103,6 +104,10 @@ class ConstantsTransformation {
 
   boolean canBreakStringInterning() {
     return breakStringInterningFilter.include(className);
+  }
+
+  void initSourceFile(String sourceFile) {
+    this.sourceFile = sourceFile;
   }
 
   /** Human-friendly String representation of a method signature */

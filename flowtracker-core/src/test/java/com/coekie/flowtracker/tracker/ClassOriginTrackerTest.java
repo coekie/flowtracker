@@ -8,12 +8,12 @@ import org.junit.Test;
 
 public class ClassOriginTrackerTest {
   @Test public void registerAndGet() {
-    ClassOriginTracker tracker = ClassOriginTracker.registerClass(null, "myClass");
+    ClassOriginTracker tracker = ClassOriginTracker.registerClass(null, "myClass", null);
     assertThat(ClassOriginTracker.get(tracker.classId)).isSameInstanceAs(tracker);
   }
 
   @Test public void testSimpleChar() {
-    ClassOriginTracker tracker = ClassOriginTracker.registerClass(null, "myClass");
+    ClassOriginTracker tracker = ClassOriginTracker.registerClass(null, "myClass", null);
 
     tracker.startMethod("myMethod");
     ClassConstant constant = tracker.registerConstant('x', 7);
@@ -28,7 +28,7 @@ public class ClassOriginTrackerTest {
   }
 
   @Test public void testLargerInt() {
-    ClassOriginTracker tracker = ClassOriginTracker.registerClass(null, "myClass");
+    ClassOriginTracker tracker = ClassOriginTracker.registerClass(null, "myClass", null);
 
     tracker.startMethod("myMethod");
     ClassConstant constant = tracker.registerConstant(9999, 7);

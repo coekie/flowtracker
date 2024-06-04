@@ -107,6 +107,12 @@ public class FlowTransformer implements Transformer {
     }
 
     @Override
+    public void visitSource(String source, String debug) {
+      super.visitSource(source, debug);
+      constantsTransformation.initSourceFile(source);
+    }
+
+    @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature,
         String[] exceptions) {
       MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
