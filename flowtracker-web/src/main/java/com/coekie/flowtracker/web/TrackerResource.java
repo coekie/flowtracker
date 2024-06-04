@@ -72,7 +72,8 @@ public class TrackerResource {
       regions.add(
           new Region(tracker, 0, getContentLength(tracker), emptyList()));
     }
-    return new TrackerDetailResponse(tracker, regions);
+    boolean hasSource = false; // line mapping not implemented yet (only in `reverse`)
+    return new TrackerDetailResponse(tracker, regions, hasSource);
   }
 
   /**
@@ -153,27 +154,50 @@ public class TrackerResource {
           activeLineNumber[0]));
     }
 
-    return new TrackerDetailResponse(tracker, regions);
+    return new TrackerDetailResponse(tracker, regions, tracker instanceof ClassOriginTracker);
   }
 
+  /**
+   * Detailed view of a tracker, including its contents (splits into regions) and how those regions
+   * link to other trackers.
+   */
   @SuppressWarnings({"UnusedDeclaration", "MismatchedQueryAndUpdateOfCollection"}) // json
   public static class TrackerDetailResponse {
     public final List<String> path;
     public final String creationStackTrace;
     public final List<Region> regions;
 
-    private TrackerDetailResponse(Tracker tracker, List<Region> regions) {
+    /**
+     * For {@link ClassOriginTracker}, indicates if there is associated source code.
+     * @see Region#line
+     */
+    public final boolean hasSource;
+
+    private TrackerDetailResponse(Tracker tracker, List<Region> regions, boolean hasSource) {
       this.path = path(tracker);
       this.creationStackTrace = creationStackTraceToString(tracker);
       this.regions = regions;
+      this.hasSource = hasSource;
     }
   }
 
+  /** Part of the content of a tracker that can be related to other trackers */
   @SuppressWarnings("UnusedDeclaration") // json
   public static class Region {
+    /** Offset in the contents of the complete tracker, where this region begins */
     public final int offset;
+
+    /**
+     * Length of this region, in the same ~units as {@link #offset}. That is, the offset of the
+     * next region is the offset+length of this one. This is often but not always the same as
+     * {@code content.length()}: it is e.g. different when dealing with {@link #escape(ByteBuffer)
+     * escaping}).
+     */
     public final int length;
+
     public final String content;
+
+    /** Relation to other trackers (where its contents came from or went to) */
     public final List<TrackerPartResponse> parts;
 
     /** For {@link ClassOriginTracker}, indicates the line number in the source code */
@@ -196,6 +220,7 @@ public class TrackerResource {
     }
   }
 
+  /** Relation between a {@link Region} of one tracker to a region in another tracker */
   @SuppressWarnings("UnusedDeclaration") // json
   public static class TrackerPartResponse {
     public final TrackerResponse tracker;
