@@ -10,6 +10,7 @@ export default defineConfig({
       '/tracker': 'http://localhost:8011',
       '/tree': 'http://localhost:8011',
       '/settings': 'http://localhost:8011',
+      '/code': 'http://localhost:8011',
     },
   },
   build: {

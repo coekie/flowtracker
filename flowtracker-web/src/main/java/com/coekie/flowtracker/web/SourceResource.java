@@ -27,7 +27,7 @@ import java.io.InputStream;
 import java.util.List;
 
 /** Serves source code for classes referenced by {@link ClassOriginTracker}. */
-@Path("/src")
+@Path("/code")
 public class SourceResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)

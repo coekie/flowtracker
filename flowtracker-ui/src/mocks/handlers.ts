@@ -14,6 +14,13 @@ export const simpleSinkTracker = {
   sink: true,
 };
 
+export const classOriginTracker = {
+  id: 103,
+  path: ['Class', 'myClass'],
+  origin: true,
+  sink: false,
+};
+
 export const handlers: HttpHandler[] = [
   http.get('/tree/all', () => {
     return HttpResponse.json({
@@ -149,4 +156,28 @@ export const handlers: HttpHandler[] = [
       });
     }
   ),
+  http.get('/tracker/' + classOriginTracker.id + '_to_' + simpleSinkTracker.id, () => {
+    return HttpResponse.json({
+      path: classOriginTracker.path,
+      hasSource: true,
+      regions: [
+        {
+          offset: 0,
+          length: 12,
+          content: 'Region without line\n',
+          parts: [],
+        },
+      ],
+    });
+  }),
+  http.get('/code/' + classOriginTracker.id, () => {
+    return HttpResponse.json({
+      lines: [
+        {
+          line: 1,
+          content: 'source line 1',
+        }
+      ],
+    });
+  }),  
 ];

@@ -7,7 +7,11 @@ import {Coloring} from './coloring';
 
 import {afterAll, afterEach, beforeAll} from 'vitest';
 import {server} from '../mocks/node';
-import {simpleOriginTracker, simpleSinkTracker} from '../mocks/handlers';
+import {
+  classOriginTracker,
+  simpleOriginTracker,
+  simpleSinkTracker,
+} from '../mocks/handlers';
 import {PathSelection, RangeSelection} from './selection';
 
 beforeAll(() => server.listen());
@@ -33,8 +37,17 @@ function renderSimpleOriginTracker(): TrackerDetailView {
   }).component;
 }
 
+function renderOriginTrackerWithSourceCode(): TrackerDetailView {
+  return render(TrackerDetailView, {
+    viewTracker: classOriginTracker,
+    targetTracker: simpleSinkTracker,
+    selection: null,
+    coloring: new Coloring(),
+  }).component;
+}
+
 describe('select region', () => {
-  const testIt = async (tree: TrackerDetailView) => {
+  const testIt = async (view: TrackerDetailView) => {
     const foo = await screen.findByText('foo');
     const bar = await screen.findByText('bar');
 
@@ -43,7 +56,7 @@ describe('select region', () => {
     await user.click(foo);
     expect(foo).toHaveClass('selected');
     expect(bar).not.toHaveClass('selected');
-    expect(tree.selection).toMatchObject({
+    expect(view.selection).toMatchObject({
       tracker: simpleOriginTracker,
       offset: 10,
       length: 3,
@@ -51,10 +64,10 @@ describe('select region', () => {
   };
 
   test('in sink tracker', async () => {
-    const tree: TrackerDetailView = renderSimpleSinkTracker();
-    await testIt(tree);
+    const view: TrackerDetailView = renderSimpleSinkTracker();
+    await testIt(view);
     // selection in sink tracker view is what we should show in the origin tracker view
-    expect(tree.secondaryTracker).toMatchObject(simpleOriginTracker);
+    expect(view.secondaryTracker).toMatchObject(simpleOriginTracker);
   });
 
   test('in origin tracker', async () => {
@@ -63,7 +76,7 @@ describe('select region', () => {
 });
 
 describe('select multiple regions', () => {
-  const testIt = async (tree: TrackerDetailView) => {
+  const testIt = async (view: TrackerDetailView) => {
     const foo = await screen.findByText('foo');
     const bar = await screen.findByText('bar');
 
@@ -78,7 +91,7 @@ describe('select multiple regions', () => {
 
     expect(foo).toHaveClass('selected');
     expect(bar).toHaveClass('selected');
-    expect(tree.selection).toMatchObject({
+    expect(view.selection).toMatchObject({
       tracker: simpleOriginTracker,
       offset: 10,
       length: 13,
@@ -97,7 +110,7 @@ describe('select multiple regions', () => {
 });
 
 describe('select multiple regions in reverse', () => {
-  const testIt = async (tree: TrackerDetailView) => {
+  const testIt = async (view: TrackerDetailView) => {
     const foo = await screen.findByText('foo');
     const bar = await screen.findByText('bar');
 
@@ -112,7 +125,7 @@ describe('select multiple regions in reverse', () => {
 
     expect(foo).toHaveClass('selected');
     expect(bar).toHaveClass('selected');
-    expect(tree.selection).toMatchObject({
+    expect(view.selection).toMatchObject({
       tracker: simpleOriginTracker,
       offset: 10,
       length: 13,
@@ -131,11 +144,11 @@ describe('select multiple regions in reverse', () => {
 });
 
 describe('coloring', () => {
-  const testIt = async (tree: TrackerDetailView) => {
+  const testIt = async (view: TrackerDetailView) => {
     const coloring = new Coloring();
     coloring.add(new RangeSelection(simpleOriginTracker, 10, 3));
     coloring.add(new RangeSelection(simpleOriginTracker, 20, 3));
-    tree.coloring = coloring;
+    view.coloring = coloring;
 
     const foo = await screen.findByText('foo');
     const bar = await screen.findByText('bar');
@@ -158,15 +171,22 @@ describe('coloring', () => {
 });
 
 test('coloring uses most specific path', async () => {
-  const tree = renderSimpleSinkTracker();
+  const view = renderSimpleSinkTracker();
   const coloring = new Coloring();
   coloring.add(new PathSelection(['Simple']));
   coloring.add(new PathSelection(['Simple', 'origin1']));
-  tree.coloring = coloring;
+  view.coloring = coloring;
 
   const foo = await screen.findByText('foo');
 
   expect(foo).toHaveStyle({
     'background-color': coloring.assignments[1].color,
+  });
+});
+
+describe('source code', () => {
+  test('load and show', async () => {
+    renderOriginTrackerWithSourceCode();
+    await screen.findByText('source line 1');
   });
 });

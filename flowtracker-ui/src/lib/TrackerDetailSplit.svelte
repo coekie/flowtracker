@@ -11,7 +11,7 @@ Also makes the split pane optional based on `showSplit`, so that we do not creat
 
 {#if !showSplit}
   <slot name="one" />
-{:else if typeof window === 'undefined'}
+{:else if navigator.userAgent.includes("jsdom")}
   <!-- for tests: only render the content -->
   <slot name="one" />
   <slot name="two" />

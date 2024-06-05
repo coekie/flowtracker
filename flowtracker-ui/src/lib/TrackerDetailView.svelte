@@ -216,34 +216,34 @@
       <PathView path={trackerDetail.path} bind:selection {coloring} />
     </div>
     <div class="split">
-    <TrackerDetailSplit showSplit={trackerDetail.hasSource}>
-      <div class="content" slot="one">
-        {#if trackerDetail.creationStackTrace}
-          <pre class="creation">{trackerDetail.creationStackTrace}</pre>
-        {/if}
-        <pre
-        bind:this={pre}
-        use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a
-            class="region"
-            href={region.parts.length > 0 ? '#' : undefined}
-            on:mouseover={() => focusIn(region)}
-            on:mouseout={() => focusOut()}
-            on:focus={() => focusIn(region)}
-            on:blur={() => focusOut()}
-            on:mousedown={() => mousedown(region)}
-            on:mousemove={e => mousemove(e, region)}
-            on:mouseup={mouseup}
-            on:dblclick={dblclick}
-            draggable="false"
-            style="background-color: {backgroundColor(region, coloring)}"
-            class:selected={isSelected(region, selection)}
-            class:withSource={region.parts.length > 0}
-            class:focus={focusRegion === region}>{region.content}</a
-          >{/each}</pre>
+      <TrackerDetailSplit showSplit={trackerDetail.hasSource}>
+        <div class="content" slot="one">
+          {#if trackerDetail.creationStackTrace}
+            <pre class="creation">{trackerDetail.creationStackTrace}</pre>
+          {/if}
+          <pre
+            bind:this={pre}
+            use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a
+                class="region"
+                href={region.parts.length > 0 ? '#' : undefined}
+                on:mouseover={() => focusIn(region)}
+                on:mouseout={() => focusOut()}
+                on:focus={() => focusIn(region)}
+                on:blur={() => focusOut()}
+                on:mousedown={() => mousedown(region)}
+                on:mousemove={e => mousemove(e, region)}
+                on:mouseup={mouseup}
+                on:dblclick={dblclick}
+                draggable="false"
+                style="background-color: {backgroundColor(region, coloring)}"
+                class:selected={isSelected(region, selection)}
+                class:withSource={region.parts.length > 0}
+                class:focus={focusRegion === region}>{region.content}</a
+              >{/each}</pre>
         </div>
-      <SourceView {trackerDetail} slot="two" />
-    </TrackerDetailSplit>
-  </div>
+        <SourceView trackerId={viewTrackerId || -1} slot="two" />
+      </TrackerDetailSplit>
+    </div>
   </div>
 {/await}
 

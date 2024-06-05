@@ -44,6 +44,18 @@ export interface NodeDetail {
   path: string[];
 }
 
+// in java: SourceResource.SourceResponse
+export interface Source {
+  // public final List<Line> lines;
+  lines: Line[];
+}
+
+// in java: SourceResource.Line
+export interface Line {
+  line: number | null;
+  content: string;
+}
+
 // in java: SettingsResource.Settings
 export interface Settings {
   snapshot: boolean;
