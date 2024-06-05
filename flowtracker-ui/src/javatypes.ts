@@ -31,6 +31,7 @@ export interface TrackerDetail {
   path: string[] | null;
   creationStackTrace: string | null;
   regions: Region[];
+  hasSource: boolean;
 }
 
 // in java: TreeResource.NodeDetailResponse

@@ -9,6 +9,8 @@
     PathSelection,
   } from './selection';
   import type {Coloring} from './coloring';
+  import SourceView from './SourceView.svelte';
+  import TrackerDetailSplit from './TrackerDetailSplit.svelte';
 
   /** Main tracker that's being shown */
   export let viewTracker: Tracker | null;
@@ -213,11 +215,13 @@
     <div class="path">
       <PathView path={trackerDetail.path} bind:selection {coloring} />
     </div>
-    <div class="content">
-      {#if trackerDetail.creationStackTrace}
-        <pre class="creation">{trackerDetail.creationStackTrace}</pre>
-      {/if}
-      <pre
+    <div class="split">
+    <TrackerDetailSplit showSplit={trackerDetail.hasSource}>
+      <div class="content" slot="one">
+        {#if trackerDetail.creationStackTrace}
+          <pre class="creation">{trackerDetail.creationStackTrace}</pre>
+        {/if}
+        <pre
         bind:this={pre}
         use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a
             class="region"
@@ -236,7 +240,10 @@
             class:withSource={region.parts.length > 0}
             class:focus={focusRegion === region}>{region.content}</a
           >{/each}</pre>
-    </div>
+        </div>
+      <SourceView {trackerDetail} slot="two" />
+    </TrackerDetailSplit>
+  </div>
   </div>
 {/await}
 
@@ -251,13 +258,17 @@
   .path {
     border-bottom: 1px solid #ccc;
   }
+  .split {
+    flex: 1;
+    overflow: hidden;
+  }
   .creation {
     margin: 0 0 1em 0;
     border-bottom: 1px solid #ccc;
   }
   .content {
     overflow: auto;
-    flex: 1;
+    height: 100%;
     margin: 0;
   }
   pre {
