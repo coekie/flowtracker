@@ -156,28 +156,31 @@ export const handlers: HttpHandler[] = [
       });
     }
   ),
-  http.get('/tracker/' + classOriginTracker.id + '_to_' + simpleSinkTracker.id, () => {
-    return HttpResponse.json({
-      path: classOriginTracker.path,
-      hasSource: true,
-      regions: [
-        {
-          offset: 0,
-          length: 12,
-          content: 'Region without line\n',
-          parts: [],
-        },
-        {
-          offset: 12,
-          length: 10,
-          content: 'Region with line 1\n',
-          // included in the response, but currently unused:
-          // line: 1
-          parts: [],
-        },
-      ],
-    });
-  }),
+  http.get(
+    '/tracker/' + classOriginTracker.id + '_to_' + simpleSinkTracker.id,
+    () => {
+      return HttpResponse.json({
+        path: classOriginTracker.path,
+        hasSource: true,
+        regions: [
+          {
+            offset: 0,
+            length: 12,
+            content: 'Region without line\n',
+            parts: [],
+          },
+          {
+            offset: 12,
+            length: 10,
+            content: 'Region with line 1\n',
+            // included in the response, but currently unused:
+            // line: 1
+            parts: [],
+          },
+        ],
+      });
+    }
+  ),
   http.get('/code/' + classOriginTracker.id, () => {
     return HttpResponse.json({
       lines: [
@@ -188,11 +191,11 @@ export const handlers: HttpHandler[] = [
             {
               tracker: classOriginTracker,
               offset: 12,
-              length: 10
-            }
-          ]
-        }
+              length: 10,
+            },
+          ],
+        },
       ],
     });
-  }),  
+  }),
 ];

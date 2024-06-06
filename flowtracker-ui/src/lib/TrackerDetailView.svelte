@@ -2,12 +2,7 @@
   import {tick} from 'svelte';
   import type {Tracker, TrackerDetail, Region} from '../javatypes';
   import PathView from './PathView.svelte';
-  import {
-    type ASelection,
-    pathStartsWith,
-    RangeSelection,
-    PathSelection,
-  } from './selection';
+  import {type ASelection, pathStartsWith, RangeSelection} from './selection';
   import type {Coloring} from './coloring';
   import SourceView from './SourceView.svelte';
   import TrackerDetailSplit from './TrackerDetailSplit.svelte';
@@ -61,6 +56,7 @@
   let selectionStart: RangeSelection | null;
 
   let pre: HTMLPreElement;
+  let sourceView: SourceView;
 
   const fetchTrackerDetail = async (
     viewTrackerId: number | undefined,
@@ -185,12 +181,17 @@
 
   /** scroll the first selected region into view */
   export function scrollToSelection() {
+    scrollToSelectionInPre();
+    sourceView?.scrollToSelection();
+  }
+
+  export function scrollToSelectionInPre() {
     pre?.querySelector('.selected')?.scrollIntoView();
   }
 
-  /** waits for rendering and then scrolls the first selection region into view */
+  /** waits for rendering and then scrolls the first selected region into view */
   function scrollToSelectionOnFirstRender(_: HTMLPreElement) {
-    tick().then(scrollToSelection);
+    tick().then(scrollToSelectionInPre);
   }
 </script>
 
@@ -225,7 +226,13 @@
                 class:focus={focusRegion === region}>{region.content}</a
               >{/each}</pre>
         </div>
-        <SourceView trackerId={viewTrackerId || -1} slot="two" {selection} {coloring}/>
+        <SourceView
+          bind:this={sourceView}
+          trackerId={viewTrackerId || -1}
+          slot="two"
+          {selection}
+          {coloring}
+        />
       </TrackerDetailSplit>
     </div>
   </div>

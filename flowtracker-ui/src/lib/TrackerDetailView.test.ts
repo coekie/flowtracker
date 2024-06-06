@@ -193,11 +193,11 @@ describe('source code', () => {
   test('render selection', async () => {
     renderOriginTrackerWithSourceCode();
     const sourceLine = await screen.findByText('source line 1');
-    expect(sourceLine).not.toHaveClass('selected')
+    expect(sourceLine).not.toHaveClass('selected');
 
-    await user.click(await screen.findByText('Region with line 1'))
+    await user.click(await screen.findByText('Region with line 1'));
 
-    expect(sourceLine).toHaveClass('selected')
+    expect(sourceLine).toHaveClass('selected');
   });
 
   test('render coloring', async () => {

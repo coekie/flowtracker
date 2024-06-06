@@ -76,7 +76,6 @@ export class Coloring {
     return result;
   }
 
-  
   /**
    * Determines background color (for text in a tracker or source code), given a
    * function that determines if a selection is applicable.
