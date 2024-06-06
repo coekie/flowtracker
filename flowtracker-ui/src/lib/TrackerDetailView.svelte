@@ -173,23 +173,7 @@
   }
 
   function backgroundColor(region: Region, coloring: Coloring): string {
-    // we find a matching assignment, and if there are multiple matching then use the most
-    // specific one, that is the one with the highest score.
-    var bestScore: number = -1;
-    var color: string = 'inherit';
-    for (const assignment of coloring.assignments) {
-      for (const selection of assignment.selections) {
-        if (isSelected(region, selection)) {
-          const score =
-            selection instanceof PathSelection ? selection.path.length : 9999;
-          if (score > bestScore) {
-            bestScore = score;
-            color = assignment.color;
-          }
-        }
-      }
-    }
-    return color;
+    return coloring.backgroundColor(s => isSelected(region, s));
   }
 
   // event for main view so that double-click in one TrackerDetailView causes scrollToSelection in the other
@@ -241,7 +225,7 @@
                 class:focus={focusRegion === region}>{region.content}</a
               >{/each}</pre>
         </div>
-        <SourceView trackerId={viewTrackerId || -1} slot="two" />
+        <SourceView trackerId={viewTrackerId || -1} slot="two" {selection} {coloring}/>
       </TrackerDetailSplit>
     </div>
   </div>

@@ -1,4 +1,4 @@
-import {indexInPath, type ASelection} from './selection';
+import {PathSelection, indexInPath, type ASelection} from './selection';
 
 export const autoColors: string[] = [
   '#ffaaaa',
@@ -38,6 +38,8 @@ export class ColorAssignment {
   }
 }
 
+type IsSelected = (_: ASelection) => boolean;
+
 /**
  * Contains the full configuration of how colors are assigned.
  */
@@ -72,6 +74,31 @@ export class Coloring {
       }
     }
     return result;
+  }
+
+  
+  /**
+   * Determines background color (for text in a tracker or source code), given a
+   * function that determines if a selection is applicable.
+   */
+  backgroundColor(isSelected: IsSelected): string {
+    // we find a matching assignment, and if there are multiple matching then use the most
+    // specific one, that is the one with the highest score.
+    let bestScore: number = -1;
+    let color: string = 'inherit';
+    for (const assignment of this.assignments) {
+      for (const selection of assignment.selections) {
+        if (isSelected(selection)) {
+          const score =
+            selection instanceof PathSelection ? selection.path.length : 9999;
+          if (score > bestScore) {
+            bestScore = score;
+            color = assignment.color;
+          }
+        }
+      }
+    }
+    return color;
   }
 }
 

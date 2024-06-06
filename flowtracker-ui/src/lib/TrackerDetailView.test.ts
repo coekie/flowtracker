@@ -189,4 +189,27 @@ describe('source code', () => {
     renderOriginTrackerWithSourceCode();
     await screen.findByText('source line 1');
   });
+
+  test('render selection', async () => {
+    renderOriginTrackerWithSourceCode();
+    const sourceLine = await screen.findByText('source line 1');
+    expect(sourceLine).not.toHaveClass('selected')
+
+    await user.click(await screen.findByText('Region with line 1'))
+
+    expect(sourceLine).toHaveClass('selected')
+  });
+
+  test('render coloring', async () => {
+    const view = renderOriginTrackerWithSourceCode();
+    const coloring = new Coloring();
+    coloring.add(new RangeSelection(classOriginTracker, 12, 10));
+    view.coloring = coloring;
+
+    const sourceLine = await screen.findByText('source line 1');
+
+    expect(sourceLine).toHaveStyle({
+      'background-color': coloring.assignments[0].color,
+    });
+  });
 });

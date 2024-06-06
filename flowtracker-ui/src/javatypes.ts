@@ -54,6 +54,7 @@ export interface Source {
 export interface Line {
   line: number | null;
   content: string;
+  parts: TrackerPart[];
 }
 
 // in java: SettingsResource.Settings

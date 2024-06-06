@@ -167,6 +167,14 @@ export const handlers: HttpHandler[] = [
           content: 'Region without line\n',
           parts: [],
         },
+        {
+          offset: 12,
+          length: 10,
+          content: 'Region with line 1\n',
+          // included in the response, but currently unused:
+          // line: 1
+          parts: [],
+        },
       ],
     });
   }),
@@ -176,6 +184,13 @@ export const handlers: HttpHandler[] = [
         {
           line: 1,
           content: 'source line 1',
+          parts: [
+            {
+              tracker: classOriginTracker,
+              offset: 12,
+              length: 10
+            }
+          ]
         }
       ],
     });
