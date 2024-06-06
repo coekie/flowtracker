@@ -17,15 +17,18 @@ package com.coekie.flowtracker.web;
  */
 
 import static com.coekie.flowtracker.web.SourceResource.getAsStream;
+import static com.coekie.flowtracker.web.SourceResource.lineToPartMapping;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.web.SourceResource.Line;
 import com.coekie.flowtracker.web.SourceResource.SourceResponse;
+import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Label;
@@ -49,7 +52,7 @@ public class AsmSourceGenerator {
       ClassReader reader = new ClassReader(is);
       reader.accept(traceClassVisitor, ClassReader.SKIP_FRAMES);
 
-      return new SourceResponse(new LineListBuilder().append(textifier.text).flush().lines);
+      return new SourceResponse(new LineListBuilder(tracker).append(textifier.text).flush().lines);
     }
   }
 
@@ -118,9 +121,14 @@ public class AsmSourceGenerator {
    * the list.
    */
   private static class LineListBuilder {
+    private final Map<Integer, List<TrackerPartResponse>> partMapping;
     private final List<Line> lines = new ArrayList<>();
     private final StringBuilder sb = new StringBuilder();
     private Integer currentLine = null;
+
+    private LineListBuilder(ClassOriginTracker tracker) {
+      this.partMapping = lineToPartMapping(tracker);
+    }
 
     LineListBuilder append(List<?> list) {
       for (Object o : list) {
@@ -141,7 +149,8 @@ public class AsmSourceGenerator {
 
     LineListBuilder flush() {
       if (sb.length() != 0) {
-        lines.add(new Line(currentLine, sb.toString()));
+        lines.add(new Line(currentLine, sb.toString(),
+            partMapping.getOrDefault(currentLine, List.of())));
         sb.setLength(0);
       }
       return this;

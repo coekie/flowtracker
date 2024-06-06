@@ -17,6 +17,7 @@ package com.coekie.flowtracker.web;
  */
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
+import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -24,7 +25,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Serves source code for classes referenced by {@link ClassOriginTracker}. */
 @Path("/code")
@@ -43,6 +47,15 @@ public class SourceResource {
     } else {
       return loader.getResourceAsStream(path);
     }
+  }
+
+  static Map<Integer, List<TrackerPartResponse>> lineToPartMapping(
+      ClassOriginTracker tracker) {
+    Map<Integer, List<TrackerPartResponse>> result = new HashMap<>();
+    tracker.pushLineNumbers((start, end, line)
+        -> result.computeIfAbsent(line, l -> new ArrayList<>())
+        .add(new TrackerPartResponse(tracker, start, end - start)));
+    return result;
   }
 
   public static class SourceResponse {
@@ -66,9 +79,13 @@ public class SourceResource {
      */
     public final String content;
 
-    public Line(Integer line, String content) {
+    /** Parts of the tracker that refer to this line */
+    public final List<TrackerPartResponse> parts;
+
+    public Line(Integer line, String content, List<TrackerPartResponse> parts) {
       this.line = line;
       this.content = content;
+      this.parts = parts;
     }
   }
 }
