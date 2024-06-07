@@ -17,6 +17,7 @@ package com.coekie.flowtracker.web;
  */
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
+import com.coekie.flowtracker.util.Logger;
 import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -33,11 +34,21 @@ import java.util.Map;
 /** Serves source code for classes referenced by {@link ClassOriginTracker}. */
 @Path("/code")
 public class SourceResource {
+  private static final Logger logger = new Logger("SourceResource");
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("{id}")
   public SourceResponse get(@PathParam("id") long id) throws IOException {
     ClassOriginTracker tracker = (ClassOriginTracker) InterestRepository.getContentTracker(id);
+    try {
+      SourceResponse result = VineflowerSourceGenerator.getSource(tracker);
+      if (result != null) {
+        return result;
+      }
+    } catch (Exception e) {
+      logger.error(e, "Failed to decompile %s", tracker.className);
+    }
     return AsmSourceGenerator.getSource(tracker);
   }
 
