@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.ByteOriginTracker;
 import com.coekie.flowtracker.tracker.ByteSinkTracker;
+import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import com.coekie.flowtracker.web.SettingsResource.Settings;
@@ -75,6 +76,22 @@ public class SnapshotTest {
     assertThat(entries).containsKey("tracker/" + origin2.getTrackerId());
     assertThat(entries)
         .containsKey("tracker/" + origin2.getTrackerId() + "_to_" + sink1.getTrackerId());
+  }
+
+  @Test
+  public void testClassOriginTrackerWithSource() throws IOException {
+    ClassOriginTracker tracker = ClassOriginTracker.registerClass(
+        SnapshotTest.class.getClassLoader(), SnapshotTest.class.getName().replace('.', '/'), null);
+    Node root = tracker.getNode();
+
+    ByteSinkTracker sink1 = new ByteSinkTracker();
+    sink1.addTo(root.node("mySink"));
+    sink1.setSource(0, 1, tracker, 0);
+    sink1.append((byte) 1);
+
+    Map<String, String> entries = snapshot(tracker.getNode());
+    assertThat(entries).containsKey("tracker/" + tracker.getTrackerId());
+    assertThat(entries).containsKey("code/" + tracker.getTrackerId());
   }
 
   @Test

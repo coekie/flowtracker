@@ -205,7 +205,7 @@ public class TrackerResource {
 
     Region(Tracker tracker, int offset, int length, List<TrackerPartResponse> parts) {
       this.offset = offset;
-      this.length =length;
+      this.length = length;
       this.content = getContentAsString(tracker, offset, offset + length);
       this.parts = parts;
       this.line = null;

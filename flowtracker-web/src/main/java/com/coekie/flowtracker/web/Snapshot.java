@@ -18,6 +18,7 @@ package com.coekie.flowtracker.web;
 
 import static java.util.Objects.requireNonNull;
 
+import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
@@ -64,6 +65,7 @@ public class Snapshot {
   private final boolean minimized;
 
   private final TrackerResource trackerResource = new TrackerResource();
+  private final SourceResource sourceResource = new SourceResource();
 
   /** Ids of trackers that we already wrote in the snapshot */
   private final Set<Long> includedTrackers = new HashSet<>();
@@ -131,6 +133,9 @@ public class Snapshot {
                 trackerResource.reverse(part.tracker.id, trackerId));
           }
         }
+      }
+      if (InterestRepository.getContentTracker(trackerId) instanceof ClassOriginTracker) {
+        writeJson(zos, "code/" + trackerId, sourceResource.get(trackerId));
       }
     }
   }
