@@ -177,6 +177,7 @@
     if (ondblclick) {
       ondblclick();
     }
+    sourceView?.scrollToSelection();
   }
 
   /** scroll the first selected region into view */
