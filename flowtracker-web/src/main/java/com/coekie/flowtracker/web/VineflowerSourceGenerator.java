@@ -21,10 +21,12 @@ import static com.coekie.flowtracker.web.SourceResource.lineToPartMapping;
 import static java.util.stream.Collectors.toList;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
+import com.coekie.flowtracker.tracker.Trackers;
 import com.coekie.flowtracker.util.Logger;
 import com.coekie.flowtracker.web.SourceResource.Line;
 import com.coekie.flowtracker.web.SourceResource.SourceResponse;
 import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +37,7 @@ import org.jetbrains.java.decompiler.main.extern.IContextSource.IOutputSink;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerLogger;
 import org.jetbrains.java.decompiler.main.extern.IFernflowerPreferences;
 import org.jetbrains.java.decompiler.main.extern.IResultSaver;
+import org.jetbrains.java.decompiler.struct.StructClass;
 
 /** Use Vineflower to decompile bytecode, with mapping of source code line numbers */
 public class VineflowerSourceGenerator {
@@ -51,7 +54,7 @@ public class VineflowerSourceGenerator {
     properties.put(IFernflowerPreferences.DUMP_CODE_LINES, "1");
     properties.put(IFernflowerPreferences.BYTECODE_SOURCE_MAPPING, "1");
 
-    Fernflower engine = new Fernflower(null, properties, new FernflowerToFTLogger());
+    Fernflower engine = new MyFernflower(null, properties, new FernflowerToFTLogger());
     OutputSink sink = new OutputSink();
     engine.addLibrary(new LibraryContextSource(loader));
     engine.addSource(new SourceContextSource(loader, trackers, sink));
@@ -89,7 +92,7 @@ public class VineflowerSourceGenerator {
   }
 
   /** Sends Fernflower logs to flowtracker's Logger */
-  static class FernflowerToFTLogger extends IFernflowerLogger {
+  private static class FernflowerToFTLogger extends IFernflowerLogger {
     private static final Logger logger = new Logger("Vineflower");
 
     @Override
@@ -108,7 +111,7 @@ public class VineflowerSourceGenerator {
   }
 
   /** Provider Fernflower with the class that needs to be decompiled */
-  static class SourceContextSource implements IContextSource {
+  private static class SourceContextSource implements IContextSource {
     private final ClassLoader classLoader;
     private final List<ClassOriginTracker> trackers;
     private final OutputSink sink;
@@ -148,7 +151,7 @@ public class VineflowerSourceGenerator {
   }
 
   /** Lets Fernflower load other classes, that are used by decompiled classes */
-  static class LibraryContextSource implements IContextSource {
+  private static class LibraryContextSource implements IContextSource {
     private final ClassLoader classLoader;
 
     LibraryContextSource(ClassLoader classLoader) {
@@ -176,7 +179,7 @@ public class VineflowerSourceGenerator {
     }
   }
 
-  static class OutputSink implements IOutputSink {
+  private static class OutputSink implements IOutputSink {
     private final Map<String, String> output = new HashMap<>();
 
     @Override
@@ -198,6 +201,36 @@ public class VineflowerSourceGenerator {
 
     @Override
     public void close() {
+    }
+  }
+
+  private static class MyFernflower extends Fernflower {
+    MyFernflower(IResultSaver saver, Map<String, Object> customProperties,
+        IFernflowerLogger logger) {
+      super(saver, customProperties, logger);
+    }
+
+    @Override
+    public String getClassContent(StructClass cl) {
+      // disable tracking, for performance. Note that Vineflower runs this in parallel in multiple
+      // threads, so suspending it just in the thread that started it (e.g. in getSource) wouldn't
+      // do it.
+      Trackers.suspendOnCurrentThread();
+      try {
+        return super.getClassContent(cl);
+      } finally {
+        Trackers.unsuspendOnCurrentThread();
+      }
+    }
+
+    @Override
+    public void processClass(StructClass cl) throws IOException {
+      Trackers.suspendOnCurrentThread();
+      try {
+        super.processClass(cl);
+      } finally {
+        Trackers.unsuspendOnCurrentThread();
+      }
     }
   }
 }
