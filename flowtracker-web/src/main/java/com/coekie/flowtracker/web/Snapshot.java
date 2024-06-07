@@ -23,6 +23,7 @@ import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import com.coekie.flowtracker.web.SettingsResource.Settings;
+import com.coekie.flowtracker.web.SourceResource.SourceResponse;
 import com.coekie.flowtracker.web.TrackerResource.Region;
 import com.coekie.flowtracker.web.TrackerResource.TrackerDetailResponse;
 import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
@@ -36,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -81,10 +83,11 @@ public class Snapshot {
       writeStaticFiles(zos);
       writeSettings(zos);
 
-      // the order here matters because Snapshot.includedTrackers is mutable: it is populated by
-      // writeTrackers and depended on by writeTree.
+      // the order here matters because: Snapshot.includedTrackers is mutable: it is populated by
+      // writeTrackers and depended on by writeTree and writeSourceCode.
       writeTrackers(zos, TrackerTree.ROOT, false);
       writeTree(zos);
+      writeSourceCode(zos);
     }
   }
 
@@ -134,9 +137,15 @@ public class Snapshot {
           }
         }
       }
-      if (InterestRepository.getContentTracker(trackerId) instanceof ClassOriginTracker) {
-        writeJson(zos, "code/" + trackerId, sourceResource.get(trackerId));
-      }
+    }
+  }
+
+  private void writeSourceCode(ZipOutputStream zos) throws IOException {
+    List<Long> ids = includedTrackers.stream()
+        .filter(id -> InterestRepository.getContentTracker(id) instanceof ClassOriginTracker)
+        .collect(Collectors.toList());
+    for (Entry<Long, SourceResponse> entry : sourceResource.getAll(ids).entrySet()) {
+      writeJson(zos, "code/" + entry.getKey(), entry.getValue());
     }
   }
 

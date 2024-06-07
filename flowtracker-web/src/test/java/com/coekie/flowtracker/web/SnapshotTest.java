@@ -82,12 +82,6 @@ public class SnapshotTest {
   public void testClassOriginTrackerWithSource() throws IOException {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass(
         SnapshotTest.class.getClassLoader(), SnapshotTest.class.getName().replace('.', '/'), null);
-    Node root = tracker.getNode();
-
-    ByteSinkTracker sink1 = new ByteSinkTracker();
-    sink1.addTo(root.node("mySink"));
-    sink1.setSource(0, 1, tracker, 0);
-    sink1.append((byte) 1);
 
     Map<String, String> entries = snapshot(tracker.getNode());
     assertThat(entries).containsKey("tracker/" + tracker.getTrackerId());

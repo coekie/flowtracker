@@ -17,7 +17,7 @@ package com.coekie.flowtracker.web;
  */
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.util.Logger;
+import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -27,6 +27,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,22 +35,46 @@ import java.util.Map;
 /** Serves source code for classes referenced by {@link ClassOriginTracker}. */
 @Path("/code")
 public class SourceResource {
-  private static final Logger logger = new Logger("SourceResource");
-
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("{id}")
   public SourceResponse get(@PathParam("id") long id) throws IOException {
-    ClassOriginTracker tracker = (ClassOriginTracker) InterestRepository.getContentTracker(id);
-    try {
-      SourceResponse result = VineflowerSourceGenerator.getSource(tracker);
-      if (result != null) {
-        return result;
+    return getAll(List.of(id)).get(id);
+  }
+
+  /**
+   * Get the source code for a collection of trackers.
+   * We do this in batch here when taking a snapshot, because that's faster than handling them one
+   * by one in {@link VineflowerSourceGenerator}.
+   */
+  Map<Long, SourceResponse> getAll(Collection<Long> ids) throws IOException {
+    Map<Long, SourceResponse> result = getAllWithVineflower(ids);
+    // for the ones that we couldn't get from vineflower, fallback to AsmSourceGenerator
+    for (Long id : ids) {
+      if (!result.containsKey(id)) {
+        ClassOriginTracker tracker = (ClassOriginTracker) InterestRepository.getContentTracker(id);
+        result.put(id, AsmSourceGenerator.getSource(tracker));
       }
-    } catch (Exception e) {
-      logger.error(e, "Failed to decompile %s", tracker.className);
     }
-    return AsmSourceGenerator.getSource(tracker);
+    return result;
+  }
+
+  private Map<Long, SourceResponse> getAllWithVineflower(Collection<Long> ids) {
+    Map<ClassLoader, List<ClassOriginTracker>> trackersByClassLoader = new HashMap<>();
+    for (long trackerId : ids) {
+      Tracker t = InterestRepository.getContentTracker(trackerId);
+      if (t instanceof ClassOriginTracker) {
+        ClassOriginTracker tracker = (ClassOriginTracker) t;
+        trackersByClassLoader.computeIfAbsent(tracker.loader, l -> new ArrayList<>())
+            .add(tracker);
+      }
+    }
+
+    Map<Long, SourceResponse> result = new HashMap<>();
+    for (List<ClassOriginTracker> trackers : trackersByClassLoader.values()) {
+      result.putAll(VineflowerSourceGenerator.getSource(trackers));
+    }
+    return result;
   }
 
   static InputStream getAsStream(ClassLoader loader, String path) {

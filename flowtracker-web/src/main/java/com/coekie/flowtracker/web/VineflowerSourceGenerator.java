@@ -18,18 +18,17 @@ package com.coekie.flowtracker.web;
 
 import static com.coekie.flowtracker.web.SourceResource.getAsStream;
 import static com.coekie.flowtracker.web.SourceResource.lineToPartMapping;
+import static java.util.stream.Collectors.toList;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.util.Logger;
 import com.coekie.flowtracker.web.SourceResource.Line;
 import com.coekie.flowtracker.web.SourceResource.SourceResponse;
 import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.jetbrains.java.decompiler.main.Fernflower;
 import org.jetbrains.java.decompiler.main.extern.IContextSource;
 import org.jetbrains.java.decompiler.main.extern.IContextSource.IOutputSink;
@@ -41,31 +40,37 @@ import org.jetbrains.java.decompiler.main.extern.IResultSaver;
 public class VineflowerSourceGenerator {
 
   /** Use ASM to dump the bytecode */
-  static SourceResponse getSource(ClassOriginTracker tracker) throws IOException {
-    try (InputStream is = getAsStream(tracker.loader, tracker.className + ".class")) {
-      if (is == null) {
-        return null;
-      }
+  static Map<Long, SourceResponse> getSource(List<ClassOriginTracker> trackers) {
+    if (trackers.isEmpty()) {
+      return Map.of();
+    }
+    ClassLoader loader = trackers.get(0).loader;
 
-      Map<String, Object> properties = new HashMap<>();
-      properties.put(IFernflowerPreferences.DUMP_ORIGINAL_LINES, "1");
-      properties.put(IFernflowerPreferences.DUMP_CODE_LINES, "1");
-      properties.put(IFernflowerPreferences.BYTECODE_SOURCE_MAPPING, "1");
+    Map<String, Object> properties = new HashMap<>();
+    properties.put(IFernflowerPreferences.DUMP_ORIGINAL_LINES, "1");
+    properties.put(IFernflowerPreferences.DUMP_CODE_LINES, "1");
+    properties.put(IFernflowerPreferences.BYTECODE_SOURCE_MAPPING, "1");
 
-      Fernflower engine = new Fernflower(null, properties, new FernflowerToFTLogger());
-      OutputSink sink = new OutputSink();
-      engine.addLibrary(new LibraryContextSource(tracker.loader));
-      engine.addSource(new SourceContextSource(tracker.loader, tracker.className, sink));
-      engine.decompileContext();
+    Fernflower engine = new Fernflower(null, properties, new FernflowerToFTLogger());
+    OutputSink sink = new OutputSink();
+    engine.addLibrary(new LibraryContextSource(loader));
+    engine.addSource(new SourceContextSource(loader, trackers, sink));
+    engine.decompileContext();
 
+    Map<Long, SourceResponse> result = new HashMap<>();
+    for (ClassOriginTracker tracker : trackers) {
       Map<Integer, List<TrackerPartResponse>> lineToPartMapping = lineToPartMapping(tracker);
 
-      List<Line> lines = sink.output.get(tracker.className).lines()
-          .map((String line) -> toLine(line, lineToPartMapping))
-          .collect(Collectors.toList());
+      String output = sink.output.get(tracker.className);
+      if (output != null) {
+        List<Line> lines = output.lines()
+            .map((String line) -> toLine(line, lineToPartMapping))
+            .collect(toList());
 
-      return new SourceResponse(lines);
+        result.put(tracker.getTrackerId(), new SourceResponse(lines));
+      }
     }
+    return result;
   }
 
   private static Line toLine(String line, Map<Integer,
@@ -89,11 +94,7 @@ public class VineflowerSourceGenerator {
 
     @Override
     public void writeMessage(String message, Severity severity) {
-      if (severity == Severity.ERROR) {
-        logger.error(message);
-      } else {
-        logger.info(severity.prefix + message);
-      }
+      logger.info(severity.prefix + message);
     }
 
     @Override
@@ -109,12 +110,13 @@ public class VineflowerSourceGenerator {
   /** Provider Fernflower with the class that needs to be decompiled */
   static class SourceContextSource implements IContextSource {
     private final ClassLoader classLoader;
-    private final String className;
+    private final List<ClassOriginTracker> trackers;
     private final OutputSink sink;
 
-    SourceContextSource(ClassLoader classLoader, String className, OutputSink sink) {
+    SourceContextSource(ClassLoader classLoader, List<ClassOriginTracker> trackers,
+        OutputSink sink) {
       this.classLoader = classLoader;
-      this.className = className;
+      this.trackers = trackers;
       this.sink = sink;
     }
 
@@ -127,12 +129,15 @@ public class VineflowerSourceGenerator {
     public Entries getEntries() {
       // TODO do we also need to include nested classes here?
       //   "WARN:  Nested class [...] missing!"
-      return new Entries(List.of(Entry.atBase(className)), List.of(), List.of());
+      return new Entries(
+          trackers.stream()
+              .map(tracker -> Entry.atBase(tracker.className))
+              .collect(toList()),
+          List.of(), List.of());
     }
 
     @Override
     public InputStream getInputStream(String resource) {
-      System.out.println("MySourceContextSource.getInputStream " + resource);
       return getAsStream(classLoader, resource);
     }
 
@@ -180,8 +185,6 @@ public class VineflowerSourceGenerator {
 
     @Override
     public void acceptClass(String qualifiedName, String fileName, String content, int[] mapping) {
-//      System.out.println("MyOutputSink.acceptClass " + qualifiedName + " " + fileName + "\n"
-//          + content);
       output.put(qualifiedName, content);
     }
 

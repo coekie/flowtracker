@@ -6,18 +6,19 @@ import static com.google.common.truth.Truth.assertThat;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.web.SourceResource.Line;
 import com.coekie.flowtracker.web.SourceResource.SourceResponse;
-import java.io.IOException;
+import java.util.List;
 import org.junit.Test;
 
 public class VineflowerSourceGeneratorTest {
   @Test
-  public void test() throws IOException {
+  public void test() {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass(
         ExampleForSource.class.getClassLoader(),
         ExampleForSource.class.getName().replace('.', '/'), null);
     tracker.registerConstantString("line 9", 9);
 
-    SourceResponse response = VineflowerSourceGenerator.getSource(tracker);
+    SourceResponse response = VineflowerSourceGenerator.getSource(List.of(tracker))
+        .get(tracker.getTrackerId());
 
     assertThat(response).isNotNull();
     assertThat(response.lines).hasSize(15);
