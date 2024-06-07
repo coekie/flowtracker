@@ -18,10 +18,14 @@ package com.coekie.flowtracker.agent;
 
 import com.coekie.flowtracker.tracker.Trackers;
 import com.coekie.flowtracker.util.Config;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.CodeSigner;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -31,11 +35,20 @@ import java.util.jar.JarFile;
 class SpiderClassLoader extends ClassLoader {
   private final JarFile jar;
   private final boolean hideInternals;
+  private final ProtectionDomain pd;
 
   SpiderClassLoader(JarFile jar, Config config) {
     super(null);
     this.jar = jar;
     this.hideInternals = config.hideInternals();
+    // to prevent NPE in Vineflower's JarPluginLoader initialization, make sure our ProtectionDomain
+    // has a location.
+    try {
+      this.pd = new ProtectionDomain(
+          new CodeSource(new File(jar.getName()).toURL(), (CodeSigner[])null), null);
+    } catch (IOException e) {
+      throw new Error(e);
+    }
   }
 
   @Override
@@ -60,7 +73,7 @@ class SpiderClassLoader extends ClassLoader {
         Trackers.unsuspendOnCurrentThread();
       }
     }
-    return defineClass(name, b, 0, b.length);
+    return defineClass(name, b, 0, b.length, pd);
   }
 
   @Override
