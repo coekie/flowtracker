@@ -52,7 +52,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
   public final String className;
   public final String sourceFile;
   private final StringBuilder content = new StringBuilder();
-  private final List<ClassConstant> entries = new ArrayList<>();
+  private final List<ClassEntry> entries = new ArrayList<>();
 
   /** Map field name to offset in content */
   private final ConcurrentMap<String, Integer> fields = new ConcurrentHashMap<>();
@@ -111,7 +111,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     content.append(method).append(":\n");
   }
 
-  public synchronized ClassConstant registerConstant(int value, int line) {
+  public synchronized ClassEntry registerConstant(int value, int line) {
     appendConstantPrefix(line);
     int offset = content.length();
     if (value >= 32 && value < 127) { // printable ascii characters
@@ -120,16 +120,16 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
       content.append("0x").append(Integer.toHexString(value))
           .append(" (").append(value).append(')');
     }
-    ClassConstant result = registerEntry(offset, content.length() - offset, line);
+    ClassEntry result = registerEntry(offset, content.length() - offset, line);
     content.append('\n');
     return result;
   }
 
-  public synchronized ClassConstant registerFallback(int line) {
+  public synchronized ClassEntry registerFallback(int line) {
     appendConstantPrefix(line);
     int offset = content.length();
     content.append(FALLBACK);
-    ClassConstant result = registerEntry(offset, content.length() - offset, line);
+    ClassEntry result = registerEntry(offset, content.length() - offset, line);
     content.append('\n');
     return result;
   }
@@ -150,8 +150,8 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     }
   }
 
-  private ClassConstant registerEntry(int offset, int length, int line) {
-    ClassConstant result = new ClassConstant(classId, offset, length, line);
+  private ClassEntry registerEntry(int offset, int length, int line) {
+    ClassEntry result = new ClassEntry(classId, offset, length, line);
     entries.add(result);
     return result;
   }
@@ -178,18 +178,22 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
 
   /** Pushes line number information to `consumer` */
   public synchronized void pushLineNumbers(LineNumberConsumer consumer) {
-    for (ClassConstant entry : entries) {
+    for (ClassEntry entry : entries) {
       consumer.line(entry.offset, entry.offset + entry.length, entry.line);
     }
   }
 
-  public static class ClassConstant {
+  /**
+   * An entry in the class that trackers can refer to, e.g. a constant, or pointing to a piece of
+   * code (fallback).
+   */
+  public static class ClassEntry {
     public final int classId;
     public final int offset;
     public final int length;
     public final int line;
 
-    private ClassConstant(int classId, int offset, int length, int line) {
+    private ClassEntry(int classId, int offset, int length, int line) {
       this.classId = classId;
       this.offset = offset;
       this.length = length;
@@ -198,7 +202,7 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
 
     @Override
     public String toString() {
-      return "ClassConstant{" +
+      return "ClassEntry{" +
           "classId=" + classId +
           ", offset=" + offset +
           ", length=" + length +

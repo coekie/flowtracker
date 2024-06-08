@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassConstant;
+import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassEntry;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -25,7 +25,7 @@ import org.objectweb.asm.tree.InsnList;
 class ConstantValue extends TrackableValue {
   private final int value;
   private final int line;
-  private ClassConstant constant;
+  private ClassEntry constant;
 
   ConstantValue(FlowMethod method, Type type, AbstractInsnNode insn, int value) {
     super(method, type, insn);

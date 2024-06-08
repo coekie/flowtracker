@@ -2,7 +2,7 @@ package com.coekie.flowtracker.tracker;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassConstant;
+import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassEntry;
 import com.coekie.flowtracker.tracker.ClassOriginTracker.LineNumberConsumer;
 import org.junit.Test;
 
@@ -16,7 +16,7 @@ public class ClassOriginTrackerTest {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass(null, "myClass", null);
 
     tracker.startMethod("myMethod");
-    ClassConstant constant = tracker.registerConstant('x', 7);
+    ClassEntry constant = tracker.registerConstant('x', 7);
     assertThat(tracker.getContent().toString()).isEqualTo("class myClass\n"
             + "myMethod:\n"
             + "  (line 7) x\n");
@@ -31,7 +31,7 @@ public class ClassOriginTrackerTest {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass(null, "myClass", null);
 
     tracker.startMethod("myMethod");
-    ClassConstant constant = tracker.registerConstant(9999, 7);
+    ClassEntry constant = tracker.registerConstant(9999, 7);
     assertThat(tracker.getContent().toString()).isEqualTo("class myClass\n"
         + "myMethod:\n"
         + "  (line 7) 0x270f (9999)\n");

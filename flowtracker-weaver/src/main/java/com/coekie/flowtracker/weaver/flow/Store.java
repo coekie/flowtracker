@@ -16,7 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassConstant;
+import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassEntry;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.tree.InsnList;
 
@@ -45,7 +45,7 @@ abstract class Store extends Instrumentable implements FlowValue.FallbackSource 
   @Override
   public void loadSourcePointFallback(InsnList toInsert) {
     FlowMethod method = frame.getMethod();
-    ClassConstant fallback = method.constantsTransformation.fallback(method, line);
+    ClassEntry fallback = method.constantsTransformation.fallback(method, line);
     ConstantsTransformation.loadClassConstantPoint(toInsert, method, fallback);
   }
 

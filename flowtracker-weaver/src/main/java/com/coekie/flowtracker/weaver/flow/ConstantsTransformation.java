@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassConstant;
+import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassEntry;
 import com.coekie.flowtracker.util.RecursionChecker;
 import com.coekie.flowtracker.weaver.ClassFilter;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
@@ -67,12 +67,12 @@ class ConstantsTransformation {
     }
   }
 
-  ClassConstant trackConstant(FlowMethod methodNode, int value, int line) {
+  ClassEntry trackConstant(FlowMethod methodNode, int value, int line) {
     maybeAddMethodHeader(methodNode);
     return tracker().registerConstant(value, line);
   }
 
-  ClassConstant fallback(FlowMethod methodNode, int line) {
+  ClassEntry fallback(FlowMethod methodNode, int line) {
     maybeAddMethodHeader(methodNode);
     return tracker().registerFallback(line);
   }
@@ -144,7 +144,7 @@ class ConstantsTransformation {
     }
   }
 
-  static void loadClassConstantPoint(InsnList toInsert, FlowMethod method, ClassConstant constant) {
+  static void loadClassConstantPoint(InsnList toInsert, FlowMethod method, ClassEntry constant) {
     // we prefer to use constant-dynamic, for performance, but fall back to invoking
     // ConstantHook.constantPoint every time when necessary.
     if (method.canUseConstantDynamic()) {
@@ -155,7 +155,7 @@ class ConstantsTransformation {
   }
 
   private static void loadClassConstantPointWithCondy(InsnList toInsert, FlowMethod method,
-      ClassConstant constant) {
+      ClassEntry constant) {
     method.addComment(toInsert,
         "loadClassConstantPoint: condy ConstantHook.constantPoint(%s, %s, %s)",
         constant.classId, constant.offset, constant.length);
@@ -180,7 +180,7 @@ class ConstantsTransformation {
   }
 
   private static void loadClassConstantPointWithoutCondy(InsnList toInsert, FlowMethod method,
-      ClassConstant constant) {
+      ClassEntry constant) {
     method.addComment(toInsert,
         "loadClassConstantPoint: ConstantHook.constantPoint(%s, %s)",
         constant.classId, constant.offset);
