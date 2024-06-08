@@ -88,7 +88,7 @@ class FlowTester {
 
   /**
    * Returns the int value, and treats this FlowTester as the source.
-   * Calls to this method should get replaced by {@link #$tracked_createSourceByte(byte)}.
+   * Calls to this method should get replaced by {@link #$tracked_createSourceInt(int)}.
    */
   int createSourceInt(@SuppressWarnings("unused") int i) {
     throw sourceNotTrackedError();
@@ -96,6 +96,19 @@ class FlowTester {
 
   @SuppressWarnings("unused") // invoked by TesterValue instrumentation
   int $tracked_createSourceInt(int i) {
+    return i;
+  }
+
+  /**
+   * Returns the long value, and treats this FlowTester as the source.
+   * Calls to this method should get replaced by {@link #$tracked_createSourceLong(long)}.
+   */
+  long createSourceLong(@SuppressWarnings("unused") long i) {
+    throw sourceNotTrackedError();
+  }
+
+  @SuppressWarnings("unused") // invoked by TesterValue instrumentation
+  long $tracked_createSourceLong(long i) {
     return i;
   }
 
@@ -204,6 +217,15 @@ class FlowTester {
     throw valueNotTrackedError();
   }
 
+  /**
+   * Assert that the given value is tracked as coming from this tester.
+   * Calls to this method should get replaced by
+   * {@link #$tracked_assertIsTheTrackedValue(long, TrackerPoint)}.
+   */
+  void assertIsTheTrackedValue(@SuppressWarnings("unused") long i) {
+    throw valueNotTrackedError();
+  }
+
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   void $tracked_assertIsTheTrackedValue(char c, TrackerPoint actual) {
     assertThat(actual).isEqualTo(point());
@@ -211,6 +233,11 @@ class FlowTester {
 
   @SuppressWarnings("unused") // invoked by TesterStore instrumentation
   void $tracked_assertIsTheTrackedValue(byte b, TrackerPoint actual) {
+    assertThat(actual).isEqualTo(point());
+  }
+
+  @SuppressWarnings("unused") // invoked by TesterStore instrumentation
+  void $tracked_assertIsTheTrackedValue(long i, TrackerPoint actual) {
     assertThat(actual).isEqualTo(point());
   }
 

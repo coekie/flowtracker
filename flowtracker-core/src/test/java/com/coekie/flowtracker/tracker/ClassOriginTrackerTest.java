@@ -16,7 +16,7 @@ public class ClassOriginTrackerTest {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass(null, "myClass", null);
 
     tracker.startMethod("myMethod");
-    ClassEntry constant = tracker.registerConstant('x', 7);
+    ClassEntry constant = tracker.registerConstant((int) 'x', 7);
     assertThat(tracker.getContent().toString()).isEqualTo("class myClass\n"
             + "myMethod:\n"
             + "  (line 7) x\n");

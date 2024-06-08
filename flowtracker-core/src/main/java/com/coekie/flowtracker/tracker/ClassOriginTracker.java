@@ -111,14 +111,24 @@ public class ClassOriginTracker extends OriginTracker implements CharContentTrac
     content.append(method).append(":\n");
   }
 
-  public synchronized ClassEntry registerConstant(int value, int line) {
+  public synchronized ClassEntry registerConstant(Number value, int line) {
     appendConstantPrefix(line);
     int offset = content.length();
-    if (value >= 32 && value < 127) { // printable ascii characters
-      content.append((char) value);
-    } else {
-      content.append("0x").append(Integer.toHexString(value))
+    if (value instanceof Integer) {
+      int intValue = (int) value;
+      if (intValue >= 32 && intValue < 127) { // printable ascii characters
+        content.append((char) intValue);
+      } else {
+        content.append("0x").append(Integer.toHexString(intValue))
+            .append(" (").append(value).append(')');
+      }
+    } else if (value instanceof Long) {
+      long longValue = (long) value;
+      content.append("0x").append(Long.toHexString(longValue))
           .append(" (").append(value).append(')');
+    } else {
+      throw new IllegalArgumentException("Only int and long constants are supported, got "
+          + value.getClass());
     }
     ClassEntry result = registerEntry(offset, content.length() - offset, line);
     content.append('\n');

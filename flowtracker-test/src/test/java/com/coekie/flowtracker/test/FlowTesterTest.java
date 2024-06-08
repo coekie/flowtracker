@@ -49,6 +49,34 @@ public class FlowTesterTest {
   }
 
   @Test
+  public void testCreateAndAssertIsTheTrackedValue_int() {
+    int a = ft.createSourceInt('a');
+    int b = ft2.createSourceInt('b');
+    ft.assertIsTheTrackedValue((char) a);
+    ft2.assertIsTheTrackedValue((char) b);
+
+    try {
+      ft.assertIsTheTrackedValue((char) b);
+      throw new RuntimeException("failed");
+    } catch (AssertionError expected) {
+    }
+  }
+
+  @Test
+  public void testCreateAndAssertIsTheTrackedValue_long() {
+    long a = ft.createSourceLong('a');
+    long b = ft2.createSourceLong('b');
+    ft.assertIsTheTrackedValue(a);
+    ft2.assertIsTheTrackedValue(b);
+
+    try {
+      ft.assertIsTheTrackedValue(b);
+      throw new RuntimeException("failed");
+    } catch (AssertionError expected) {
+    }
+  }
+
+  @Test
   public void testGetCharSourcePoint() {
     char a = ft.createSourceChar('a');
     assertThat(FlowTester.getCharSourcePoint(a)).isEqualTo(ft.point());

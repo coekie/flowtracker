@@ -16,31 +16,45 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassEntry;
-import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 
-class ConstantValue extends TrackableValue {
-  /** The Integer or Long value of the constant */
-  private final Number value;
-  private final int line;
-  private ClassEntry constant;
+/**
+ * A value received from a cast operation between a long and an int (int/char/byte/short).
+ */
+class CastValue extends FlowValue {
+  private final FlowValue target;
+  private final AbstractInsnNode insn;
 
-  ConstantValue(FlowMethod method, Type type, AbstractInsnNode insn, Number value) {
-    super(method, type, insn);
-    this.value = value;
-    this.line = method.getLine(insn);
+  CastValue(Type type, AbstractInsnNode insn, FlowValue target) {
+    super(type);
+    this.insn = insn;
+    this.target = target;
   }
 
   @Override
-  void insertTrackStatements() {
-    constant = method.constantsTransformation.trackConstant(method, value, line);
+  boolean isTrackable() {
+    return target.isTrackable();
+  }
+
+  @Override
+  AbstractInsnNode getCreationInsn() {
+    return insn;
+  }
+
+  @Override
+  void ensureTracked() {
+    target.ensureTracked();
   }
 
   @Override
   void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
-    ConstantsTransformation.loadClassConstantPoint(toInsert, method, constant);
+    target.loadSourcePoint(toInsert, fallback);
+  }
+
+  @Override
+  boolean hasMergeAt(FlowFrame mergingFrame) {
+    return target.hasMergeAt(mergingFrame);
   }
 }

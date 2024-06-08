@@ -31,9 +31,12 @@ class TesterValue extends TrackableValue {
   /** Local variable storing the target FlowTester */
   private TrackLocal testerLocal;
 
-  TesterValue(FlowMethod method, MethodInsnNode mInsn) {
+  boolean isLong;
+
+  TesterValue(FlowMethod method, MethodInsnNode mInsn, boolean isLong) {
     super(method, Type.getReturnType(mInsn.desc), mInsn);
     this.mInsn = mInsn;
+    this.isLong = isLong;
   }
 
   @Override void insertTrackStatements() {
@@ -44,10 +47,26 @@ class TesterValue extends TrackableValue {
 
     InsnList toInsert = new InsnList();
 
-    // store tester
-    toInsert.add(new InsnNode(Opcodes.DUP2)); // dup tester and c
-    toInsert.add(new InsnNode(Opcodes.POP)); // pop c
-    toInsert.add(testerLocal.store()); // store tester
+    // store tester. doing a little dance on the stack because tester isn't on top.
+    if (isLong) {
+      // stack: tester, l
+      toInsert.add(new InsnNode(Opcodes.DUP2_X1)); // dup l down the stack
+      // stack: l, tester, l
+      toInsert.add(new InsnNode(Opcodes.POP2)); // pop l
+      // stack: l, tester
+      toInsert.add(new InsnNode(Opcodes.DUP_X2)); // dup tester down the stack
+      // stack: tester, l, tester
+      toInsert.add(testerLocal.store()); // store tester
+      // stack: tester, l
+    } else {
+      // stack: tester, c
+      toInsert.add(new InsnNode(Opcodes.DUP2)); // dup tester and c
+      // stack: tester, c, tester, c
+      toInsert.add(new InsnNode(Opcodes.POP)); // pop c
+      // stack: tester, c, tester
+      toInsert.add(testerLocal.store()); // store tester
+      // stack: tester, c
+    }
 
     mInsn.name = "$tracked_" + mInsn.name;
 

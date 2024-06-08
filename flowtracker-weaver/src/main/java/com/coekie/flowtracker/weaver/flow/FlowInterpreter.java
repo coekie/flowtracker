@@ -120,6 +120,8 @@ class FlowInterpreter extends Interpreter<FlowValue> {
         LdcInsnNode ldcInsn = (LdcInsnNode) insn;
         if (ldcInsn.cst instanceof Integer) {
           return new ConstantValue(method, Type.INT_TYPE, insn, (Integer) ldcInsn.cst);
+        } else if (ldcInsn.cst instanceof Long) {
+          return new ConstantValue(method, Type.LONG_TYPE, insn, (Long) ldcInsn.cst);
         }
     }
     return toFlowValue(basicInterpreter.newOperation(insn));
@@ -142,6 +144,12 @@ class FlowInterpreter extends Interpreter<FlowValue> {
         // It's ok to keep it as the same type, because this is going from a BasicValue.INT_VALUE
         // (which includes byte, char & int) to another INT_VALUE.
         return value;
+      case Opcodes.I2L:
+        // cast that does change the type
+        return new CastValue(Type.LONG_TYPE, insn, value);
+      case Opcodes.L2I:
+        // cast that does change the type
+        return new CastValue(Type.INT_TYPE, insn, value);
       case Opcodes.GETFIELD:
         FieldInsnNode fieldInsn = (FieldInsnNode) insn;
         Type fieldType = Type.getType(((FieldInsnNode) insn).desc);
@@ -170,7 +178,8 @@ class FlowInterpreter extends Interpreter<FlowValue> {
         InsnNode insn = (InsnNode) aInsn;
         return new ArrayLoadValue(method, insn, Type.INT_TYPE);
       }
-      case Opcodes.IAND: {
+      case Opcodes.IAND:
+      case Opcodes.LAND: {
         // treat `x & constant` as having the same source as x
         if (value2 instanceof ConstantValue) {
           return value1;
@@ -178,7 +187,8 @@ class FlowInterpreter extends Interpreter<FlowValue> {
           return value2;
         }
       }
-      case Opcodes.IUSHR: { // >>>
+      case Opcodes.IUSHR:
+      case Opcodes.LUSHR: { // >>>
         // for e.g. DataOutputStream.writeShort/writeChar, Bits.putShort/putInt (in older jdks)
         if (value2 instanceof ConstantValue) {
           return value1;
@@ -204,7 +214,9 @@ class FlowInterpreter extends Interpreter<FlowValue> {
             || "createSourceShort".equals(mInsn.name)
             || "createSourceByte".equals(mInsn.name)
             || "createSourceInt".equals(mInsn.name)) {
-          return new TesterValue(method, mInsn);
+          return new TesterValue(method, mInsn, false);
+        } else if ("createSourceLong".equals(mInsn.name)) {
+          return new TesterValue(method, mInsn, true);
         }
       } else if ("java/lang/Byte".equals(mInsn.owner) && "toUnsignedInt".equals(mInsn.name)) {
         return values.get(0);

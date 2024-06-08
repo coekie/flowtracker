@@ -123,12 +123,39 @@ public class FlowAnalysisTest {
     ft.assertIsTheTrackedValue((char) (short) (char) i);
   }
 
+  // casts with long are special because long takes two slots. see CastValue
+  @Test public void castFromLong() {
+    long i = ft.createSourceLong('a');
+    ft.assertIsTheTrackedValue((int) i);
+    ft.assertIsTheTrackedValue((byte) i);
+    ft.assertIsTheTrackedValue((char) i);
+    ft.assertIsTheTrackedValue((byte) (int) (byte) i);
+    ft.assertIsTheTrackedValue((char) (int) (char) i);
+    ft.assertIsTheTrackedValue((char) (short) (char) i);
+  }
+
+  // casts with long are special because long takes two slots. see CastValue
+  @SuppressWarnings("RedundantCast")
+  @Test public void castToLong() {
+    int i = ft.createSourceByte((byte) 'a');
+    ft.assertIsTheTrackedValue((long) i);
+    ft.assertIsTheTrackedValue((long) (char) i);
+    ft.assertIsTheTrackedValue((long) (byte) i);
+    ft.assertIsTheTrackedValue((long) (short) i);
+  }
+
   // Test that we track a value through "x & 255". (Analyzed code may use that to convert a signed
   // byte into an unsigned value.)
   @Test public void binaryAnd() {
     byte b = ft.createSourceByte((byte) 'a');
     ft.assertIsTheTrackedValue((char) (b & 255));
     ft.assertIsTheTrackedValue((char) (255 & b));
+  }
+
+  @Test public void binaryAndLong() {
+    long i = ft.createSourceLong('a');
+    ft.assertIsTheTrackedValue((char) (i & 255));
+    ft.assertIsTheTrackedValue((char) (255 & i));
   }
 
   // Test that we track a value through ">>>" (IUSHR).
@@ -140,6 +167,12 @@ public class FlowAnalysisTest {
     ft.assertIsTheTrackedValue((byte) (i >>> 0));
     ft.assertIsTheTrackedValue((byte) ((i >>> 8) & 0xFF));
     ft.assertIsTheTrackedValue((byte) ((i >>> 0) & 0xFF));
+  }
+
+  @Test public void shiftLong() {
+    long i = ft.createSourceLong(0x6162);
+    ft.assertIsTheTrackedValue((byte) (i >>> 8));
+    ft.assertIsTheTrackedValue((byte) ((i >>> 8) & 0xFF));
   }
 
   @Test public void byteToUnsignedInt() {

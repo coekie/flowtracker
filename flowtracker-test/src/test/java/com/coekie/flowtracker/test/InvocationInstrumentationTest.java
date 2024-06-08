@@ -45,6 +45,14 @@ public class InvocationInstrumentationTest {
     assertThat(sink.called).isTrue();
   }
 
+  @Test
+  public void testArgValueLong() {
+    FlowTester flowTester = new FlowTester();
+    Sink sink = new Sink(flowTester);
+    sink.writeLong(flowTester.createSourceLong('a'));
+    assertThat(sink.called).isTrue();
+  }
+
   /** Test call using super.method(), that is using INVOKESPECIAL */
   @Test
   public void superCall() {
@@ -196,6 +204,11 @@ public class InvocationInstrumentationTest {
 
     void writeInt(int i) {
       flowTester.assertIsTheTrackedValue((char) i);
+      called = true;
+    }
+
+    void writeLong(long i) {
+      flowTester.assertIsTheTrackedValue(i);
       called = true;
     }
   }

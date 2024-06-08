@@ -67,7 +67,8 @@ class ConstantsTransformation {
     }
   }
 
-  ClassEntry trackConstant(FlowMethod methodNode, int value, int line) {
+  /** Add tracking for a constant int or long value */
+  ClassEntry trackConstant(FlowMethod methodNode, Number value, int line) {
     maybeAddMethodHeader(methodNode);
     return tracker().registerConstant(value, line);
   }
