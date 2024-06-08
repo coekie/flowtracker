@@ -16,12 +16,12 @@ package com.coekie.flowtracker.web;
  * limitations under the License.
  */
 
-import static com.coekie.flowtracker.web.SourceResource.getAsStream;
-import static com.coekie.flowtracker.web.SourceResource.lineToPartMapping;
+import static com.coekie.flowtracker.web.CodeResource.getAsStream;
+import static com.coekie.flowtracker.web.CodeResource.lineToPartMapping;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.web.SourceResource.Line;
-import com.coekie.flowtracker.web.SourceResource.SourceResponse;
+import com.coekie.flowtracker.web.CodeResource.CodeResponse;
+import com.coekie.flowtracker.web.CodeResource.Line;
 import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,10 +37,10 @@ import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceClassVisitor;
 
 /** Use ASM to dump bytecode to text form, with mapping of source code line numbers */
-public class AsmSourceGenerator {
+public class AsmCodeGenerator {
 
   /** Use ASM to dump the bytecode */
-  static SourceResponse getSource(ClassOriginTracker tracker) throws IOException {
+  static CodeResponse getCode(ClassOriginTracker tracker) throws IOException {
     try (InputStream is = getAsStream(tracker.loader, tracker.className + ".class")) {
       if (is == null) {
         return null;
@@ -52,7 +52,7 @@ public class AsmSourceGenerator {
       ClassReader reader = new ClassReader(is);
       reader.accept(traceClassVisitor, ClassReader.SKIP_FRAMES);
 
-      return new SourceResponse(new LineListBuilder(tracker).append(textifier.text).flush().lines);
+      return new CodeResponse(new LineListBuilder(tracker).append(textifier.text).flush().lines);
     }
   }
 

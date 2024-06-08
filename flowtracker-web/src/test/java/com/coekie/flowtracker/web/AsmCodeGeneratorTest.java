@@ -1,15 +1,15 @@
 package com.coekie.flowtracker.web;
 
-import static com.coekie.flowtracker.web.SourceResourceTest.findLine;
+import static com.coekie.flowtracker.web.CodeResourceTest.findLine;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.web.SourceResource.Line;
-import com.coekie.flowtracker.web.SourceResource.SourceResponse;
+import com.coekie.flowtracker.web.CodeResource.CodeResponse;
+import com.coekie.flowtracker.web.CodeResource.Line;
 import java.io.IOException;
 import org.junit.Test;
 
-public class AsmSourceGeneratorTest {
+public class AsmCodeGeneratorTest {
   @Test
   public void test() throws IOException {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass(
@@ -17,7 +17,7 @@ public class AsmSourceGeneratorTest {
         ExampleForSource.class.getName().replace('.', '/'), null);
     tracker.registerConstantString("line 9", 9);
 
-    SourceResponse response = AsmSourceGenerator.getSource(tracker);
+    CodeResponse response = AsmCodeGenerator.getCode(tracker);
 
     assertThat(response).isNotNull();
     assertThat(response.lines).hasSize(9);

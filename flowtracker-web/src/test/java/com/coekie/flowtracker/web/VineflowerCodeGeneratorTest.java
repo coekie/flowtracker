@@ -1,15 +1,15 @@
 package com.coekie.flowtracker.web;
 
-import static com.coekie.flowtracker.web.SourceResourceTest.findLine;
+import static com.coekie.flowtracker.web.CodeResourceTest.findLine;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.web.SourceResource.Line;
-import com.coekie.flowtracker.web.SourceResource.SourceResponse;
+import com.coekie.flowtracker.web.CodeResource.CodeResponse;
+import com.coekie.flowtracker.web.CodeResource.Line;
 import java.util.List;
 import org.junit.Test;
 
-public class VineflowerSourceGeneratorTest {
+public class VineflowerCodeGeneratorTest {
   @Test
   public void test() {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass(
@@ -17,7 +17,7 @@ public class VineflowerSourceGeneratorTest {
         ExampleForSource.class.getName().replace('.', '/'), null);
     tracker.registerConstantString("line 9", 9);
 
-    SourceResponse response = VineflowerSourceGenerator.getSource(List.of(tracker))
+    CodeResponse response = VineflowerCodeGenerator.getCode(List.of(tracker))
         .get(tracker.getTrackerId());
 
     assertThat(response).isNotNull();

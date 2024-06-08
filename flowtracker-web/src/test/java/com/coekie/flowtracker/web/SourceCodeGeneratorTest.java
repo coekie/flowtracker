@@ -1,25 +1,25 @@
 package com.coekie.flowtracker.web;
 
-import static com.coekie.flowtracker.web.SourceResourceTest.findLine;
-import static com.coekie.flowtracker.web.SourceSourceGenerator.guessSourceUrl;
+import static com.coekie.flowtracker.web.CodeResourceTest.findLine;
+import static com.coekie.flowtracker.web.SourceCodeGenerator.guessSourceUrl;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.web.SourceResource.Line;
-import com.coekie.flowtracker.web.SourceResource.SourceResponse;
+import com.coekie.flowtracker.web.CodeResource.CodeResponse;
+import com.coekie.flowtracker.web.CodeResource.Line;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.junit.Test;
 
-public class SourceSourceGeneratorTest {
+public class SourceCodeGeneratorTest {
   @Test
-  public void testGetSource() {
+  public void testGetCode() {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass(
         ExampleForSource.class.getClassLoader(),
         ExampleForSource.class.getName().replace('.', '/'), null);
     tracker.registerConstantString("line 9", 9);
 
-    SourceResponse response = SourceSourceGenerator.getSource(tracker);
+    CodeResponse response = SourceCodeGenerator.getCode(tracker);
     assertThat(response).isNotNull();
 
     Line line9 = findLine(response, 9);
@@ -64,20 +64,20 @@ public class SourceSourceGeneratorTest {
 
   /** As far as we can, test actually finding sources in various ways. */
   @Test
-  public void testGetSourceString() {
+  public void testGetCodeString() {
     // this only works if sources have been downloaded. "works for me", but too dependent on the
     // environment
     //assertThat(getSourceString(Opcodes.class)).contains("class Opcodes");
 
-    assertThat(getSourceString(SourceSourceGenerator.class))
-        .contains("class SourceSourceGenerator");
-    assertThat(getSourceString(SourceSourceGeneratorTest.class))
+    assertThat(getCodeString(SourceCodeGenerator.class))
+        .contains("class SourceCodeGenerator");
+    assertThat(getCodeString(SourceCodeGeneratorTest.class))
         .contains("Whatever you want. This String.");
 
-    assertThat(getSourceString(String.class)).contains("class String");
+    assertThat(getCodeString(String.class)).contains("class String");
   }
 
-  private static String getSourceString(Class<?> clazz) {
-    return SourceSourceGenerator.getSourceString(ClassOriginTracker.get(clazz));
+  private static String getCodeString(Class<?> clazz) {
+    return SourceCodeGenerator.getCodeString(ClassOriginTracker.get(clazz));
   }
 }

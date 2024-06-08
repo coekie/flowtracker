@@ -1,6 +1,6 @@
 <script lang="ts">
   import {tick} from 'svelte';
-  import type {Line, Source} from '../javatypes';
+  import type {Line, Code} from '../javatypes';
   import type {Coloring} from './coloring';
   import {type ASelection, RangeSelection} from './selection';
 
@@ -9,12 +9,12 @@
   export let selection: ASelection | null;
   export let coloring: Coloring;
 
-  let sourcePromise: Promise<Source>;
-  $: sourcePromise = fetchSource(trackerId);
+  let codePromise: Promise<Code>;
+  $: codePromise = fetchCode(trackerId);
 
   let pre: HTMLPreElement;
 
-  const fetchSource = async (trackerId: number) => {
+  const fetchCode = async (trackerId: number) => {
     const response = await fetch('code/' + trackerId);
     if (!response.ok) throw new Error(response.statusText);
     return response.json();
@@ -50,7 +50,7 @@
 <!-- @component
 Shows source code of a class.
 -->
-{#await sourcePromise then source}
+{#await codePromise then source}
   <pre
     bind:this={pre}
     use:scrollToSelectionOnFirstRender>{#each source.lines as line}<div

@@ -22,8 +22,8 @@ import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
+import com.coekie.flowtracker.web.CodeResource.CodeResponse;
 import com.coekie.flowtracker.web.SettingsResource.Settings;
-import com.coekie.flowtracker.web.SourceResource.SourceResponse;
 import com.coekie.flowtracker.web.TrackerResource.Region;
 import com.coekie.flowtracker.web.TrackerResource.TrackerDetailResponse;
 import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
@@ -67,7 +67,7 @@ public class Snapshot {
   private final boolean minimized;
 
   private final TrackerResource trackerResource = new TrackerResource();
-  private final SourceResource sourceResource = new SourceResource();
+  private final CodeResource codeResource = new CodeResource();
 
   /** Ids of trackers that we already wrote in the snapshot */
   private final Set<Long> includedTrackers = new HashSet<>();
@@ -84,10 +84,10 @@ public class Snapshot {
       writeSettings(zos);
 
       // the order here matters because: Snapshot.includedTrackers is mutable: it is populated by
-      // writeTrackers and depended on by writeTree and writeSourceCode.
+      // writeTrackers and depended on by writeTree and writeCode.
       writeTrackers(zos, TrackerTree.ROOT, false);
       writeTree(zos);
-      writeSourceCode(zos);
+      writeCode(zos);
     }
   }
 
@@ -140,11 +140,11 @@ public class Snapshot {
     }
   }
 
-  private void writeSourceCode(ZipOutputStream zos) throws IOException {
+  private void writeCode(ZipOutputStream zos) throws IOException {
     List<Long> ids = includedTrackers.stream()
         .filter(id -> InterestRepository.getContentTracker(id) instanceof ClassOriginTracker)
         .collect(Collectors.toList());
-    for (Entry<Long, SourceResponse> entry : sourceResource.getAll(ids).entrySet()) {
+    for (Entry<Long, CodeResponse> entry : codeResource.getAll(ids).entrySet()) {
       writeJson(zos, "code/" + entry.getKey(), entry.getValue());
     }
   }

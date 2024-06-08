@@ -3,13 +3,13 @@ package com.coekie.flowtracker.web;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.web.SourceResource.Line;
-import com.coekie.flowtracker.web.SourceResource.SourceResponse;
+import com.coekie.flowtracker.web.CodeResource.CodeResponse;
+import com.coekie.flowtracker.web.CodeResource.Line;
 import java.io.IOException;
 import java.util.Objects;
 import org.junit.Test;
 
-public class SourceResourceTest {
+public class CodeResourceTest {
   @Test
   public void test() throws IOException {
     ClassOriginTracker tracker = ClassOriginTracker.registerClass(
@@ -17,11 +17,11 @@ public class SourceResourceTest {
         ExampleForSource.class.getName().replace('.', '/'), null);
     InterestRepository.register(tracker);
 
-    SourceResponse response = new SourceResource().get(tracker.getTrackerId());
+    CodeResponse response = new CodeResource().get(tracker.getTrackerId());
     assertThat(findLine(response, 9).content).contains("line 9");
   }
 
-  static Line findLine(SourceResponse response, int lineNumber) {
+  static Line findLine(CodeResponse response, int lineNumber) {
     return response.lines.stream()
         .filter(line -> Objects.equals(line.line, lineNumber))
         .findFirst()

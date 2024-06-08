@@ -73,7 +73,7 @@ public class WebModule {
 
     ResourceConfig resourceConfig =
         new ResourceConfig(TrackerResource.class, TreeResource.class, SettingsResource.class,
-            SnapshotResource.class, SourceResource.class)
+            SnapshotResource.class, CodeResource.class)
             .property(ServletProperties.FILTER_FORWARD_ON_404, true)
             .register(JsonGsonFeature.class);
     ServletContainer servletContainer = new ServletContainer(resourceConfig);

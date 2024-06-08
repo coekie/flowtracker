@@ -16,12 +16,12 @@ package com.coekie.flowtracker.web;
  * limitations under the License.
  */
 
-import static com.coekie.flowtracker.web.SourceResource.lineToPartMapping;
+import static com.coekie.flowtracker.web.CodeResource.lineToPartMapping;
 import static java.util.stream.Collectors.toList;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.web.SourceResource.Line;
-import com.coekie.flowtracker.web.SourceResource.SourceResponse;
+import com.coekie.flowtracker.web.CodeResource.CodeResponse;
+import com.coekie.flowtracker.web.CodeResource.Line;
 import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 /** Get source code from the actual source files, e.g. -sources.jar files */
-public class SourceSourceGenerator {
-  static SourceResponse getSource(ClassOriginTracker tracker) {
-    String s = getSourceString(tracker);
+public class SourceCodeGenerator {
+  static CodeResponse getCode(ClassOriginTracker tracker) {
+    String s = getCodeString(tracker);
     if (s == null) {
       return null;
     }
@@ -45,10 +45,10 @@ public class SourceSourceGenerator {
       result.add(new Line(i + 1, lines.get(i) + '\n',
           lineToPartMapping.getOrDefault(i + 1, List.of())));
     }
-    return new SourceResponse(result);
+    return new CodeResponse(result);
   }
 
-  static String getSourceString(ClassOriginTracker tracker) {
+  static String getCodeString(ClassOriginTracker tracker) {
     URL classUrl = getURL(tracker.loader, tracker.className + ".class");
     if (classUrl == null) {
       return null;
@@ -77,7 +77,7 @@ public class SourceSourceGenerator {
           && classUrl.getPath().contains("/target/test-classes/")) {
         return sourceUrl(classUrl, "/target/test-classes/", "/src/test/java/", sourceFile);
       } else if (classUrl.getProtocol().equals("jrt")) {
-        String innerPath = toSource(classUrl.getPath(), sourceFile);
+        String innerPath = toSourcePath(classUrl.getPath(), sourceFile);
         if (innerPath != null) {
           return new URL("jar", "", -1,
               "file:" + System.getProperty("java.home") + "/lib/src.zip!" + innerPath);
@@ -91,7 +91,7 @@ public class SourceSourceGenerator {
 
   private static URL sourceUrl(URL classUrl, String replaceThis, String withThis, String sourceFile)
       throws MalformedURLException {
-    String sourcePath = toSource(classUrl.getPath().replace(replaceThis, withThis), sourceFile);
+    String sourcePath = toSourcePath(classUrl.getPath().replace(replaceThis, withThis), sourceFile);
     if (sourcePath == null) {
       return null;
     } else {
@@ -104,7 +104,7 @@ public class SourceSourceGenerator {
    * the .class file. In practice usually replacing `.class` with `.java`. Uses `sourceFile`
    * (filename referenced in class) when available.
    */
-  private static String toSource(String classPath, String sourceFile) {
+  private static String toSourcePath(String classPath, String sourceFile) {
     int slash = classPath.lastIndexOf('/');
     String filename;
     if (sourceFile != null) { // usual case: use the sourceFile attribute

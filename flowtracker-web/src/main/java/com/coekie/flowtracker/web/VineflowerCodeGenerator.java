@@ -16,15 +16,15 @@ package com.coekie.flowtracker.web;
  * limitations under the License.
  */
 
-import static com.coekie.flowtracker.web.SourceResource.getAsStream;
-import static com.coekie.flowtracker.web.SourceResource.lineToPartMapping;
+import static com.coekie.flowtracker.web.CodeResource.getAsStream;
+import static com.coekie.flowtracker.web.CodeResource.lineToPartMapping;
 import static java.util.stream.Collectors.toList;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.Trackers;
 import com.coekie.flowtracker.util.Logger;
-import com.coekie.flowtracker.web.SourceResource.Line;
-import com.coekie.flowtracker.web.SourceResource.SourceResponse;
+import com.coekie.flowtracker.web.CodeResource.CodeResponse;
+import com.coekie.flowtracker.web.CodeResource.Line;
 import com.coekie.flowtracker.web.TrackerResource.TrackerPartResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,10 +41,10 @@ import org.jetbrains.java.decompiler.main.extern.IResultSaver;
 import org.jetbrains.java.decompiler.struct.StructClass;
 
 /** Use Vineflower to decompile bytecode, with mapping of source code line numbers */
-public class VineflowerSourceGenerator {
+public class VineflowerCodeGenerator {
 
   /** Use ASM to dump the bytecode */
-  static Map<Long, SourceResponse> getSource(List<ClassOriginTracker> trackers) {
+  static Map<Long, CodeResponse> getCode(List<ClassOriginTracker> trackers) {
     if (trackers.isEmpty()) {
       return Map.of();
     }
@@ -61,7 +61,7 @@ public class VineflowerSourceGenerator {
     engine.addSource(new SourceContextSource(loader, trackers, sink));
     engine.decompileContext();
 
-    Map<Long, SourceResponse> result = new HashMap<>();
+    Map<Long, CodeResponse> result = new HashMap<>();
     for (ClassOriginTracker tracker : trackers) {
       Map<Integer, List<TrackerPartResponse>> lineToPartMapping = lineToPartMapping(tracker);
 
@@ -74,7 +74,7 @@ public class VineflowerSourceGenerator {
             )
             .collect(toList());
 
-        result.put(tracker.getTrackerId(), new SourceResponse(lines));
+        result.put(tracker.getTrackerId(), new CodeResponse(lines));
       }
     }
     return result;

@@ -4,7 +4,7 @@
   import PathView from './PathView.svelte';
   import {type ASelection, pathStartsWith, RangeSelection} from './selection';
   import type {Coloring} from './coloring';
-  import SourceView from './SourceView.svelte';
+  import CodeView from './CodeView.svelte';
   import TrackerDetailSplit from './TrackerDetailSplit.svelte';
 
   /** Main tracker that's being shown */
@@ -56,7 +56,7 @@
   let selectionStart: RangeSelection | null;
 
   let pre: HTMLPreElement;
-  let sourceView: SourceView;
+  let codeView: CodeView;
 
   const fetchTrackerDetail = async (
     viewTrackerId: number | undefined,
@@ -177,13 +177,13 @@
     if (ondblclick) {
       ondblclick();
     }
-    sourceView?.scrollToSelection();
+    codeView?.scrollToSelection();
   }
 
   /** scroll the first selected region into view */
   export function scrollToSelection() {
     scrollToSelectionInPre();
-    sourceView?.scrollToSelection();
+    codeView?.scrollToSelection();
   }
 
   export function scrollToSelectionInPre() {
@@ -227,8 +227,8 @@
                 class:focus={focusRegion === region}>{region.content}</a
               >{/each}</pre>
         </div>
-        <SourceView
-          bind:this={sourceView}
+        <CodeView
+          bind:this={codeView}
           trackerId={viewTrackerId || -1}
           slot="two"
           {selection}

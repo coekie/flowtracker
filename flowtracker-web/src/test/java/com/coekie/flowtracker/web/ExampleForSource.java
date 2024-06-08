@@ -1,7 +1,7 @@
 package com.coekie.flowtracker.web;
 
 /**
- * Example code for testing {@link SourceResource}
+ * Example code for testing {@link CodeResource}
  */
 public class ExampleForSource {
   @SuppressWarnings("unused")

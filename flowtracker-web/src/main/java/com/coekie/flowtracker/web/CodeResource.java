@@ -34,25 +34,25 @@ import java.util.Map;
 
 /** Serves source code for classes referenced by {@link ClassOriginTracker}. */
 @Path("/code")
-public class SourceResource {
+public class CodeResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("{id}")
-  public SourceResponse get(@PathParam("id") long id) throws IOException {
+  public CodeResponse get(@PathParam("id") long id) throws IOException {
     return getAll(List.of(id)).get(id);
   }
 
   /**
    * Get the source code for a collection of trackers.
    * We do this in batch here when taking a snapshot, because that's faster than handling them one
-   * by one in {@link VineflowerSourceGenerator}.
+   * by one in {@link VineflowerCodeGenerator}.
    */
-  Map<Long, SourceResponse> getAll(Collection<Long> ids) throws IOException {
+  Map<Long, CodeResponse> getAll(Collection<Long> ids) throws IOException {
     // first try finding the actual source file
     List<Long> remaining = new ArrayList<>();
-    Map<Long, SourceResponse> result = new HashMap<>();
+    Map<Long, CodeResponse> result = new HashMap<>();
     for (Long id : ids) {
-      SourceResponse found = SourceSourceGenerator.getSource(
+      CodeResponse found = SourceCodeGenerator.getCode(
           (ClassOriginTracker) InterestRepository.getContentTracker(id));
       if (found != null) {
         result.put(id, found);
@@ -64,17 +64,17 @@ public class SourceResource {
     // otherwise decompile with vineflower
     result.putAll(getAllWithVineflower(remaining));
 
-    // for the ones that we couldn't get from source or vineflower, fallback to AsmSourceGenerator
+    // for the ones that we couldn't get from source or vineflower, fallback to AsmCodeGenerator
     for (Long id : ids) {
       if (!result.containsKey(id)) {
         ClassOriginTracker tracker = (ClassOriginTracker) InterestRepository.getContentTracker(id);
-        result.put(id, AsmSourceGenerator.getSource(tracker));
+        result.put(id, AsmCodeGenerator.getCode(tracker));
       }
     }
     return result;
   }
 
-  private Map<Long, SourceResponse> getAllWithVineflower(Collection<Long> ids) {
+  private Map<Long, CodeResponse> getAllWithVineflower(Collection<Long> ids) {
     Map<ClassLoader, List<ClassOriginTracker>> trackersByClassLoader = new HashMap<>();
     for (long trackerId : ids) {
       Tracker t = InterestRepository.getContentTracker(trackerId);
@@ -85,9 +85,9 @@ public class SourceResource {
       }
     }
 
-    Map<Long, SourceResponse> result = new HashMap<>();
+    Map<Long, CodeResponse> result = new HashMap<>();
     for (List<ClassOriginTracker> trackers : trackersByClassLoader.values()) {
-      result.putAll(VineflowerSourceGenerator.getSource(trackers));
+      result.putAll(VineflowerCodeGenerator.getCode(trackers));
     }
     return result;
   }
@@ -109,10 +109,10 @@ public class SourceResource {
     return result;
   }
 
-  public static class SourceResponse {
+  public static class CodeResponse {
     public final List<Line> lines;
 
-    SourceResponse(List<Line> lines) {
+    CodeResponse(List<Line> lines) {
       this.lines = lines;
     }
   }

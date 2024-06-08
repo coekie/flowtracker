@@ -44,13 +44,12 @@ export interface NodeDetail {
   path: string[];
 }
 
-// in java: SourceResource.SourceResponse
-export interface Source {
-  // public final List<Line> lines;
+// in java: CodeResource.CodeResponse
+export interface Code {
   lines: Line[];
 }
 
-// in java: SourceResource.Line
+// in java: CodeResource.Line
 export interface Line {
   line: number | null;
   content: string;
