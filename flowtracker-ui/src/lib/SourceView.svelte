@@ -24,6 +24,7 @@
     if (selection instanceof RangeSelection) {
       return line.parts.some(
         part =>
+          selection.tracker.id == trackerId &&
           selection.offset + selection.length > part.offset &&
           selection.offset < part.offset + part.length
       );
