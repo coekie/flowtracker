@@ -48,8 +48,23 @@ public class SourceResource {
    * by one in {@link VineflowerSourceGenerator}.
    */
   Map<Long, SourceResponse> getAll(Collection<Long> ids) throws IOException {
-    Map<Long, SourceResponse> result = getAllWithVineflower(ids);
-    // for the ones that we couldn't get from vineflower, fallback to AsmSourceGenerator
+    // first try finding the actual source file
+    List<Long> remaining = new ArrayList<>();
+    Map<Long, SourceResponse> result = new HashMap<>();
+    for (Long id : ids) {
+      SourceResponse found = SourceSourceGenerator.getSource(
+          (ClassOriginTracker) InterestRepository.getContentTracker(id));
+      if (found != null) {
+        result.put(id, found);
+      } else {
+        remaining.add(id);
+      }
+    }
+
+    // otherwise decompile with vineflower
+    result.putAll(getAllWithVineflower(remaining));
+
+    // for the ones that we couldn't get from source or vineflower, fallback to AsmSourceGenerator
     for (Long id : ids) {
       if (!result.containsKey(id)) {
         ClassOriginTracker tracker = (ClassOriginTracker) InterestRepository.getContentTracker(id);
