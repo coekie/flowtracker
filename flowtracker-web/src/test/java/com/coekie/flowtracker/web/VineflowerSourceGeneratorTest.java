@@ -21,7 +21,7 @@ public class VineflowerSourceGeneratorTest {
         .get(tracker.getTrackerId());
 
     assertThat(response).isNotNull();
-    assertThat(response.lines).hasSize(15);
+    assertThat(response.lines).hasSize(16);
 
     // simple line
     Line line9 = findLine(response, 9);

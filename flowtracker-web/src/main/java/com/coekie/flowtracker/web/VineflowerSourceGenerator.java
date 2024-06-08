@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.jetbrains.java.decompiler.main.Fernflower;
 import org.jetbrains.java.decompiler.main.extern.IContextSource;
 import org.jetbrains.java.decompiler.main.extern.IContextSource.IOutputSink;
@@ -66,8 +67,11 @@ public class VineflowerSourceGenerator {
 
       String output = sink.output.get(tracker.className);
       if (output != null) {
-        List<Line> lines = output.lines()
-            .map((String line) -> toLine(line, lineToPartMapping))
+        List<Line> lines = Stream.concat(
+                Stream.of(new Line(null, "// Decompiled by Vineflower\n\n", List.of())),
+                output.lines()
+                    .map((String line) -> toLine(line, lineToPartMapping))
+            )
             .collect(toList());
 
         result.put(tracker.getTrackerId(), new SourceResponse(lines));
