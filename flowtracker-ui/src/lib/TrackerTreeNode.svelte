@@ -47,6 +47,7 @@
   class:origin={node.tracker?.origin}
   class:sink={node.tracker?.sink}
   class:selected={selectionIndex == node.path.length - 1}
+  class:root={node.path.length == 0}
   style="background-color: {colorByIndex[node.path.length - 1] || 'inherit'}"
   on:click={() => click(node)}
 >
@@ -70,7 +71,7 @@
   {/each}
 </button>
 {#if expanded}
-  <ul>
+  <ul class:root={node.path.length == 0}>
     {#each node.children as child}
       <li>
         <svelte:self
@@ -121,18 +122,25 @@
     background-size: 1em 1em;
   }
 
+  button.root {
+    display: none;
+  }
+
   ul {
     padding: 0.2em 0 0 0.5em;
-    margin: 0 0 0 0.5em;
     list-style: none;
+  }
+
+  ul:not(.root) {
+    margin: 0 0 0 0.5em;
     border-left: 1px solid rgba(128, 128, 128, 0.4);
+  }
+
+  ul.root {
+    margin: 0 0 0 0;
   }
 
   .path-part {
     display: inline-block;
   }
-
-  /* li {
-		padding: 0.2em 0;
-	} */
 </style>
