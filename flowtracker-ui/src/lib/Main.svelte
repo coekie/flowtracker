@@ -94,6 +94,7 @@
       on:click={toggleTree}
       class="treeToggle"
       class:close={treePaneSize > 0}
+      title="Toggle tree"
     />
     <SettingsView /><ColoringView bind:coloring bind:selection />
   </div>
@@ -119,10 +120,13 @@
   }
 
   .treeToggle {
+    background: none;
     background-image: url(/left_panel_open.svg);
     background-repeat: no-repeat;
     background-position: center;
-    width: 50px;
+    width: 3em;
+    height: 100%;
+    border: 1px solid black;
   }
 
   .treeToggle.close {
