@@ -17,6 +17,7 @@ package com.coekie.flowtracker.hook;
  */
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
+import com.coekie.flowtracker.tracker.Trackers;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -25,6 +26,10 @@ import java.lang.reflect.Method;
 public class ReflectionHook {
   /** Hook for {@link Class#getName()}, used in `ClassNameCall` */
   public static String getClassName(Class<?> clazz) {
+    if (!Trackers.isActive() || clazz.isArray()) {
+      return clazz.getName();
+    }
+
     return StringHook.constantString(clazz.getName(), ClassOriginTracker.get(clazz),
         6 /* after "class " */);
   }
@@ -32,6 +37,11 @@ public class ReflectionHook {
   /** Hook for {@link Field#getName()}, used in `FieldNameCall` */
   public static String getFieldName(Field field) {
     String name = field.getName();
+
+    if (!Trackers.isActive() || field.getClass().isArray()) {
+      return name;
+    }
+
     ClassOriginTracker classTracker = ClassOriginTracker.get(field.getDeclaringClass());
     return StringHook.constantString(name, classTracker, classTracker.getFieldOffset(name));
   }
@@ -39,6 +49,11 @@ public class ReflectionHook {
   /** Hook for {@link Method#getName()}, used in `MethodNameCall` */
   public static String getMethodName(Method method) {
     String name = method.getName();
+
+    if (!Trackers.isActive() || method.getClass().isArray()) {
+      return name;
+    }
+
     ClassOriginTracker classTracker = ClassOriginTracker.get(method.getDeclaringClass());
     return StringHook.constantString(name, classTracker, classTracker.getMethodOffset(name));
   }

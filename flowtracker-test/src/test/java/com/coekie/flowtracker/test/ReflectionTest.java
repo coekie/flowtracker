@@ -18,6 +18,12 @@ public class ReflectionTest {
   }
 
   @Test
+  public void getClassName_array() {
+    String str = ClassTest[].class.getName();
+    assertThat(getStringTracker(str)).isNull();
+  }
+
+  @Test
   public void testFieldName() {
     class Foo {
       @SuppressWarnings("unused")
