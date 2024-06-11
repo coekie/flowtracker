@@ -36,7 +36,6 @@ Component to edit coloring
 -->
 
 <div class="coloringwrapper">
-  <div><b>Coloring:</b></div>
   {#each coloring.assignments as assignment, index}
     <a
       href={'#'}
@@ -47,7 +46,7 @@ Component to edit coloring
     >
   {/each}
   {#if coloring.canAdd()}
-    <a href={'#'} on:click={add} class="square">+</a>
+    <a href={'#'} on:click={add} class="square plus">+</a>
   {/if}
 </div>
 
@@ -60,9 +59,16 @@ Component to edit coloring
     display: inline-block;
     width: 1em;
     height: 1em;
+    line-height: 1em; /* center the + */
     margin: 0.1em;
     border: 1px solid black;
     text-decoration: none;
     text-align: center;
+    font-weight: bolder;
+    font-size: 1.75em;
+  }
+
+  .plus {
+    background-image: linear-gradient(to bottom right, #ff9999, #99ffff);
   }
 </style>
