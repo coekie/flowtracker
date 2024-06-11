@@ -51,7 +51,7 @@
 
 <div class="tree">
   <!-- Checkboxes to show & hide sinks or origins. Disabled for now because it's ugly. -->
-  <div style='display: none'>
+  <div style="display: none">
     <input type="checkbox" id="sinksCheckbox" bind:checked={showSinks} />
     <label for="sinksCheckbox">Sinks</label>
     <input type="checkbox" id="originsCheckbox" bind:checked={showOrigins} />

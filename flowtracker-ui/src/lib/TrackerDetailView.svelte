@@ -55,6 +55,9 @@
   /** For an ongoing selection (while the mouse button is down), the selection where we started (where the mouse went down) */
   let selectionStart: RangeSelection | null;
 
+  /** Show creation stacktrace (when available). Toggled with button in upper right corner. */
+  let showCreation: boolean = false;
+
   let pre: HTMLPreElement;
   let codeView: CodeView;
 
@@ -200,11 +203,17 @@
   <div class="trackerDetail">
     <div class="path">
       <PathView path={trackerDetail.path} bind:selection {coloring} />
+      {#if trackerDetail.creationStackTrace}
+        <button
+          class="toggle-creation"
+          on:click={() => (showCreation = !showCreation)}
+        />
+      {/if}
     </div>
     <div class="split">
       <TrackerDetailSplit showSplit={trackerDetail.hasSource}>
         <div class="content" slot="one">
-          {#if trackerDetail.creationStackTrace}
+          {#if showCreation && trackerDetail.creationStackTrace}
             <pre class="creation">{trackerDetail.creationStackTrace}</pre>
           {/if}
           <pre
@@ -249,6 +258,16 @@
   }
   .path {
     border-bottom: 1px solid #ccc;
+  }
+  .toggle-creation {
+    border: none;
+    background: none;
+    float: right;
+    margin-right: 0.5em;
+    width: 1.2em;
+    height: 1.2em;
+    background-image: url(/stacks.svg);
+    background-size: contain;
   }
   .split {
     flex: 1;
