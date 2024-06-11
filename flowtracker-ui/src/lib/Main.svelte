@@ -26,7 +26,7 @@
 <div class="wrapper">
   <div class="panes">
     <Splitpanes theme="my-theme">
-      <Pane>
+      <Pane size={30}>
         <TrackerTree
           bind:selectedTracker={mainTracker}
           bind:secondaryTracker

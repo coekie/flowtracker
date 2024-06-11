@@ -17,7 +17,7 @@ Also makes the split pane optional based on `showSplit`, so that we do not creat
   <slot name="two" />
 {:else}
   <Splitpanes theme="my-theme">
-    <Pane>
+    <Pane size={30}>
       <slot name="one" />
     </Pane>
     <Pane>
