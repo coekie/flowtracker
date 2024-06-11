@@ -19,17 +19,46 @@
 
   let coloring: Coloring = new Coloring();
 
+  /** Width of the split pane showing the tree. On a small screen, use the full width initially */
+  let treePaneSize: number = window.innerWidth < 600 ? 100 : 30;
+  /** Old width to restore `treePaneSize` to if the tree was hidden and then shown again */
+  let restoreTreePaneSize: number = 0;
+  $: restoreTreePaneSize =
+    treePaneSize > 0 ? treePaneSize : restoreTreePaneSize;
+
   let sinkView: TrackerDetailView;
   let originView: TrackerDetailView;
+
+  /** Show or hide the split pane that contains the tree */
+  function toggleTree() {
+    if (treePaneSize == 0) {
+      treePaneSize = restoreTreePaneSize;
+    } else {
+      treePaneSize = 0;
+    }
+  }
+
+  function onTrackerSelectedInTree(tracker: Tracker) {
+    // reset secondaryTracker, to prevent ever having a secondaryTracker
+    // that is unrelated to the mainTracker
+    secondaryTracker = null;
+
+    mainTracker = tracker;
+
+    // if we selected a tracker when all that's visible is the tree (usually because the screen
+    // isn't wide enough) then hide the tree, so we can see the TrackerDetailView.
+    if (treePaneSize == 100) {
+      treePaneSize = 0;
+    }
+  }
 </script>
 
 <div class="wrapper">
   <div class="panes">
     <Splitpanes theme="my-theme">
-      <Pane size={30}>
+      <Pane bind:size={treePaneSize}>
         <TrackerTree
-          bind:selectedTracker={mainTracker}
-          bind:secondaryTracker
+          onTrackerSelected={onTrackerSelectedInTree}
           bind:selection
           {coloring}
         />
@@ -61,6 +90,11 @@
     </Splitpanes>
   </div>
   <div class="footer">
+    <button
+      on:click={toggleTree}
+      class="treeToggle"
+      class:close={treePaneSize > 0}
+    />
     <SettingsView /><ColoringView bind:coloring bind:selection />
   </div>
 </div>
@@ -82,5 +116,16 @@
   .footer {
     display: flex;
     border-top: 3px solid #ccc; /* default: 1px solid #eee */
+  }
+
+  .treeToggle {
+    background-image: url(/left_panel_open.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 50px;
+  }
+
+  .treeToggle.close {
+    background-image: url(/left_panel_close.svg);
   }
 </style>

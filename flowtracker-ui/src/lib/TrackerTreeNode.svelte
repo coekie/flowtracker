@@ -1,10 +1,14 @@
 <script lang="ts">
-  import type {NodeDetail, Tracker} from '../javatypes';
+  import type {NodeDetail} from '../javatypes';
   import type {ColorByIndex, Coloring} from './coloring';
-  import {indexInPath, PathSelection, type ASelection} from './selection';
+  import {
+    indexInPath,
+    PathSelection,
+    type ASelection,
+    type OnTrackerSelected,
+  } from './selection';
 
-  export let selectedTracker: Tracker | null;
-  export let secondaryTracker: Tracker | null;
+  export let onTrackerSelected: OnTrackerSelected | null;
   export let selection: ASelection | null;
   export let coloring: Coloring;
   export let node: NodeDetail;
@@ -17,12 +21,8 @@
   $: colorByIndex = coloring.calcColorByIndex(node.path);
 
   function click(node: NodeDetail) {
-    if (node.tracker) {
-      // reset secondaryTracker, to prevent ever having a secondaryTracker
-      // that is unrelated to the selectedTracker
-      secondaryTracker = null;
-
-      selectedTracker = node.tracker;
+    if (node.tracker && onTrackerSelected) {
+      onTrackerSelected(node.tracker);
     }
     if (node.children.length > 0) {
       expanded = !expanded;
@@ -47,7 +47,6 @@
   class:origin={node.tracker?.origin}
   class:sink={node.tracker?.sink}
   class:selected={selectionIndex == node.path.length - 1}
-  class:selected-tracker={node.tracker && node.tracker === selectedTracker}
   style="background-color: {colorByIndex[node.path.length - 1] || 'inherit'}"
   on:click={() => click(node)}
 >
@@ -76,8 +75,7 @@
       <li>
         <svelte:self
           node={child}
-          bind:selectedTracker
-          bind:secondaryTracker
+          {onTrackerSelected}
           bind:selection
           {coloring}
         />

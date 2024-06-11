@@ -62,3 +62,5 @@ export function indexInPath(
 export function pathStartsWith(a: string[], b: string[]): boolean {
   return a && b && a.length >= b.length && b.every((n, i) => a[i] == n);
 }
+
+export type OnTrackerSelected = (_: Tracker) => void;

@@ -1,11 +1,10 @@
 <script lang="ts">
   import TrackerTreeNode from './TrackerTreeNode.svelte';
-  import type {Tracker, NodeDetail} from '../javatypes';
-  import type {ASelection} from './selection';
+  import type {NodeDetail} from '../javatypes';
+  import type {ASelection, OnTrackerSelected} from './selection';
   import type {Coloring} from './coloring';
 
-  export let selectedTracker: Tracker | null;
-  export let secondaryTracker: Tracker | null;
+  export let onTrackerSelected: OnTrackerSelected | null;
   export let selection: ASelection | null;
   export let coloring: Coloring;
 
@@ -63,8 +62,7 @@
   {:then root}
     <TrackerTreeNode
       node={root}
-      bind:selectedTracker
-      bind:secondaryTracker
+      {onTrackerSelected}
       bind:selection
       {coloring}
     />
