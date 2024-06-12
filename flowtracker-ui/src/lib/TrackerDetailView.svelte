@@ -221,7 +221,7 @@
             bind:this={pre}
             use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a
                 class="region"
-                href={region.parts.length > 0 ? '#' : undefined}
+                href={region.parts.length > 0 ? 'javascript:;' : undefined}
                 on:mouseover={() => focusIn(region)}
                 on:mouseout={() => focusOut()}
                 on:focus={() => focusIn(region)}

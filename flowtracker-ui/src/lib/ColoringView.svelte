@@ -38,7 +38,7 @@ Component to edit coloring
 <div class="coloringwrapper">
   {#each coloring.assignments as assignment, index}
     <a
-      href={'#'}
+      href={'javascript:;'}
       on:click={e => reassign(assignment, index, e)}
       on:contextmenu={e => remove(index, e)}
       class="square"
@@ -46,7 +46,7 @@ Component to edit coloring
     >
   {/each}
   {#if coloring.canAdd()}
-    <a href={'#'} on:click={add} class="square plus">+</a>
+    <a href={'javascript:;'} on:click={add} class="square plus">+</a>
   {/if}
 </div>
 
