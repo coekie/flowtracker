@@ -134,18 +134,6 @@ class InvocationArgStore extends Store {
           return result;
         }
         break;
-      case "jdk/internal/util/ByteArray": // used in ByteArrayHook
-        if (name.equals("setUnsignedShort") || name.equals("setInt")) {
-          result[2] = true; // the `value` argument
-          return result;
-        }
-        break;
-      case "java/nio/ByteBuffer": // used in ByteBufferHook
-        if (name.equals("putInt")) {
-          result[result.length - 1] = true; // the `value` argument, for both overloads
-          return result;
-        }
-        break;
       case "java/lang/String":
         // don't track "coder"
         if (name.equals("getBytes")) {
@@ -154,7 +142,12 @@ class InvocationArgStore extends Store {
         break;
     }
 
-    boolean eager = name.contains("write") || name.contains("Write") || name.contains("print");
+    boolean eager = name.contains("write") || name.contains("Write") || name.contains("print")
+        // classes with Byte in the name are likely to be worth tracking. e.g.
+        // - java.nio.ByteBuffer
+        // - jdk.internal.util.ByteArray (used in ByteArrayHook)
+        // - org.objectweb.asm.ByteVector (AsmDemo)
+        || owner.contains("Byte");
 
     for (int i = 0; i < args.length; i++) {
       Type arg = args[i];

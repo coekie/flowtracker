@@ -5,7 +5,9 @@ import static com.google.common.truth.Truth.assertThat;
 import org.junit.Test;
 
 public class InvocationArgStoreTest {
-  @Test public void testShouldInstrumentInvocationArg() {
+
+  @Test
+  public void testShouldInstrumentInvocationArg() {
     assertThat(InvocationArgStore.shouldInstrumentInvocationArg("whatever", "whatever", "(B)V"))
         .isTrue();
     assertThat(InvocationArgStore.shouldInstrumentInvocationArg("whatever", "whatever", "(C)V"))
@@ -25,11 +27,21 @@ public class InvocationArgStoreTest {
     assertThat(InvocationArgStore.shouldInstrumentInvocationArg(
         "java/io/Bits", "putChar", "([BIC)V"))
         .isTrue();
-    // assertThat(InvocationArgStore.shouldInstrumentInvocationArg(
-    // "java/io/Bits", "putShort", "([BIS)V"))
-    // .isTrue();
+    assertThat(InvocationArgStore.shouldInstrumentInvocationArg(
+        "java/io/Bits", "putShort", "([BIS)V"))
+        .isTrue();
     assertThat(InvocationArgStore.shouldInstrumentInvocationArg(
         "java/io/Bits", "putInt", "([BII)V"))
+        .isTrue();
+
+    // used in ByteBufferHook
+    assertThat(InvocationArgStore.shouldInstrumentInvocationArg(
+        "java/nio/ByteBuffer", "putInt", "(I)Ljava/nio/ByteBuffer;"))
+        .isTrue();
+
+    // for AsmDemo
+    assertThat(InvocationArgStore.shouldInstrumentInvocationArg(
+        "org/objectweb/asm/ByteVector", "putInt", "(I)Lorg/objectweb/asm/ByteVector;"))
         .isTrue();
   }
 }
