@@ -1,7 +1,7 @@
 <script lang="ts">
   import TrackerTreeNode from './TrackerTreeNode.svelte';
   import type {NodeDetail} from '../javatypes';
-  import type {ASelection, OnTrackerSelected} from './selection';
+  import {pathStartsWith, type ASelection, type OnTrackerSelected} from './selection';
   import type {Coloring} from './coloring';
 
   export let onTrackerSelected: OnTrackerSelected | null;
@@ -36,7 +36,11 @@
     }
     const response = await fetch('tree' + url);
     if (!response.ok) return Promise.reject(response);
-    return response.json().then(r => enrich(r, null));
+    return response.json().then(r => {
+      const enriched = enrich(r, null);
+      applyUrlHash(enriched);
+      return enriched;
+    });
   }
 
   /** Fill in NodeDetail.path */
@@ -46,6 +50,27 @@
       enrich(child, node);
     }
     return node;
+  }
+
+  /** Open the tracker specified in the URL */
+  function applyUrlHash(root:NodeDetail): void {
+    const hash = window.location.hash;
+    if (hash != null && hash.length != 0) {
+      var node = root;
+      var remaining = hash.substring(1).split('/').map(decodeURIComponent);
+
+      while (remaining.length > 0) {
+        const next = node.children.find(child => pathStartsWith(remaining, child.names));
+        if (!next) {
+          return;
+        }
+        remaining = remaining.splice(next.names.length);
+        node = next;
+      }
+      if (node.tracker && onTrackerSelected) {
+        onTrackerSelected(node.tracker);
+      }
+    }
   }
 </script>
 

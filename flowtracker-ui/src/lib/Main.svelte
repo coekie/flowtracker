@@ -50,6 +50,8 @@
     if (treePaneSize == 100) {
       treePaneSize = 0;
     }
+
+    window.location.hash = tracker.path.map(encodeURIComponent).join('/');
   }
 </script>
 
