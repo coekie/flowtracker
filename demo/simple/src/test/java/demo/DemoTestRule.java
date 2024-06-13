@@ -12,6 +12,7 @@ import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import com.google.common.collect.Iterables;
 import com.google.common.primitives.Bytes;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.StringSubject;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -157,6 +158,10 @@ public class DemoTestRule extends ExternalResource {
     void comesFromConstantInClass(Class<?> source) {
       comesFromConstantInClassThat()
           .startsWith("class " + source.getName() + "\n");
+    }
+
+    IterableSubject comesFromTrackerWithPath() {
+      return assertThat(tracker().getNode().path());
     }
   }
 }

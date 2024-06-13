@@ -24,7 +24,8 @@ public class AsmDemoTest {
     out.assertThatPart("LineNumberTable").comesFromConstantInClassThat()
         .startsWith("class org.objectweb.asm.MethodWriter");
 
-    // TODO Strings read from original class file are not tracked
-    out.assertThatPart("demo/HelloWorld").isNotTracked();
+    // Strings read from original class file
+    out.assertThatPart("java/lang/System").comesFromTrackerWithPath()
+        .contains("HelloWorld.class");
   }
 }

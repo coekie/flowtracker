@@ -19,7 +19,9 @@ package com.coekie.flowtracker.weaver;
 import com.coekie.flowtracker.annotation.HookLocation;
 import com.coekie.flowtracker.util.Logger;
 import com.coekie.flowtracker.weaver.HookSpec.HookArgument;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -41,18 +43,22 @@ class ClassHookSpec implements Transformer {
       MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
 
       Method method = new Method(name, desc);
-      HookSpec hookSpec = methodHookSpecs.get(method);
-      if (hookSpec != null) {
-        logger.info("Transforming %s.%s%s", targetClass.getClassName(), name, desc);
-        return hookSpec.createMethodAdapter(mv, access, name, desc);
-      } else {
+
+      List<HookSpec> hookSpecs = methodHookSpecs.get(method);
+      if (hookSpecs == null) {
         return mv;
       }
+
+      logger.info("Transforming %s.%s%s", targetClass.getClassName(), name, desc);
+      for (HookSpec hookSpec : hookSpecs) {
+        mv = hookSpec.createMethodAdapter(mv, access, name, desc);
+      }
+      return mv;
     }
   }
 
   private final Type targetClass;
-  private final Map<Method, HookSpec> methodHookSpecs = new HashMap<>();
+  private final Map<Method, List<HookSpec>> methodHookSpecs = new HashMap<>();
 
   ClassHookSpec(Type targetClass) {
     this.targetClass = targetClass;
@@ -62,7 +68,10 @@ class ClassHookSpec implements Transformer {
       HookLocation location, HookArgument... hookArguments) {
     HookSpec hookSpec =
         new HookSpec(targetClass, targetMethod, hookClass, hookMethod, location, hookArguments);
-    methodHookSpecs.put(targetMethod, hookSpec);
+    if (!methodHookSpecs.containsKey(targetMethod)) {
+      methodHookSpecs.put(targetMethod, new ArrayList<>());
+    }
+    methodHookSpecs.get(targetMethod).add(hookSpec);
     return this;
   }
 
@@ -76,8 +85,10 @@ class ClassHookSpec implements Transformer {
   }
 
   void typeCheck() {
-    for (HookSpec hookSpec : methodHookSpecs.values()) {
-      hookSpec.typeCheck();
+    for (List<HookSpec> hookSpecList : methodHookSpecs.values()) {
+      for (HookSpec hookSpec : hookSpecList) {
+        hookSpec.typeCheck();
+      }
     }
   }
 }
