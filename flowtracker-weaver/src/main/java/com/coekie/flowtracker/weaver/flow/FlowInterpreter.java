@@ -248,7 +248,10 @@ class FlowInterpreter extends Interpreter<FlowValue> {
               method.name, method.desc);
       if (argsToInstrument != null && argNum < argsToInstrument.length
           && argsToInstrument[argNum]) {
-        return new InvocationArgValue(method, null, argNum);
+        // we consider the first instruction of the method to be the instruction that created the
+        // parameter values. that's not entirely correct (they get created _before_ that
+        // instruction), but close enough.
+        return new InvocationArgValue(method, method.instructions.getFirst(), argNum);
       }
     }
     return super.newParameterValue(isInstanceMethod, local, type);
