@@ -19,8 +19,8 @@ package com.coekie.flowtracker.weaver.flow;
 import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
@@ -40,20 +40,20 @@ class FlowFrame extends Frame<FlowValue> {
    * So any MergedValue in Frame.values corresponds to a non-null value in this array at the same
    * index.
    */
-  private final Set<FlowValue>[] mergedValues;
+  private final List<FlowValue>[] mergedValues;
 
   @SuppressWarnings("unchecked")
   FlowFrame(int numLocals, int maxStack, FlowAnalyzer analyzer) {
     super(numLocals, maxStack);
     this.analyzer = analyzer;
-    this.mergedValues = (Set<FlowValue>[]) new Set<?>[numLocals + maxStack];
+    this.mergedValues = (List<FlowValue>[]) new List<?>[numLocals + maxStack];
   }
 
   @SuppressWarnings("unchecked")
   FlowFrame(FlowFrame frame, FlowAnalyzer analyzer) {
     super(frame);
     this.analyzer = analyzer;
-    this.mergedValues = (Set<FlowValue>[]) new Set<?>[frame.mergedValues.length];
+    this.mergedValues = (List<FlowValue>[]) new List<?>[frame.mergedValues.length];
   }
 
   AbstractInsnNode getInsn() {
@@ -125,14 +125,14 @@ class FlowFrame extends Frame<FlowValue> {
     return result;
   }
 
-  Set<FlowValue> getMergedValues(ValueReference ref) {
+  List<FlowValue> getMergedValues(ValueReference ref) {
     if (ref.frame != this) {
       throw new IllegalArgumentException();
     }
     int index = ref.isLocal ? ref.index : this.getLocals() + ref.index;
-    Set<FlowValue> result = mergedValues[index];
+    List<FlowValue> result = mergedValues[index];
     if (result == null) {
-      result = new HashSet<>();
+      result = new ArrayList<>();
       mergedValues[index] = result;
     }
     return result;

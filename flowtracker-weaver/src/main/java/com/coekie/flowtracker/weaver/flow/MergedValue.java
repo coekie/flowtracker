@@ -17,7 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
-import java.util.Set;
+import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -148,7 +148,7 @@ class MergedValue extends FlowValue {
     return other.mergingFrame == this.mergingFrame && other.ref.equals(this.ref);
   }
 
-  Set<FlowValue> mergedValues() {
+  List<FlowValue> mergedValues() {
     return mergingFrame.getMergedValues(ref);
   }
 
@@ -167,7 +167,7 @@ class MergedValue extends FlowValue {
     }
 
     // this is a "real" merge, so update our mergedValues
-    Set<FlowValue> mergedValues = mergingFrame.getMergedValues(ref);
+    List<FlowValue> mergedValues = mergingFrame.getMergedValues(ref);
     if (mergedValues.isEmpty()) { // a new merge
       mergedValues.add(value1);
       mergedValues.add(value2);
@@ -193,19 +193,19 @@ class MergedValue extends FlowValue {
   /**
    * Record that `value` gets merged it at `ref`/`mergedValues` (unless value is that merge itself)
    */
-  static void addToThisMerge(ValueReference ref, Set<FlowValue> mergedValues, FlowValue value) {
+  static void addToThisMerge(ValueReference ref, List<FlowValue> mergedValues, FlowValue value) {
     if (isThisMerge(ref, value)) {
       return;
     }
     // keep mergedValues as small as possible: if the new value can be combined with one of the
     // existing values, do that.
-    for (FlowValue mergedValue : mergedValues) {
+    for (int i = 0; i < mergedValues.size(); i++) {
+      FlowValue mergedValue = mergedValues.get(i);
       FlowValue combined = mergedValue.mergeInPlace(value);
       if (combined != null) {
         // if it's not the one that's already in mergedValues, then replace it
         if (combined != mergedValue) {
-          mergedValues.remove(mergedValue);
-          mergedValues.add(combined);
+          mergedValues.set(i, combined);
         }
         return;
       }
