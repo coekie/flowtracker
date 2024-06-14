@@ -58,12 +58,12 @@ public class Logger {
         //noinspection CallToPrintStackTrace
         t.printStackTrace();
       }
+    } finally {
       if (exitOnError) {
         // forcefully exit, don't even try to run shutdown hooks. this avoids stuff going crazy if
         // our instrumentation has caused something fundamental to fail.
         Runtime.getRuntime().halt(1);
       }
-    } finally {
       Trackers.unsuspendOnCurrentThread();
     }
   }

@@ -41,7 +41,7 @@ public class CoreInitializer {
     Logger.initLogging(config);
     RecursionChecker.initialize(config);
     ClassLoaderHook.initialize(config);
-    ensureInitialized();
+    ensureInitialized(config);
   }
 
   public static void initialize(Config config, JarFile agentJar) {
@@ -53,10 +53,14 @@ public class CoreInitializer {
 
   // call stuff to make sure JDK internals needed for it are initialized, before we enable tracking
   // e.g. java.util.concurrent.ConcurrentSkipListMap
-  private static void ensureInitialized() {
+  @SuppressWarnings("ResultOfMethodCallIgnored")
+  private static void ensureInitialized(Config config) {
     DefaultTracker tracker1 = new DefaultTracker();
     tracker1.setSource(0, 1, new ByteOriginTracker(), 7);
     tracker1.pushSourceTo(0, 1, new DefaultTracker(), 10);
+    if (config.containsKey("dumpText")) {
+      String.format("%s", "a");
+    }
   }
 
   /**
