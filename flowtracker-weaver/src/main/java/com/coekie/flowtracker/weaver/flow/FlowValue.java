@@ -102,12 +102,13 @@ abstract class FlowValue extends BasicValue {
    * to a merge that happens because of converging control flow).
    * You could say this is handling the "simple" case of the merge.
    * <p>
-   * Concretely, this handles one round of interpretation having seen that there's a MergeValue, and
-   * another interpretation just having one of those values, so effectively being a _subset_ of it.
-   * So e.g. `value1.mergeInPlace(MergeValue1)`, where MergeValue1 already contains value1, returns
-   * MergeValue1. And this recurses, so that e.g.
-   * CopyValue(value1).mergeInPLace(CopyValue(MergeValue1))` (where the two CopyValues are caused by
-   * the same instruction) also returns CopyOf(MergeValue1).
+   * Concretely, this handles one round of interpretation having seen that there's a MergedValue,
+   * and another interpretation just having one of those values, so effectively being a _subset_ of
+   * it.
+   * So e.g. `value1.mergeInPlace(MergedValue1)`, where MergedValue1 already contains value1,
+   * returns MergedValue1. And this recurses, so that e.g.
+   * CopyValue(value1).mergeInPLace(CopyValue(MergedValue1))` (where the two CopyValues are caused
+   * by the same instruction) also returns CopyOf(MergedValue1).
    */
   final FlowValue mergeInPlace(FlowValue other) {
     // if one of them is a MergedValue, let that one handle it

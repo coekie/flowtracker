@@ -145,18 +145,11 @@ class MergedValue extends FlowValue {
   }
 
   /**
-   * Combine two values when possible; creating a MergedValue when necessary. Returns null if the
-   * values can't be combined.
+   * Combine two values into a MergedValue. Returns null if the values can't be merged.
+   * Note: This is only called if we actually need a MergedValue; if the values can't be merged
+   * in-place.
    */
-  static FlowValue maybeMerge(Type type, FlowFrame mergingFrame, FlowValue value1,
-      FlowValue value2) {
-    // if we can merge them in-place, do that
-    FlowValue merged = value1.mergeInPlace(value2);
-    if (merged != null) {
-      return merged;
-    }
-
-    // this is a "real" merge, so update our mergedValues
+  static MergedValue merge(Type type, FlowFrame mergingFrame, FlowValue value1, FlowValue value2) {
     MergeSlot slot = MergeSlot.findMergeSlot(mergingFrame, value1);
     List<FlowValue> mergedValues = slot.getMergedValues();
     if (mergedValues.isEmpty()) { // a new merge

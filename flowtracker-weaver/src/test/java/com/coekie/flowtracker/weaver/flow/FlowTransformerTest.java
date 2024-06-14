@@ -242,7 +242,7 @@ public class FlowTransformerTest {
           @SuppressWarnings({"unused", "LoopConditionNotUpdatedInsideLoop"})
           void write(int value, boolean b) {
             while (b) {
-              value = (byte) value; // causing a circular reference in MergeValues
+              value = (byte) value; // causing a circular reference in MergedValues
             }
             myByteArray[0] = (byte)value;
           }
