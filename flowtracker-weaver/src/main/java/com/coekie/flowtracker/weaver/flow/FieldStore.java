@@ -45,7 +45,7 @@ class FieldStore extends Store {
 
     InsnList toInsert = new InsnList();
 
-    methodNode.addComment(toInsert, "begin FieldStore.insertTrackStatements");
+    methodNode.addComment(toInsert, "begin FieldStore.instrument");
     // put a copy on top of the stack to pass as argument into the hook method, in two steps:
     // starting with (target, value) on the stack,
     // dup2 -> (target, value, target, value),
@@ -65,7 +65,7 @@ class FieldStore extends Store {
         "(Ljava/lang/Object;Ljava/lang/String;Lcom/coekie/flowtracker/tracker/TrackerPoint;)V",
         false));
 
-    methodNode.addComment(toInsert, "end FieldStore.insertTrackStatements");
+    methodNode.addComment(toInsert, "end FieldStore.instrument");
 
     methodNode.instructions.insertBefore(storeInsn, toInsert);
   }

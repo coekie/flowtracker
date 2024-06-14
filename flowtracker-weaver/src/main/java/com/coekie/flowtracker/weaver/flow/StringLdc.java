@@ -54,13 +54,13 @@ class StringLdc extends Instrumentable {
         insn.cst = constantsTransformation.stringConstantDynamic(offset, value);
       } else {
         InsnList toInsert = new InsnList();
-        methodNode.addComment(toInsert, "begin StringLdc.insertTrackStatements");
+        methodNode.addComment(toInsert, "begin StringLdc.instrument");
         toInsert.add(ConstantsTransformation.iconst(constantsTransformation.classId()));
         toInsert.add(ConstantsTransformation.iconst(offset));
         toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
             "com/coekie/flowtracker/hook/StringHook", "constantString",
             "(Ljava/lang/String;II)Ljava/lang/String;"));
-        methodNode.addComment(toInsert, "end StringLdc.insertTrackStatements");
+        methodNode.addComment(toInsert, "end StringLdc.instrument");
         methodNode.instructions.insert(insn, toInsert);
         methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
       }

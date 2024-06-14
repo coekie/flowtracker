@@ -79,7 +79,7 @@ class InvocationArgStore extends Store {
     // we add these instructions using insertInvocationPreparation, so Invocation is on top of the
     // stack. setArg returns the Invocation, so it's on top of the stack again.
     InsnList toInsert = new InsnList();
-    methodNode.addComment(toInsert, "begin InvocationArgStore.insertTrackStatements");
+    methodNode.addComment(toInsert, "begin InvocationArgStore.instrument");
 
     for (int i = 0; i < args.length; i++) {
       FlowValue arg = args[i];
@@ -95,7 +95,7 @@ class InvocationArgStore extends Store {
                     + "Lcom/coekie/flowtracker/tracker/Invocation;"));
       }
     }
-    methodNode.addComment(toInsert, "end InvocationArgStore.insertTrackStatements");
+    methodNode.addComment(toInsert, "end InvocationArgStore.instrument");
 
     transformation.ensureInstrumented();
     transformation.insertInvocationPreparation(toInsert);

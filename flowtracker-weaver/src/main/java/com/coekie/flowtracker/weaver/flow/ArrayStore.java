@@ -42,7 +42,7 @@ class ArrayStore extends Store {
   void instrument(FlowMethod methodNode) {
     InsnList toInsert = new InsnList();
 
-    methodNode.addComment(toInsert, "begin ArrayStore.insertTrackStatements: "
+    methodNode.addComment(toInsert, "begin ArrayStore.instrument: "
         + "ArrayHook.set*(array, arrayIndex, value [already on stack], sourcePoint)");
 
     // note: we do this even for UntrackableValues
@@ -57,7 +57,7 @@ class ArrayStore extends Store {
         "com/coekie/flowtracker/hook/ArrayHook", hook.getName(), hook.getDescriptor(),
         false));
 
-    methodNode.addComment(toInsert, "end ArrayStore.insertTrackStatements");
+    methodNode.addComment(toInsert, "end ArrayStore.instrument");
 
     methodNode.instructions.insert(storeInsn, toInsert);
     methodNode.instructions.remove(storeInsn); // our hook takes care of the storing

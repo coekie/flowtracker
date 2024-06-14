@@ -42,7 +42,7 @@ class InvocationReturnStore extends Store {
     // if we know where the value we are returning came from
     if (shouldTrack(returnedValue)) {
       InsnList toInsert = new InsnList();
-      methodNode.addComment(toInsert, "begin InvocationReturnStore.insertTrackStatements");
+      methodNode.addComment(toInsert, "begin InvocationReturnStore.instrument");
 
       returnedValue.ensureTracked();
       invocation.ensureStarted(methodNode);
@@ -56,7 +56,7 @@ class InvocationReturnStore extends Store {
               + "Lcom/coekie/flowtracker/tracker/TrackerPoint;)V",
           false));
 
-      methodNode.addComment(toInsert, "end InvocationReturnStore.insertTrackStatements");
+      methodNode.addComment(toInsert, "end InvocationReturnStore.instrument");
       methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
 
       methodNode.instructions.insertBefore(returnInsn, toInsert);

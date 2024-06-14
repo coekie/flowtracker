@@ -40,10 +40,9 @@ class TesterStore extends Store {
     if (storedValue.isTrackable()) { // if we know where the value we are storing came from
       storedValue.ensureTracked();
 
-      // replace the call with a call to the $tracked_ method, with two extra arguments: the tracker
-      // and the index
+      // replace the call with a call to the $tracked_ method, with one extra argument: TrackerPoint
       InsnList toInsert = new InsnList();
-      methodNode.addComment(toInsert, "begin TesterStore.insertTrackStatements");
+      methodNode.addComment(toInsert, "begin TesterStore.instrument");
 
       storedValue.loadSourcePoint(toInsert, this);
 
