@@ -31,19 +31,18 @@ import org.objectweb.asm.tree.LineNumberNode;
  * ternary operator).
  */
 class MergedValue extends FlowValue {
-  final FlowFrame mergingFrame;
-  // NICE: we could optimize this for small sets, like in SourceInterpreter with SmallSet
-  final ValueReference ref;
+  private final FlowFrame mergingFrame;
+  private final MergeSlot slot;
   private int cachedIsTrackable = -1;
   private boolean tracked;
 
   /** Local variable storing the PointTracker for the merged value */
   private TrackLocal pointTrackerLocal;
 
-  private MergedValue(Type type, FlowFrame mergingFrame, ValueReference ref) {
+  private MergedValue(Type type, FlowFrame mergingFrame, MergeSlot slot) {
     super(type);
     this.mergingFrame = mergingFrame;
-    this.ref = ref;
+    this.slot = slot;
   }
 
   @Override
@@ -145,11 +144,11 @@ class MergedValue extends FlowValue {
       return false;
     }
     MergedValue other = (MergedValue) o;
-    return other.mergingFrame == this.mergingFrame && other.ref.equals(this.ref);
+    return other.mergingFrame == this.mergingFrame && other.slot.equals(this.slot);
   }
 
   List<FlowValue> mergedValues() {
-    return mergingFrame.getMergedValues(ref);
+    return slot.getMergedValues();
   }
 
   /**
@@ -158,8 +157,6 @@ class MergedValue extends FlowValue {
    */
   static FlowValue maybeMerge(Type type, FlowFrame mergingFrame, FlowValue value1,
       FlowValue value2) {
-    ValueReference ref = mergingFrame.findReference(value1);
-
     // if we can merge them in-place, do that
     FlowValue merged = value1.mergeInPlace(value2);
     if (merged != null) {
@@ -167,34 +164,35 @@ class MergedValue extends FlowValue {
     }
 
     // this is a "real" merge, so update our mergedValues
-    List<FlowValue> mergedValues = mergingFrame.getMergedValues(ref);
+    MergeSlot slot = MergeSlot.findMergeSlot(mergingFrame, value1);
+    List<FlowValue> mergedValues = slot.getMergedValues();
     if (mergedValues.isEmpty()) { // a new merge
       mergedValues.add(value1);
       mergedValues.add(value2);
     } else { // merge more into an existing merge
       // TODO remove this to handle merges of merges.
       //  skip that case for now because this triggers some bugs (VerifyErrors)
-      if ((value1 instanceof MergedValue && !isThisMerge(ref, value1))
-        || (value2 instanceof MergedValue && !isThisMerge(ref, value2))) {
+      if ((value1 instanceof MergedValue && !isThisMerge(slot, value1))
+        || (value2 instanceof MergedValue && !isThisMerge(slot, value2))) {
         return null;
       }
 
-      addToThisMerge(ref, mergedValues, value1);
-      addToThisMerge(ref, mergedValues, value2);
+      addToThisMerge(slot, mergedValues, value1);
+      addToThisMerge(slot, mergedValues, value2);
     }
 
-    return new MergedValue(type, mergingFrame, ref);
+    return new MergedValue(type, mergingFrame, slot);
   }
 
-  static boolean isThisMerge(ValueReference ref, FlowValue value) {
-    return (value instanceof MergedValue) && ref.equals(((MergedValue) value).ref);
+  static boolean isThisMerge(MergeSlot slot, FlowValue value) {
+    return (value instanceof MergedValue) && slot.equals(((MergedValue) value).slot);
   }
 
   /**
-   * Record that `value` gets merged it at `ref`/`mergedValues` (unless value is that merge itself)
+   * Record that `value` gets merged it at `slot`/`mergedValues` (unless value is that merge itself)
    */
-  static void addToThisMerge(ValueReference ref, List<FlowValue> mergedValues, FlowValue value) {
-    if (isThisMerge(ref, value)) {
+  static void addToThisMerge(MergeSlot slot, List<FlowValue> mergedValues, FlowValue value) {
+    if (isThisMerge(slot, value)) {
       return;
     }
     // keep mergedValues as small as possible: if the new value can be combined with one of the

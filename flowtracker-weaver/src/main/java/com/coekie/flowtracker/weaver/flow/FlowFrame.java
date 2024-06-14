@@ -19,7 +19,6 @@ package com.coekie.flowtracker.weaver.flow;
 import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
-import java.util.ArrayList;
 import java.util.List;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -39,8 +38,9 @@ class FlowFrame extends Frame<FlowValue> {
    * first all the locals, then the stack.
    * So any MergedValue in Frame.values corresponds to a non-null value in this array at the same
    * index.
+   * This should only be used by {@link MergeSlot}.
    */
-  private final List<FlowValue>[] mergedValues;
+  final List<FlowValue>[] mergedValues;
 
   @SuppressWarnings("unchecked")
   FlowFrame(int numLocals, int maxStack, FlowAnalyzer analyzer) {
@@ -96,45 +96,5 @@ class FlowFrame extends Frame<FlowValue> {
     } finally {
       ((FlowInterpreter) interpreter).endMerge();
     }
-  }
-
-  /** Find where `value` is in the frame, and return a {@link ValueReference} to it */
-  // NICE we could avoid looping over all locals and stack, if in (Flow)Frame.merge we would keep
-  // of where we are in the loop with merging
-  ValueReference findReference(FlowValue value) {
-    ValueReference result = null;
-    for (int i = 0; i < getStackSize(); i++) {
-      if (getStack(i) == value) {
-        if (result != null) {
-          throw new IllegalStateException("Found value multiple times");
-        }
-        result = ValueReference.stack(this, i);
-      }
-    }
-    for (int i = 0; i < getLocals(); i++) {
-      if (getLocal(i) == value) {
-        if (result != null) {
-          throw new IllegalStateException("Found value multiple times");
-        }
-        result = ValueReference.local(this, i);
-      }
-    }
-    if (result == null) {
-      throw new RuntimeException("Cannot find value " + value);
-    }
-    return result;
-  }
-
-  List<FlowValue> getMergedValues(ValueReference ref) {
-    if (ref.frame != this) {
-      throw new IllegalArgumentException();
-    }
-    int index = ref.isLocal ? ref.index : this.getLocals() + ref.index;
-    List<FlowValue> result = mergedValues[index];
-    if (result == null) {
-      result = new ArrayList<>();
-      mergedValues[index] = result;
-    }
-    return result;
   }
 }
