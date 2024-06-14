@@ -98,18 +98,31 @@ class FlowFrame extends Frame<FlowValue> {
     }
   }
 
+  /** Find where `value` is in the frame, and return a {@link ValueReference} to it */
+  // NICE we could avoid looping over all locals and stack, if in (Flow)Frame.merge we would keep
+  // of where we are in the loop with merging
   ValueReference findReference(FlowValue value) {
+    ValueReference result = null;
     for (int i = 0; i < getStackSize(); i++) {
       if (getStack(i) == value) {
-        return ValueReference.stack(this, i);
+        if (result != null) {
+          throw new IllegalStateException("Found value multiple times");
+        }
+        result = ValueReference.stack(this, i);
       }
     }
     for (int i = 0; i < getLocals(); i++) {
       if (getLocal(i) == value) {
-        return ValueReference.local(this, i);
+        if (result != null) {
+          throw new IllegalStateException("Found value multiple times");
+        }
+        result = ValueReference.local(this, i);
       }
     }
-    throw new RuntimeException("Cannot find value " + value);
+    if (result == null) {
+      throw new RuntimeException("Cannot find value " + value);
+    }
+    return result;
   }
 
   final Set<FlowValue> getMergedValues(ValueReference ref) {
