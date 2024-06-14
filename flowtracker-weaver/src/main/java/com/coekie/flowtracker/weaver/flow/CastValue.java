@@ -44,6 +44,11 @@ class CastValue extends FlowValue {
   }
 
   @Override
+  boolean hasCreationInsn() {
+    return true;
+  }
+
+  @Override
   void ensureTracked() {
     target.ensureTracked();
   }

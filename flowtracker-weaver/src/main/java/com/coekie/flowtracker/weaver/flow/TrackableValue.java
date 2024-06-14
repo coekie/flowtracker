@@ -50,6 +50,11 @@ abstract class TrackableValue extends FlowValue {
     return insn;
   }
 
+  @Override
+  boolean hasCreationInsn() {
+    return true;
+  }
+
   /**
    * Insert the statements needed to keep track of the origin of this value.
    * <p>

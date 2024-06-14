@@ -17,11 +17,11 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
-import java.util.HashSet;
 import java.util.Set;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 
@@ -32,17 +32,17 @@ import org.objectweb.asm.tree.InsnNode;
 class MergedValue extends FlowValue {
   final FlowFrame mergingFrame;
   // NICE: we could optimize this for small sets, like in SourceInterpreter with SmallSet
-  final Set<FlowValue> values;
+  final ValueReference ref;
   private int cachedIsTrackable = -1;
   private boolean tracked;
 
   /** Local variable storing the PointTracker for the merged value */
   private TrackLocal pointTrackerLocal;
 
-  private MergedValue(Type type, FlowFrame mergingFrame, Set<FlowValue> values) {
+  private MergedValue(Type type, FlowFrame mergingFrame, ValueReference ref) {
     super(type);
     this.mergingFrame = mergingFrame;
-    this.values = values;
+    this.ref = ref;
   }
 
   @Override
@@ -54,8 +54,8 @@ class MergedValue extends FlowValue {
   }
 
   private boolean calcIsTrackable() {
-    for (FlowValue value : values) {
-      if (!value.isTrackable() || value.getCreationInsn() == null) {
+    for (FlowValue value : mergedValues()) {
+      if (!value.isTrackable() || !value.hasCreationInsn()) {
         return false;
       }
     }
@@ -71,10 +71,14 @@ class MergedValue extends FlowValue {
   }
 
   @Override
-  void initCreationFrame(FlowAnalyzer analyzer) {
-    super.initCreationFrame(analyzer);
-    for (FlowValue value : values) {
-      value.initCreationFrame(analyzer);
+  boolean initCreationFrame(FlowAnalyzer analyzer) {
+    if (super.initCreationFrame(analyzer)) {
+      for (FlowValue value : mergedValues()) {
+        value.initCreationFrame(analyzer);
+      }
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -84,7 +88,7 @@ class MergedValue extends FlowValue {
         Type.getType("Lcom/coekie/flowtracker/tracker/TrackerPoint;"),
         "MergedValue PointTracker");
 
-    for (FlowValue value : values) {
+    for (FlowValue value : mergedValues()) {
       value.ensureTracked();
 
       InsnList toInsert = new InsnList();
@@ -94,7 +98,15 @@ class MergedValue extends FlowValue {
       // that when we get to the point where they get merged, it already has the right TrackerPoint
       value.loadSourcePoint(toInsert, NullFallbackSource.INSTANCE);
       toInsert.add(pointTrackerLocal.store());
-      methodNode.instructions.insert(value.getCreationInsn(), toInsert);
+
+      // avoid inserting between a label and a frame; because for verification to succeed the frame
+      // must stay right after the label.
+      AbstractInsnNode insertAfter = value.getCreationInsn();
+      if (insertAfter.getNext() instanceof FrameNode) {
+        insertAfter = insertAfter.getNext();
+      }
+
+      methodNode.instructions.insert(insertAfter, toInsert);
     }
 
     InsnList toInsert = new InsnList();
@@ -106,6 +118,11 @@ class MergedValue extends FlowValue {
   @Override
   AbstractInsnNode getCreationInsn() {
     return mergingFrame.getInsn();
+  }
+
+  @Override
+  boolean hasCreationInsn() {
+    return true;
   }
 
   @Override
@@ -123,7 +140,7 @@ class MergedValue extends FlowValue {
     if (mergingFrame == this.mergingFrame) {
       return true;
     }
-    for (FlowValue value : values) {
+    for (FlowValue value : mergedValues()) {
       if (value.hasMergeAt(mergingFrame)) {
         return true;
       }
@@ -139,30 +156,11 @@ class MergedValue extends FlowValue {
       return false;
     }
     MergedValue other = (MergedValue) o;
-    return other.mergingFrame == this.mergingFrame && other.values.equals(this.values);
+    return other.mergingFrame == this.mergingFrame && other.ref.equals(this.ref);
   }
 
-  /** Add value into values, or return true if a loop is detected */
-  private static boolean addAndDetectLoop(Set<FlowValue> values, FlowValue value, FlowFrame mergingFrame) {
-    if (value instanceof MergedValue) {
-      MergedValue mergedValue = (MergedValue) value;
-      if (mergedValue.mergingFrame == mergingFrame) {
-        // if the merge is at the same frame, then the merging does not represent two code paths
-        // converging, it's us analyzing the same instruction twice, so just combine the results
-        values.addAll(mergedValue.values);
-        return false;
-      } else {
-        // avoid problems with loops in the data flow
-        if (mergedValue.hasMergeAt(mergingFrame)) {
-          return true;
-        }
-        // TODO we don't have a test case yet where we need a Merge of a Merge;
-        //  so for now we just always stop tracking here
-        return true;
-      }
-    }
-    values.add(value);
-    return false;
+  Set<FlowValue> mergedValues() {
+    return mergingFrame.getMergedValues(ref);
   }
 
   /**
@@ -179,15 +177,22 @@ class MergedValue extends FlowValue {
       return value2;
     }
 
-    Set<FlowValue> values = new HashSet<>();
-    if (addAndDetectLoop(values, value1, mergingFrame)) {
-      return null;
+    ValueReference ref = mergingFrame.findReference(value1);
+    Set<FlowValue> mergedValues = mergingFrame.getMergedValues(ref);
+    if (!((value1 instanceof MergedValue) && ((MergedValue) value1).ref.equals(ref))) {
+      if (value1 instanceof MergedValue) { // TODO remove. for now still excluding merges of merges
+        return null;
+      }
+      mergedValues.add(value1);
     }
-    if (addAndDetectLoop(values, value2, mergingFrame)) {
-      return null;
+    if (!((value2 instanceof MergedValue) && ((MergedValue) value2).ref.equals(ref))) {
+      if (value2 instanceof MergedValue) { // TODO remove. for now still excluding merges of merges
+        return null;
+      }
+      mergedValues.add(value2);
     }
 
-    return new MergedValue(type, mergingFrame, values);
+    return new MergedValue(type, mergingFrame, ref);
   }
 
   /**
@@ -200,7 +205,7 @@ class MergedValue extends FlowValue {
     }
 
     if (value1 instanceof MergedValue) {
-      for (FlowValue value : ((MergedValue) value1).values) {
+      for (FlowValue value : ((MergedValue) value1).mergedValues()) {
         if (contains(value, value2)) {
           return true;
         }

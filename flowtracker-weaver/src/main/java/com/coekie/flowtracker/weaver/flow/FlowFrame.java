@@ -19,6 +19,10 @@ package com.coekie.flowtracker.weaver.flow;
 import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
@@ -31,6 +35,8 @@ class FlowFrame extends Frame<FlowValue> {
 
   /** Instruction that this frame corresponds to */
   private AbstractInsnNode insn;
+
+  private final Map<ValueReference, Set<FlowValue>> mergedValues = new HashMap<>();
 
   FlowFrame(int numLocals, int maxStack, FlowAnalyzer analyzer) {
     super(numLocals, maxStack);
@@ -82,5 +88,28 @@ class FlowFrame extends Frame<FlowValue> {
     } finally {
       ((FlowInterpreter) interpreter).endMerge();
     }
+  }
+
+  ValueReference findReference(FlowValue value) {
+    for (int i = 0; i < getStackSize(); i++) {
+      if (getStack(i) == value) {
+        return ValueReference.stack(this, i);
+      }
+    }
+    for (int i = 0; i < getLocals(); i++) {
+      if (getLocal(i) == value) {
+        return ValueReference.local(this, i);
+      }
+    }
+    throw new RuntimeException("Cannot find value " + value);
+  }
+
+  final Set<FlowValue> getMergedValues(ValueReference ref) {
+    Set<FlowValue> result = mergedValues.get(ref);
+    if (result == null) {
+      result = new HashSet<>();
+      mergedValues.put(ref, result);
+    }
+    return result;
   }
 }

@@ -55,8 +55,18 @@ abstract class FlowValue extends BasicValue {
   /**
    * The instruction at which this value was last touched (created, copied or merged), or null if
    * unknown.
+   * <p>
+   * Should only be called after analysis has finished (so that
+   * {@link FlowFrame#initInsn} has been called). That is a limitation because ASM
+   * does not pass along the instruction to the interpreter.
    */
   abstract AbstractInsnNode getCreationInsn();
+
+  /**
+   * Return if we will know where FlowValue was created; that is if {@link #getCreationInsn()} will
+   * return a non-null value after analysis.
+   */
+  abstract boolean hasCreationInsn();
 
   /**
    * The {@link FlowFrame} that the analyzer built for {@link #getCreationInsn()}
@@ -65,11 +75,15 @@ abstract class FlowValue extends BasicValue {
     return creationFrame;
   }
 
-  void initCreationFrame(FlowAnalyzer analyzer) {
-    AbstractInsnNode creationInsn = getCreationInsn();
-    if (creationInsn != null) {
-      creationFrame = analyzer.getFrame(creationInsn);
+  boolean initCreationFrame(FlowAnalyzer analyzer) {
+    if (creationFrame == null) {
+      AbstractInsnNode creationInsn = getCreationInsn();
+      if (creationInsn != null) {
+        creationFrame = analyzer.getFrame(creationInsn);
+        return true;
+      }
     }
+    return false;
   }
 
   /**

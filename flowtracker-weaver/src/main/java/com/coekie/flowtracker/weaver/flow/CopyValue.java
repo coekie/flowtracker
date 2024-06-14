@@ -53,9 +53,18 @@ class CopyValue extends FlowValue {
   }
 
   @Override
-  void initCreationFrame(FlowAnalyzer analyzer) {
-    super.initCreationFrame(analyzer);
-    original.initCreationFrame(analyzer);
+  boolean hasCreationInsn() {
+    return true;
+  }
+
+  @Override
+  boolean initCreationFrame(FlowAnalyzer analyzer) {
+    if (super.initCreationFrame(analyzer)) {
+      original.initCreationFrame(analyzer);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @Override

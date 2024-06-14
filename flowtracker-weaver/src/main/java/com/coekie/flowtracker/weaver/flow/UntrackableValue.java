@@ -67,6 +67,11 @@ class UntrackableValue extends FlowValue {
   }
 
   @Override
+  boolean hasCreationInsn() {
+    return false;
+  }
+
+  @Override
   void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     fallback.loadSourcePointFallback(toInsert);
   }

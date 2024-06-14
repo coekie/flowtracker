@@ -80,7 +80,7 @@ public class FlowAnalyzerTest {
         return b ? c1 : c2;
       }
     });
-    assertThat(v.values.size()).isEqualTo(2);
+    assertThat(v.mergedValues().size()).isEqualTo(2);
   }
 
   // this is a bit of a weird test case. this is testing if when two long values get merged, that

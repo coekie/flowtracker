@@ -50,11 +50,9 @@ public class FlowAnalysisTest {
     assertIsFallbackIn(getCharSourcePoint(array[0]), FlowAnalysisTest.class.getName());
   }
 
-  // This one is hard.
+  // Tricky flow in a loop.
   // Both assignments into array come from the same statement,
   // but "secondLast" does not contain the *last* execution of that statement anymore.
-  // Ideally, we would follow the flow of these local variables; but that's not so important now.
-  // But we must detect this, and mark the origin as unknown (fallback).
   @Test public void delayedFlow() {
     String abc = trackCopy("abc");
 
@@ -77,7 +75,8 @@ public class FlowAnalysisTest {
     assertIsFallbackIn(getCharSourcePoint(array[0]), FlowAnalysisTest.class.getName());
 
     // if we would track secondLast through the loop, then this would be:
-    //   snapshotBuilder().trackString(abc, 0, 2).assertTrackerOf(array);
+    //     TrackerSnapshot.assertThatTrackerOf(array).matches(TrackerSnapshot.snapshot()
+    //        .trackString(2, abc, 0));
   }
 
   char[] chars = new char[]{FlowTester.untrackedChar('.')};

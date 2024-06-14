@@ -47,5 +47,16 @@ public class WeaverInitializer {
       System.err.println("Failed to retransform");
       throw t;
     }
+
+    // alternative, in case transforming all at once fails: transforming one by one.
+    // leaving this code in, commented out, for easier debugging when needed.
+//    for (Class<?> aClass : toTransform) {
+//      try {
+//        inst.retransformClasses(new Class<?>[]{aClass});
+//      } catch (Throwable t2) {
+//        System.err.println("Failed to retransform " + aClass);
+//        t2.printStackTrace();
+//      }
+//    }
   }
 }
