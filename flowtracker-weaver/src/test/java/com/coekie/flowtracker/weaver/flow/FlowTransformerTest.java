@@ -236,6 +236,77 @@ public class FlowTransformerTest {
             + "MAXLOCALS = 2\n");
   }
 
+  @Test
+  public void testLoopMerge() {
+    testTransform(new Object() {
+          @SuppressWarnings({"unused", "LoopConditionNotUpdatedInsideLoop"})
+          void write(int value, boolean b) {
+            while (b) {
+              value = (byte) value; // causing a circular reference in MergeValues
+            }
+            myByteArray[0] = (byte)value;
+          }
+        },
+        "L0\n"
+            + "FRAME FULL [$THIS$ I I] []\n"
+            + "ILOAD 2\n"
+            + "IFEQ L1\n"
+            + "ILOAD 1\n"
+            + "I2B\n"
+            + "ISTORE 1\n"
+            + "GOTO L0\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ I I] []\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_0\n"
+            + "ILOAD 1\n"
+            + "I2B\n"
+            + "BASTORE\n"
+            + "RETURN\n"
+            + "MAXSTACK = 3\n"
+            + "MAXLOCALS = 3\n",
+        "// Initialize newLocal MergedValue PointTracker\n"
+            + "ACONST_NULL\n"
+            + "ASTORE 3\n"
+            + "// Initialize newLocal InvocationTransformation invocation\n"
+            + "LDC \"write (IZ)V\"\n"
+            + "INVOKESTATIC com/coekie/flowtracker/tracker/Invocation.start (Ljava/lang/String;)Lcom/coekie/flowtracker/tracker/Invocation;\n"
+            + "ASTORE 4\n"
+            + "// FYI MergedValue merges here (TrackerPoint in 3)\n"
+            + "L0\n"
+            + "FRAME FULL [$THIS$ I I com/coekie/flowtracker/tracker/TrackerPoint com/coekie/flowtracker/tracker/Invocation] []\n"
+            + "// MergedValue (TrackerPoint in 3)\n"
+            + "// InvocationArgValue.loadSourcePoint\n"
+            + "ALOAD 4\n"
+            + "ICONST_0\n"
+            + "INVOKESTATIC com/coekie/flowtracker/tracker/Invocation.getArgPoint (Lcom/coekie/flowtracker/tracker/Invocation;I)Lcom/coekie/flowtracker/tracker/TrackerPoint;\n"
+            + "ASTORE 3\n"
+            + "ILOAD 2\n"
+            + "IFEQ L1\n"
+            + "ILOAD 1\n"
+            + "I2B\n"
+            + "ISTORE 1\n"
+            + "// MergedValue (TrackerPoint in 3)\n"
+            + "// MergedValue.loadSourcePoint\n"
+            + "ALOAD 3\n"
+            + "ASTORE 3\n"
+            + "GOTO L0\n"
+            + "L1\n"
+            + "FRAME FULL [$THIS$ I I com/coekie/flowtracker/tracker/TrackerPoint com/coekie/flowtracker/tracker/Invocation] []\n"
+            + "GETSTATIC $THISTEST$.myByteArray : [B\n"
+            + "ICONST_0\n"
+            + "ILOAD 1\n"
+            + "I2B\n"
+            + "// begin ArrayStore.insertTrackStatements: ArrayHook.set*(array, arrayIndex, value [already on stack], sourcePoint)\n"
+            + "// MergedValue.loadSourcePoint\n"
+            + "ALOAD 3\n"
+            + "INVOKESTATIC com/coekie/flowtracker/hook/ArrayHook.setByte ([BIBLcom/coekie/flowtracker/tracker/TrackerPoint;)V\n"
+            + "// end ArrayStore.insertTrackStatements\n"
+            + "RETURN\n"
+            + "MAXSTACK = 6\n"
+            + "MAXLOCALS = 5\n");
+  }
+
   /**
    * Storing in a boolean array also uses BASTORE; that should not be confused with storing in a
    * byte array

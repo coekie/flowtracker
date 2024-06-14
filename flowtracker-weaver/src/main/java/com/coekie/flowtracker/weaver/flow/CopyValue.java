@@ -82,4 +82,23 @@ class CopyValue extends FlowValue {
     CopyValue other = (CopyValue) o;
     return other.insn == insn && other.original.equals(original);
   }
+
+  @Override
+  FlowValue doMergeInPlace(FlowValue o) {
+    CopyValue other = (CopyValue) o;
+    if (this.insn == other.insn) {
+      FlowValue mergedOriginal = this.original.mergeInPlace(other.original);
+      if (mergedOriginal == this.original) {
+        return this;
+      } else if (mergedOriginal == other.original) {
+        return other;
+      } else if (mergedOriginal == null) {
+        return null;
+      } else {
+        return new CopyValue(mergedOriginal, insn);
+      }
+    } else {
+      return null;
+    }
+  }
 }

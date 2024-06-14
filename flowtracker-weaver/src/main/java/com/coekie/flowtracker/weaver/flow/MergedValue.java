@@ -24,6 +24,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.LineNumberNode;
 
 /**
  * A value that can come from more than one source due to control flow (e.g. due to if-statements or
@@ -102,7 +103,8 @@ class MergedValue extends FlowValue {
       // avoid inserting between a label and a frame; because for verification to succeed the frame
       // must stay right after the label.
       AbstractInsnNode insertAfter = value.getCreationInsn();
-      if (insertAfter.getNext() instanceof FrameNode) {
+      while (insertAfter.getNext() instanceof FrameNode
+          || insertAfter.getNext() instanceof LineNumberNode) {
         insertAfter = insertAfter.getNext();
       }
 
@@ -151,60 +153,75 @@ class MergedValue extends FlowValue {
   }
 
   /**
-   * Combine two values into a {@link MergedValue} when possible; else return null.
+   * Combine two values when possible; creating a MergedValue when necessary. Returns null if the
+   * values can't be combined.
    */
   static FlowValue maybeMerge(Type type, FlowFrame mergingFrame, FlowValue value1,
       FlowValue value2) {
-    // if one value is a subset of the other, then this is not two code paths converging; so keep
-    // the old MergedValue. Note that this means we keep the old mergingFrame.
-    if (contains(value1, value2)) {
-      return value1;
-    }
-    if (contains(value2, value1)) {
-      return value2;
+    ValueReference ref = mergingFrame.findReference(value1);
+
+    // if we can merge them in-place, do that
+    FlowValue merged = value1.mergeInPlace(value2);
+    if (merged != null) {
+      return merged;
     }
 
-    ValueReference ref = mergingFrame.findReference(value1);
+    // this is a "real" merge, so update our mergedValues
     Set<FlowValue> mergedValues = mergingFrame.getMergedValues(ref);
-    if (!((value1 instanceof MergedValue) && ((MergedValue) value1).ref.equals(ref))) {
-      if (value1 instanceof MergedValue) { // TODO remove. for now still excluding merges of merges
-        return null;
-      }
+    if (mergedValues.isEmpty()) { // a new merge
       mergedValues.add(value1);
-    }
-    if (!((value2 instanceof MergedValue) && ((MergedValue) value2).ref.equals(ref))) {
-      if (value2 instanceof MergedValue) { // TODO remove. for now still excluding merges of merges
+      mergedValues.add(value2);
+    } else { // merge more into an existing merge
+      // TODO remove this to handle merges of merges.
+      //  skip that case for now because this triggers some bugs (VerifyErrors)
+      if ((value1 instanceof MergedValue && !isThisMerge(ref, value1))
+        || (value2 instanceof MergedValue && !isThisMerge(ref, value2))) {
         return null;
       }
-      mergedValues.add(value2);
+
+      addToThisMerge(ref, mergedValues, value1);
+      addToThisMerge(ref, mergedValues, value2);
     }
 
     return new MergedValue(type, mergingFrame, ref);
   }
 
+  static boolean isThisMerge(ValueReference ref, FlowValue value) {
+    return (value instanceof MergedValue) && ref.equals(((MergedValue) value).ref);
+  }
+
   /**
-   * Returns if value1 contains value2, either directly (when value1 is a MergedValue) or indirectly
-   * (nested into CopyValue)
+   * Record that `value` gets merged it at `ref`/`mergedValues` (unless value is that merge itself)
    */
-  static boolean contains(FlowValue value1, FlowValue value2) {
-    if (value1.equals(value2)) {
-      return true;
+  static void addToThisMerge(ValueReference ref, Set<FlowValue> mergedValues, FlowValue value) {
+    if (isThisMerge(ref, value)) {
+      return;
     }
-
-    if (value1 instanceof MergedValue) {
-      for (FlowValue value : ((MergedValue) value1).mergedValues()) {
-        if (contains(value, value2)) {
-          return true;
+    // keep mergedValues as small as possible: if the new value can be combined with one of the
+    // existing values, do that.
+    for (FlowValue mergedValue : mergedValues) {
+      FlowValue combined = mergedValue.mergeInPlace(value);
+      if (combined != null) {
+        // if it's not the one that's already in mergedValues, then replace it
+        if (combined != mergedValue) {
+          mergedValues.remove(mergedValue);
+          mergedValues.add(combined);
         }
-      }
-    } else if (value1 instanceof CopyValue && value2 instanceof CopyValue) {
-      CopyValue cValue1 = (CopyValue) value1;
-      CopyValue cValue2 = (CopyValue) value2;
-      if (cValue1.getCreationInsn() == cValue2.getCreationInsn()) {
-        return contains(cValue1.getOriginal(), cValue2.getOriginal());
+        return;
       }
     }
+    mergedValues.add(value);
+  }
 
-    return false;
+  @Override
+  FlowValue doMergeInPlace(FlowValue other) {
+    if (mergedValues().contains(other)) {
+      return this;
+    } else if (other instanceof MergedValue
+        && ((MergedValue) other).mergedValues().contains(this)) {
+      return other;
+    } else {
+      return null;
+    }
   }
 }

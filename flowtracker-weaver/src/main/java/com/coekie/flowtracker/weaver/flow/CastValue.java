@@ -57,4 +57,23 @@ class CastValue extends FlowValue {
   void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     target.loadSourcePoint(toInsert, fallback);
   }
+
+  @Override
+  FlowValue doMergeInPlace(FlowValue o) {
+    CastValue other = (CastValue) o;
+    if (this.insn == other.insn) {
+      FlowValue mergedTarget = this.target.mergeInPlace(other.target);
+      if (mergedTarget == this.target) {
+        return this;
+      } else if (mergedTarget == other.target) {
+        return other;
+      } else if (mergedTarget == null) {
+        return null;
+      } else {
+        return new CastValue(getType(), insn, mergedTarget);
+      }
+    } else {
+      return null;
+    }
+  }
 }

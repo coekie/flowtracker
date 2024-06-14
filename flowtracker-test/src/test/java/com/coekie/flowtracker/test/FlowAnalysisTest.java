@@ -69,14 +69,8 @@ public class FlowAnalysisTest {
     array[0] = secondLast;
     array[1] = last;
 
-    // because of FallbackSource, it's not actually a gap. but it is _almost_ this:
-//    TrackerSnapshot.assertThatTrackerOf(array).matches(
-//        TrackerSnapshot.snapshot().gap(1).trackString(1, abc, 1));
-    assertIsFallbackIn(getCharSourcePoint(array[0]), FlowAnalysisTest.class.getName());
-
-    // if we would track secondLast through the loop, then this would be:
-    //     TrackerSnapshot.assertThatTrackerOf(array).matches(TrackerSnapshot.snapshot()
-    //        .trackString(2, abc, 0));
+   TrackerSnapshot.assertThatTrackerOf(array).matches(TrackerSnapshot.snapshot()
+      .trackString(2, abc, 0));
   }
 
   char[] chars = new char[]{FlowTester.untrackedChar('.')};

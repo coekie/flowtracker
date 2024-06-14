@@ -67,4 +67,13 @@ abstract class TrackableValue extends FlowValue {
   public boolean equals(Object o) {
     return o == this || (super.equals(o) && ((TrackableValue) o).insn == this.insn);
   }
+
+  @Override
+  FlowValue doMergeInPlace(FlowValue other) {
+    if (this == other) {
+      return this;
+    } else {
+      return null;
+    }
+  }
 }

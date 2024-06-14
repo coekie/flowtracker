@@ -24,6 +24,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Interpreter;
 
 /**
  * A value in our flow analysis. That is, a representation of what we know about a certain value
@@ -93,6 +94,40 @@ abstract class FlowValue extends BasicValue {
    * @param toInsert list of instructions where the needed statements are added to at the end
    */
   abstract void loadSourcePoint(InsnList toInsert, FallbackSource fallback);
+
+  /**
+   * Combine `this` and `other` into a single FlowValue, if the combination can be represented with
+   * a single FlowValue. This is meant for handling merges ({@link Interpreter#merge} where we have
+   * two different values because the same instructions were interpreted multiple times (as opposed
+   * to a merge that happens because of converging control flow).
+   * You could say this is handling the "simple" case of the merge.
+   * <p>
+   * Concretely, this handles one round of interpretation having seen that there's a MergeValue, and
+   * another interpretation just having one of those values, so effectively being a _subset_ of it.
+   * So e.g. `value1.mergeInPlace(MergeValue1)`, where MergeValue1 already contains value1, returns
+   * MergeValue1. And this recurses, so that e.g.
+   * CopyValue(value1).mergeInPLace(CopyValue(MergeValue1))` (where the two CopyValues are caused by
+   * the same instruction) also returns CopyOf(MergeValue1).
+   */
+  final FlowValue mergeInPlace(FlowValue other) {
+    // if one of them is a MergedValue, let that one handle it
+    if (this instanceof MergedValue) {
+      return doMergeInPlace(other);
+    } else if (other instanceof MergedValue) {
+      return other.doMergeInPlace(this);
+    } else if (this.getClass() != other.getClass()) {
+      // except for MergedValue, merging in place can only happen for two values of the same type
+      return null;
+    } else {
+      return doMergeInPlace(other);
+    }
+  }
+
+  /**
+   * Implement {@link #mergeInPlace(FlowValue)}, for the non-trivial case.
+   * When this is called, `other` is always the same type as `this`.
+   */
+  abstract FlowValue doMergeInPlace(FlowValue other);
 
   @Override
   public boolean equals(Object o) {

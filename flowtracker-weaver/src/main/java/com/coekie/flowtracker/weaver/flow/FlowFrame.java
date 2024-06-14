@@ -125,7 +125,7 @@ class FlowFrame extends Frame<FlowValue> {
     return result;
   }
 
-  final Set<FlowValue> getMergedValues(ValueReference ref) {
+  Set<FlowValue> getMergedValues(ValueReference ref) {
     if (ref.frame != this) {
       throw new IllegalArgumentException();
     }

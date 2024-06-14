@@ -17,6 +17,7 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.weaver.Types;
+import java.util.Objects;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -74,5 +75,14 @@ class UntrackableValue extends FlowValue {
   @Override
   void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     fallback.loadSourcePointFallback(toInsert);
+  }
+
+  @Override
+  FlowValue doMergeInPlace(FlowValue other) {
+    if (Objects.equals(this.getType(), other.getType())) {
+      return this;
+    } else {
+      return null;
+    }
   }
 }
