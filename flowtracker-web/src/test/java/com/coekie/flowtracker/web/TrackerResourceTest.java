@@ -124,6 +124,18 @@ public class TrackerResourceTest {
     assertRegionNoPart(response.regions.get(0), "abc❲01 02 FF❳def\r\n");
   }
 
+  @Test public void escapeBytes_newlineAtStartOfPart() {
+    ByteOriginTracker tracker = new ByteOriginTracker();
+    InterestRepository.register(tracker);
+
+    tracker.append("\n".getBytes(), 0, 1);
+
+    TrackerDetailResponse response = trackerResource.get(tracker.getTrackerId());
+    assertThat(response.regions).hasSize(1);
+
+    assertRegionNoPart(response.regions.get(0), "⏎\n");
+  }
+
   @Test public void growth() {
     ByteSinkTracker tracker = new ByteSinkTracker();
     InterestRepository.register(tracker);

@@ -11,11 +11,11 @@ public class ProtobufDemo {
     // protobuf library itself
     System.out.write(Method.newBuilder()
         // simple field
-        .setName("myName")
+        .setName("name")
         // enum field
         .setSyntax(Syntax.SYNTAX_PROTO3)
         // nested message
-        .addOptions(Option.newBuilder().setName("optionName"))
+        .addOptions(Option.newBuilder().setName("option"))
         .build().toByteArray());
   }
 }

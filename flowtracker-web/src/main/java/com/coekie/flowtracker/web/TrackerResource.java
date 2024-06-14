@@ -317,9 +317,21 @@ public class TrackerResource {
   private static String escape(ByteBuffer buf) {
     StringBuilder result = new StringBuilder(buf.limit() - buf.position());
     boolean escaped = false;
+    boolean hadNonNewline = false; // have we seen anything besides newlines
     for (int i = buf.position(); i < buf.limit(); i++) {
       int b = buf.get(i) & 0xff;
       if ((b >= 32 && b < 127) || b == '\n' || b == '\r') { // printable ascii characters
+        if (b == '\n' || b == '\r') {
+          // if the first (possibly the only) character is a newline, then prefix it with ⏎, because
+          // otherwise it's hard/confusing to select that part in the UI, because there's nothing to
+          // click on.
+          if (!hadNonNewline) {
+            result.append("⏎");
+            hadNonNewline = true;
+          }
+        } else {
+          hadNonNewline = true;
+        }
         if (escaped) {
           result.append('❳'); // close them if they were open
           escaped = false;
@@ -335,6 +347,7 @@ public class TrackerResource {
         // an escaped byte is rendered as two 0-F chars
         appendHex(result, b / 16);
         appendHex(result, b % 16);
+        hadNonNewline = true;
       }
     }
     if (escaped) {
