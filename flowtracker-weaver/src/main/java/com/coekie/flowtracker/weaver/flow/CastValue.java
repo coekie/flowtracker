@@ -57,9 +57,4 @@ class CastValue extends FlowValue {
   void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     target.loadSourcePoint(toInsert, fallback);
   }
-
-  @Override
-  boolean hasMergeAt(FlowFrame mergingFrame) {
-    return target.hasMergeAt(mergingFrame);
-  }
 }

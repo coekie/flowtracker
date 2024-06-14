@@ -64,11 +64,6 @@ abstract class TrackableValue extends FlowValue {
   abstract void insertTrackStatements();
 
   @Override
-  boolean hasMergeAt(FlowFrame mergingFrame) {
-    return false;
-  }
-
-  @Override
   public boolean equals(Object o) {
     return o == this || (super.equals(o) && ((TrackableValue) o).insn == this.insn);
   }

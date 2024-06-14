@@ -73,11 +73,6 @@ class CopyValue extends FlowValue {
   }
 
   @Override
-  boolean hasMergeAt(FlowFrame mergingFrame) {
-    return original.hasMergeAt(mergingFrame);
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (o == this) {
       return true;

@@ -75,9 +75,4 @@ class UntrackableValue extends FlowValue {
   void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     fallback.loadSourcePointFallback(toInsert);
   }
-
-  @Override
-  boolean hasMergeAt(FlowFrame mergingFrame) {
-    return false;
-  }
 }

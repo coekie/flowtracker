@@ -111,12 +111,6 @@ abstract class FlowValue extends BasicValue {
   }
 
   /**
-   * Returns if this value somewhere (through merges and copies) contains a MergeValue at the given
-   * mergingFrame. Used to detect loops in the data flow.
-   */
-  abstract boolean hasMergeAt(FlowFrame mergingFrame);
-
-  /**
    * Fallback for {@link #loadSourcePoint}. If we're not tracking the source of a value,
    * we can use this as a source instead, so that instead we point to where in the code this value
    * first started to get tracked.

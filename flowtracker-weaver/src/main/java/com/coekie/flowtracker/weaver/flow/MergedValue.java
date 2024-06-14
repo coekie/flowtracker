@@ -136,19 +136,6 @@ class MergedValue extends FlowValue {
   }
 
   @Override
-  boolean hasMergeAt(FlowFrame mergingFrame) {
-    if (mergingFrame == this.mergingFrame) {
-      return true;
-    }
-    for (FlowValue value : mergedValues()) {
-      if (value.hasMergeAt(mergingFrame)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (o == this) {
       return true;
