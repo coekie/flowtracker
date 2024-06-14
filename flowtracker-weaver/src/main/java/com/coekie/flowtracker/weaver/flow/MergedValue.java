@@ -18,12 +18,10 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
 
 /**
@@ -33,7 +31,6 @@ import org.objectweb.asm.tree.LineNumberNode;
 class MergedValue extends FlowValue {
   private final FlowFrame mergingFrame;
   private final MergeSlot slot;
-  private int cachedIsTrackable = -1;
   private boolean tracked;
 
   /** Local variable storing the PointTracker for the merged value */
@@ -47,24 +44,14 @@ class MergedValue extends FlowValue {
 
   @Override
   boolean isTrackable() {
-    if (cachedIsTrackable == -1) {
-      cachedIsTrackable = calcIsTrackable() ? 1 : 0;
-    }
-    return cachedIsTrackable == 1;
-  }
-
-  private boolean calcIsTrackable() {
-    for (FlowValue value : mergedValues()) {
-      if (!value.isTrackable() || !value.hasCreationInsn()) {
-        return false;
-      }
-    }
+    // since mergedValues() can still change, we can't _reliably_ return here if we'll be able to
+    // do the tracking later (when there may be more values), so just assume that we can.
     return true;
   }
 
   @Override
   final void ensureTracked() {
-    if (!tracked && isTrackable()) {
+    if (!tracked) {
       tracked = true;
       insertTrackStatements();
     }
@@ -83,6 +70,12 @@ class MergedValue extends FlowValue {
   }
 
   private void insertTrackStatements() {
+    for (FlowValue value : mergedValues()) {
+      if (!value.isTrackable() || !value.hasCreationInsn()) {
+        return;
+      }
+    }
+
     FlowMethod methodNode = mergingFrame.getMethod();
     pointTrackerLocal = methodNode.newLocalForObject(
         Type.getType("Lcom/coekie/flowtracker/tracker/TrackerPoint;"),
@@ -129,10 +122,10 @@ class MergedValue extends FlowValue {
   @Override
   void loadSourcePoint(InsnList toInsert, FallbackSource fallback) {
     mergingFrame.getMethod().addComment(toInsert, "MergedValue.loadSourcePoint");
-    if (isTrackable()) {
+    if (pointTrackerLocal != null) { // if insertTrackStatements didn't bail out
       toInsert.add(pointTrackerLocal.load());
     } else {
-      toInsert.add(new InsnNode(Opcodes.ACONST_NULL));
+      fallback.loadSourcePointFallback(toInsert);
     }
   }
 
