@@ -19,9 +19,7 @@ package com.coekie.flowtracker.weaver.flow;
 import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -36,16 +34,26 @@ class FlowFrame extends Frame<FlowValue> {
   /** Instruction that this frame corresponds to */
   private AbstractInsnNode insn;
 
-  private final Map<ValueReference, Set<FlowValue>> mergedValues = new HashMap<>();
+  /**
+   * Values that are the source for a {@link MergedValue}. Indexed the same way as Frame.values:
+   * first all the locals, then the stack.
+   * So any MergedValue in Frame.values corresponds to a non-null value in this array at the same
+   * index.
+   */
+  private final Set<FlowValue>[] mergedValues;
 
+  @SuppressWarnings("unchecked")
   FlowFrame(int numLocals, int maxStack, FlowAnalyzer analyzer) {
     super(numLocals, maxStack);
     this.analyzer = analyzer;
+    this.mergedValues = (Set<FlowValue>[]) new Set<?>[numLocals + maxStack];
   }
 
-  FlowFrame(Frame<? extends FlowValue> frame, FlowAnalyzer analyzer) {
+  @SuppressWarnings("unchecked")
+  FlowFrame(FlowFrame frame, FlowAnalyzer analyzer) {
     super(frame);
     this.analyzer = analyzer;
+    this.mergedValues = (Set<FlowValue>[]) new Set<?>[frame.mergedValues.length];
   }
 
   AbstractInsnNode getInsn() {
@@ -105,10 +113,14 @@ class FlowFrame extends Frame<FlowValue> {
   }
 
   final Set<FlowValue> getMergedValues(ValueReference ref) {
-    Set<FlowValue> result = mergedValues.get(ref);
+    if (ref.frame != this) {
+      throw new IllegalArgumentException();
+    }
+    int index = ref.isLocal ? ref.index : this.getLocals() + ref.index;
+    Set<FlowValue> result = mergedValues[index];
     if (result == null) {
       result = new HashSet<>();
-      mergedValues.put(ref, result);
+      mergedValues[index] = result;
     }
     return result;
   }

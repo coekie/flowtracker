@@ -23,9 +23,9 @@ import java.util.Objects;
  * the FlowValue that this points to can still change.
  */
 class ValueReference {
-  private final FlowFrame frame;
-  private final boolean isLocal;
-  private final int index;
+  final FlowFrame frame;
+  final boolean isLocal;
+  final int index;
 
   private ValueReference(FlowFrame frame, boolean isLocal, int index) {
     this.frame = frame;

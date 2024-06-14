@@ -39,7 +39,7 @@ class FlowAnalyzer extends Analyzer<FlowValue> {
 
   @Override
   protected Frame<FlowValue> newFrame(Frame<? extends FlowValue> frame) {
-    return new FlowFrame(frame, this);
+    return new FlowFrame((FlowFrame) frame, this);
   }
 
   @Override
