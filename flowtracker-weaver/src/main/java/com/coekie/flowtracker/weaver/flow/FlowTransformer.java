@@ -236,7 +236,8 @@ public class FlowTransformer implements Transformer {
                   || ClassNameCall.analyze(toInstrument, mInsn)
                   || FieldNameCall.analyze(toInstrument, mInsn)
                   || MethodNameCall.analyze(toInstrument, mInsn)
-                  || TesterStore.analyze(toInstrument, mInsn, frame);
+                  || TesterStore.analyze(toInstrument, mInsn, frame)
+                  || UnsafeStore.analyze(toInstrument, mInsn, frame);
           if (!instrumented) { // don't instrument twice for invocations already handled above
             InvocationArgStore.analyze(toInstrument, mInsn, frame, frames, insnIndex);
           }
