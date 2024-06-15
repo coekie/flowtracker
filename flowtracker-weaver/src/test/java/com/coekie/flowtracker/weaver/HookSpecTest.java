@@ -73,8 +73,9 @@ public class HookSpecTest {
 
   @Test
   public void testInvocation() throws ReflectiveOperationException {
-    Invocation.createCalling(context(), "withInvocation ()V")
-        .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777));
+    Invocation.create("withInvocation ()V")
+        .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777))
+        .calling(context());
     ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(HookedWithInvocation.class));
     transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void withInvocation()"),
         Type.getType(MyHook.class), Method.getMethod(
@@ -206,7 +207,7 @@ class HookedWithInvocation implements Runnable {
   }
 
   void withInvocation() {
-    Invocation.createCalling(context(), "something else");
+    Invocation.create("something else").calling(context());
     HookSpecTest.log("withInvocation");
   }
 }

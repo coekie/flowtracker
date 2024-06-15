@@ -38,15 +38,7 @@ class InvocationOutgoingTransformation {
   private final MethodInsnNode mInsn;
   private final FlowMethod methodNode;
 
-  /**
-   * The instruction that creates the Invocation. Initially this is a call to
-   * {@link Invocation#createCalling(Context, String)}. If necessary this is split into invocations
-   * to {@link Invocation#create(String)} and {@link Invocation#calling(Context)}. (Only splitting
-   * when necessary, to minimize size of the instrumented code).
-   */
-  private MethodInsnNode createInsn;
-
-  /** Call to {@link Invocation#calling(Context)}, if has been split from {@link #createInsn} */
+  /** Instruction where our call to {@link Invocation#calling(Context)} starts */
   private AbstractInsnNode callingInsn;
 
   /** Last instruction of our instrumentation, that removes the {@link Invocation} from the stack */
@@ -58,7 +50,8 @@ class InvocationOutgoingTransformation {
   }
 
   /**
-   * Insert call to {@link Invocation#createCalling(Context, String)} if it hasn't been added yet
+   * Insert call to {@link Invocation#create(String)} and {@link Invocation#calling(Context)} if
+   * it hasn't been added yet
    */
   void ensureInstrumented() {
     if (endInsn != null) {
@@ -69,14 +62,19 @@ class InvocationOutgoingTransformation {
 
     InsnList toInsert = new InsnList();
     methodNode.addComment(toInsert, "begin InvocationOutgoingTransformation.ensureInstrumented");
-    toInsert.add(methodNode.contextLoader.contextLocal.load());
     toInsert.add(new LdcInsnNode(Invocation.signature(mInsn.name, mInsn.desc)));
-    createInsn = new MethodInsnNode(Opcodes.INVOKESTATIC,
+    toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC,
         "com/coekie/flowtracker/tracker/Invocation",
-        "createCalling",
-        "(Lcom/coekie/flowtracker/tracker/Context;Ljava/lang/String;)"
-            + "Lcom/coekie/flowtracker/tracker/Invocation;");
-    toInsert.add(createInsn);
+        "create",
+        "(Ljava/lang/String;)Lcom/coekie/flowtracker/tracker/Invocation;"));
+
+    callingInsn = methodNode.contextLoader.contextLocal.load();
+    toInsert.add(callingInsn);
+    toInsert.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
+        "com/coekie/flowtracker/tracker/Invocation",
+        "calling",
+        "(Lcom/coekie/flowtracker/tracker/Context;)Lcom/coekie/flowtracker/tracker/Invocation;"));
+
     // initially we assume we're not going to need the Invocation anymore.
     endInsn = new InsnNode(Opcodes.POP);
     toInsert.add(endInsn);
@@ -91,25 +89,6 @@ class InvocationOutgoingTransformation {
    * instructions it should still be there.
    */
   void insertInvocationPreparation(InsnList toInsert) {
-    if (callingInsn == null) {
-      // split call to "createCalling" into "create" and "calling"; where we can put the `toInsert`
-      // in between.
-      createInsn.name = "create";
-      // unlike createCalling, create does not take Context,
-      // so update signature and remove the contextLocal.load() instruction
-      createInsn.desc = "(Ljava/lang/String;)Lcom/coekie/flowtracker/tracker/Invocation;";
-      methodNode.instructions.remove(createInsn.getPrevious().getPrevious());
-
-      InsnList toInsertForCalling = new InsnList();
-      callingInsn = methodNode.contextLoader.contextLocal.load();
-      toInsertForCalling.add(callingInsn);
-      toInsertForCalling.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
-          "com/coekie/flowtracker/tracker/Invocation",
-          "calling",
-          "(Lcom/coekie/flowtracker/tracker/Context;)Lcom/coekie/flowtracker/tracker/Invocation;"));
-      methodNode.instructions.insertBefore(endInsn, toInsertForCalling);
-    }
-
     methodNode.instructions.insertBefore(callingInsn, toInsert);
   }
 

@@ -19,8 +19,9 @@ public class SuspendInvocationTransformerTest {
     SuspendInvocationTransformer transformer = new SuspendInvocationTransformer(true);
     called = false;
 
-    Invocation suspendedInvocation = Invocation.createCalling(context(), "should get suspended")
-        .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777));
+    Invocation suspendedInvocation = Invocation.create("should get suspended")
+        .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777))
+        .calling(context());
     transformAndRun(transformer, Type.getType(SuspendInvocationTransformerTestSubject.class));
     assertThat(called).isTrue();
     // invocation should have been restored

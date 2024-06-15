@@ -120,14 +120,6 @@ public class Invocation {
   }
 
   /**
-   * Called by a caller before calling another method through which we want to track return or
-   * parameter values.
-   */
-  public static Invocation createCalling(Context context, String signature) {
-    return create(signature).calling(context);
-  }
-
-  /**
    * Called inside the called method
    */
   public static Invocation start(Context context, String signature) {

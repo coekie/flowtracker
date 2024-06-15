@@ -12,7 +12,7 @@ public class InvocationTest {
     Tracker tracker = new CharOriginTracker();
     TrackerPoint trackerPoint = TrackerPoint.of(tracker, 2);
 
-    Invocation callingInvocation = Invocation.createCalling(context(), "read");
+    Invocation callingInvocation = Invocation.create("read").calling(context());
     // inside the called read() method:
     {
       Invocation calledInvocation = Invocation.start(context(), "read");
@@ -45,7 +45,7 @@ public class InvocationTest {
 
   @Test
   public void testUseEachInvocationOnlyOnce() {
-    Invocation calling = Invocation.createCalling(context(), "read");
+    Invocation calling = Invocation.create("read").calling(context());
     Invocation called = Invocation.start(context(), "read");
     assertThat(called).isSameInstanceAs(calling);
     assertThat(Invocation.start(context(), "read")).isNull();
