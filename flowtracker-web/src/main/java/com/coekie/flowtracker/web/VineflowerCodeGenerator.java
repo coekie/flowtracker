@@ -87,12 +87,20 @@ public class VineflowerCodeGenerator {
       return new Line(null, line + '\n', List.of());
     }
     String comment = line.substring(index + 3);
-    if (!comment.chars().allMatch(c -> c >= '0' && c <= '9')) {
+    if (!comment.chars().allMatch(c -> (c >= '0' && c <= '9') || c == ' ')) {
       return new Line(null, line + '\n', List.of());
     }
-    int lineNumber = Integer.parseInt(comment);
-    return new Line(lineNumber, line.substring(0, index) + '\n',
-        lineToPartMapping.getOrDefault(lineNumber, List.of()));
+    List<Integer> lineNumbers = Stream.of(comment.split(" "))
+        .map(Integer::parseInt)
+        .collect(toList());
+    // response format currently only allows one line number
+    Integer lineNumber = lineNumbers.isEmpty() ? null : lineNumbers.get(0);
+
+    List<TrackerPartResponse> parts = Stream.of(comment.split(" "))
+        .map(Integer::parseInt)
+        .flatMap(n -> lineToPartMapping.getOrDefault(n, List.of()).stream())
+        .collect(toList());
+    return new Line(lineNumber, line.substring(0, index) + '\n', parts);
   }
 
   /** Sends Fernflower logs to flowtracker's Logger */

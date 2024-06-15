@@ -20,7 +20,7 @@ public class AsmCodeGeneratorTest {
     CodeResponse response = AsmCodeGenerator.getCode(tracker);
 
     assertThat(response).isNotNull();
-    assertThat(response.lines).hasSize(9);
+    assertThat(response.lines).hasSize(12);
 
     // simple line
     Line line9 = findLine(response, 9);
@@ -37,8 +37,8 @@ public class AsmCodeGeneratorTest {
         .isEqualTo("line 9");
 
     // line with multiple labels
-    assertThat(findLine(response, 12).content).isEqualTo("   L2\n"
-        + "    LINENUMBER 12 L2\n"
+    assertThat(findLine(response, 13).content).isEqualTo("   L2\n"
+        + "    LINENUMBER 13 L2\n"
         + "    INVOKESTATIC java/lang/System.currentTimeMillis ()J\n"
         + "    LCONST_0\n"
         + "    LCMP\n"
