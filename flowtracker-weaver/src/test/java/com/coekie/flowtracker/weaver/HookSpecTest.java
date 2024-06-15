@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.weaver;
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.annotation.HookLocation;
@@ -72,7 +73,7 @@ public class HookSpecTest {
 
   @Test
   public void testInvocation() throws ReflectiveOperationException {
-    Invocation.createCalling("withInvocation ()V")
+    Invocation.createCalling(context(), "withInvocation ()V")
         .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777));
     ClassHookSpec classHookSpec = new ClassHookSpec(Type.getType(HookedWithInvocation.class));
     transformAndRun(classHookSpec.addMethodHookSpec(Method.getMethod("void withInvocation()"),
@@ -205,7 +206,7 @@ class HookedWithInvocation implements Runnable {
   }
 
   void withInvocation() {
-    Invocation.createCalling("something else");
+    Invocation.createCalling(context(), "something else");
     HookSpecTest.log("withInvocation");
   }
 }

@@ -16,6 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
@@ -36,21 +37,25 @@ class InvocationIncomingTransformation {
   /** Local variable that represents the Invocation of the method we're in */
   TrackLocal invocationLocal;
 
-  /** Ensure that we called {@link Invocation#start(String)} at the beginning */
-  void ensureStarted(FlowMethod methodNode) {
+  /** Ensure that we called {@link Invocation#start(Context, String)} at the beginning */
+  void ensureStarted(FlowMethod method) {
     if (invocationLocal != null) {
       return;
     }
-    invocationLocal = methodNode.newLocal(
+    method.contextLoader.ensureLoaded(method);
+    invocationLocal = method.newLocal(
         Type.getType("Lcom/coekie/flowtracker/tracker/Invocation;"),
         List.of(
-            new LdcInsnNode(Invocation.signature(methodNode.name, methodNode.desc)),
+            method.contextLoader.contextLocal.load(),
+            new LdcInsnNode(Invocation.signature(method.name, method.desc)),
             new MethodInsnNode(Opcodes.INVOKESTATIC,
             "com/coekie/flowtracker/tracker/Invocation",
             "start",
-            "(Ljava/lang/String;)Lcom/coekie/flowtracker/tracker/Invocation;",
+            "(Lcom/coekie/flowtracker/tracker/Context;Ljava/lang/String;)"
+                + "Lcom/coekie/flowtracker/tracker/Invocation;",
             false)
         ),
+        2,
         "InvocationTransformation invocation");
   }
 }

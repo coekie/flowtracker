@@ -87,8 +87,8 @@ public class Invocation {
    * Called by a caller just before calling another method through which we want to track return or
    * parameter values.
    */
-  public Invocation calling() {
-    context().pendingInvocation = this;
+  public Invocation calling(Context context) {
+    context.pendingInvocation = this;
     return this;
   }
 
@@ -112,8 +112,8 @@ public class Invocation {
 
   /**
    * Creates an {@link Invocation}. Can optionally be followed by calls to
-   * {@link #setArg0(TrackerPoint)} and friends, and should be followed by {@link #calling()} before
-   * doing the actual call.
+   * {@link #setArg0(TrackerPoint)} and friends, and should be followed by {@link #calling(Context)}
+   * before doing the actual call.
    */
   public static Invocation create(String signature) {
     return new Invocation(signature);
@@ -123,15 +123,14 @@ public class Invocation {
    * Called by a caller before calling another method through which we want to track return or
    * parameter values.
    */
-  public static Invocation createCalling(String signature) {
-    return create(signature).calling();
+  public static Invocation createCalling(Context context, String signature) {
+    return create(signature).calling(context);
   }
 
   /**
    * Called inside the called method
    */
-  public static Invocation start(String signature) {
-    Context context = context();
+  public static Invocation start(Context context, String signature) {
     Invocation invocation = context.pendingInvocation;
     if (invocation != null) {
       context.pendingInvocation = null;
@@ -143,7 +142,7 @@ public class Invocation {
   }
 
   /**
-   * Like {@link #start(String)}, but doesn't clear the invocation. Can be used to get the
+   * Like {@link #start(Context, String)}, but doesn't clear the invocation. Can be used to get the
    * invocation in a hook without breaking the real invocation instrumentation.
    */
   @SuppressWarnings("unused") // used in HookSpec.INVOCATION
@@ -168,9 +167,9 @@ public class Invocation {
    * This is used to solve a problem caused by class loading and initialization triggered by a
    * method invocation.
    * The problem is that the loading and initialization can happen between when the caller calls
-   * {@link #calling()} and when the callee calls {@link #start(String)}. And it may involve
-   * other method calls that use Invocation. Since we only keep track of one pending call, this
-   * means class loading would make us forget about the pending call.
+   * {@link #calling(Context)} and when the callee calls {@link #start(Context, String)}. And it may
+   * involve other method calls that use Invocation. Since we only keep track of one pending call,
+   * this means class loading would make us forget about the pending call.
    * We solve that by, when class loading is triggered, removing the current pending call, and
    * restoring it when class loading has finished.
    */

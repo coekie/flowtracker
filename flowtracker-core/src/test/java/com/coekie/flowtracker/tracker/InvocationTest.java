@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.tracker;
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -11,10 +12,10 @@ public class InvocationTest {
     Tracker tracker = new CharOriginTracker();
     TrackerPoint trackerPoint = TrackerPoint.of(tracker, 2);
 
-    Invocation callingInvocation = Invocation.createCalling("read");
+    Invocation callingInvocation = Invocation.createCalling(context(), "read");
     // inside the called read() method:
     {
-      Invocation calledInvocation = Invocation.start("read");
+      Invocation calledInvocation = Invocation.start(context(), "read");
       assertThat(calledInvocation).isSameInstanceAs(callingInvocation);
       Invocation.returning(calledInvocation, trackerPoint);
     }
@@ -28,10 +29,10 @@ public class InvocationTest {
 
     TrackerPoint trackerPoint = TrackerPoint.of(tracker, 2);
     Invocation callingInvocation =
-        Invocation.create("write").setArg(0, trackerPoint).calling();
+        Invocation.create("write").setArg(0, trackerPoint).calling(context());
     // inside the called write() method:
     {
-      Invocation calledInvocation = requireNonNull(Invocation.start("write"));
+      Invocation calledInvocation = requireNonNull(Invocation.start(context(), "write"));
       assertThat(calledInvocation).isSameInstanceAs(callingInvocation);
       assertThat(Invocation.getArgPoint(calledInvocation, 0)).isSameInstanceAs(trackerPoint);
     }
@@ -39,14 +40,14 @@ public class InvocationTest {
 
   @Test
   public void testStartWithoutCalling() {
-    assertThat(Invocation.start("read")).isNull();
+    assertThat(Invocation.start(context(), "read")).isNull();
   }
 
   @Test
   public void testUseEachInvocationOnlyOnce() {
-    Invocation calling = Invocation.createCalling("read");
-    Invocation called = Invocation.start("read");
+    Invocation calling = Invocation.createCalling(context(), "read");
+    Invocation called = Invocation.start(context(), "read");
     assertThat(called).isSameInstanceAs(calling);
-    assertThat(Invocation.start("read")).isNull();
+    assertThat(Invocation.start(context(), "read")).isNull();
   }
 }

@@ -44,9 +44,9 @@ class InvocationReturnValue extends TrackableValue {
     transformation.ensureInstrumented();
     transformation.storeInvocation(invocationLocal);
 
-    // ensureInstrumented puts one extra value on the stack
+    // ensureInstrumented puts two extra value on the stack
     method.maxStack = Math.max(method.maxStack,
-        getCreationFrame().fullStackSize() + 1);
+        getCreationFrame().fullStackSize() + 2);
   }
 
   @Override

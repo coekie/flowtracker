@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.weaver;
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.coekie.flowtracker.weaver.TransformerTestUtils.transformAndRun;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -18,7 +19,7 @@ public class SuspendInvocationTransformerTest {
     SuspendInvocationTransformer transformer = new SuspendInvocationTransformer(true);
     called = false;
 
-    Invocation suspendedInvocation = Invocation.createCalling("should get suspended")
+    Invocation suspendedInvocation = Invocation.createCalling(context(), "should get suspended")
         .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777));
     transformAndRun(transformer, Type.getType(SuspendInvocationTransformerTestSubject.class));
     assertThat(called).isTrue();

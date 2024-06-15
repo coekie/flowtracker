@@ -127,6 +127,7 @@ public class FlowTransformer implements Transformer {
     /** The next visitor in the chain after this one */
     private final TransparentLocalVariablesSorter varSorter;
     final InsnList intro = new InsnList();
+    final ContextLoader contextLoader = new ContextLoader();
     final InvocationIncomingTransformation invocation = new InvocationIncomingTransformation();
     final ConstantsTransformation constantsTransformation;
     int[] lineNumbers;
@@ -263,7 +264,7 @@ public class FlowTransformer implements Transformer {
 
     /** Create a new local variable for storing an object, initialized to null */
     TrackLocal newLocalForObject(Type type, String sourceForComment) {
-      return newLocal(type, List.of(new InsnNode(Opcodes.ACONST_NULL)), sourceForComment);
+      return newLocal(type, List.of(new InsnNode(Opcodes.ACONST_NULL)), 1, sourceForComment);
     }
 
     /**
@@ -276,7 +277,8 @@ public class FlowTransformer implements Transformer {
      * is practically impossible because it does not properly update frames (see
      * <a href="https://gitlab.ow2.org/asm/asm/-/issues/316352">asm#316352</a>).
      */
-    TrackLocal newLocal(Type type, List<AbstractInsnNode> initialValue, String sourceForComment) {
+    TrackLocal newLocal(Type type, List<AbstractInsnNode> initialValue, int maxStack,
+        String sourceForComment) {
       TrackLocal local = new TrackLocal(type, varSorter.newLocal(type));
       // initialize the variable to -1 at the start of the method
       // NICE only initialize when necessary (if there is a jump, or it is read before it is first
@@ -286,6 +288,7 @@ public class FlowTransformer implements Transformer {
         intro.add(initialValueInstruction);
       }
       intro.add(local.store());
+      this.maxStack = Math.max(this.maxStack, maxStack);
       return local;
     }
 
