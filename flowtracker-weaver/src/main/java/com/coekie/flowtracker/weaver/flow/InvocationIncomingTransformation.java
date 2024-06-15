@@ -42,11 +42,10 @@ class InvocationIncomingTransformation {
     if (invocationLocal != null) {
       return;
     }
-    method.contextLoader.ensureLoaded(method);
     invocationLocal = method.newLocal(
         Type.getType("Lcom/coekie/flowtracker/tracker/Invocation;"),
         List.of(
-            method.contextLoader.contextLocal.load(),
+            method.contextLoader.load(method),
             new LdcInsnNode(Invocation.signature(method.name, method.desc)),
             new MethodInsnNode(Opcodes.INVOKESTATIC,
             "com/coekie/flowtracker/tracker/Invocation",

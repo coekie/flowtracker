@@ -58,8 +58,6 @@ class InvocationOutgoingTransformation {
       return;
     }
 
-    methodNode.contextLoader.ensureLoaded(methodNode);
-
     InsnList toInsert = new InsnList();
     methodNode.addComment(toInsert, "begin InvocationOutgoingTransformation.ensureInstrumented");
     toInsert.add(new LdcInsnNode(Invocation.signature(mInsn.name, mInsn.desc)));
@@ -68,7 +66,7 @@ class InvocationOutgoingTransformation {
         "create",
         "(Ljava/lang/String;)Lcom/coekie/flowtracker/tracker/Invocation;"));
 
-    callingInsn = methodNode.contextLoader.contextLocal.load();
+    callingInsn = methodNode.contextLoader.load(methodNode);
     toInsert.add(callingInsn);
     toInsert.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
         "com/coekie/flowtracker/tracker/Invocation",

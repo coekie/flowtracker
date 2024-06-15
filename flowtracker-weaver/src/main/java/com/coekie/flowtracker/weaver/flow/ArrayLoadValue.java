@@ -47,19 +47,21 @@ class ArrayLoadValue extends TrackableValue {
     InsnList toInsert = new InsnList();
     method.addComment(toInsert, "begin ArrayLoadValue.insertTrackStatements");
 
-    // insert code for: pointTracker = ArrayLoadHook.getElementTracker(target, index)
+    // insert code for: pointTracker = ArrayLoadHook.getElementTracker(target, index, context)
     // use DUP2 to copy target and index for getElementTracker while leaving it on the stack for the
     // actual CALOAD
     toInsert.add(new InsnNode(Opcodes.DUP2));
+    toInsert.add(method.contextLoader.load(method));
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC,
             "com/coekie/flowtracker/hook/ArrayLoadHook",
             "getElementTracker",
-            "(Ljava/lang/Object;I)Lcom/coekie/flowtracker/tracker/TrackerPoint;",
+            "(Ljava/lang/Object;ILcom/coekie/flowtracker/tracker/Context;)"
+                + "Lcom/coekie/flowtracker/tracker/TrackerPoint;",
             false));
     toInsert.add(pointTrackerLocal.store());
     method.maxStack = Math.max(method.maxStack,
-        getCreationFrame().fullStackSize() + 2);
+        getCreationFrame().fullStackSize() + 3);
 
     method.addComment(toInsert, "end ArrayLoadValue.insertTrackStatements");
 

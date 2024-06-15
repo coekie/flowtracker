@@ -22,6 +22,7 @@ import java.util.List;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Manages getting of the {@link Context}. It's gotten only once and stored in a local var as an
@@ -29,10 +30,10 @@ import org.objectweb.asm.tree.MethodInsnNode;
  */
 class ContextLoader {
   /** Local variable that holds the {@link Context} */
-  TrackLocal contextLocal;
+  private TrackLocal contextLocal;
 
   /** Ensure that we have stored the Context in {@link #contextLocal} */
-  void ensureLoaded(FlowMethod method) {
+  private void ensureLocalPopulated(FlowMethod method) {
     if (contextLocal != null) {
       return;
     }
@@ -47,5 +48,10 @@ class ContextLoader {
         ),
         1,
         "ContextLoader context");
+  }
+
+  VarInsnNode load(FlowMethod method) {
+    ensureLocalPopulated(method);
+    return contextLocal.load();
   }
 }
