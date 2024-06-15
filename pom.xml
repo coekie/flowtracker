@@ -20,7 +20,7 @@
     <java.version>11</java.version>
 
     <!-- make tests fail if any error is being logged -->
-    <flowtracker.extraAgentArgs>exitOnError=true</flowtracker.extraAgentArgs>
+    <flowtracker.extraAgentArgs>verify;exitOnError</flowtracker.extraAgentArgs>
     <!--
       other values that can help debug failing tests:
         logging=true

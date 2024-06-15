@@ -107,13 +107,14 @@ class AsmTransformer implements ClassFileTransformer {
 
       ClassWriter writer = new ClassWriter(0);
 
-      // NICE make checkAdapter optional; for development only
       // wrap with extra ClassVisitor as workaround for CheckClassAdapter (since ASM 9.4) having
       // issues dealing with JDK classes that are being redefined but missing StackMapFrames because
       // of https://bugs.openjdk.org/browse/JDK-8228604 .
       // this avoids the "instanceof ClassWriter" check in CheckClassAdapter, so that is skips
       // verifying the frames
-      ClassVisitor wrappedWriter = new CheckClassAdapter(new ClassVisitor(Opcodes.ASM9, writer) {});
+      ClassVisitor wrappedWriter = config.getBoolean("verify", false)
+          ? new CheckClassAdapter(new ClassVisitor(Opcodes.ASM9, writer) {})
+          : writer;
 
       ClassVisitor adapter = adapterFactory.transform(loader, className, wrappedWriter);
       if (className.equals("java/lang/String")) {
