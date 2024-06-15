@@ -16,6 +16,8 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -27,7 +29,7 @@ public class TrackerRepository {
 
   public static Tracker getTracker(Context context, Object obj) {
     if (!context.isActive()) return null;
-    return objectToTracker.get(obj);
+    return doGetTracker(context, obj);
   }
 
   public static Tracker createFixedOriginTracker(Object obj, int length) {
@@ -44,7 +46,7 @@ public class TrackerRepository {
 
   public static Tracker getOrCreateTracker(Context context, Object obj) {
     if (!context.isActive()) return null;
-    Tracker tracker = objectToTracker.get(obj);
+    Tracker tracker = doGetTracker(context, obj);
     return tracker == null ? createTracker(context, obj) : tracker;
   }
 
@@ -58,6 +60,7 @@ public class TrackerRepository {
           + " has " + getTracker(context, obj));
     } else {
       objectToTracker.put(obj, tracker);
+      overwriteCachedTracker(context, obj, tracker);
     }
   }
 
@@ -66,10 +69,58 @@ public class TrackerRepository {
       throw new NullPointerException("Can't track null");
     } else {
       objectToTracker.put(obj, tracker);
+      overwriteCachedTracker(context(), obj, tracker);
     }
   }
 
   public static void removeTracker(Object obj) {
     objectToTracker.remove(obj);
+    overwriteCachedTracker(context(), obj, null);
+  }
+
+  /**
+   * Get the tracker for obj, with caching.
+   * For the cache, we store recently queried objects in the Context, with the assumption that the
+   * same objects are often queried repeatedly in the same thread.
+   * It's a very small cache, just to avoid querying {@link #objectToTracker}.
+   */
+  private static Tracker doGetTracker(Context context, Object obj) {
+    if (context.cachedObj0 == obj) {
+      return context.cachedTracker0;
+    } else if (context.cachedObj1 == obj) {
+      return context.cachedTracker1;
+    } else if (context.cachedObj2 == obj) {
+      return context.cachedTracker2;
+    } else { // cache miss
+      Tracker result = objectToTracker.get(obj);
+      // store it in the cache
+      if (context.nextCache == 0) {
+        context.cachedObj0 = obj;
+        context.cachedTracker0 = result;
+        context.nextCache = 1;
+      } else if (context.nextCache == 1) {
+        context.cachedObj1 = obj;
+        context.cachedTracker1 = result;
+        context.nextCache = 2;
+      } else {
+        context.cachedObj2 = obj;
+        context.cachedTracker2 = result;
+        context.nextCache = 0;
+      }
+      return result;
+    }
+  }
+
+  // overwrite existing cache entry, if any.
+  // we assume that the setting of a tracker happens in the thread that created it, before it
+  // escapes; so it's not necessary to clear the caches of any other threads.
+  private static void overwriteCachedTracker(Context context, Object obj, Tracker tracker) {
+    if (context.cachedObj0 == obj) {
+      context.cachedTracker0 = tracker;
+    } else if (context.cachedObj1 == obj) {
+      context.cachedTracker1 = tracker;
+    } else if (context.cachedObj2 == obj) {
+      context.cachedTracker2 = tracker;
+    }
   }
 }

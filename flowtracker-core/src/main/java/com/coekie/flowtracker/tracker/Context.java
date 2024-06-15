@@ -36,6 +36,15 @@ public class Context {
   /** Number of times this thread has (recursively) been suspended */
   int suspended;
 
+  // cache for TrackerRepository
+  Object cachedObj0;
+  Tracker cachedTracker0;
+  Object cachedObj1;
+  Tracker cachedTracker1;
+  Object cachedObj2;
+  Tracker cachedTracker2;
+  int nextCache;
+
   /** Checks if tracking is currently active on this thread */
   public boolean isActive() {
     // uncommentable hack to fix debugging after a while if tracking completely breaks things
