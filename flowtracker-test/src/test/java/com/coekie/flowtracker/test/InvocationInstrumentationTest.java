@@ -53,6 +53,22 @@ public class InvocationInstrumentationTest {
     assertThat(sink.called).isTrue();
   }
 
+  @Test
+  public void testAfterLong() {
+    FlowTester flowTester = new FlowTester();
+    Sink sink = new Sink(flowTester);
+    sink.writeAfterLong(0L, flowTester.createSourceByte((byte) 1));
+    assertThat(sink.called).isTrue();
+  }
+
+  @Test
+  public void testBeforeLong() {
+    FlowTester flowTester = new FlowTester();
+    Sink sink = new Sink(flowTester);
+    sink.writeBeforeLong(flowTester.createSourceByte((byte) 1), 0L);
+    assertThat(sink.called).isTrue();
+  }
+
   /** Test call using super.method(), that is using INVOKESPECIAL */
   @Test
   public void superCall() {
@@ -209,6 +225,18 @@ public class InvocationInstrumentationTest {
 
     void writeLong(long i) {
       flowTester.assertIsTheTrackedValue(i);
+      called = true;
+    }
+
+    // testing that the 2-slot argument doesn't break things
+    void writeAfterLong(@SuppressWarnings("all") long whatever, byte b) {
+      flowTester.assertIsTheTrackedValue(b);
+      called = true;
+    }
+
+    // testing that the 2-slot argument doesn't break things
+    void writeBeforeLong(byte b, @SuppressWarnings("all") long whatever) {
+      flowTester.assertIsTheTrackedValue(b);
       called = true;
     }
   }

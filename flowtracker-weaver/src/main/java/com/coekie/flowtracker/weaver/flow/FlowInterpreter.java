@@ -16,6 +16,8 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+
 import com.coekie.flowtracker.weaver.Types;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
@@ -46,6 +48,8 @@ class FlowInterpreter extends Interpreter<FlowValue> {
   }
 
   private final FlowMethod method;
+  /** @see #initArgNumsToInstrument */
+  private final int[] argNumsToInstrument;
 
   /**
    * Frame for which we are merging. That is, for which {@link #merge(FlowValue, FlowValue)}
@@ -57,6 +61,7 @@ class FlowInterpreter extends Interpreter<FlowValue> {
   FlowInterpreter(FlowMethod method) {
     super(Opcodes.ASM9);
     this.method = method;
+    this.argNumsToInstrument = initArgNumsToInstrument(method);
   }
 
   @Override
@@ -241,13 +246,9 @@ class FlowInterpreter extends Interpreter<FlowValue> {
 
   @Override
   public FlowValue newParameterValue(boolean isInstanceMethod, int local, Type type) {
-    int argNum = local - (isInstanceMethod ? 1 : 0);
-    if (argNum >= 0) {
-      boolean[] argsToInstrument =
-          InvocationArgStore.argsToInstrument(method.owner,
-              method.name, method.desc);
-      if (argsToInstrument != null && argNum < argsToInstrument.length
-          && argsToInstrument[argNum]) {
+    if (argNumsToInstrument != null) {
+      int argNum = argNumsToInstrument[local];
+      if (argNum >= 0) {
         // we consider the first instruction of the method to be the instruction that created the
         // parameter values. that's not entirely correct (they get created _before_ that
         // instruction), but close enough.
@@ -255,6 +256,39 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       }
     }
     return super.newParameterValue(isInstanceMethod, local, type);
+  }
+
+  /**
+   * Returns an array indicating which locals contain which arguments to instrument.
+   * The index in the array is the `local` (as in {@link #newParameterValue(boolean, int, Type)});
+   * that is counting including the `this` argument and counting two for longs and doubles.
+   * The value is the index of the argument if it is to be instrumented, otherwise -1.
+   */
+  private static int[] initArgNumsToInstrument(FlowMethod method) {
+    boolean[] argsToInstrument =
+        InvocationArgStore.argsToInstrument(method.owner, method.name, method.desc);
+    if (argsToInstrument == null) {
+      return null;
+    }
+
+    int argumentsSize = Type.getArgumentsAndReturnSizes(method.desc) >> 2;
+    boolean isInstanceMethod = (method.access & ACC_STATIC) == 0;
+    int[] result = new int[argumentsSize + (isInstanceMethod ? 1 : 0)];
+
+    // how we count currentLocal here is the same as in Analyzer.computeInitialFrame
+    int currentLocal = 0;
+    if (isInstanceMethod) {
+      result[currentLocal++] = -1;
+    }
+    Type[] argumentTypes = Type.getArgumentTypes(method.desc);
+    for (int i = 0; i < argumentTypes.length; i++) {
+      Type argumentType = argumentTypes[i];
+      result[currentLocal++] = argsToInstrument[i] ? i : -1;
+      if (argumentType.getSize() == 2) {
+        result[currentLocal++] = -1;
+      }
+    }
+    return result;
   }
 
   void startMerge(FlowFrame mergingFrame) {

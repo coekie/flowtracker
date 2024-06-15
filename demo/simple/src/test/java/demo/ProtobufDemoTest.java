@@ -20,9 +20,10 @@ public class ProtobufDemoTest {
     // string length
     out.assertThatPart(new byte[] {4}).comesFromConstantInClassThat()
         .startsWith("class com.google.protobuf.CodedOutputStream$ArrayEncoder");
-    // don't know yet why this isn't tracked
-    out.assertThatPart("name").isNotTracked();
-    // 1 = Syntax.SYNTAX_PROTO3.getNumber()
+    // strings
+    out.assertThatPart("name").comesFromConstantInClass(ProtobufDemo.class);
+    out.assertThatPart("option").comesFromConstantInClass(ProtobufDemo.class);
+    // enum value. 1 == Syntax.SYNTAX_PROTO3.getNumber()
     out.assertThatPart(new byte[] {1}).comesFromConstantInClass(Method.class);
   }
 }
