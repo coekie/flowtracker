@@ -16,11 +16,12 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
-import com.coekie.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
@@ -33,7 +34,7 @@ public class FileChannelImplHook {
       method = "void <init>(java.io.FileDescriptor,java.lang.String,boolean,boolean,boolean,java.io.Closeable)")
   public static void afterInit(@Arg("FileChannelImpl_fd") FileDescriptor fd,
       @Arg("ARG1") String path, @Arg("ARG2") boolean readable, @Arg("ARG3") boolean writeable) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       if (!FileDescriptorTrackerRepository.hasTracker(fd)) {
         FileDescriptorTrackerRepository.createTracker(fd, readable, writeable,
             TrackerTree.fileNode(path));

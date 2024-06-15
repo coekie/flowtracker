@@ -16,8 +16,10 @@ package com.coekie.flowtracker.agent;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.CoreInitializer;
-import com.coekie.flowtracker.tracker.Trackers;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.util.Config;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -66,7 +68,8 @@ public class FlowTrackAgent {
       CoreInitializer.preInitialize(config);
 
       // do not track our own initialization
-      Trackers.suspendOnCurrentThread();
+      Context context = context();
+      context.suspend();
 
       spiderClassLoader
           .loadClass("com.coekie.flowtracker.weaver.WeaverInitializer")
@@ -76,7 +79,7 @@ public class FlowTrackAgent {
       CoreInitializer.initialize(config, agentJar);
 
       // initialization done, unsuspend tracking
-      Trackers.unsuspendOnCurrentThread();
+      context.unsuspend();
 
       initWeb(spiderClassLoader, config);
       CoreInitializer.postInitialize(config);

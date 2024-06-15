@@ -16,11 +16,13 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.DefaultTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
-import com.coekie.flowtracker.tracker.Trackers;
 import com.coekie.flowtracker.util.Config;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -65,19 +67,21 @@ public class StringHook {
         // ignore the specifying of the debugUntracked string on the command line itself
         // (but eventually that should be tracked too, see java.lang.ProcessingEnvironment)
         && !target.contains("debugUntracked")) {
-      Trackers.suspendOnCurrentThread();
+      Context context = context();
+      context.suspend();
       new Throwable("untracked").printStackTrace();
-      Trackers.unsuspendOnCurrentThread();
+      context.unsuspend();
     }
   }
 
   /** Get a tracker even when trackers are suspended; to be used from a debugger. */
   @SuppressWarnings("unused")
   public static Tracker forceGetStringTracker(String str) {
-    if (Trackers.isActive()) return getStringTracker(str);
-    Trackers.unsuspendOnCurrentThread();
+    Context context = context();
+    if (context.isActive()) return getStringTracker(str);
+    context.unsuspend();
     Tracker result = getStringTracker(str);
-    Trackers.suspendOnCurrentThread();
+    context.suspend();
     return result;
   }
 

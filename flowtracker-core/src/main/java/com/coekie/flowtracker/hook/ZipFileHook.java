@@ -16,12 +16,13 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
-import com.coekie.flowtracker.tracker.Trackers;
 import com.coekie.flowtracker.util.Config;
 import java.io.InputStream;
 import java.util.jar.JarFile;
@@ -43,7 +44,7 @@ public class ZipFileHook {
       method = "java.io.InputStream getInputStream(java.util.zip.ZipEntry)")
   public static void afterGetInputStream(@Arg("RETURN") InputStream result,
       @Arg("THIS") ZipFile target, @Arg("ARG0") ZipEntry zipEntry) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       Tracker tracker = TrackerRepository.getTracker(result);
       // shouldn't be null because InflaterInputStream constructor is instrumented
       if (tracker == null) {

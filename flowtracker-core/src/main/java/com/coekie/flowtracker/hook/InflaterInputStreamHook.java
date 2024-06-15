@@ -16,6 +16,8 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.ByteOriginTracker;
@@ -24,7 +26,6 @@ import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
-import com.coekie.flowtracker.tracker.Trackers;
 import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -34,7 +35,7 @@ public class InflaterInputStreamHook {
       method = "void <init>(java.io.InputStream,java.util.zip.Inflater,int)")
   public static void afterInit(@Arg("THIS") InflaterInputStream target,
       @Arg("ARG0") InputStream in) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       var tracker = new ByteOriginTracker();
       Tracker inTracker = InputStreamHook.getInputStreamTracker(in);
       if (inTracker != null && inTracker.getNode() != null) {

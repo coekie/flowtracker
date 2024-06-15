@@ -16,8 +16,10 @@ package com.coekie.flowtracker.web;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.TrackerTree;
-import com.coekie.flowtracker.tracker.Trackers;
 import com.coekie.flowtracker.util.Config;
 import jakarta.servlet.DispatcherType;
 import java.io.FileOutputStream;
@@ -106,14 +108,15 @@ public class WebModule {
 
   private static void snapshotOnExit(String path, Config config) {
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      Trackers.suspendOnCurrentThread();
+      Context context = context();
+      context.suspend();
       try (var out = new FileOutputStream(path)) {
         new Snapshot(TrackerTree.ROOT, config.getBoolean("snapshotOnExitMinimized", true))
             .write(out);
       } catch (IOException e) {
         throw new RuntimeException(e);
       } finally {
-        Trackers.unsuspendOnCurrentThread();
+        context.unsuspend();
       }
     }));
   }
@@ -131,7 +134,7 @@ public class WebModule {
 
     @Override public Thread newThread(final Runnable runnable) {
       return super.newThread(() -> {
-        Trackers.suspendOnCurrentThread();
+        context().suspend();
         runnable.run();
       });
     }

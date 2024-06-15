@@ -16,12 +16,13 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
-import com.coekie.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
 import java.lang.invoke.MethodHandle;
 import java.net.InetAddress;
@@ -49,7 +50,7 @@ public class SocketImplHook {
       method = "void connect(java.net.SocketAddress,int)")
   public static void afterConnect(@Arg("SocketImpl_fd") FileDescriptor fd,
       @Arg("ARG0") SocketAddress remote, @Arg("SocketImpl_localport") int localport) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       FileDescriptorTrackerRepository.createTracker(fd, true, true, clientSocketNode(remote));
     }
   }
@@ -62,7 +63,7 @@ public class SocketImplHook {
       method = "void accept(java.net.SocketImpl)")
   public static void afterAccept(@Arg("ARG0") SocketImpl si,
       @Arg("SocketImpl_localport") int localport) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       FileDescriptor fd = fd(si);
       InetAddress address = address(si);
       int port = port(si);

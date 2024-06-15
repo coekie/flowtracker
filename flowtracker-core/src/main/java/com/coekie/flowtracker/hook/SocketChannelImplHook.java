@@ -16,10 +16,11 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
-import com.coekie.flowtracker.tracker.Trackers;
 import java.io.FileDescriptor;
 import java.lang.invoke.MethodHandle;
 import java.net.InetSocketAddress;
@@ -41,7 +42,7 @@ public class SocketChannelImplHook {
       method = "boolean connect(java.net.SocketAddress)")
   public static void afterConnect(@Arg("RETURN") boolean result, @Arg("THIS") SocketChannel channel,
       @Arg("SocketChannelImpl_fd") FileDescriptor fd) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       SocketAddress remoteAddress = remoteAddress(channel);
       SocketAddress localAddress = localAddress(channel);
       FileDescriptorTrackerRepository.createTracker(fd, true, true,
@@ -54,7 +55,7 @@ public class SocketChannelImplHook {
       method = "java.nio.channels.SocketChannel finishAccept(java.io.FileDescriptor,java.net.SocketAddress)")
   public static void afterFinishAccept(@Arg("RETURN") SocketChannel channel,
       @Arg("ARG0") FileDescriptor fd) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       SocketAddress remoteAddress = remoteAddress(channel);
       SocketAddress localAddress = localAddress(channel);
       FileDescriptorTrackerRepository.createTracker(fd, true, true,
@@ -66,7 +67,7 @@ public class SocketChannelImplHook {
       condition = "version <= 11",
       method = "java.nio.channels.SocketChannel accept()")
   public static void afterAccept(@Arg("RETURN") SocketChannel channel) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       SocketAddress remoteAddress = remoteAddress(channel);
       SocketAddress localAddress = localAddress(channel);
       FileDescriptor fd = fd(channel);

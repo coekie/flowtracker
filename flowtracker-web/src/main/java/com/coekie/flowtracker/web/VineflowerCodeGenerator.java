@@ -16,12 +16,13 @@ package com.coekie.flowtracker.web;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.coekie.flowtracker.web.CodeResource.getAsStream;
 import static com.coekie.flowtracker.web.CodeResource.lineToPartMapping;
 import static java.util.stream.Collectors.toList;
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.tracker.Trackers;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.util.Logger;
 import com.coekie.flowtracker.web.CodeResource.CodeResponse;
 import com.coekie.flowtracker.web.CodeResource.Line;
@@ -227,21 +228,23 @@ public class VineflowerCodeGenerator {
       // disable tracking, for performance. Note that Vineflower runs this in parallel in multiple
       // threads, so suspending it just in the thread that started it (e.g. in getSource) wouldn't
       // do it.
-      Trackers.suspendOnCurrentThread();
+      Context context = context();
+      context.suspend();
       try {
         return super.getClassContent(cl);
       } finally {
-        Trackers.unsuspendOnCurrentThread();
+        context.unsuspend();
       }
     }
 
     @Override
     public void processClass(StructClass cl) throws IOException {
-      Trackers.suspendOnCurrentThread();
+      Context context = context();
+      context.suspend();
       try {
         super.processClass(cl);
       } finally {
-        Trackers.unsuspendOnCurrentThread();
+        context.unsuspend();
       }
     }
   }

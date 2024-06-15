@@ -16,6 +16,8 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.ByteSinkTracker;
@@ -25,7 +27,6 @@ import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
-import com.coekie.flowtracker.tracker.Trackers;
 import java.io.File;
 import java.io.FileDescriptor;
 
@@ -36,7 +37,7 @@ public class FileOutputStreamHook {
       method = "void <init>(java.io.File,boolean)")
   public static void afterInit(@Arg("FileOutputStream_fd") FileDescriptor fd,
       @Arg("ARG0") File file) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       FileDescriptorTrackerRepository.createTracker(fd, false, true,
           TrackerTree.fileNode(file.getAbsolutePath()));
     }

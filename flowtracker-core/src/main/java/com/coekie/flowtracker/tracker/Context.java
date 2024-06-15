@@ -32,4 +32,29 @@ public class Context {
 
   /** Currently pending invocation. Should only be used by the {@link Invocation} implementation */
   Invocation pendingInvocation;
+
+  /** Number of times this thread has (recursively) been suspended */
+  int suspended;
+
+  /** Checks if tracking is currently active on this thread */
+  public boolean isActive() {
+    // uncommentable hack to fix debugging after a while if tracking completely breaks things
+    //private static long startTime = System.currentTimeMillis();
+    //if (System.currentTimeMillis() - startTime > 3000) return false;
+
+    return suspended == 0;
+  }
+
+  /** Disable tracking on this thread. See {@link #isActive()}, {@link #unsuspend()}. */
+  public void suspend() {
+    suspended++;
+  }
+
+  /** Re-enable tracking on this thread. See {@link #isActive()}, {@link #suspend()}. */
+  public void unsuspend() {
+    if (suspended == 0) {
+      throw new IllegalStateException("not suspended");
+    }
+    suspended--;
+  }
 }

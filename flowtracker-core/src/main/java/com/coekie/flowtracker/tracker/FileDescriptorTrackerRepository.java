@@ -16,6 +16,8 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import java.io.FileDescriptor;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -30,17 +32,17 @@ public class FileDescriptorTrackerRepository {
       Collections.synchronizedMap(new IdentityHashMap<>());
 
   public static ByteOriginTracker getReadTracker(FileDescriptor fd) {
-    if (!Trackers.isActive()) return null;
+    if (!context().isActive()) return null;
     TrackerPair pair = map.get(fd);
     return pair == null ? null : pair.readTracker;
   }
 
   public static ByteSinkTracker getWriteTracker(FileDescriptor fd) {
-    if (!Trackers.isActive()) return null;
+    if (!context().isActive()) return null;
     return forceGetWriteTracker(fd);
   }
 
-  /** Get tracker for writes, even when not {@link Trackers#isActive()} */
+  /** Get tracker for writes, even when not {@link Context#isActive()} */
   public static ByteSinkTracker forceGetWriteTracker(FileDescriptor fd) {
     TrackerPair pair = map.get(fd);
     return pair == null ? null : pair.writeTracker;

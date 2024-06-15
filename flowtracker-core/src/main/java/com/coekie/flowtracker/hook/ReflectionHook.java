@@ -16,8 +16,9 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.tracker.Trackers;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -26,7 +27,7 @@ import java.lang.reflect.Method;
 public class ReflectionHook {
   /** Hook for {@link Class#getName()}, used in `ClassNameCall` */
   public static String getClassName(Class<?> clazz) {
-    if (!Trackers.isActive() || clazz.isArray()) {
+    if (!context().isActive() || clazz.isArray()) {
       return clazz.getName();
     }
 
@@ -38,7 +39,7 @@ public class ReflectionHook {
   public static String getFieldName(Field field) {
     String name = field.getName();
 
-    if (!Trackers.isActive() || field.getClass().isArray()) {
+    if (!context().isActive() || field.getClass().isArray()) {
       return name;
     }
 
@@ -50,7 +51,7 @@ public class ReflectionHook {
   public static String getMethodName(Method method) {
     String name = method.getName();
 
-    if (!Trackers.isActive() || method.getClass().isArray()) {
+    if (!context().isActive() || method.getClass().isArray()) {
       return name;
     }
 

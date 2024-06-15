@@ -16,6 +16,8 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -26,7 +28,7 @@ public class TrackerRepository {
       Collections.synchronizedMap(new IdentityHashMap<Object, Tracker>());
 
   public static Tracker getTracker(Object obj) {
-    if (!Trackers.isActive()) return null;
+    if (!context().isActive()) return null;
     return objectToTracker.get(obj);
   }
 
@@ -43,7 +45,7 @@ public class TrackerRepository {
   }
 
   public static Tracker getOrCreateTracker(Object obj) {
-    if (!Trackers.isActive()) return null;
+    if (!context().isActive()) return null;
     Tracker tracker = objectToTracker.get(obj);
     return tracker == null ? createTracker(obj) : tracker;
   }

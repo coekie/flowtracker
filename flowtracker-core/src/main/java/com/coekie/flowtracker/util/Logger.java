@@ -16,7 +16,9 @@ package com.coekie.flowtracker.util;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.tracker.Trackers;
+import static com.coekie.flowtracker.tracker.Context.context;
+
+import com.coekie.flowtracker.tracker.Context;
 
 /**
  * Handles logging for flowtracker. Deliberately very primitive, not using a _proper_ logging
@@ -51,7 +53,8 @@ public class Logger {
 
   public void error(Throwable t, String format, Object... args) {
     // suspend tracking to avoid possibility of errors during logging errors, which might recurse
-    Trackers.suspendOnCurrentThread();
+    Context context = context();
+    context.suspend();
     try {
       System.err.println("[FT " + name + " ERROR] " + String.format(format, args));
       if (t != null) {
@@ -64,7 +67,7 @@ public class Logger {
         // our instrumentation has caused something fundamental to fail.
         Runtime.getRuntime().halt(1);
       }
-      Trackers.unsuspendOnCurrentThread();
+      context.unsuspend();
     }
   }
 

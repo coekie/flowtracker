@@ -16,7 +16,8 @@ package com.coekie.flowtracker.agent;
  * limitations under the License.
  */
 
-import com.coekie.flowtracker.tracker.Trackers;
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.util.Config;
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +63,7 @@ class SpiderClassLoader extends ClassLoader {
     if (hideInternals) {
       // don't track reading of flowtracker class files because that's noise to the user.
       // (see also ClassLoaderHook.shouldHideFileReading for other class loaders)
-      Trackers.suspendOnCurrentThread();
+      context().suspend();
     }
     try (InputStream in = jar.getInputStream(entry)) {
       b = in.readAllBytes();
@@ -70,7 +71,7 @@ class SpiderClassLoader extends ClassLoader {
       throw new Error(e);
     } finally {
       if (hideInternals) {
-        Trackers.unsuspendOnCurrentThread();
+        context().unsuspend();
       }
     }
     return defineClass(name, b, 0, b.length, pd);

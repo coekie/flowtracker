@@ -16,6 +16,8 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.CharSinkTracker;
@@ -25,7 +27,6 @@ import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
-import com.coekie.flowtracker.tracker.Trackers;
 import com.coekie.flowtracker.util.Config;
 import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
@@ -66,7 +67,7 @@ public class OutputStreamWriterHook {
       condition = enabledCondition)
   public static void afterInit(@Arg("THIS") OutputStreamWriter target,
       @Arg("ARG0") OutputStream stream) {
-    if (Trackers.isActive()) {
+    if (context().isActive()) {
       createOutputStreamWriterTracker(target, stream);
     }
   }
