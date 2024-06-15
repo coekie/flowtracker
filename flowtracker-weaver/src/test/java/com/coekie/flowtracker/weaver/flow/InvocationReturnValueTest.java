@@ -19,6 +19,8 @@ public class InvocationReturnValueTest {
     // Character.codePointAt,toCodePoint
     assertThat(InvocationReturnValue.shouldInstrumentInvocation("codePointAt", "([CII)I")).isTrue();
     assertThat(InvocationReturnValue.shouldInstrumentInvocation("toCodePoint", "(CC)I")).isTrue();
+    assertThat(InvocationReturnValue.shouldInstrumentInvocation("offsetByCodePoints", "([CIII)I"))
+        .isFalse();
 
     assertThat(InvocationReturnValue.shouldInstrumentInvocation(
         "read", "([C)I")).isFalse();

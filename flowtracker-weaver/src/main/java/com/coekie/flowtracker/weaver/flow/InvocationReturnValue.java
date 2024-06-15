@@ -83,8 +83,11 @@ class InvocationReturnValue extends TrackableValue {
         return true;
       }
 
-      // e.g. Character.codePointAt
-      return name.contains("codePoint") || name.contains("CodePoint");
+      // e.g. Character.codePointAt.
+      // but not [String|Character].offsetByCodePoints because that's useless and seen in profiler
+      // as significant overhead (as used by CheckMethodAdapter).
+      return name.contains("codePoint")
+          || (name.contains("CodePoint") && !name.startsWith("offset"));
     }
     return false;
   }
