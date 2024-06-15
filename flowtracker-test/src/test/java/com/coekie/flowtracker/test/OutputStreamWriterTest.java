@@ -4,6 +4,7 @@ import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static com.coekie.flowtracker.test.TrackTestHelper.untrackedCharArray;
 import static com.coekie.flowtracker.test.TrackTestHelper.untrackedString;
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -38,7 +39,8 @@ public class OutputStreamWriterTest {
     file = File.createTempFile("OutputStreamWriterTest", "");
     stream = new FileOutputStream(file);
     writer = new OutputStreamWriter(stream);
-    streamTracker = requireNonNull(FileDescriptorTrackerRepository.getWriteTracker(stream.getFD()));
+    streamTracker = requireNonNull(FileDescriptorTrackerRepository.getWriteTracker(context(),
+        stream.getFD()));
   }
 
   @After public void close() throws IOException {
@@ -53,8 +55,8 @@ public class OutputStreamWriterTest {
   private void assertContentEquals(String expected) throws IOException {
     // check content of writer
     Truth.assertThat(
-        requireNonNull((CharContentTracker) TrackerRepository.getTracker(writer)).getContent()
-            .toString())
+        requireNonNull((CharContentTracker) TrackerRepository.getTracker(context(), writer))
+            .getContent().toString())
         .isEqualTo(expected);
 
     // check content of FileOutputStream

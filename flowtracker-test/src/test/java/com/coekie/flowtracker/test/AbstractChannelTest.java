@@ -1,6 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedByteArray;
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
@@ -209,11 +210,11 @@ abstract class AbstractChannelTest<C extends ByteChannel> {
   }
 
   ByteOriginTracker getReadTracker(C channel) {
-    return FileDescriptorTrackerRepository.getReadTracker(getFd(channel));
+    return FileDescriptorTrackerRepository.getReadTracker(context(), getFd(channel));
   }
 
   ByteSinkTracker getWriteTracker(C channel) {
-    return FileDescriptorTrackerRepository.getWriteTracker(getFd(channel));
+    return FileDescriptorTrackerRepository.getWriteTracker(context(), getFd(channel));
   }
 
   /** Content that tests for reading expect */

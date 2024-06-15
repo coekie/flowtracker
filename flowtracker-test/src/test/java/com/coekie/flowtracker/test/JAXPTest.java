@@ -1,8 +1,8 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.test.TrackTestHelper.stringTracker;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 
-import com.coekie.flowtracker.hook.StringHook;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import com.google.common.truth.Truth;
 import java.io.ByteArrayInputStream;
@@ -33,10 +33,10 @@ public class JAXPTest {
 
     // in com.sun.org.apache.xerces.internal.util.SymbolTable, the names of tags are interned, which
     // makes them very hard to track
-    Truth.assertThat(StringHook.getStringTracker(handler.startedElement)).isNull();
+    Truth.assertThat(stringTracker(handler.startedElement)).isNull();
 
     // but content is tracked
-    TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(handler.characters)).matches(
+    TrackerSnapshot.assertThatTracker(stringTracker(handler.characters)).matches(
         TrackerSnapshot.snapshot().trackString(5, input, 6));
   }
 

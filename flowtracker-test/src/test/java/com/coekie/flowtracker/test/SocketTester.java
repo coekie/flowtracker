@@ -1,6 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.hook.Reflection.clazz;
+import static com.coekie.flowtracker.tracker.Context.context;
 
 import com.coekie.flowtracker.hook.Reflection;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
@@ -34,11 +35,11 @@ class SocketTester implements Closeable {
   }
 
   static Tracker getReadTracker(Socket socket) {
-    return FileDescriptorTrackerRepository.getReadTracker(getFd(socket));
+    return FileDescriptorTrackerRepository.getReadTracker(context(), getFd(socket));
   }
 
   static Tracker getWriteTracker(Socket socket) {
-    return FileDescriptorTrackerRepository.getWriteTracker(getFd(socket));
+    return FileDescriptorTrackerRepository.getWriteTracker(context(), getFd(socket));
   }
 
   private static FileDescriptor getFd(Socket socket) {

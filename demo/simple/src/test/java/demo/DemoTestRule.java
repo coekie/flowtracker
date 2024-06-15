@@ -1,5 +1,6 @@
 package demo;
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.ByteContentTracker;
@@ -39,7 +40,7 @@ public class DemoTestRule extends ExternalResource {
   }
 
   private Tracker outTracker() {
-    return TrackerRepository.getTracker(bout.getByteContent().array());
+    return TrackerRepository.getTracker(context(), bout.getByteContent().array());
   }
 
   /** Find a new Tracker that was created since this test started */

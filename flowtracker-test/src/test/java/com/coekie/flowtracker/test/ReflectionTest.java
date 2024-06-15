@@ -1,7 +1,7 @@
 package com.coekie.flowtracker.test;
 
-import static com.coekie.flowtracker.hook.StringHook.getStringTracker;
 import static com.coekie.flowtracker.test.TrackTestHelper.getClassOriginTrackerContent;
+import static com.coekie.flowtracker.test.TrackTestHelper.stringTracker;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
@@ -11,7 +11,7 @@ public class ReflectionTest {
   @Test
   public void getClassName() {
     String str = ClassTest.class.getName();
-    TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
+    TrackerSnapshot snapshot = TrackerSnapshot.of(stringTracker(str));
     assertThat(snapshot.getParts()).hasSize(1);
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(0)))
         .isEqualTo("com.coekie.flowtracker.test.ClassTest");
@@ -20,7 +20,7 @@ public class ReflectionTest {
   @Test
   public void getClassName_array() {
     String str = ClassTest[].class.getName();
-    assertThat(getStringTracker(str)).isNull();
+    assertThat(stringTracker(str)).isNull();
   }
 
   @Test
@@ -30,7 +30,7 @@ public class ReflectionTest {
       int myField;
     }
     String str = Foo.class.getDeclaredFields()[0].getName();
-    TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
+    TrackerSnapshot snapshot = TrackerSnapshot.of(stringTracker(str));
     assertThat(snapshot.getParts()).hasSize(1);
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(0)))
         .isEqualTo("myField");
@@ -45,7 +45,7 @@ public class ReflectionTest {
       }
     }
     String str = Foo.class.getDeclaredMethods()[0].getName();
-    TrackerSnapshot snapshot = TrackerSnapshot.of(getStringTracker(str));
+    TrackerSnapshot snapshot = TrackerSnapshot.of(stringTracker(str));
     assertThat(snapshot.getParts()).hasSize(1);
     assertThat(getClassOriginTrackerContent(snapshot.getParts().get(0)))
         .isEqualTo("myMethod");

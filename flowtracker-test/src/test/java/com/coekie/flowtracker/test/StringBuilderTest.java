@@ -1,8 +1,8 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.test.TrackTestHelper.stringTracker;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.coekie.flowtracker.hook.StringHook;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("abcdefghi");
 
-    TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(result)).matches(
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
         TrackerSnapshot.snapshot().trackString(abc).trackString(def).trackString(ghi));
   }
 
@@ -29,7 +29,7 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("bcd");
 
-    TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(result)).matches(
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
         TrackerSnapshot.snapshot().trackString(3, abcdef, 1));
   }
 
@@ -44,7 +44,7 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("abxyzcd");
 
-    TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(result)).matches(
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
         TrackerSnapshot.snapshot().trackString(ab).trackString(xyz).trackString(cd));
   }
 
@@ -60,7 +60,7 @@ public class StringBuilderTest {
     String result = sb.toString();
     assertThat(result).isEqualTo("abxyzcd");
 
-    TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(result)).matches(
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
         TrackerSnapshot.snapshot().trackString(2, abcd, 0).trackString(xyz).trackString(2, abcd, 2));
   }
 
@@ -71,7 +71,7 @@ public class StringBuilderTest {
     sb.reverse();
     String result = sb.toString();
     assertThat(result).isEqualTo("dcba");
-    TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(result)).matches(
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
         TrackerSnapshot.snapshot()
         .trackString(1, abcd, 3).trackString(1, abcd, 2).trackString(1, abcd, 1)
         .trackString(1, abcd, 0));
@@ -85,7 +85,7 @@ public class StringBuilderTest {
     sb.replace(1, 3, x);
     String result = sb.toString();
     assertThat(result).isEqualTo("axdef");
-    TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(result)).matches(
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
         TrackerSnapshot.snapshot()
         .trackString(1, abcd, 0).trackString(1, x, 0).trackString(3, abcd, 3));
   }

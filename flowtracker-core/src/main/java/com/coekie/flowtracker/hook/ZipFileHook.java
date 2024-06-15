@@ -20,6 +20,7 @@ import static com.coekie.flowtracker.tracker.Context.context;
 
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
@@ -44,8 +45,9 @@ public class ZipFileHook {
       method = "java.io.InputStream getInputStream(java.util.zip.ZipEntry)")
   public static void afterGetInputStream(@Arg("RETURN") InputStream result,
       @Arg("THIS") ZipFile target, @Arg("ARG0") ZipEntry zipEntry) {
-    if (context().isActive()) {
-      Tracker tracker = TrackerRepository.getTracker(result);
+    Context context = context();
+    if (context.isActive()) {
+      Tracker tracker = TrackerRepository.getTracker(context, result);
       // shouldn't be null because InflaterInputStream constructor is instrumented
       if (tracker == null) {
         return;

@@ -21,6 +21,7 @@ import static com.coekie.flowtracker.tracker.Context.context;
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.ByteOriginTracker;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
@@ -35,13 +36,14 @@ public class InflaterInputStreamHook {
       method = "void <init>(java.io.InputStream,java.util.zip.Inflater,int)")
   public static void afterInit(@Arg("THIS") InflaterInputStream target,
       @Arg("ARG0") InputStream in) {
-    if (context().isActive()) {
+    Context context = context();
+    if (context.isActive()) {
       var tracker = new ByteOriginTracker();
       Tracker inTracker = InputStreamHook.getInputStreamTracker(in);
       if (inTracker != null && inTracker.getNode() != null) {
         tracker.addTo(inTracker.getNode().node("Inflater"));
       }
-      TrackerRepository.setTracker(target, tracker);
+      TrackerRepository.setTracker(context, target, tracker);
     }
   }
 
@@ -50,9 +52,10 @@ public class InflaterInputStreamHook {
   public static void afterReadByteArrayOffset(@Arg("RETURN") int read,
       @Arg("THIS") InflaterInputStream target, @Arg("ARG0") byte[] buf, @Arg("ARG1") int offset) {
     if (read > 0) {
-      Tracker tracker = TrackerRepository.getTracker(target);
+      Context context = context();
+      Tracker tracker = TrackerRepository.getTracker(context, target);
       if (tracker != null) {
-        TrackerUpdater.setSourceTracker(buf, offset, read, tracker, tracker.getLength());
+        TrackerUpdater.setSourceTracker(context, buf, offset, read, tracker, tracker.getLength());
         ((ByteOriginTracker) tracker).append(buf, offset, read);
       }
     }
@@ -67,7 +70,7 @@ public class InflaterInputStreamHook {
   public static void afterRead1(@Arg("RETURN") int result, @Arg("THIS") InflaterInputStream target,
       @Arg("INVOCATION") Invocation invocation) {
     if (result > 0) {
-      Tracker tracker = TrackerRepository.getTracker(target);
+      Tracker tracker = TrackerRepository.getTracker(context(), target);
       if (tracker != null) {
         Invocation.returning(invocation, TrackerPoint.of(tracker, tracker.getLength() - 1));
       }

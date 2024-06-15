@@ -16,6 +16,8 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.tracker.CharOriginTracker;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
@@ -38,7 +40,7 @@ public class SystemHook {
   @SuppressWarnings("SuspiciousSystemArraycopy")
   public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
     System.arraycopy(src, srcPos, dest, destPos, length);
-    TrackerUpdater.setSource(dest, destPos, length, src, srcPos);
+    TrackerUpdater.setSource(context(), dest, destPos, length, src, srcPos);
   }
 
   public static void initialize(Config config) {
@@ -64,7 +66,7 @@ public class SystemHook {
       if (OutputStreamWriterHook.enabled(config)) {
         OutputStreamWriter writer =
             Reflection.getSlow(PrintStream.class, "charOut", OutputStreamWriter.class, printStream);
-        OutputStreamWriterHook.createOutputStreamWriterTracker(writer, fileOut);
+        OutputStreamWriterHook.createOutputStreamWriterTracker(context(), writer, fileOut);
       }
     } catch (Throwable t) {
       System.err.println("Cannot hook System.out/err:");

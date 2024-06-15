@@ -1,6 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedCharArray;
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.coekie.flowtracker.tracker.TrackerRepository.getTracker;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -46,15 +47,15 @@ public class CharacterTest {
   public void testCodePointAt() {
     char[] abc = trackedCharArray("abc");
     int b = Character.codePointAt(abc, 1);
-    FlowTester.assertTrackedValue(b, 'b', getTracker(abc), 1);
+    FlowTester.assertTrackedValue(b, 'b', getTracker(context(), abc), 1);
   }
 
   @Test
   public void testCodePointAtWithSurrogatePair() {
     char[] abc = trackedCharArray("a\ud83c\udf09c");
     int b = Character.codePointAt(abc, 1);
-    FlowTester.assertTrackedValue(b, 127753, getTracker(abc), 1);
+    FlowTester.assertTrackedValue(b, 127753, getTracker(context(), abc), 1);
     assertThat(FlowTester.getIntSourcePoint(b))
-        .isEqualTo(TrackerPoint.of(getTracker(abc), 1, 2));
+        .isEqualTo(TrackerPoint.of(getTracker(context(), abc), 1, 2));
   }
 }

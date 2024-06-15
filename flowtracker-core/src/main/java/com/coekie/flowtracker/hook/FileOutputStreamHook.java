@@ -21,6 +21,7 @@ import static com.coekie.flowtracker.tracker.Context.context;
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.ByteSinkTracker;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.Tracker;
@@ -47,7 +48,7 @@ public class FileOutputStreamHook {
       method = "void write(int)")
   public static void afterWrite1(@Arg("FileOutputStream_fd") FileDescriptor fd, @Arg("ARG0") int c,
       @Arg("INVOCATION") Invocation invocation) {
-    ByteSinkTracker tracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
+    ByteSinkTracker tracker = FileDescriptorTrackerRepository.getWriteTracker(context(), fd);
     if (tracker != null) {
       TrackerPoint sourcePoint = Invocation.getArgPoint(invocation, 0);
       if (sourcePoint != null) {
@@ -68,9 +69,10 @@ public class FileOutputStreamHook {
       method = "void write(byte[],int,int)")
   public static void afterWriteByteArrayOffset(@Arg("FileOutputStream_fd") FileDescriptor fd,
       @Arg("ARG0") byte[] buf, @Arg("ARG1") int off, @Arg("ARG2") int len) {
-    ByteSinkTracker tracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
+    Context context = context();
+    ByteSinkTracker tracker = FileDescriptorTrackerRepository.getWriteTracker(context, fd);
     if (tracker != null) {
-      Tracker sourceTracker = TrackerRepository.getTracker(buf);
+      Tracker sourceTracker = TrackerRepository.getTracker(context, buf);
       if (sourceTracker != null) {
         tracker.setSource(tracker.getLength(), len, sourceTracker, off);
       }

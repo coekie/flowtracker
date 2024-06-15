@@ -16,6 +16,8 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
 import java.lang.invoke.CallSite;
@@ -157,7 +159,7 @@ public class StringConcatFactoryHook {
    */
   public static String trackedCharToString(char c, TrackerPoint point) {
     char[] array = new char[]{c};
-    TrackerUpdater.setSourceTrackerPoint(array, 0, 1, point);
+    TrackerUpdater.setSourceTrackerPoint(context(), array, 0, 1, point);
     return new String(array);
   }
 }

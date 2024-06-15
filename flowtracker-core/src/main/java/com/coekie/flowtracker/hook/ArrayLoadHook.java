@@ -16,6 +16,8 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
@@ -23,7 +25,7 @@ import com.coekie.flowtracker.tracker.TrackerRepository;
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class ArrayLoadHook {
   public static TrackerPoint getElementTracker(Object array, int index) {
-    Tracker tracker = TrackerRepository.getTracker(array);
+    Tracker tracker = TrackerRepository.getTracker(context(), array);
     return tracker == null ? null : TrackerPoint.of(tracker, index);
   }
 }

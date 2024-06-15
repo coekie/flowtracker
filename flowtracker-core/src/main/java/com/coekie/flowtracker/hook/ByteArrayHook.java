@@ -16,6 +16,8 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.Invocation;
@@ -28,7 +30,8 @@ public class ByteArrayHook {
       method = "void setChar(byte[], int, char)")
   public static void afterSetChar(@Arg("ARG0") byte[] array, @Arg("ARG1") int offset,
       @Arg("INVOCATION") Invocation invocation) {
-    TrackerUpdater.setSourceTrackerPoint(array, offset, 2, Invocation.getArgPoint(invocation, 2));
+    TrackerUpdater.setSourceTrackerPoint(context(),
+        array, offset, 2, Invocation.getArgPoint(invocation, 2));
   }
 
   @Hook(target = "jdk.internal.util.ByteArray",
@@ -36,7 +39,8 @@ public class ByteArrayHook {
       method = "void setShort(byte[], int, short)")
   public static void afterSetShort(@Arg("ARG0") byte[] array, @Arg("ARG1") int offset,
       @Arg("INVOCATION") Invocation invocation) {
-    TrackerUpdater.setSourceTrackerPoint(array, offset, 2, Invocation.getArgPoint(invocation, 2));
+    TrackerUpdater.setSourceTrackerPoint(context(),
+        array, offset, 2, Invocation.getArgPoint(invocation, 2));
   }
 
   @Hook(target = "jdk.internal.util.ByteArray",
@@ -44,7 +48,8 @@ public class ByteArrayHook {
       method = "void setUnsignedShort(byte[], int, int)")
   public static void afterSetUnsignedShort(@Arg("ARG0") byte[] array, @Arg("ARG1") int offset,
       @Arg("INVOCATION") Invocation invocation) {
-    TrackerUpdater.setSourceTrackerPoint(array, offset, 2, Invocation.getArgPoint(invocation, 2));
+    TrackerUpdater.setSourceTrackerPoint(context(),
+        array, offset, 2, Invocation.getArgPoint(invocation, 2));
   }
 
   @Hook(target = "jdk.internal.util.ByteArray",
@@ -52,6 +57,7 @@ public class ByteArrayHook {
       method = "void setInt(byte[], int, int)")
   public static void afterSetInt(@Arg("ARG0") byte[] array, @Arg("ARG1") int offset,
       @Arg("INVOCATION") Invocation invocation) {
-    TrackerUpdater.setSourceTrackerPoint(array, offset, 4, Invocation.getArgPoint(invocation, 2));
+    TrackerUpdater.setSourceTrackerPoint(context(),
+        array, offset, 4, Invocation.getArgPoint(invocation, 2));
   }
 }

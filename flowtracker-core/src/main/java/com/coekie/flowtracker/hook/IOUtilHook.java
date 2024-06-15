@@ -16,10 +16,13 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.ByteOriginTracker;
 import com.coekie.flowtracker.tracker.ByteSinkTracker;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
@@ -40,10 +43,11 @@ public class IOUtilHook {
   public static void afterReadByteBuffer(@Arg("RETURN") int result, @Arg("ARG0") FileDescriptor fd,
       @Arg("ARG1") ByteBuffer dst, @Arg("ARG2") long position) {
     // TODO do something with position (seeking)
-    ByteOriginTracker fdTracker = FileDescriptorTrackerRepository.getReadTracker(fd);
+    Context context = context();
+    ByteOriginTracker fdTracker = FileDescriptorTrackerRepository.getReadTracker(context, fd);
     if (fdTracker != null && result > 0 && !dst.isDirect()) {
       int startIndex = ByteBufferHook.offset(dst) + dst.position() - result;
-      TrackerUpdater.setSourceTracker(dst.array(), startIndex, result, fdTracker,
+      TrackerUpdater.setSourceTracker(context, dst.array(), startIndex, result, fdTracker,
           fdTracker.getLength());
       fdTracker.append(dst.array(), startIndex, result);
     }
@@ -58,10 +62,11 @@ public class IOUtilHook {
   public static void afterWriteByteBuffer(@Arg("RETURN") int result, @Arg("ARG0") FileDescriptor fd,
       @Arg("ARG1") ByteBuffer src, @Arg("ARG2") long position) {
     // TODO do something with position (seeking)
-    ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
+    Context context = context();
+    ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(context, fd);
     if (fdTracker != null && result > 0 && !src.isDirect()) {
       byte[] hb = ByteBufferHook.hb(src);
-      Tracker srcTracker = TrackerRepository.getTracker(hb);
+      Tracker srcTracker = TrackerRepository.getTracker(context, hb);
       int startIndex = ByteBufferHook.offset(src) + src.position() - result;
       if (srcTracker != null) {
         fdTracker.setSource(fdTracker.getLength(), result, srcTracker, startIndex);
@@ -81,7 +86,8 @@ public class IOUtilHook {
       @Arg("ARG1") ByteBuffer[] srcs,
       @Arg("ARG2") int srcsOffset,
       @Arg("IOUtilHookSpec.BUFFER_POSITIONS") int[] startPositions) {
-    ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(fd);
+    Context context = context();
+    ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(context, fd);
     if (fdTracker != null && result > 0) {
       long remaining = result;
       int i = srcsOffset; // index in srcs
@@ -91,7 +97,7 @@ public class IOUtilHook {
         if (!src.isDirect()) { // direct buffers are not supported yet
           byte[] hb = ByteBufferHook.hb(src);
           int startIndex = ByteBufferHook.offset(src) + startPositions[i];
-          Tracker srcTracker = TrackerRepository.getTracker(hb);
+          Tracker srcTracker = TrackerRepository.getTracker(context, hb);
           if (srcTracker != null) {
             fdTracker.setSource(fdTracker.getLength(), length,
                 srcTracker, startIndex);

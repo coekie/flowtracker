@@ -16,6 +16,9 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
@@ -31,14 +34,19 @@ public class InputStreamHook {
 
   /** Returns the tracker of an input stream, ignoring wrapping FilterInputStreams */
   public static Tracker getInputStreamTracker(InputStream stream) {
-    Tracker tracker = TrackerRepository.getTracker(stream);
+    return getInputStreamTracker(context(), stream);
+  }
+
+  private static Tracker getInputStreamTracker(Context context, InputStream stream) {
+    Tracker tracker = TrackerRepository.getTracker(context, stream);
     if (tracker != null) {
       return tracker;
     } else if (stream instanceof FilterInputStream) {
-      return getInputStreamTracker(filterInputStream_in((FilterInputStream) stream));
+      return getInputStreamTracker(context, filterInputStream_in((FilterInputStream) stream));
     } else if (stream instanceof FileInputStream) {
       try {
-        return FileDescriptorTrackerRepository.getReadTracker(((FileInputStream) stream).getFD());
+        return FileDescriptorTrackerRepository.getReadTracker(context,
+            ((FileInputStream) stream).getFD());
       } catch (IOException e) {
         return null;
       }

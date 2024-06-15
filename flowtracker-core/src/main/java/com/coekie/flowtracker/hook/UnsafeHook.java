@@ -16,6 +16,8 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
 import sun.misc.Unsafe;
@@ -33,7 +35,7 @@ public class UnsafeHook {
     unsafe.putByte(target, offset, value);
     if (target instanceof byte[]) {
       int index = (int) (offset - BYTE_ARRAY_BASE_OFFSET);
-      TrackerUpdater.setSourceTrackerPoint(target, index, 1, source);
+      TrackerUpdater.setSourceTrackerPoint(context(), target, index, 1, source);
     }
   }
 }

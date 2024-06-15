@@ -18,6 +18,7 @@ package com.coekie.flowtracker.hook;
 
 import static com.coekie.flowtracker.tracker.Context.context;
 
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.TagTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
@@ -28,13 +29,14 @@ import java.net.URLConnection;
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class URLConnectionHook {
   public static void afterGetInputStream(InputStream result, URLConnection connection) {
-    if (!context().isActive()) return;
+    Context context = context();
+    if (!context.isActive()) return;
     Tracker tracker = InputStreamHook.getInputStreamTracker(result);
     // (since ZipFile is hooked, and we haven't added tests for any other URLConnection, this code
     // is untested)
     if (tracker == null) {
       tracker = new TagTracker();
-      TrackerRepository.setTracker(result, tracker);
+      TrackerRepository.setTracker(context, result, tracker);
     }
     if (tracker.getNode() == null) {
       tracker.addTo(TrackerTree.ROOT.node("URLConnection")

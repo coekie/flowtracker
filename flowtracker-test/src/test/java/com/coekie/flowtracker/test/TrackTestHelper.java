@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.hook.StringHook;
@@ -78,6 +79,10 @@ public class TrackTestHelper {
     return result;
   }
 
+  public static Tracker stringTracker(String str) {
+    return StringHook.getStringTracker(context(), str);
+  }
+
   /**
    * We use this instead of {@link FlowTester#untrackedChar(char)}, because we don't want the
    * "fallback" to kick in (we don't want to test a TrackerPoint pointing to a
@@ -93,7 +98,7 @@ public class TrackTestHelper {
   }
 
   private static Tracker tracker(Object o) {
-    return o instanceof Tracker ? (Tracker) o : TrackerRepository.getTracker(o);
+    return o instanceof Tracker ? (Tracker) o : TrackerRepository.getTracker(context(), o);
   }
 
   /**

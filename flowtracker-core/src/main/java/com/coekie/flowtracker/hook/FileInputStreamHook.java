@@ -21,6 +21,7 @@ import static com.coekie.flowtracker.tracker.Context.context;
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.ByteOriginTracker;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.TrackerPoint;
@@ -49,7 +50,7 @@ public class FileInputStreamHook {
   public static void afterRead1(@Arg("RETURN") int result,
       @Arg("FileInputStream_fd") FileDescriptor fd, @Arg("INVOCATION") Invocation invocation) {
     if (result > 0) {
-      ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
+      ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(context(), fd);
       if (tracker != null) {
         Invocation.returning(invocation, TrackerPoint.of(tracker, tracker.getLength()));
         tracker.append((byte) result);
@@ -62,9 +63,10 @@ public class FileInputStreamHook {
   public static void afterReadByteArray(@Arg("RETURN") int read,
       @Arg("FileInputStream_fd") FileDescriptor fd, @Arg("ARG0") byte[] buf) {
     if (read > 0) {
-      ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
+      Context context = context();
+      ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(context, fd);
       if (tracker != null) {
-        TrackerUpdater.setSourceTracker(buf, 0, read, tracker, tracker.getLength());
+        TrackerUpdater.setSourceTracker(context, buf, 0, read, tracker, tracker.getLength());
         tracker.append(buf, 0, read);
       }
     }
@@ -76,9 +78,10 @@ public class FileInputStreamHook {
       @Arg("FileInputStream_fd") FileDescriptor fd, @Arg("ARG0") byte[] buf,
       @Arg("ARG1") int offset) {
     if (read > 0) {
-      ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(fd);
+      Context context = context();
+      ByteOriginTracker tracker = FileDescriptorTrackerRepository.getReadTracker(context, fd);
       if (tracker != null) {
-        TrackerUpdater.setSourceTracker(buf, offset, read, tracker, tracker.getLength());
+        TrackerUpdater.setSourceTracker(context, buf, offset, read, tracker, tracker.getLength());
         tracker.append(buf, offset, read);
       }
     }

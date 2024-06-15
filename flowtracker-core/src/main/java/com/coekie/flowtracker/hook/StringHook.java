@@ -39,8 +39,8 @@ public class StringHook {
     debugUntracked = config.get(DEBUG_UNTRACKED);
   }
 
-  public static Tracker getStringTracker(String str) {
-    return TrackerRepository.getTracker(getValueArray(str));
+  public static Tracker getStringTracker(Context context, String str) {
+    return TrackerRepository.getTracker(context, getValueArray(str));
   }
 
   public static void createFixedOriginTracker(String str) {
@@ -62,15 +62,16 @@ public class StringHook {
 
   @SuppressWarnings({"UnusedDeclaration", "CallToPrintStackTrace"}) // used by instrumented code
   public static void afterInit(String target) {
-    if (debugUntracked != null && target.contains(debugUntracked)
-        && getStringTracker(target) == null
+    if (debugUntracked != null && target.contains(debugUntracked)) {
+      Context context = context();
+      if (getStringTracker(context, target) == null
         // ignore the specifying of the debugUntracked string on the command line itself
         // (but eventually that should be tracked too, see java.lang.ProcessingEnvironment)
         && !target.contains("debugUntracked")) {
-      Context context = context();
-      context.suspend();
-      new Throwable("untracked").printStackTrace();
-      context.unsuspend();
+        context.suspend();
+        new Throwable("untracked").printStackTrace();
+        context.unsuspend();
+      }
     }
   }
 
@@ -78,9 +79,9 @@ public class StringHook {
   @SuppressWarnings("unused")
   public static Tracker forceGetStringTracker(String str) {
     Context context = context();
-    if (context.isActive()) return getStringTracker(str);
+    if (context.isActive()) return getStringTracker(context, str);
     context.unsuspend();
-    Tracker result = getStringTracker(str);
+    Tracker result = getStringTracker(context, str);
     context.suspend();
     return result;
   }

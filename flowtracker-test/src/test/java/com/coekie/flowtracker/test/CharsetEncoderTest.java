@@ -2,6 +2,7 @@ package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.test.TrackTestHelper.assertIsFallbackIn;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedCharArray;
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
@@ -49,7 +50,8 @@ public class CharsetEncoderTest {
     // TODO this isn't right, lost track of the non-ascii char.
     // note: because of the `FallbackSource` it's not actually a "gap"; but it points to coming from
     // the encoder (which is still better than nothing, I guess).
-    TrackerSnapshot snapshot = TrackerSnapshot.of(TrackerRepository.getTracker(bb.array()));
+    TrackerSnapshot snapshot = TrackerSnapshot.of(
+        TrackerRepository.getTracker(context(), bb.array()));
     assertIsFallbackIn(snapshot.getParts().get(1), "sun.nio.cs.UTF_8$Encoder");
   }
 

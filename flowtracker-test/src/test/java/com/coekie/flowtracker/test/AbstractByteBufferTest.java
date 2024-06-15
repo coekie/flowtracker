@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
@@ -189,7 +190,7 @@ public abstract class AbstractByteBufferTest {
 
   Tracker bbTracker(ByteBuffer bb) {
     assertThat(bb.isDirect()).isFalse(); // direct ByteBuffers not supported here yet
-    return TrackerRepository.getTracker(bb.array());
+    return TrackerRepository.getTracker(context(), bb.array());
   }
 
   /** Create a ByteBuffer with given capacity, with no tracker yet */

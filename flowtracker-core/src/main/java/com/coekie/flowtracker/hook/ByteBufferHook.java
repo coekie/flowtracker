@@ -16,6 +16,8 @@ package com.coekie.flowtracker.hook;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.Invocation;
@@ -51,7 +53,8 @@ public class ByteBufferHook {
     // alternative: we could look at the address that SCOPED_MEMORY_ACCESS.copyMemory is being
     // called with, and from there calculate what offset into the array we're reading from and
     // writing to
-    TrackerUpdater.setSource(targetArray, targetOffset + pos, n, srcArray, srcOffset + srcPos);
+    TrackerUpdater.setSource(context(), targetArray, targetOffset + pos, n, srcArray,
+        srcOffset + srcPos);
   }
 
   @Hook(target = "java.nio.DirectByteBuffer",
@@ -59,7 +62,7 @@ public class ByteBufferHook {
       method = "java.nio.ByteBuffer get(byte[],int,int)")
   public static void afterDirectBufferGet(@Arg("ARG0") byte[] target,
       @Arg("ARG1") int offset, @Arg("ARG2") int length) {
-    TrackerUpdater.setSource(target, offset, length, null, -1);
+    TrackerUpdater.setSource(context(), target, offset, length, null, -1);
   }
 
   @Hook(target = "java.nio.HeapByteBuffer",
@@ -109,7 +112,7 @@ public class ByteBufferHook {
     byte[] targetArray = hb(target);
     int pos = target.position() - length; // position before we wrote the value
     int targetOffset = offset(target);
-    TrackerUpdater.setSourceTrackerPoint(targetArray, targetOffset + pos, length,
+    TrackerUpdater.setSourceTrackerPoint(context(), targetArray, targetOffset + pos, length,
         Invocation.getArgPoint(invocation, 0));
   }
 
@@ -118,7 +121,7 @@ public class ByteBufferHook {
       Invocation invocation, int length) {
     byte[] targetArray = hb(target);
     int targetOffset = offset(target);
-    TrackerUpdater.setSourceTrackerPoint(targetArray, targetOffset + pos, length,
+    TrackerUpdater.setSourceTrackerPoint(context(), targetArray, targetOffset + pos, length,
         Invocation.getArgPoint(invocation, 1));
   }
 

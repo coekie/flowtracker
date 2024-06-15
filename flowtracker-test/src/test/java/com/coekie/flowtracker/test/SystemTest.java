@@ -1,10 +1,10 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.test.TrackTestHelper.stringTracker;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedCharArray;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.coekie.flowtracker.hook.StringHook;
 import com.coekie.flowtracker.tracker.CharOriginTracker;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import com.coekie.flowtracker.tracker.TrackerTree;
@@ -111,9 +111,9 @@ public class SystemTest {
 		assertThat(keySourceIndex).isGreaterThan(0);
 		int valueSourceIndex = keySourceIndex + key.length() + 1; // +1 for the '=' sign
 
-		TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(key))
+		TrackerSnapshot.assertThatTracker(stringTracker(key))
 				.matches(TrackerSnapshot.snapshot().part(key.length(), originTracker, keySourceIndex));
-		TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(value))
+		TrackerSnapshot.assertThatTracker(stringTracker(value))
 				.matches(TrackerSnapshot.snapshot().part(value.length(), originTracker, valueSourceIndex));
 	}
 }

@@ -2,6 +2,7 @@ package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedIntArray;
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.coekie.flowtracker.tracker.TrackerRepository.getTracker;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
@@ -20,7 +21,7 @@ public class ArrayTest {
   @Test
   public void charArrayLoadValue() {
     char[] array = TrackTestHelper.trackedCharArrayWithLength(3);
-    FlowTester.assertTrackedValue(array[2], '\0', getTracker(array), 2);
+    FlowTester.assertTrackedValue(array[2], '\0', getTracker(context(), array), 2);
   }
 
   @Test public void charArrayStore() {
@@ -82,7 +83,7 @@ public class ArrayTest {
 
     // would be nice if this was tracked. for now, we're happy with it not blowing up
     // snapshotBuilder().track(a, 0, 1).assertTrackerOf(bytes);
-    assertThat(getTracker(bytes)).isNull();
+    assertThat(getTracker(context(), bytes)).isNull();
   }
 
   @Test public void intArrayLoadAndStore() {

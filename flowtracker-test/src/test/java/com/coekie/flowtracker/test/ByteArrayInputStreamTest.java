@@ -1,5 +1,7 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import java.io.ByteArrayInputStream;
@@ -17,7 +19,7 @@ public class ByteArrayInputStreamTest extends AbstractInputStreamTest {
 
   @Override
   Tracker getStreamTracker(InputStream is) {
-    return TrackerRepository.getTracker(((MyByteArrayInputStream) is).getBuf());
+    return TrackerRepository.getTracker(context(), ((MyByteArrayInputStream) is).getBuf());
   }
 
   @Override

@@ -1,6 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedByteArray;
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -71,7 +72,7 @@ public class FileOutputStreamTest extends AbstractOutputStreamTest<FileOutputStr
   @Override
   Tracker getTracker(FileOutputStream os) {
     try {
-      return FileDescriptorTrackerRepository.getWriteTracker(os.getFD());
+      return FileDescriptorTrackerRepository.getWriteTracker(context(), os.getFD());
     } catch (IOException e) {
       throw new AssertionError(e);
     }

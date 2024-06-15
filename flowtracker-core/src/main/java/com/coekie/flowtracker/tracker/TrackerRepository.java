@@ -16,8 +16,6 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
-import static com.coekie.flowtracker.tracker.Context.context;
-
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -25,10 +23,10 @@ import java.util.Map;
 public class TrackerRepository {
   // TODO concurrent weak identity hash map? Use Guava's MapMaker (without pollution classpath)?
   private static final Map<Object, Tracker> objectToTracker =
-      Collections.synchronizedMap(new IdentityHashMap<Object, Tracker>());
+      Collections.synchronizedMap(new IdentityHashMap<>());
 
-  public static Tracker getTracker(Object obj) {
-    if (!context().isActive()) return null;
+  public static Tracker getTracker(Context context, Object obj) {
+    if (!context.isActive()) return null;
     return objectToTracker.get(obj);
   }
 
@@ -38,26 +36,26 @@ public class TrackerRepository {
     return tracker;
   }
 
-  public static Tracker createTracker(Object obj) {
+  public static Tracker createTracker(Context context, Object obj) {
     Tracker tracker = new DefaultTracker();
-    setTracker(obj, tracker);
+    setTracker(context, obj, tracker);
     return tracker;
   }
 
-  public static Tracker getOrCreateTracker(Object obj) {
-    if (!context().isActive()) return null;
+  public static Tracker getOrCreateTracker(Context context, Object obj) {
+    if (!context.isActive()) return null;
     Tracker tracker = objectToTracker.get(obj);
-    return tracker == null ? createTracker(obj) : tracker;
+    return tracker == null ? createTracker(context, obj) : tracker;
   }
 
-  public static void setTracker(Object obj, Tracker tracker) {
+  public static void setTracker(Context context, Object obj, Tracker tracker) {
     if (obj == null) {
       throw new NullPointerException("Can't track null");
-    } else if (getTracker(obj) != null) {
+    } else if (getTracker(context, obj) != null) {
       // FIXME race condition: two threads could try to create tracker for same obj at same time.
       //  use Map.putIfAbsent in getOrCreateTracker?
       throw new IllegalStateException("Object already has a tracker: " + obj
-          + " has " + getTracker(obj));
+          + " has " + getTracker(context, obj));
     } else {
       objectToTracker.put(obj, tracker);
     }

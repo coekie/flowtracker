@@ -21,6 +21,7 @@ import static com.coekie.flowtracker.tracker.Context.context;
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.CharSinkTracker;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.Tracker;
@@ -67,17 +68,18 @@ public class OutputStreamWriterHook {
       condition = enabledCondition)
   public static void afterInit(@Arg("THIS") OutputStreamWriter target,
       @Arg("ARG0") OutputStream stream) {
-    if (context().isActive()) {
-      createOutputStreamWriterTracker(target, stream);
+    Context context = context();
+    if (context.isActive()) {
+      createOutputStreamWriterTracker(context, target, stream);
     }
   }
 
-  static void createOutputStreamWriterTracker(OutputStreamWriter target,
+  static void createOutputStreamWriterTracker(Context context, OutputStreamWriter target,
       OutputStream stream) {
     Tracker streamTracker = getOutputStreamTracker(stream);
     CharSinkTracker tracker = new CharSinkTracker();
     tracker.addTo(TrackerTree.nodeOrUnknown(streamTracker).node("Writer"));
-    TrackerRepository.setTracker(target, tracker);
+    TrackerRepository.setTracker(context, target, tracker);
   }
 
   @Hook(target = "java.io.OutputStreamWriter",
@@ -85,7 +87,7 @@ public class OutputStreamWriterHook {
       condition = enabledCondition)
   public static void afterWrite1(@Arg("THIS") OutputStreamWriter target, @Arg("ARG0") int c,
     @Arg("INVOCATION") Invocation invocation) {
-    Tracker tracker = TrackerRepository.getTracker(target);
+    Tracker tracker = TrackerRepository.getTracker(context(), target);
     if (tracker != null) {
       TrackerPoint sourcePoint = Invocation.getArgPoint(invocation, 0);
       if (sourcePoint != null) {
@@ -100,9 +102,10 @@ public class OutputStreamWriterHook {
       condition = enabledCondition)
   public static void afterWriteCharArrayOffset(@Arg("THIS") OutputStreamWriter target,
       @Arg("ARG0") char[] cbuf, @Arg("ARG1") int off, @Arg("ARG2") int len) {
-    Tracker tracker = TrackerRepository.getTracker(target);
+    Context context = context();
+    Tracker tracker = TrackerRepository.getTracker(context, target);
     if (tracker != null) {
-      Tracker sourceTracker = TrackerRepository.getTracker(cbuf);
+      Tracker sourceTracker = TrackerRepository.getTracker(context, cbuf);
       if (sourceTracker != null) {
         tracker.setSource(tracker.getLength(), len, sourceTracker, off);
       }
@@ -115,9 +118,10 @@ public class OutputStreamWriterHook {
       condition = enabledCondition)
   public static void afterWriteStringOffset(@Arg("THIS") OutputStreamWriter target,
       @Arg("ARG0") String str, @Arg("ARG1") int off, @Arg("ARG2") int len) {
-    Tracker tracker = TrackerRepository.getTracker(target);
+    Context context = context();
+    Tracker tracker = TrackerRepository.getTracker(context, target);
     if (tracker != null) {
-      Tracker sourceTracker = StringHook.getStringTracker(str);
+      Tracker sourceTracker = StringHook.getStringTracker(context, str);
       if (sourceTracker != null) {
         tracker.setSource(tracker.getLength(), len, sourceTracker, off);
       }

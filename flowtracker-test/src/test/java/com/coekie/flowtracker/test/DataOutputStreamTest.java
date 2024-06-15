@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.Tracker;
@@ -20,7 +21,7 @@ public class DataOutputStreamTest extends AbstractDataOutputStreamTest<DataOutpu
 
   @Override
   Tracker getTracker(DataOutputStream os) {
-    return TrackerRepository.getTracker(bout.toByteArray());
+    return TrackerRepository.getTracker(context(), bout.toByteArray());
   }
 
   @Override

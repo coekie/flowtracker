@@ -1,6 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.test.TrackTestHelper.assertThatTrackerNode;
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Objects.requireNonNull;
 
@@ -39,7 +40,7 @@ public class FilesTest {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     long result = Files.copy(file.toPath(), bout);
     assertThat(result).isEqualTo(3);
-    Tracker tracker = requireNonNull(TrackerRepository.getTracker(bout.toByteArray()));
+    Tracker tracker = requireNonNull(TrackerRepository.getTracker(context(), bout.toByteArray()));
     TrackerSnapshot trackerSnapshot = TrackerSnapshot.of(tracker);
     assertThat(trackerSnapshot.getParts()).hasSize(1);
     Part part = trackerSnapshot.getParts().get(0);

@@ -16,6 +16,7 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.hook.StringHook;
@@ -97,7 +98,7 @@ public class TrackerSnapshot {
   }
 
   public static TrackerSubject assertThatTrackerOf(Object obj) {
-    return new TrackerSubject(TrackerSnapshot.of(TrackerRepository.getTracker(obj)));
+    return new TrackerSubject(TrackerSnapshot.of(TrackerRepository.getTracker(context(), obj)));
   }
 
   private static int length(List<Part> parts) {
@@ -198,20 +199,20 @@ public class TrackerSnapshot {
 
     public Builder track(Object source) {
       if (source instanceof Tracker) throw new IllegalArgumentException("wrong method");
-      return part(TrackerRepository.getTracker(source));
+      return part(TrackerRepository.getTracker(context(), source));
     }
 
     public Builder track(int length, Object source, int sourceIndex) {
       if (source instanceof Tracker) throw new IllegalArgumentException("wrong method");
-      return part(length, TrackerRepository.getTracker(source), sourceIndex);
+      return part(length, TrackerRepository.getTracker(context(), source), sourceIndex);
     }
 
     public Builder trackString(String source) {
-      return part(StringHook.getStringTracker(source));
+      return part(StringHook.getStringTracker(context(), source));
     }
 
     public Builder trackString(int length, String source, int sourceIndex) {
-      return part(length, StringHook.getStringTracker(source), sourceIndex);
+      return part(length, StringHook.getStringTracker(context(), source), sourceIndex);
     }
 
     /** Append a part for which the source tracker is unknown */

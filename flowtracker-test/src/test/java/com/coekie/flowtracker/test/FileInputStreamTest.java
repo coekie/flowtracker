@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
@@ -43,7 +44,8 @@ public class FileInputStreamTest extends AbstractInputStreamTest {
   @Override
   Tracker getStreamTracker(InputStream is) {
     try {
-      return FileDescriptorTrackerRepository.getReadTracker(((FileInputStream) is).getFD());
+      return FileDescriptorTrackerRepository.getReadTracker(context(),
+          ((FileInputStream) is).getFD());
     } catch (IOException e) {
       throw new AssertionError(e);
     }

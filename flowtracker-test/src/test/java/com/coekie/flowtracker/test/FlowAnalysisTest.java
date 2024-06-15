@@ -3,11 +3,11 @@ package com.coekie.flowtracker.test;
 import static com.coekie.flowtracker.test.FlowTester.getCharSourcePoint;
 import static com.coekie.flowtracker.test.FlowTester.untrackedChar;
 import static com.coekie.flowtracker.test.TrackTestHelper.assertIsFallbackIn;
+import static com.coekie.flowtracker.test.TrackTestHelper.stringTracker;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedByteArray;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.coekie.flowtracker.hook.StringHook;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import org.junit.Test;
 
@@ -26,7 +26,7 @@ public class FlowAnalysisTest {
 
     assertThat(result).isEqualTo("abc");
 
-    TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(result)).matches(
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
         TrackerSnapshot.snapshot().trackString(3, abc, 0));
   }
 
@@ -40,7 +40,7 @@ public class FlowAnalysisTest {
 
     assertThat(result).isEqualTo("abc");
 
-    TrackerSnapshot.assertThatTracker(StringHook.getStringTracker(result)).matches(
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
         TrackerSnapshot.snapshot().trackString(3, abc, 0));
   }
 

@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.tracker.Context.context;
 import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.tracker.ByteOriginTracker;
@@ -40,7 +41,7 @@ public class ZipFileTest {
 
         // this is tested more in InflaterInputStreamTest
         byte[] bytes = in.readAllBytes();
-        Tracker tracker = TrackerRepository.getTracker(in);
+        Tracker tracker = TrackerRepository.getTracker(context(), in);
         TrackerSnapshot.assertThatTrackerOf(bytes).matches(
             TrackerSnapshot.snapshot().part(bytes.length, tracker, 0));
         Truth.assertThat(((ByteOriginTracker) tracker).getByteContent())
