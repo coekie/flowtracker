@@ -16,6 +16,7 @@ package com.coekie.flowtracker.weaver.flow;
  * limitations under the License.
  */
 
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.util.Config;
 import com.coekie.flowtracker.util.Logger;
 import com.coekie.flowtracker.weaver.ClassFilter;
@@ -39,6 +40,7 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
@@ -127,7 +129,7 @@ public class FlowTransformer implements Transformer {
     /** The next visitor in the chain after this one */
     private final TransparentLocalVariablesSorter varSorter;
     final InsnList intro = new InsnList();
-    final ContextLoader contextLoader = new ContextLoader();
+    private final ContextLoader contextLoader = new ContextLoader();
     final InvocationIncomingTransformation invocation = new InvocationIncomingTransformation();
     final ConstantsTransformation constantsTransformation;
     int[] lineNumbers;
@@ -295,6 +297,11 @@ public class FlowTransformer implements Transformer {
     /** @see Commentator */
     void addComment(InsnList insnList, String comment, Object... commentArgs) {
       commentator.addComment(insnList, comment, commentArgs);
+    }
+
+    /** Returns an instruction that puts the {@link Context} on the stack */
+    VarInsnNode loadContext() {
+      return contextLoader.load(this);
     }
 
     /**

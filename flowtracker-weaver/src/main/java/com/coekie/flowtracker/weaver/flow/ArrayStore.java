@@ -48,6 +48,7 @@ class ArrayStore extends Store {
     // note: we do this even for UntrackableValues
     storedValue.ensureTracked();
     storedValue.loadSourcePoint(toInsert, this);
+    toInsert.add(methodNode.loadContext());
 
     methodNode.maxStack = Math.max(frame.fullStackSize() + 3, methodNode.maxStack);
 
@@ -67,7 +68,8 @@ class ArrayStore extends Store {
   static void analyzeCharArrayStore(List<Instrumentable> toInstrument, InsnNode insn,
       FlowFrame frame) {
     toInstrument.add(new ArrayStore(insn, frame,
-        "void setChar(char[],int,char,com.coekie.flowtracker.tracker.TrackerPoint)"));
+        "void setChar(char[],int,char,com.coekie.flowtracker.tracker.TrackerPoint,"
+            + "com.coekie.flowtracker.tracker.Context)"));
   }
 
   /** Add a {@link ArrayStore} to `toInstrument` when we need to instrument it */
@@ -75,7 +77,8 @@ class ArrayStore extends Store {
       FlowFrame frame) {
     if (Types.BYTE_ARRAY.equals(frame.getStack(frame.getStackSize() - 3).getType())) {
       toInstrument.add(new ArrayStore(insn, frame,
-          "void setByte(byte[],int,byte,com.coekie.flowtracker.tracker.TrackerPoint)"));
+          "void setByte(byte[],int,byte,com.coekie.flowtracker.tracker.TrackerPoint,"
+              + "com.coekie.flowtracker.tracker.Context)"));
     }
   }
 
@@ -89,7 +92,8 @@ class ArrayStore extends Store {
     // ideally we'd only do this for arrays that deal with codepoints, which are very rare.
     if (!owner.startsWith("java/lang") && !owner.startsWith("java/util")) {
       toInstrument.add(new ArrayStore(insn, frame,
-          "void setInt(int[],int,int,com.coekie.flowtracker.tracker.TrackerPoint)"));
+          "void setInt(int[],int,int,com.coekie.flowtracker.tracker.TrackerPoint,"
+              + "com.coekie.flowtracker.tracker.Context)"));
     }
   }
 }

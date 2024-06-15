@@ -51,7 +51,7 @@ class ArrayLoadValue extends TrackableValue {
     // use DUP2 to copy target and index for getElementTracker while leaving it on the stack for the
     // actual CALOAD
     toInsert.add(new InsnNode(Opcodes.DUP2));
-    toInsert.add(method.contextLoader.load(method));
+    toInsert.add(method.loadContext());
     toInsert.add(
         new MethodInsnNode(Opcodes.INVOKESTATIC,
             "com/coekie/flowtracker/hook/ArrayLoadHook",

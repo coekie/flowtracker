@@ -66,7 +66,7 @@ class InvocationOutgoingTransformation {
         "create",
         "(Ljava/lang/String;)Lcom/coekie/flowtracker/tracker/Invocation;"));
 
-    callingInsn = methodNode.contextLoader.load(methodNode);
+    callingInsn = methodNode.loadContext();
     toInsert.add(callingInsn);
     toInsert.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
         "com/coekie/flowtracker/tracker/Invocation",

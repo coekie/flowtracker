@@ -18,6 +18,7 @@ package com.coekie.flowtracker.hook;
 
 import static com.coekie.flowtracker.tracker.Context.context;
 
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
 
@@ -25,21 +26,24 @@ import com.coekie.flowtracker.tracker.TrackerUpdater;
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class ArrayHook {
   /** Store a value in a char[] */
-  public static void setChar(char[] array, int arrayIndex, char value, TrackerPoint source) {
+  public static void setChar(char[] array, int arrayIndex, char value, TrackerPoint source,
+      Context context) {
     array[arrayIndex] = value;
-    TrackerUpdater.setSourceTrackerPoint(context(), array, arrayIndex, 1, source);
+    TrackerUpdater.setSourceTrackerPoint(context, array, arrayIndex, 1, source);
   }
 
   /** Store a value in a byte[] */
-  public static void setByte(byte[] array, int arrayIndex, byte value, TrackerPoint source) {
+  public static void setByte(byte[] array, int arrayIndex, byte value, TrackerPoint source,
+      Context context) {
     array[arrayIndex] = value;
-    TrackerUpdater.setSourceTrackerPoint(context(), array, arrayIndex, 1, source);
+    TrackerUpdater.setSourceTrackerPoint(context, array, arrayIndex, 1, source);
   }
 
   /** Store a value in an int[] */
-  public static void setInt(int[] array, int arrayIndex, int value, TrackerPoint source) {
+  public static void setInt(int[] array, int arrayIndex, int value, TrackerPoint source,
+      Context context) {
     array[arrayIndex] = value;
-    TrackerUpdater.setSourceTrackerPoint(context(), array, arrayIndex, 1, source);
+    TrackerUpdater.setSourceTrackerPoint(context, array, arrayIndex, 1, source);
   }
 
   /** Hook for calling clone() on a char[] */
