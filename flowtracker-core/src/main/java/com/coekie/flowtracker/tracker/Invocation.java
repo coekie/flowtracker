@@ -16,6 +16,8 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import java.util.Arrays;
 
 /**
@@ -23,8 +25,6 @@ import java.util.Arrays;
  * Facilitates tracking of primitive values through calls, for return values and parameters.
  */
 public class Invocation {
-  private static final ThreadLocal<Invocation> pending = new ThreadLocal<>();
-
   private final String signature;
 
   // source of the returned primitive value
@@ -88,7 +88,7 @@ public class Invocation {
    * parameter values.
    */
   public Invocation calling() {
-    pending.set(this);
+    context().pendingInvocation = this;
     return this;
   }
 
@@ -131,9 +131,10 @@ public class Invocation {
    * Called inside the called method
    */
   public static Invocation start(String signature) {
-    Invocation invocation = pending.get();
+    Context context = context();
+    Invocation invocation = context.pendingInvocation;
     if (invocation != null) {
-      clear();
+      context.pendingInvocation = null;
       if (signature.equals(invocation.signature)) {
         return invocation;
       }
@@ -147,7 +148,7 @@ public class Invocation {
    */
   @SuppressWarnings("unused") // used in HookSpec.INVOCATION
   public static Invocation preStart(String signature) {
-    Invocation invocation = pending.get();
+    Invocation invocation = context().pendingInvocation;
     if (invocation != null) {
       if (signature.equals(invocation.signature)) {
         return invocation;
@@ -174,26 +175,18 @@ public class Invocation {
    * restoring it when class loading has finished.
    */
   public static Invocation suspend() {
-    Invocation invocation = pending.get();
-    if (invocation != null) {
-      clear();
-    }
+    Context context = context();
+    Invocation invocation = context.pendingInvocation;
+    context.pendingInvocation = null;
     return invocation;
   }
 
   /** @see #suspend() */
   public static void unsuspend(Invocation invocation) {
-    pending.set(invocation);
-  }
-
-  // deliberately not using ThreadLocal.clear(), because constantly adding and removing from the
-  // map is slower than updating an existing entry.
-  @SuppressWarnings("ThreadLocalSetWithNull")
-  private static void clear() {
-    pending.set(null);
+    context().pendingInvocation = invocation;
   }
 
   public static Invocation peekPending() {
-    return pending.get();
+    return context().pendingInvocation;
   }
 }
