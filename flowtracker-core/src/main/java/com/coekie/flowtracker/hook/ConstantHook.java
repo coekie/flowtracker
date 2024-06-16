@@ -37,6 +37,6 @@ public class ConstantHook {
   // stack we can use in ConstantValue.loadSourcePoint we split that into two calls when length
   // is not 1
   public static TrackerPoint withLength(TrackerPoint point, int length) {
-    return TrackerPoint.of(point.tracker, point.index, length);
+    return point.withLength(length);
   }
 }

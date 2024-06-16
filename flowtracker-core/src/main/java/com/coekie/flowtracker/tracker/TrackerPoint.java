@@ -49,6 +49,12 @@ public class TrackerPoint {
     return index == that.index && Objects.equals(tracker, that.tracker) && length == that.length;
   }
 
+  /** Return a TrackerPoint with same tracker and index as this, but different length */
+  public TrackerPoint withLength(int length) {
+    // optimization: avoid going through TrackerPoint.of, depth.isAcceptableContent
+    return new TrackerPoint(this.tracker, this.index, length);
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(tracker, index, length);
