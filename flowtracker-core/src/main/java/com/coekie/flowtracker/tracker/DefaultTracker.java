@@ -22,20 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.TreeMap;
 
 public class DefaultTracker extends Tracker {
-  private final NavigableMap<Integer, PartTracker> map = new ConcurrentSkipListMap<>();
+  private final NavigableMap<Integer, PartTracker> map = new TreeMap<>();
   private final TrackerDepth depth;
-
-  /**
-   * Create a tracker whose content is a copy of the given tracker, with the specified depth.
-   */
-  public static DefaultTracker copyOf(Tracker tracker, TrackerDepth depth) {
-    DefaultTracker result = new DefaultTracker(depth);
-    tracker.pushSourceTo(0, tracker.getLength(), result, 0);
-    return result;
-  }
 
   public DefaultTracker() {
     this(TrackerDepth.CONTENT_IMMUTABLE);
@@ -47,7 +38,8 @@ public class DefaultTracker extends Tracker {
   }
 
   @Override
-  public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex, Growth growth) {
+  public synchronized void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
+      Growth growth) {
     if (sourceTracker == null) {
       doSetSource(index, length, null, -1, Growth.NONE);
     } else if (depth.isAcceptableContent(sourceTracker)) {
@@ -64,7 +56,7 @@ public class DefaultTracker extends Tracker {
   }
 
   @Override
-  public void pushSourceTo(int index, int targetLength, WritableTracker targetTracker,
+  public synchronized void pushSourceTo(int index, int targetLength, WritableTracker targetTracker,
       int targetIndex, Growth growth) {
     // we start at the part that contains index
     // or, if there's no such part, at what comes after
@@ -124,8 +116,8 @@ public class DefaultTracker extends Tracker {
     }
   }
 
-  private void doSetSource(int index, int length, Tracker sourceTracker, int sourceIndex,
-      Growth growth) {
+  private void doSetSource(int index, int length, Tracker sourceTracker,
+      int sourceIndex, Growth growth) {
     if (length == 0) return;
 
     // check the entry right after the new one (starting where new one ends, or overlapping)
@@ -204,12 +196,12 @@ public class DefaultTracker extends Tracker {
   }
 
   @Override
-  public int getEntryCount() {
+  public synchronized int getEntryCount() {
     return map.size();
   }
 
   @Override
-  public int getLength() {
+  public synchronized int getLength() {
     if (map.isEmpty()) return 0;
     Entry<Integer, PartTracker> lastEntry = map.lastEntry();
     return lastEntry.getKey() + lastEntry.getValue().getLength();
