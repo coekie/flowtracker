@@ -103,7 +103,10 @@ public class StringHook {
   }
 
   public static String constantString(String value, ClassOriginTracker tracker, int offset) {
+    Context context = context();
+    context.suspend(); // optimization: no point in tracking this
     String str = new String(value.getBytes());
+    context.unsuspend();
     setStringSource(str, tracker, offset);
     return str;
   }

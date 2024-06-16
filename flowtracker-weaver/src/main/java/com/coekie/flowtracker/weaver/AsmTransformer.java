@@ -16,6 +16,9 @@ package com.coekie.flowtracker.weaver;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.util.Config;
 import com.coekie.flowtracker.util.Logger;
@@ -99,6 +102,8 @@ class AsmTransformer implements ClassFileTransformer {
       Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
       byte[] classfileBuffer) {
     Invocation suspended = Invocation.suspend();
+    Context context = context();
+    context.suspend();
     try {
       Transformer adapterFactory = getAdapterFactory(loader, className);
       if (adapterFactory == null) {
@@ -138,6 +143,7 @@ class AsmTransformer implements ClassFileTransformer {
       throw new RuntimeException("Exception transforming class " + className, t);
     } finally {
       Invocation.unsuspend(suspended);
+      context.unsuspend();
     }
   }
 

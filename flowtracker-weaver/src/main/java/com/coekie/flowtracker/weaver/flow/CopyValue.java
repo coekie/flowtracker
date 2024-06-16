@@ -76,7 +76,7 @@ class CopyValue extends FlowValue {
   public boolean equals(Object o) {
     if (o == this) {
       return true;
-    } else if (!super.equals(o)) {
+    } else if (!(o instanceof CopyValue)) {
       return false;
     }
     CopyValue other = (CopyValue) o;
