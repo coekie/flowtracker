@@ -18,6 +18,7 @@ package com.coekie.flowtracker.tracker;
 
 import com.coekie.flowtracker.hook.Reflection;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.VarHandle;
 
 /**
  * Manages the storing of {@link Context} in the current thread.
@@ -65,50 +66,44 @@ abstract class ContextSupplier {
    * This field was removed (replaced by Thread.FieldHolder.task) in later JDK versions.
    */
   private static class WithThreadTarget extends ContextSupplier {
-    private static final MethodHandle getThreadTarget =
-        Reflection.getter(Thread.class, "target", Runnable.class);
-    private static final MethodHandle setThreadTarget =
-        Reflection.setter(Thread.class, "target", Runnable.class);
+    private static final VarHandle threadTargetHandle =
+        Reflection.varHandle(Thread.class, "target", Runnable.class);
 
     @Override
     Context get() {
-      try {
-        Thread thread = Thread.currentThread();
-        Runnable runnable = (Runnable) getThreadTarget.invokeExact(thread);
-        if (runnable instanceof Context) {
-          return (Context) runnable;
-        } else {
-          Context context = new Context();
-          setThreadTarget.invokeExact(thread, (Runnable) context);
-          return context;
-        }
-      } catch (Throwable t) {
-        throw new Error(t);
+      Thread thread = Thread.currentThread();
+      Runnable runnable = (Runnable) threadTargetHandle.get(thread);
+      if (runnable instanceof Context) {
+        return (Context) runnable;
+      } else {
+        Context context = new Context();
+        threadTargetHandle.set(thread, (Runnable) context);
+        return context;
       }
     }
   }
 
   /** Store the Context in Thread.interruptLock */
   private static class WithThreadInterruptLock extends ContextSupplier {
-    private static final MethodHandle getThreadInterruptLock =
-        Reflection.getter(Thread.class, "interruptLock", Object.class);
+    private static final VarHandle threadInterruptLockHandle =
+        Reflection.varHandle(Thread.class, "interruptLock", Object.class);
     private static final MethodHandle setThreadInterruptLock =
         Reflection.setter(Thread.class, "interruptLock", Object.class);
 
     @Override
     Context get() {
-      try {
-        Thread thread = Thread.currentThread();
-        Object lock = getThreadInterruptLock.invokeExact(thread);
-        if (lock instanceof Context) {
-          return (Context) lock;
-        } else {
-          Context context = new Context();
+      Thread thread = Thread.currentThread();
+      Object lock = threadInterruptLockHandle.get(thread);
+      if (lock instanceof Context) {
+        return (Context) lock;
+      } else {
+        Context context = new Context();
+        try {
           setThreadInterruptLock.invokeExact(thread, (Object) context);
-          return context;
+        } catch (Throwable t) {
+          throw new Error(t);
         }
-      } catch (Throwable t) {
-        throw new Error(t);
+        return context;
       }
     }
   }

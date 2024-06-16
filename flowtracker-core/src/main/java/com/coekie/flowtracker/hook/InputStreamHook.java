@@ -26,11 +26,11 @@ import java.io.FileInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.invoke.MethodHandle;
+import java.lang.invoke.VarHandle;
 
 public class InputStreamHook {
-  private static final MethodHandle filterInputStream_in =
-      Reflection.getter(FilterInputStream.class, "in", InputStream.class);
+  private static final VarHandle filterInputStream_in =
+      Reflection.varHandle(FilterInputStream.class, "in", InputStream.class);
 
   /** Returns the tracker of an input stream, ignoring wrapping FilterInputStreams */
   public static Tracker getInputStreamTracker(InputStream stream) {
@@ -56,10 +56,6 @@ public class InputStreamHook {
   }
 
   private static InputStream filterInputStream_in(FilterInputStream o) {
-    try {
-      return (InputStream) filterInputStream_in.invokeExact(o);
-    } catch (Throwable e) {
-      throw new Error(e);
-    }
+    return (InputStream) filterInputStream_in.get(o);
   }
 }

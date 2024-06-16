@@ -34,7 +34,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.invoke.MethodHandle;
+import java.lang.invoke.VarHandle;
 
 /**
  * Hook methods called by instrumented code for OutputStreamWriter.
@@ -47,8 +47,8 @@ public class OutputStreamWriterHook {
   private static final String enabledCondition =
       "config.getBoolean(\"" + TRACK_OUTPUT_STREAM_WRITER + "\", false)";
 
-  private static final MethodHandle filterOutputStream_out =
-      Reflection.getter(FilterOutputStream.class, "out", OutputStream.class);
+  private static final VarHandle filterOutputStream_out =
+      Reflection.varHandle(FilterOutputStream.class, "out", OutputStream.class);
 
   static boolean enabled(Config config) {
     return config.getBoolean(TRACK_OUTPUT_STREAM_WRITER, false);
@@ -143,10 +143,6 @@ public class OutputStreamWriterHook {
   }
 
   private static OutputStream filterOutputStream_out(FilterOutputStream o) {
-    try {
-      return (OutputStream) filterOutputStream_out.invokeExact(o);
-    } catch (Throwable e) {
-      throw new Error(e);
-    }
+    return (OutputStream) filterOutputStream_out.get(o);
   }
 }

@@ -22,15 +22,15 @@ import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
-import java.lang.invoke.MethodHandle;
+import java.lang.invoke.VarHandle;
 import java.nio.ByteBuffer;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class ByteBufferHook {
-  private static final MethodHandle hbHandle =
-      Reflection.getter(ByteBuffer.class, "hb", byte[].class);
-  private static final MethodHandle offsetHandle =
-      Reflection.getter(ByteBuffer.class, "offset", int.class);
+  private static final VarHandle hbHandle =
+      Reflection.varHandle(ByteBuffer.class, "hb", byte[].class);
+  private static final VarHandle offsetHandle =
+      Reflection.varHandle(ByteBuffer.class, "offset", int.class);
 
   @Hook(target = "java.nio.ByteBuffer",
       condition = "version > 11",
@@ -126,18 +126,10 @@ public class ByteBufferHook {
   }
 
   static byte[] hb(ByteBuffer o) {
-    try {
-      return (byte[]) hbHandle.invokeExact(o);
-    } catch (Throwable e) {
-      throw new Error(e);
-    }
+    return (byte[]) hbHandle.get(o);
   }
 
   static int offset(ByteBuffer o) {
-    try {
-      return (int) offsetHandle.invokeExact(o);
-    } catch (Throwable e) {
-      throw new Error(e);
-    }
+    return (int) offsetHandle.get(o);
   }
 }

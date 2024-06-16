@@ -24,7 +24,7 @@ import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import java.io.FileDescriptor;
-import java.lang.invoke.MethodHandle;
+import java.lang.invoke.VarHandle;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -35,12 +35,12 @@ import java.net.SocketImpl;
  * */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class SocketImplHook {
-  private static final MethodHandle fdHandle =
-      Reflection.getter(SocketImpl.class, "fd", FileDescriptor.class);
-  private static final MethodHandle addressHandle =
-      Reflection.getter(SocketImpl.class, "address", InetAddress.class);
-  private static final MethodHandle portHandle =
-      Reflection.getter(SocketImpl.class, "port", int.class);
+  private static final VarHandle fdHandle =
+      Reflection.varHandle(SocketImpl.class, "fd", FileDescriptor.class);
+  private static final VarHandle addressHandle =
+      Reflection.varHandle(SocketImpl.class, "address", InetAddress.class);
+  private static final VarHandle portHandle =
+      Reflection.varHandle(SocketImpl.class, "port", int.class);
 
   @Hook(target = "sun.nio.ch.NioSocketImpl",
       condition = "version >= 17",
@@ -110,26 +110,15 @@ public class SocketImplHook {
   }
 
   private static FileDescriptor fd(SocketImpl channel) {
-    try {
-      return (FileDescriptor) fdHandle.invokeExact(channel);
-    } catch (Throwable e) {
-      throw new Error(e);
-    }
+    return (FileDescriptor) fdHandle.get(channel);
+
   }
 
   private static InetAddress address(SocketImpl channel) {
-    try {
-      return (InetAddress) addressHandle.invokeExact(channel);
-    } catch (Throwable e) {
-      throw new Error(e);
-    }
+    return (InetAddress) addressHandle.get(channel);
   }
 
   private static int port(SocketImpl channel) {
-    try {
-      return (int) portHandle.invokeExact(channel);
-    } catch (Throwable e) {
-      throw new Error(e);
-    }
+    return (int) portHandle.get(channel);
   }
 }
