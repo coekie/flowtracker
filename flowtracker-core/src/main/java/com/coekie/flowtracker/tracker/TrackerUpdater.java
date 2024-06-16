@@ -23,7 +23,7 @@ public class TrackerUpdater {
   public static void setSource(Context context, Object target, int targetIndex, int length,
       Object source, int sourceIndex) {
     setSourceTracker(context, target, targetIndex, length,
-        TrackerRepository.getTracker(context, source), sourceIndex);
+        TrackerRepository.getTracker(context, source), sourceIndex, Growth.NONE);
   }
 
   public static void setSourceTracker(Context context, Object target, int targetIndex, int length,
@@ -49,7 +49,7 @@ public class TrackerUpdater {
   public static void setSourceTrackerPoint(Context context, Object target, int targetIndex,
       int length, TrackerPoint sourcePoint) {
     if (sourcePoint == null) {
-      setSourceTracker(context, target, targetIndex, length, null, -1);
+      setSourceTracker(context, target, targetIndex, length, null, -1, Growth.NONE);
     } else {
       setSourceTracker(context, target, targetIndex, length, sourcePoint.tracker, sourcePoint.index,
           Growth.of(length, sourcePoint.length));

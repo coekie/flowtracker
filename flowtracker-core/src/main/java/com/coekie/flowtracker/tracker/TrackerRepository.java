@@ -29,7 +29,7 @@ public class TrackerRepository {
 
   public static Tracker getTracker(Context context, Object obj) {
     if (!context.isActive()) return null;
-    return doGetTracker(context, obj);
+    return forceGetTracker(context, obj);
   }
 
   public static Tracker createFixedOriginTracker(Object obj, int length) {
@@ -46,20 +46,21 @@ public class TrackerRepository {
 
   public static Tracker getOrCreateTracker(Context context, Object obj) {
     if (!context.isActive()) return null;
-    Tracker tracker = doGetTracker(context, obj);
+    Tracker tracker = forceGetTracker(context, obj);
     return tracker == null ? createTracker(context, obj) : tracker;
   }
 
   public static void setTracker(Context context, Object obj, Tracker tracker) {
     if (obj == null) {
       throw new NullPointerException("Can't track null");
-    } else if (getTracker(context, obj) != null) {
-      // FIXME race condition: two threads could try to create tracker for same obj at same time.
-      //  use Map.putIfAbsent in getOrCreateTracker?
-      throw new IllegalStateException("Object already has a tracker: " + obj
-          + " has " + getTracker(context, obj));
     } else {
-      objectToTracker.put(obj, tracker);
+      Tracker existingTracker = objectToTracker.put(obj, tracker);
+      if (existingTracker != null) {
+        // FIXME race condition: two threads could try to create tracker for same obj at same time.
+        //  use Map.putIfAbsent in getOrCreateTracker?
+        throw new IllegalStateException("Object already has a tracker: " + obj
+            + " has " + getTracker(context, obj));
+      }
       overwriteCachedTracker(context, obj, tracker);
     }
   }
@@ -79,12 +80,12 @@ public class TrackerRepository {
   }
 
   /**
-   * Get the tracker for obj, with caching.
-   * For the cache, we store recently queried objects in the Context, with the assumption that the
-   * same objects are often queried repeatedly in the same thread.
-   * It's a very small cache, just to avoid querying {@link #objectToTracker}.
+   * Get the tracker for obj, without checking if tracking is active.
    */
-  private static Tracker doGetTracker(Context context, Object obj) {
+  // For the cache, we store recently queried objects in the Context, with the assumption that the
+  // same objects are often queried repeatedly in the same thread.
+  // It's a very small cache, just to avoid querying {@link #objectToTracker}.
+  private static Tracker forceGetTracker(Context context, Object obj) {
     if (context.cachedObj0 == obj) {
       return context.cachedTracker0;
     } else if (context.cachedObj1 == obj) {
