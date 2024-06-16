@@ -23,11 +23,19 @@ package com.coekie.flowtracker.tracker;
  * own classes (e.g. `pendingInvocation` being a ThreadLocal in `Invocation`), but that requires
  * accessing ThreadLocal more often, which has a significant performance impact.
  */
-public class Context {
-  private static final ThreadLocal<Context> threadLocal = ThreadLocal.withInitial(Context::new);
+public class Context implements Runnable {
+  private static final ContextSupplier supplier = ContextSupplier.initSupplier();
 
+  /** Get or create the Context of the current thread */
   public static Context context() {
-    return threadLocal.get();
+    return supplier.get();
+  }
+
+  @Override
+  public void run() {
+    // the fact that this class implements Runnable is a weird hack needed because of
+    // ContextSupplier.WithThreadTarget
+    throw new UnsupportedOperationException();
   }
 
   /** Currently pending invocation. Should only be used by the {@link Invocation} implementation */

@@ -46,6 +46,15 @@ public class Reflection {
     }
   }
 
+  /** Returns a MethodHandle that sets the requested field */
+  public static MethodHandle setter(Class<?> owner, String name, Class<?> fieldType) {
+    try {
+      return lookup.findSetter(owner, name, fieldType);
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      throw new Error(e);
+    }
+  }
+
   /**
    * Looks up the method handle to access the field and gets its value.
    * <p>
