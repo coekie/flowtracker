@@ -59,7 +59,7 @@ class InvocationReturnValue extends TrackableValue {
         "Lcom/coekie/flowtracker/tracker/TrackerPoint;"));
   }
 
-  static boolean shouldInstrumentInvocation(String name, String desc) {
+  static boolean shouldInstrumentInvocation(String owner, String name, String desc) {
     Type returnType = Type.getReturnType(desc);
     if (returnType.equals(Type.BYTE_TYPE) || returnType.equals(Type.CHAR_TYPE)) {
 
@@ -67,6 +67,11 @@ class InvocationReturnValue extends TrackableValue {
       // circularity problems
       if (name.equals("coder") || name.equals("getCoder")) {
         return false;
+      } else if ((owner.equals("java/lang/String") || owner.equals("java/lang/StringLatin1"))
+          && name.equals("charAt")) {
+        return false; // handled by CharAtValue
+      } else if (owner.startsWith("java/lang/invoke/VarHandle")) {
+        return false; // optimization, tracking through VarHandles doesn't work anyway
       }
 
       return true;

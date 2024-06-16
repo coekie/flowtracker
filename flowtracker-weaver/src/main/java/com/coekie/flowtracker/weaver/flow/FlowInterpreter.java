@@ -225,7 +225,11 @@ class FlowInterpreter extends Interpreter<FlowValue> {
         }
       } else if ("java/lang/Byte".equals(mInsn.owner) && "toUnsignedInt".equals(mInsn.name)) {
         return values.get(0);
-      } else if (InvocationReturnValue.shouldInstrumentInvocation(mInsn.name, mInsn.desc)) {
+      } else if ("java/lang/String".equals(mInsn.owner) && "charAt".equals(mInsn.name)) {
+        return new CharAtValue(method, mInsn, false);
+      } else if ("java/lang/CharSequence".equals(mInsn.owner) && "charAt".equals(mInsn.name)) {
+        return new CharAtValue(method, mInsn, true);
+      } else if (InvocationReturnValue.shouldInstrumentInvocation(mInsn.owner, mInsn.name, mInsn.desc)) {
         return new InvocationReturnValue(method, mInsn);
       }
     }

@@ -18,6 +18,7 @@ package com.coekie.flowtracker.hook;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import sun.misc.Unsafe;
 
@@ -50,6 +51,14 @@ public class Reflection {
   public static MethodHandle setter(Class<?> owner, String name, Class<?> fieldType) {
     try {
       return lookup.findSetter(owner, name, fieldType);
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      throw new Error(e);
+    }
+  }
+
+  public static VarHandle varHandle(Class<?> owner, String name, Class<?> fieldType) {
+    try {
+      return lookup.findVarHandle(owner, name, fieldType);
     } catch (NoSuchFieldException | IllegalAccessException e) {
       throw new Error(e);
     }

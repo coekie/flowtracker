@@ -13,6 +13,7 @@ import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.hook.StringConcatFactoryHook;
+import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import java.lang.invoke.StringConcatFactory;
@@ -60,6 +61,34 @@ public class StringTest {
   @Test public void testCharAt() {
     String abc = trackCopy("abc");
     FlowTester.assertTrackedValue(abc.charAt(1), 'b', stringTracker(abc), 1);
+  }
+
+  @Test
+  public void testCharAt_UTF16() {
+    String abc = trackCopy("abc\u0939");
+    TrackerPoint point = FlowTester.getCharSourcePoint(abc.charAt(1));
+    assertThat(point.tracker).isEqualTo(stringTracker(abc));
+    assertThat(point.index).isEqualTo(2);
+    assertThat(point.length).isEqualTo(2);
+  }
+
+  @SuppressWarnings("UnnecessaryLocalVariable") // we want its type to be a CharSequence
+  @Test
+  public void testCharAt_CharSequence_String() {
+    String str = trackCopy("abc");
+    CharSequence abc = str;
+
+    FlowTester.assertTrackedValue(abc.charAt(1), 'b', stringTracker(str), 1);
+  }
+
+  @SuppressWarnings("UnnecessaryLocalVariable") // we want its type to be a CharSequence
+  @Test
+  public void testCharAt_CharSequence_NonString() {
+    String str = trackCopy("abc");
+    StringBuilder sb = new StringBuilder(str);
+    CharSequence abc = sb;
+
+    FlowTester.assertTrackedValue(abc.charAt(1), 'b', stringTracker(str), 1);
   }
 
   @Test public void testGetBytes() {

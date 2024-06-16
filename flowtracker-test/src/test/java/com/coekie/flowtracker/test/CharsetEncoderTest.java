@@ -32,7 +32,7 @@ public class CharsetEncoderTest {
   // not a real test, just gathering some good test data
   @Test
   public void examples() {
-    assertThat("\u00A3".getBytes().length).isEqualTo(2); // $
+    assertThat("\u00A3".getBytes().length).isEqualTo(2); // £
     assertThat("\u0939".getBytes().length).isEqualTo(3); // ह
     assertThat("\u20AC".getBytes().length).isEqualTo(3); // €
     assertThat("\uD55C".getBytes().length).isEqualTo(3); // 한

@@ -61,6 +61,7 @@ public class CoreInitializer {
     if (config.containsKey("dumpText")) {
       String.format("%s", "a");
     }
+    StringHook.ensureInitialized();
   }
 
   /**

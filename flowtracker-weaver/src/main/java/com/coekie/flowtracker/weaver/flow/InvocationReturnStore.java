@@ -66,7 +66,7 @@ class InvocationReturnStore extends Store {
   /** Add a {@link InvocationReturnStore} to `toInstrument` when we need to instrument it */
   static void analyze(List<Instrumentable> toInstrument, InsnNode insn, FlowFrame frame,
       FlowMethod method) {
-    if (InvocationReturnValue.shouldInstrumentInvocation(method.name, method.desc)) {
+    if (InvocationReturnValue.shouldInstrumentInvocation(method.owner, method.name, method.desc)) {
       toInstrument.add(new InvocationReturnStore(insn, frame, method.invocation));
     }
   }

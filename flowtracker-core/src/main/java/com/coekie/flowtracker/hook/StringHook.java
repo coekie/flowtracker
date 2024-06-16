@@ -21,15 +21,19 @@ import static com.coekie.flowtracker.tracker.Context.context;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.DefaultTracker;
+import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.Tracker;
+import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.util.Config;
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 
 public class StringHook {
-  private static final MethodHandle valueGetter =
-      Reflection.getter(String.class, "value", byte[].class);
+  private static final VarHandle valueHandle =
+      Reflection.varHandle(String.class, "value", byte[].class);
+  private static final VarHandle coderHandle =
+      Reflection.varHandle(String.class, "coder", byte.class);
 
   public static final String DEBUG_UNTRACKED = "debugUntracked";
 
@@ -53,11 +57,12 @@ public class StringHook {
 
   /** Get the "value" field from a String */
   private static byte[] getValueArray(String str) {
-    try {
-      return (byte[]) valueGetter.invokeExact(str);
-    } catch (Throwable t) {
-      throw new Error(t);
-    }
+    return (byte[]) valueHandle.get(str);
+  }
+
+  /** Check if a String is latin1 using the "coder" field from a String */
+  public static boolean isLatin1(String str) {
+    return ((byte) coderHandle.get(str)) == 0;
   }
 
   @SuppressWarnings({"UnusedDeclaration", "CallToPrintStackTrace"}) // used by instrumented code
@@ -113,5 +118,34 @@ public class StringHook {
     DefaultTracker tracker = new DefaultTracker();
     tracker.setSource(0, valueArray.length, sourceTracker, sourceIndex);
     TrackerRepository.forceSetTracker(valueArray, tracker);
+  }
+
+  @SuppressWarnings("unused") // used in CharAtValue
+  public static TrackerPoint charAtTracker(String str, int index, Context context) {
+    if (isLatin1(str)) {
+      Tracker tracker = getStringTracker(context, str);
+      return tracker == null ? null : TrackerPoint.of(tracker, index);
+    } else {
+      Tracker tracker = getStringTracker(context, str);
+      return tracker == null ? null : TrackerPoint.of(tracker, index * 2, 2);
+    }
+  }
+
+  @SuppressWarnings("unused") // used in CharAtValue
+  public static TrackerPoint charAtTracker(CharSequence cs, int index, Context context) {
+    if (cs instanceof String) {
+      return charAtTracker((String) cs, index, context);
+    } else {
+      // this is a bit behaviour-changing, but we call charAt a second time to get the TrackerPoint
+      Invocation invocation = Invocation.create("charAt (I)C").calling(context);
+      //noinspection ResultOfMethodCallIgnored
+      cs.charAt(index);
+      return invocation.returnPoint;
+    }
+  }
+
+  public static void ensureInitialized() {
+    getValueArray("");
+    StringHook.isLatin1("");
   }
 }
