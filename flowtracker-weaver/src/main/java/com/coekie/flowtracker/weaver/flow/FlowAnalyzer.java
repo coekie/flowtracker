@@ -18,7 +18,11 @@ package com.coekie.flowtracker.weaver.flow;
 
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FrameNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
@@ -70,5 +74,18 @@ class FlowAnalyzer extends Analyzer<FlowValue> {
       throw new IllegalStateException("Instruction and frame index don't match");
     }
     return frame;
+  }
+
+  @Override
+  protected boolean newControlFlowExceptionEdge(int insnIndex, TryCatchBlockNode tryCatchBlock) {
+    AbstractInsnNode insn = method.instructions.get(insnIndex);
+    // optimization: these instructions can never throw, so do not analyze the code path from them
+    // to an exception handler. this reduces the number of merges we have to do. our merge handling
+    // is relatively slow. there are many more like that; but this already reduces the
+    // false-positive merges a lot.
+    if (insn instanceof LabelNode || insn instanceof FrameNode || insn instanceof VarInsnNode) {
+      return false;
+    }
+    return super.newControlFlowExceptionEdge(insnIndex, tryCatchBlock);
   }
 }
