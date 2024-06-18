@@ -36,7 +36,8 @@ public class TrackerUpdater {
     Tracker targetTracker;
     if (sourceTracker == null) {
       targetTracker = TrackerRepository.getTracker(context, target);
-      // unknown source and unknown target; nothing to do
+      // if both source and tracker are unknown, do nothing. creating a Tracker just to remember
+      // that we do not know where its contents comes from would be useless overhead.
       if (targetTracker == null) return;
     } else {
       targetTracker = TrackerRepository.getOrCreateTracker(context, target);

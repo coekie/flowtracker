@@ -71,7 +71,6 @@ public class StringHook {
       Context context = context();
       if (getStringTracker(context, target) == null
         // ignore the specifying of the debugUntracked string on the command line itself
-        // (but eventually that should be tracked too, see java.lang.ProcessingEnvironment)
         && !target.contains("debugUntracked")) {
         context.suspend();
         new Throwable("untracked").printStackTrace();
@@ -125,12 +124,14 @@ public class StringHook {
 
   @SuppressWarnings("unused") // used in CharAtValue
   public static TrackerPoint charAtTracker(String str, int index, Context context) {
+    Tracker tracker = getStringTracker(context, str);
+    if (tracker == null) {
+      return null;
+    }
     if (isLatin1(str)) {
-      Tracker tracker = getStringTracker(context, str);
-      return tracker == null ? null : TrackerPoint.of(tracker, index);
-    } else {
-      Tracker tracker = getStringTracker(context, str);
-      return tracker == null ? null : TrackerPoint.of(tracker, index * 2, 2);
+      return TrackerPoint.of(tracker, index);
+    } else { // non-latin1 Strings store their value as UTF-16, two bytes per character
+      return TrackerPoint.of(tracker, index * 2, 2);
     }
   }
 

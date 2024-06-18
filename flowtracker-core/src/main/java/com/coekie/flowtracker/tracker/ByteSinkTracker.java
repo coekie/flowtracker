@@ -16,10 +16,11 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
- * Tracker for writing to a sink of bytes.
+ * Tracker for writing to a sink of bytes, e.g. for an {@link OutputStream}.
  *
  * @see ByteOriginTracker
  * @see CharSinkTracker

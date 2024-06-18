@@ -17,15 +17,22 @@ package com.coekie.flowtracker.tracker;
  */
 
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.Channel;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+/**
+ * Associates {@link FileDescriptor}s to Trackers.
+ * Note that {@link FileDescriptor}s are used in {@link FileInputStream}, {@link FileOutputStream}
+ * and {@link Channel}s, so indirectly this associates trackers to those.
+ */
 public class FileDescriptorTrackerRepository {
   public static final String READ = "Read";
   public static final String WRITE = "Write";
 
-  // like TrackerRepository, ideally these would be concurrent weak identity hash maps?
   private static final Map<FileDescriptor, TrackerPair> map =
       Collections.synchronizedMap(new IdentityHashMap<>());
 
@@ -78,6 +85,10 @@ public class FileDescriptorTrackerRepository {
     map.put(fd, pair);
   }
 
+  /**
+   * Trackers for reading and writing to the same {@link FileDescriptor}. Both or only one could be
+   * set.
+   */
   private static class TrackerPair {
     private final ByteOriginTracker readTracker;
     private final ByteSinkTracker writeTracker;

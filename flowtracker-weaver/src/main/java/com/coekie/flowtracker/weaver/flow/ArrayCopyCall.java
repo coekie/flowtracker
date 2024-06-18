@@ -36,6 +36,8 @@ class ArrayCopyCall extends Instrumentable {
 
   @Override
   void instrument(FlowMethod methodNode) {
+    // our hook method has same name and signature as System.arraycopy, so we only adjust the call
+    // to point to our class
     mInsn.owner = "com/coekie/flowtracker/hook/SystemHook";
   }
 

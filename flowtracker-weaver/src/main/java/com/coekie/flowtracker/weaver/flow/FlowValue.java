@@ -107,8 +107,9 @@ abstract class FlowValue extends BasicValue {
    * it.
    * So e.g. `value1.mergeInPlace(MergedValue1)`, where MergedValue1 already contains value1,
    * returns MergedValue1. And this recurses, so that e.g.
-   * CopyValue(value1).mergeInPLace(CopyValue(MergedValue1))` (where the two CopyValues are caused
+   * CopyValue(value1).mergeInPlace(CopyValue(MergedValue1))` (where the two CopyValues are caused
    * by the same instruction) also returns CopyOf(MergedValue1).
+   * See {@link MergedValue} docs for an example.
    */
   final FlowValue mergeInPlace(FlowValue other) {
     // if one of them is a MergedValue, let that one handle it

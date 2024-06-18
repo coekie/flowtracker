@@ -25,11 +25,54 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LineNumberNode;
 
 /**
- * A value that can come from more than one source due to control flow (e.g. due to if-statements or
- * ternary operator).
+ * A {@link FlowValue} that can come from more than one source {@link FlowValue} depending on
+ * control flow (e.g. due to if-statements, loops, or ternary operator).
+ * <p>
+ * For example, consider code like this:
+ * <pre>{@code
+ * byte b;
+ * if (condition) {
+ *   b = value1;
+ * } else {
+ *   b = value2;
+ * }
+ * somethingElse();
+ * store(b);
+ * }</pre>
+ * At `b = value1()` the FlowValue for local variable `b` is CopyValue(value1), at `b = value2()`
+ * it's CopyValue(value2), and starting at the instruction/frame where the control flow converges,
+ * at `somethingElse()`, it is a `MergedValue` where {@link MergedValue#mergedValues()} contains
+ * those two values.
+ * <p>
+ * About {@link FlowValue#mergeInPlace(FlowValue)}: In the example above, while it is being
+ * analyzed, in a first pass that takes the first branch, at `somethingElse()` and `store(b)`, b
+ * could have CopyValue(value1). In a second pass that takes the other branch, the MergedValue is
+ * created at `somethingElse()`. Then at store(b) we have to merge the CopyValue(value1) that's
+ * still there from the first pass, with the MergedValue from the previous frame. We don't create a
+ * new MergedValue there, but mergeInPlace returns the existing MergedValue.
+ * <p>
+ * How do we instrument this; how do we know at the `store(b)` instruction where b came from?
+ * We create a local variable ({@link #pointTrackerLocal}), and assign the TrackerPoint to it at the
+ * creation of all {@link MergedValue#mergedValues()}, so at `b = value1` and `b = value2`.
+ * <p>
+ * Side note: For this example, this seems a bit overcomplicated. You could think that it would be
+ * simpler to associate the {@link #pointTrackerLocal} to the local variable (for every relevant
+ * local variable), instead of with places where values merge, so that we don't need to care about
+ * merges at all. But that doesn't handle the case when values on the stack get merged, e.g. with
+ * the ternary operator (`b = condition ? value1 : value2`).
  */
 class MergedValue extends FlowValue {
+  /**
+   * Frame where the merge happened. In the example above that is the frame for `somethingElse()`.
+   */
   private final FlowFrame mergingFrame;
+
+  /**
+   * Slot in the {@link #mergingFrame} where the merge happened. We use this to indirectly store the
+   * {@link #mergedValues()}. This indirection (as opposed to storing the mergedValues as a field
+   * in MergedValue directly) makes us able to handle loops, where a MergedValue (usually
+   * indirectly, through {@link CopyValue}s) points back to itself.
+   */
   private final MergeSlot slot;
   private boolean tracked;
 
@@ -92,8 +135,8 @@ class MergedValue extends FlowValue {
       value.loadSourcePoint(toInsert, NullFallbackSource.INSTANCE);
       toInsert.add(pointTrackerLocal.store());
 
-      // avoid inserting between a label and a frame; because for verification to succeed the frame
-      // must stay right after the label.
+      // avoid inserting instructions between a label and a frame; because for verification to
+      // succeed the frame must stay right after the label if it's a jump target.
       AbstractInsnNode insertAfter = value.getCreationInsn();
       while (insertAfter.getNext() instanceof FrameNode
           || insertAfter.getNext() instanceof LineNumberNode) {
@@ -146,8 +189,8 @@ class MergedValue extends FlowValue {
 
   /**
    * Combine two values into a MergedValue. Returns null if the values can't be merged.
-   * Note: This is only called if we actually need a MergedValue; if the values can't be merged
-   * in-place.
+   * This is only called if we actually need a MergedValue; if the values can't be merged
+   * {@link FlowValue#mergeInPlace(FlowValue) in-place}.
    */
   static MergedValue merge(Type type, FlowFrame mergingFrame, FlowValue value1, FlowValue value2) {
     MergeSlot slot = MergeSlot.findMergeSlot(mergingFrame, value1);
@@ -156,8 +199,9 @@ class MergedValue extends FlowValue {
       mergedValues.add(value1);
       mergedValues.add(value2);
     } else { // merge more into an existing merge
-      // TODO remove this to handle merges of merges.
-      //  skip that case for now because this triggers some bugs (VerifyErrors)
+      // TODO we're skipping handling merges of merges for now, because this triggers some bugs
+      //  (VerifyErrors). Note that we _do_ handle e.g. merges of CopyValues of merges, so we do
+      //  handle some complex control flows, but not all of them.
       if ((value1 instanceof MergedValue && !isThisMerge(slot, value1))
         || (value2 instanceof MergedValue && !isThisMerge(slot, value2))) {
         return null;

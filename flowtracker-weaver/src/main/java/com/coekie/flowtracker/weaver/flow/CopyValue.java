@@ -20,8 +20,10 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 
 /**
- * A value that got copied (e.g. put in a local variable, or loaded onto the stack). We use this to
- * find which instructions a value came from in {@link MergedValue}.
+ * A value that got copied (e.g. stored from the stack into a local variable, or loaded from a
+ * variable onto the stack, or the result of a DUP instruction,...).
+ * <p>
+ * We use this to find which instructions a value came from in {@link MergedValue}.
  */
 class CopyValue extends FlowValue {
   private final FlowValue original;

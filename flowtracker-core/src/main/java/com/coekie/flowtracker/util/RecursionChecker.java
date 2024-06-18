@@ -19,7 +19,8 @@ package com.coekie.flowtracker.util;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Helper to debug some nasty recursions problems caused by our instrumentation.
+ * Helper to debug some nasty recursions problems caused by our instrumentation, that occasionally
+ * pop up when adding new types of instrumentation.
  * Without help those can be hard to debug, because they can also break the ability to print errors,
  * StackOverflowErrors are created without stacktraces, and we've had a couple heisenbugs where they
  * only happen if there is no debugger attached.

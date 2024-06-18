@@ -16,10 +16,11 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 /**
- * Tracker for reading from a source of bytes.
+ * Tracker for reading from a source of bytes, e.g. for an {@link InputStream}s.
  *
  * @see CharOriginTracker
  * @see ByteSinkTracker
@@ -34,15 +35,6 @@ public class ByteOriginTracker extends OriginTracker implements ByteContentTrack
   public void append(byte[] cbuf, int offset, int len) {
     content.write(cbuf, offset, len);
   }
-
-  // TODO show content of ByteOriginTracker in UI
-//  @Override public boolean supportsContent() {
-//    return true;
-//  }
-//
-//  @Override public CharSequence getContent() {
-//    return content;
-//  }
 
   public ByteBuffer getByteContent() {
     return content.getByteContent();
