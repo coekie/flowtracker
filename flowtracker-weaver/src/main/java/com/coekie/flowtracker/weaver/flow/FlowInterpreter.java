@@ -176,16 +176,13 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       throws AnalyzerException {
     switch (aInsn.getOpcode()) {
       case Opcodes.CALOAD: {
-        InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(method, insn, Type.CHAR_TYPE);
+        return new ArrayLoadValue(method, (InsnNode) aInsn, Type.CHAR_TYPE);
       }
       case Opcodes.BALOAD: {
-        InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(method, insn, Type.BYTE_TYPE);
+        return new ArrayLoadValue(method, (InsnNode) aInsn, Type.BYTE_TYPE);
       }
       case Opcodes.IALOAD: {
-        InsnNode insn = (InsnNode) aInsn;
-        return new ArrayLoadValue(method, insn, Type.INT_TYPE);
+        return new ArrayLoadValue(method, (InsnNode) aInsn, Type.INT_TYPE);
       }
       case Opcodes.IAND:
       case Opcodes.LAND: {
@@ -197,7 +194,8 @@ class FlowInterpreter extends Interpreter<FlowValue> {
         }
       }
       case Opcodes.IUSHR:
-      case Opcodes.LUSHR: { // >>>
+      case Opcodes.LUSHR: {
+        // treat `x >>> constant` as having the same source as x.
         // for e.g. DataOutputStream.writeShort/writeChar, Bits.putShort/putInt (in older jdks)
         if (value2 instanceof ConstantValue) {
           return value1;

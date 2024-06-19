@@ -16,6 +16,7 @@ package com.coekie.flowtracker.weaver;
  * limitations under the License.
  */
 
+import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.annotation.HookLocation;
 import com.coekie.flowtracker.tracker.Invocation;
 import java.util.ArrayList;
@@ -27,11 +28,24 @@ import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+/**
+ * A HookSpec specifies the way we want to hook a particular method; that is adding a call to a
+ * method in a _hook_ class at the start or end of it.
+ * <p>
+ * In practice, HookSpecs are created through annotations: every {@link Hook} annotation creates one
+ * HookSpec instance.
+ */
 class HookSpec {
+  /** Specifies an argument that should be passed into a hook method. */
   interface HookArgument {
     HookArgumentInstance applyTo(HookSpec hookSpec);
   }
 
+  /**
+   * A HookArgument applied to a specific method. A HookArgumentInstance can be stateful/mutable;
+   * concretely the {@link #onMethodEnter(GeneratorAdapter)} may create a local variable that is
+   * later used in {@link #load(GeneratorAdapter)}.
+   */
   interface HookArgumentInstance {
     /**
      * Add code at the start of the method (optional).
@@ -160,6 +174,10 @@ class HookSpec {
     }
   };
 
+  /**
+   * Does the actual instrumentation that the {@link HookSpec} describes: adds the call to the hook
+   * method in the original method.
+   */
   private class HookMethodAdapter extends AdviceAdapter {
     private final List<HookArgumentInstance> argumentInstances = createArgumentInstance();
 

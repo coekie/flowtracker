@@ -160,8 +160,11 @@ public class Invocation {
    * method invocation.
    * The problem is that the loading and initialization can happen between when the caller calls
    * {@link #calling(Context)} and when the callee calls {@link #start(Context, String)}. And it may
-   * involve other method calls that use Invocation. Since we only keep track of one pending call,
-   * this means class loading would make us forget about the pending call.
+   * involve other method calls that use Invocation.
+   * For example, calling `SomeClass.foo()` may not immediately call `foo`, but first calls methods
+   * in the ClassLoader, and transformers like flowtracker, and `SomeClass.&lt;clinit&gt;`.
+   * Since we only keep track of one pending call, this means class loading would make us forget
+   * about the pending call.
    * We solve that by, when class loading is triggered, removing the current pending call, and
    * restoring it when class loading has finished.
    */

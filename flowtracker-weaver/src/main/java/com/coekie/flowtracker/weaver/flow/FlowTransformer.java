@@ -282,7 +282,7 @@ public class FlowTransformer implements Transformer {
     TrackLocal newLocal(Type type, List<AbstractInsnNode> initialValue, int maxStack,
         String sourceForComment) {
       TrackLocal local = new TrackLocal(type, varSorter.newLocal(type));
-      // initialize the variable to -1 at the start of the method
+      // initialize the variable to initialValue at the start of the method
       // NICE only initialize when necessary (if there is a jump, or it is read before it is first
       //  written to)
       addComment(intro, "Initialize newLocal %s", sourceForComment);

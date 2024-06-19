@@ -44,7 +44,7 @@ public class TrackTestHelper {
     return result;
   }
 
-  /** Create a char array without tracking (by a {@link FixedOriginTracker}) */
+  /** Create a char array without tracking */
   public static char[] untrackedCharArray(String str) {
     char[] result = str.toCharArray();
     TrackerRepository.removeTracker(result);
