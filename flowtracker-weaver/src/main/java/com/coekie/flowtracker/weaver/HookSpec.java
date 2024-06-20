@@ -274,7 +274,7 @@ class HookSpec {
       if (!canAssign(givenType, hookArgTypes[i])) {
         throw new IllegalStateException("Cannot assign " + givenType + " to " + hookArgTypes[i]
             + " for " + this + " arg " + i);
-      };
+      }
     }
   }
 

@@ -51,6 +51,7 @@
           <appendAssemblyId>false</appendAssemblyId>
           <archive>
             <manifestEntries>
+              <Main-Class>com.coekie.flowtracker.agent.Main</Main-Class>
               <Premain-Class>com.coekie.flowtracker.agent.FlowTrackAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>

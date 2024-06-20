@@ -35,6 +35,13 @@ import java.util.jar.JarFile;
 public class CoreInitializer {
 
   /**
+   * JVM options that need to be set for flowtracker to work properly.
+   */
+  // note: we keep this as a single string on one long line here to make this easier to copy-paste
+  // keep this in sync with pom.xml
+  public static final String JVM_OPTS = "-XX:-UseStringDeduplication -XX:+UnlockDiagnosticVMOptions -XX:DisableIntrinsic=_copyOf -XX:DisableIntrinsic=_copyOfRange -XX:DisableIntrinsic=_String_String -XX:DisableIntrinsic=_StringBuilder_String -XX:DisableIntrinsic=_StringBuilder_append_char -XX:DisableIntrinsic=_StringBuilder_append_String -XX:DisableIntrinsic=_StringBuilder_toString -XX:DisableIntrinsic=_inflateStringC -XX:DisableIntrinsic=_inflateStringB -XX:DisableIntrinsic=_toBytesStringU -XX:DisableIntrinsic=_getCharsStringU -XX:DisableIntrinsic=_getCharStringU -XX:DisableIntrinsic=_putCharStringU -XX:DisableIntrinsic=_compressStringC -XX:DisableIntrinsic=_compressStringB -XX:DisableIntrinsic=_encodeByteISOArray";
+
+  /**
    * Initialization before the weaver is installed
    */
   public static void preInitialize(Config config) {
@@ -71,7 +78,7 @@ public class CoreInitializer {
   @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
   public static void postInitialize(Config config) {
     ShutdownSuspender.initShutdownHook(config.getBoolean("suspendShutdown", false));
-    verifyJvmArgs();
+    verifyJvmArgs(config);
   }
 
   /**
@@ -79,16 +86,18 @@ public class CoreInitializer {
    * (I added this check because I've wasted too much time debugging issues where something was
    * unexpectedly not tracked because I forgot this).
    */
-  private static void verifyJvmArgs() {
-    // note: we keep this as a single string on one long line here to make this easier to copy-paste
-    // keep this in sync with pom.xml
-    String expectedJvmArgsString = "-XX:-UseStringDeduplication -XX:+UnlockDiagnosticVMOptions -XX:DisableIntrinsic=_copyOf -XX:DisableIntrinsic=_copyOfRange -XX:DisableIntrinsic=_String_String -XX:DisableIntrinsic=_StringBuilder_String -XX:DisableIntrinsic=_StringBuilder_append_char -XX:DisableIntrinsic=_StringBuilder_append_String -XX:DisableIntrinsic=_StringBuilder_toString -XX:DisableIntrinsic=_inflateStringC -XX:DisableIntrinsic=_inflateStringB -XX:DisableIntrinsic=_toBytesStringU -XX:DisableIntrinsic=_getCharsStringU -XX:DisableIntrinsic=_getCharStringU -XX:DisableIntrinsic=_putCharStringU -XX:DisableIntrinsic=_compressStringC -XX:DisableIntrinsic=_compressStringB -XX:DisableIntrinsic=_encodeByteISOArray";
-    String[] expectedJvmArgs = expectedJvmArgsString.split(" ");
+  private static void verifyJvmArgs(Config config) {
+    if (config.getBoolean("bypassJvmArgsCheck", false)) {
+      return;
+    }
+    String[] expectedJvmArgs = JVM_OPTS.split(" ");
     Set<String> givenJvmArgs =
         new HashSet<>(ManagementFactory.getRuntimeMXBean().getInputArguments());
     for (String expectedJvmArg : expectedJvmArgs) {
       if (!givenJvmArgs.contains(expectedJvmArg)) {
-        throw new Error("JVM should be started with: " + expectedJvmArgsString + "\n"
+        throw new Error("JVM should be started with a list of options to disable JVM "
+            + "optimizations that disrupt flowtracker.\n"
+            + "See usage information using `java -jar flowtracker.jar`\n"
             + "Not found: " + expectedJvmArg);
       }
     }

@@ -20,6 +20,11 @@
     </dependency>
   </dependencies>
   <build>
+    <resources>
+      <resource>
+        <directory>target/generated-resources/usage</directory>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -27,12 +32,38 @@
         <configuration>
           <archive>
             <manifestEntries>
+              <Main-Class>com.coekie.flowtracker.agent.Main</Main-Class>
               <Premain-Class>com.coekie.flowtracker.agent.FlowTrackAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
             </manifestEntries>
           </archive>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.7</version>
+        <executions>
+          <execution>
+            <id>copy-usage</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/generated-resources/usage</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/..</directory>
+                  <includes>
+                    <include>USAGE.md</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
