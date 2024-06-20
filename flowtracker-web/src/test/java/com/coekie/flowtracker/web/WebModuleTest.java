@@ -27,7 +27,7 @@ public class WebModuleTest {
 
     // entry point
     String index = get("/");
-    assertThat(index).contains("<title>Flowtracker</title>");
+    assertThat(index).contains("<title>FlowTracker</title>");
 
     // static files
     assertThat(get("/folder.svg")).contains("<svg");

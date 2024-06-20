@@ -49,7 +49,7 @@ public class FlowTrackAgent {
     }
     String path = url.getPath();
     if (!"jar".equals(url.getProtocol()) || !path.startsWith("file:/")) {
-      throw new IllegalStateException("Flowtracker not launched from jar file: " + url);
+      throw new IllegalStateException("FlowTracker not launched from jar file: " + url);
     }
     return new JarFile(path.substring("file:".length(), path.indexOf("!")));
   }
