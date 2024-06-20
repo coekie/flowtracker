@@ -207,7 +207,7 @@
         <button
           class="toggle-creation"
           on:click={() => (showCreation = !showCreation)}
-          title='Toggle creation stacktrace'
+          title="Toggle creation stacktrace"
         />
       {/if}
     </div>
