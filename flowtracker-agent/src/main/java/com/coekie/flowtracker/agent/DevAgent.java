@@ -31,8 +31,8 @@ public class DevAgent {
   public static void premain(String agentArgs, Instrumentation inst) {
     try {
       // for DevAgent the manifest already puts flowtracker-core on the bootstrap classpath,
-      // so unlike FlowTrackAgent, we don't need to do appendToBootstrapClassLoaderSearch here.
-      JarFile agentJar = FlowTrackAgent.getAgentJar();
+      // so unlike FlowTrackerAgent, we don't need to do appendToBootstrapClassLoaderSearch here.
+      JarFile agentJar = FlowTrackerAgent.getAgentJar();
       new Phase2().premain2(agentArgs, inst, agentJar);
     } catch (Throwable e) {
       e.printStackTrace();
@@ -40,7 +40,7 @@ public class DevAgent {
     }
   }
 
-  static class Phase2 extends FlowTrackAgent.Phase2 {
+  static class Phase2 extends FlowTrackerAgent.Phase2 {
     @Override
     public ClassLoader createSpiderClassLoader(Instrumentation inst, JarFile agentJar,
         Config config) throws IOException {

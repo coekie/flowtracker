@@ -27,7 +27,7 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.jar.JarFile;
 
-public class FlowTrackAgent {
+public class FlowTrackerAgent {
   public static void premain(String agentArgs, Instrumentation inst) {
     try {
       JarFile agentJar = getAgentJar();
@@ -55,7 +55,7 @@ public class FlowTrackAgent {
   }
 
   /**
-   * Second phase of starting of the agent. This is in a separate class, so that FlowTrackAgent
+   * Second phase of starting of the agent. This is in a separate class, so that FlowTrackerAgent
    * itself doesn't have references to classes from flowtracker-core that need to be put on the
    * bootstrap classpath _before_ they get loaded.
    */

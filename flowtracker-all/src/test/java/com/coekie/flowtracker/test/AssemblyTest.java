@@ -2,7 +2,7 @@ package com.coekie.flowtracker.test;
 
 import static org.junit.Assert.fail;
 
-import com.coekie.flowtracker.agent.FlowTrackAgent;
+import com.coekie.flowtracker.agent.FlowTrackerAgent;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 
 /**
- * Test for the assembly, and for {@link FlowTrackAgent}'s
+ * Test for the assembly, and for {@link FlowTrackerAgent}'s
  * handling of it
  */
 public class AssemblyTest {

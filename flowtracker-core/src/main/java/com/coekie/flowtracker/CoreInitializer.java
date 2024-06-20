@@ -75,7 +75,7 @@ public class CoreInitializer {
    * Initialize the shutdown hook. This is initialized later, to avoid having a hanging shutdown
    * hook without a UI available to stop it if initialization fails.
    */
-  @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
+  @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackerAgent
   public static void postInitialize(Config config) {
     ShutdownSuspender.initShutdownHook(config.getBoolean("suspendShutdown", false));
     verifyJvmArgs(config);

@@ -23,7 +23,7 @@ import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackAgent
+@SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackerAgent
 public class WeaverInitializer {
   public static void initialize(Instrumentation inst, Config config) throws Exception {
     // avoid ClassCircularityErrors: Make sure these hook classes are loaded before we start
