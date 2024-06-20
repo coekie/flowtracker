@@ -28,13 +28,13 @@ Supported configuration options:
 * `trackCreation`: Every time a tracker is created that appears in the tree (most sinks and origins), collect a stacktrace dump. This stacktrace can be seen in the UI by clicking on the small button on the top right. This can be useful to see where in the application some input or output was triggered (Default: false)
 * `logging`: Log FlowTracker info messages to stderr. Note that error logging is always enabled. (Default: false)
 * `filter`: Specifies which classes to instrument. Comma-separated list of inclusions (starting with +) or exclusions (starting with -).
-  There's a recommended base of classes to instrument or not (of the JDK itself) that can (and is highly recommended to) be referred to using %recommended.
-  Mostly useful to exclude classes that break when instrumented. e.g. `%recommended,-exclude.this.package.*,+*` (Default: `%recommended,+*`)
+  There's a recommended base of classes to instrument or not (of the JDK itself) that can (and is highly recommended to) be referred to using %base.
+  Mostly useful to exclude classes that break when instrumented. e.g. `%base,-exclude.this.package.*,+*` (Default: `%base,+*`)
 * `breakStringInterning`: Similar to `filter`, instrumented classes where it is ok to break String interning.
   To track Strings that appear as String literals in the code, FlowTrackers undoes the interning of Strings that the JVM does.
   That can cause some libraries that depend on the interning to break.
   Those can be excluded with this option.
-  (Default: `%recommended,+*`)
+  (Default: `%base,+*`)
 * hideInternals: Disable tracking for some uninteresting internal operations that add noise, such as reading of .class files by ClassLoaders (Default: true)
 
 These options are meant for FlowTracker development/debugging only:

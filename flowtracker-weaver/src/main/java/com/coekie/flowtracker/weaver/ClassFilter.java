@@ -27,11 +27,11 @@ import java.util.List;
  * Comma-separated list of rules. Rules can either start with a '+' to include some classes
  * or with '-' to exclude them. A rule ending with a '*' indicates the prefix should match, or else
  * the complete name must match.
- * A rule value of '%recommended' means the recommended rules.
+ * A rule value of '%base' means the recommended rules.
  * For inner classes, rules are applied to the outer class. So including 'foo.Bar' includes
  * 'foo.Bar' and all its inner classes.
  * <p>
- * For example '-foo.Bar,+foo.*,%recommended,-*' means don't apply it to 'foo.Bar', apply it to
+ * For example '-foo.Bar,+foo.*,%base,-*' means don't apply it to 'foo.Bar', apply it to
  * everything else in the foo package (and subpackages), apply it recommended classes, don't apply
  * it to anything else.
  */
@@ -61,7 +61,7 @@ public class ClassFilter {
     List<Rule> rules = new ArrayList<>();
 
     for (String str : rulesStr.split(",")) {
-      if (str.equals("%recommended")) {
+      if (str.equals("%base")) {
         rules.addAll(parseRules(requireNonNull(recommended), null));
       } else {
         boolean include;

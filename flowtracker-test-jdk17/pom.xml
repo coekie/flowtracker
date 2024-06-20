@@ -57,7 +57,7 @@
           <!-- For cleaner debugging environment, but slower: -->
           <!--<reuseForks>false</reuseForks>-->
           <argLine>
-            -javaagent:../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=webmodule=false;filter=%recommended,+com.coekie.flowtracker.test.*;trackOutputStreamWriter=true;${flowtracker.extraAgentArgs}
+            -javaagent:../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=webmodule=false;filter=%base,+com.coekie.flowtracker.test.*;trackOutputStreamWriter=true;${flowtracker.extraAgentArgs}
             ${flowtracker.jvmArgs}
           </argLine>
           <!-- These should not be on the app classpath; the agent should take care of getting this on the classpath (bootstrap classpath and for spider classloader) -->

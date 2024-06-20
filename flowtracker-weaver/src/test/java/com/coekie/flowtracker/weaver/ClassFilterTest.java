@@ -35,7 +35,7 @@ public class ClassFilterTest {
   @Test
   public void testRecommended() {
     String recommended = "+foo*,-bar*";
-    ClassFilter filter = new ClassFilter("-foo.override,+bar.override,%recommended", recommended);
+    ClassFilter filter = new ClassFilter("-foo.override,+bar.override,%base", recommended);
     assertThat(filter.include("foo/A")).isTrue();
     assertThat(filter.include("bar/B")).isFalse();
     assertThat(filter.include("foo/override")).isFalse();

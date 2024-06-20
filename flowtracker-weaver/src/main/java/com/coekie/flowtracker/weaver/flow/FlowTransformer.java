@@ -79,7 +79,7 @@ public class FlowTransformer implements Transformer {
     this.commentator = commentator;
     this.listener = listener;
     this.breakStringInterningFilter = new ClassFilter(
-        config.get("breakStringInterning", "%recommended,+*"),
+        config.get("breakStringInterning", "%base,+*"),
         // by default, we don't break String interning in most JDK classes, because some of them
         // depend on interning to work. we don't do that for other libraries, so this probably
         // breaks some libraries.
