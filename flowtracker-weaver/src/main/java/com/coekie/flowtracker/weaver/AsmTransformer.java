@@ -40,7 +40,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 class AsmTransformer implements ClassFileTransformer {
   private static final Logger logger = new Logger("AsmTransformer");
-  private static final String RECOMMENDED_FILTER = "+java.util.Arrays,"
+  private static final String BASE_FILTER = "+java.util.Arrays,"
       + "+java.lang.String*," // String and friends like StringBuilder, StringLatin1
       + "+java.lang.AbstractStringBuilder,"
       + "+java.lang.Character,"
@@ -65,12 +65,12 @@ class AsmTransformer implements ClassFileTransformer {
       + "+java.net.SocketOutputStream," // JDK 11
       + "+java.net.Socket,"
       + "+java.lang.ClassLoader,"
-      + "+com.sun.org.apache.xerces.*,"
       + "-jdk.internal.misc.Unsafe,"
       + "-java.lang.CharacterData*," // seems to break the debugger sometimes?
       // causes ClassCircularityError when running with -Xverify:all, because it is used indirectly
       // by Modules.transformedByAgent
       + "-java.lang.WeakPairMap*";
+  // equivalent to `%base,+*` but simpler
   private static final String DEFAULT_FILTER = "-java.lang.CharacterData*,"
       + "-jdk.internal.misc.Unsafe,"
       + "-java.lang.WeakPairMap*,"
@@ -85,7 +85,7 @@ class AsmTransformer implements ClassFileTransformer {
   private final FlowTransformer flowTransformer;
 
   public AsmTransformer(Config config) {
-    toInstrumentFilter = new ClassFilter(config.get("filter", DEFAULT_FILTER), RECOMMENDED_FILTER);
+    toInstrumentFilter = new ClassFilter(config.get("filter", DEFAULT_FILTER), BASE_FILTER);
     dumpByteCodePath = config.containsKey("dumpByteCode")
         ? new File(config.get("dumpByteCode"))
         : null;
