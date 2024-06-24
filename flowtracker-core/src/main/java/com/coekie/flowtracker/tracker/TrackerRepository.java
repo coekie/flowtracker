@@ -35,26 +35,27 @@ public class TrackerRepository {
     return tracker;
   }
 
-  public static Tracker createTracker(Context context, Object obj) {
-    Tracker tracker = new DefaultTracker();
-    setTracker(context, obj, tracker);
-    return tracker;
-  }
-
   public static Tracker getOrCreateTracker(Context context, Object obj) {
     if (!context.isActive()) return null;
-    Tracker tracker = forceGetTracker(context, obj);
-    return tracker == null ? createTracker(context, obj) : tracker;
+    Tracker existingTracker = forceGetTracker(context, obj);
+    if (existingTracker != null) {
+      return existingTracker;
+    }
+    Tracker newTracker = new DefaultTracker();
+    Tracker existingTracker2 = objectToTracker.putIfAbsent(obj, newTracker);
+    if (existingTracker2 != null) { // race condition, tracker created concurrently
+      return existingTracker2;
+    }
+    overwriteCachedTracker(context, obj, newTracker);
+    return newTracker;
   }
 
   public static void setTracker(Context context, Object obj, Tracker tracker) {
     if (obj == null) {
       throw new NullPointerException("Can't track null");
     } else {
-      Tracker existingTracker = objectToTracker.put(obj, tracker);
+      Tracker existingTracker = objectToTracker.putIfAbsent(obj, tracker);
       if (existingTracker != null) {
-        // FIXME race condition: two threads could try to create tracker for same obj at same time.
-        //  use Map.putIfAbsent in getOrCreateTracker?
         throw new IllegalStateException("Object already has a tracker: " + obj
             + " has " + getTracker(context, obj));
       }
