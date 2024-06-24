@@ -26,7 +26,7 @@ import com.coekie.flowtracker.tracker.CharContentTracker;
 import com.coekie.flowtracker.tracker.CharSinkTracker;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.DefaultTracker;
-import com.coekie.flowtracker.tracker.FixedOriginTracker;
+import com.coekie.flowtracker.tracker.FakeOriginTracker;
 import com.coekie.flowtracker.tracker.Growth;
 import com.coekie.flowtracker.tracker.OriginTracker;
 import com.coekie.flowtracker.tracker.Simplifier;
@@ -290,8 +290,8 @@ public class TrackerResource {
       slice.position(start);
       slice.limit(end);
       return escape(slice);
-    } else if (tracker instanceof FixedOriginTracker) {
-      return "<not implemented>";
+    } else if (tracker instanceof FakeOriginTracker) {
+      return "<fake>";
     } else {
       return null;
     }
@@ -304,7 +304,7 @@ public class TrackerResource {
     } else if (tracker instanceof ByteContentTracker) {
       ByteContentTracker byteTracker = (ByteContentTracker) tracker;
       return byteTracker.getContent().size();
-    } else if (tracker instanceof FixedOriginTracker) {
+    } else if (tracker instanceof FakeOriginTracker) {
       return tracker.getLength();
     } else {
       return 0;

@@ -10,8 +10,8 @@ public class TrackerTest {
   private Tracker source, source2, target, middleman;
 
   @Before public void setupSource() {
-    source = new FixedOriginTracker(1000);
-    source2 = new FixedOriginTracker(1000);
+    source = new FakeOriginTracker(1000);
+    source2 = new FakeOriginTracker(1000);
     target = new DefaultTracker();
     middleman = new DefaultTracker();
   }

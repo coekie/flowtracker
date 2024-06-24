@@ -13,7 +13,7 @@ public class ByteArrayInputStreamTest extends AbstractInputStreamTest {
   @Override
   InputStream createInputStream(byte[] bytes) {
     byte[] copy = Arrays.copyOf(bytes, bytes.length);
-    TrackerRepository.createFixedOriginTracker(copy, copy.length);
+    TrackerRepository.createFakeOriginTracker(copy, copy.length);
     return new MyByteArrayInputStream(copy);
   }
 

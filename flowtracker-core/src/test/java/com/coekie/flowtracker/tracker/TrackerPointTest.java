@@ -10,7 +10,7 @@ public class TrackerPointTest {
 
   @Before
   public void setupSource() {
-    source = new FixedOriginTracker(1000);
+    source = new FakeOriginTracker(1000);
   }
 
   @Test

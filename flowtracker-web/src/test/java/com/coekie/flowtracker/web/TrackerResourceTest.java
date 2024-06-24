@@ -8,7 +8,7 @@ import com.coekie.flowtracker.tracker.ByteSinkTracker;
 import com.coekie.flowtracker.tracker.CharOriginTracker;
 import com.coekie.flowtracker.tracker.CharSinkTracker;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.tracker.FixedOriginTracker;
+import com.coekie.flowtracker.tracker.FakeOriginTracker;
 import com.coekie.flowtracker.tracker.Growth;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerTree;
@@ -28,8 +28,8 @@ public class TrackerResourceTest {
     CharSinkTracker tracker = new CharSinkTracker();
     InterestRepository.register(tracker);
 
-    Tracker sourceTracker1 = new FixedOriginTracker(3);
-    Tracker sourceTracker2 = new FixedOriginTracker(3);
+    Tracker sourceTracker1 = new FakeOriginTracker(3);
+    Tracker sourceTracker2 = new FakeOriginTracker(3);
 
     // content: abcdefgh
     // index:   0123456
@@ -58,8 +58,8 @@ public class TrackerResourceTest {
     ByteSinkTracker tracker = new ByteSinkTracker();
     InterestRepository.register(tracker);
 
-    Tracker sourceTracker1 = new FixedOriginTracker(3);
-    Tracker sourceTracker2 = new FixedOriginTracker(3);
+    Tracker sourceTracker1 = new FakeOriginTracker(3);
+    Tracker sourceTracker2 = new FakeOriginTracker(3);
 
     // content: abcdefgh
     // index:   0123456
@@ -140,7 +140,7 @@ public class TrackerResourceTest {
     ByteSinkTracker tracker = new ByteSinkTracker();
     InterestRepository.register(tracker);
 
-    Tracker sourceTracker = new FixedOriginTracker(3);
+    Tracker sourceTracker = new FakeOriginTracker(3);
 
     tracker.append("ab".getBytes(), 0, 2); // gap, no source tracker
     tracker.append("cde".getBytes(), 0, 3);

@@ -36,7 +36,7 @@ public class AssemblyTest {
 
   @Test public void simpleTrackingTest() {
     char[] a = new char['a'];
-    Tracker aTracker = TrackerRepository.createFixedOriginTracker(a, a.length);
+    Tracker aTracker = TrackerRepository.createFakeOriginTracker(a, a.length);
     char[] copy = Arrays.copyOf(a, a.length);
     TrackerSnapshot.assertThatTrackerOf(copy).matches(TrackerSnapshot.snapshot().part(aTracker));
   }

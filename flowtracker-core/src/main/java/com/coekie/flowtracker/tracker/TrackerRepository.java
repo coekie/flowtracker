@@ -29,8 +29,8 @@ public class TrackerRepository {
     return forceGetTracker(context, obj);
   }
 
-  public static Tracker createFixedOriginTracker(Object obj, int length) {
-    Tracker tracker = new FixedOriginTracker(length);
+  public static Tracker createFakeOriginTracker(Object obj, int length) {
+    Tracker tracker = new FakeOriginTracker(length);
     forceSetTracker(obj, tracker);
     return tracker;
   }

@@ -6,8 +6,8 @@ import com.google.common.truth.Truth;
 import org.junit.Test;
 
 public class SimplifierTest {
-  private final Tracker source = new FixedOriginTracker(1000);
-  private final Tracker source2 = new FixedOriginTracker(1000);
+  private final Tracker source = new FakeOriginTracker(1000);
+  private final Tracker source2 = new FakeOriginTracker(1000);
 
   @Test
   public void testSimpleMerge() {

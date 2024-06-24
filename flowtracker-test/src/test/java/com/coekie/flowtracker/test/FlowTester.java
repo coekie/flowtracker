@@ -2,7 +2,7 @@ package com.coekie.flowtracker.test;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.coekie.flowtracker.tracker.FixedOriginTracker;
+import com.coekie.flowtracker.tracker.FakeOriginTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 
@@ -20,7 +20,7 @@ class FlowTester {
   private final int length;
 
   public FlowTester() {
-    this.tracker = new FixedOriginTracker(-1);
+    this.tracker = new FakeOriginTracker(-1);
     this.index = 42;
     // in practice this is usually 1 (or else normally at most 2 or 4). we're using a particular
     // higher value here to help spot places where the length of a point isn't correctly passed

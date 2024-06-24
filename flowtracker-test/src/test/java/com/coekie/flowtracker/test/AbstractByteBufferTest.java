@@ -5,7 +5,7 @@ import static com.coekie.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.coekie.flowtracker.tracker.FixedOriginTracker;
+import com.coekie.flowtracker.tracker.FakeOriginTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
@@ -182,7 +182,7 @@ public abstract class AbstractByteBufferTest {
   }
 
   /**
-   * Create a heap (non-direct) ByteBuffer tracked by a {@link FixedOriginTracker}.
+   * Create a heap (non-direct) ByteBuffer tracked by a {@link FakeOriginTracker}.
    */
   ByteBuffer createTrackedHeapBuffer(int capacity) {
     return ByteBuffer.wrap(TrackTestHelper.trackedByteArray("x".repeat(capacity)));

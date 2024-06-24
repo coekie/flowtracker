@@ -4,7 +4,7 @@ import static com.coekie.flowtracker.tracker.Context.context;
 import static com.coekie.flowtracker.weaver.TransformerTestUtils.transformAndRun;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.coekie.flowtracker.tracker.FixedOriginTracker;
+import com.coekie.flowtracker.tracker.FakeOriginTracker;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class SuspendInvocationTransformerTest {
     called = false;
 
     Invocation suspendedInvocation = Invocation.create("should get suspended")
-        .setArg(0, TrackerPoint.of(new FixedOriginTracker(1000), 777))
+        .setArg(0, TrackerPoint.of(new FakeOriginTracker(1000), 777))
         .calling(context());
     transformAndRun(transformer, Type.getType(SuspendInvocationTransformerTestSubject.class));
     assertThat(called).isTrue();

@@ -48,8 +48,8 @@ public class StringHook {
     return TrackerRepository.getTracker(context, getValueArray(str));
   }
 
-  public static void createFixedOriginTracker(String str) {
-    TrackerRepository.createFixedOriginTracker(getValueArray(str), str.length());
+  public static void createFakeOriginTracker(String str) {
+    TrackerRepository.createFakeOriginTracker(getValueArray(str), str.length());
   }
 
   public static void removeTracker(String str) {

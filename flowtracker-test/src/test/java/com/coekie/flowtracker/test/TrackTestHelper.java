@@ -5,7 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.hook.StringHook;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.tracker.FixedOriginTracker;
+import com.coekie.flowtracker.tracker.FakeOriginTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
@@ -20,27 +20,27 @@ import java.util.function.Predicate;
 public class TrackTestHelper {
 
   /**
-   * Returns a copy of the given String, which will be tracked (by a {@link FixedOriginTracker}).
+   * Returns a copy of the given String, which will be tracked (by a {@link FakeOriginTracker}).
    * <p>
    * We create a copy to avoid interference from other usage of the same (interned) String.
    */
   public static String trackCopy(String str) {
     str = new String(str.toCharArray());
-    StringHook.createFixedOriginTracker(str);
+    StringHook.createFakeOriginTracker(str);
     return str;
   }
 
-  /** Create a tracked char array, with the given length (by a {@link FixedOriginTracker}) */
+  /** Create a tracked char array, with the given length (by a {@link FakeOriginTracker}) */
   public static char[] trackedCharArrayWithLength(int length) {
     char[] result = new char[length];
-    TrackerRepository.createFixedOriginTracker(result, length);
+    TrackerRepository.createFakeOriginTracker(result, length);
     return result;
   }
 
-  /** Create a tracked char array (by a {@link FixedOriginTracker}) */
+  /** Create a tracked char array (by a {@link FakeOriginTracker}) */
   public static char[] trackedCharArray(String str) {
     char[] result = str.toCharArray();
-    TrackerRepository.createFixedOriginTracker(result, result.length);
+    TrackerRepository.createFakeOriginTracker(result, result.length);
     return result;
   }
 
@@ -51,10 +51,10 @@ public class TrackTestHelper {
     return result;
   }
 
-  /** Create a tracked byte array (by a {@link FixedOriginTracker}) */
+  /** Create a tracked byte array (by a {@link FakeOriginTracker}) */
   public static byte[] trackedByteArray(String str) {
     byte[] result = str.getBytes();
-    TrackerRepository.createFixedOriginTracker(result, result.length);
+    TrackerRepository.createFakeOriginTracker(result, result.length);
     return result;
   }
 
@@ -65,10 +65,10 @@ public class TrackTestHelper {
     return result;
   }
 
-  /** Create a tracked int array (by a {@link FixedOriginTracker}) */
+  /** Create a tracked int array (by a {@link FakeOriginTracker}) */
   public static int[] trackedIntArray(String str) {
     int[] result = str.codePoints().toArray();
-    TrackerRepository.createFixedOriginTracker(result, result.length);
+    TrackerRepository.createFakeOriginTracker(result, result.length);
     return result;
   }
 

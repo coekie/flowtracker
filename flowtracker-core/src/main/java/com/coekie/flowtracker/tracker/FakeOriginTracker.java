@@ -17,12 +17,12 @@ package com.coekie.flowtracker.tracker;
  */
 
 /**
- * OriginTracker that cannot grow.
+ * OriginTracker without content and a fixed length. For testing.
  */
-public class FixedOriginTracker extends OriginTracker {
+public class FakeOriginTracker extends OriginTracker {
   private final int length;
 
-  public FixedOriginTracker(int length) {
+  public FakeOriginTracker(int length) {
     this.length = length;
   }
 
