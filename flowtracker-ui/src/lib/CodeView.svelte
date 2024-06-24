@@ -38,7 +38,7 @@
 
   /** scroll the first selected line into view */
   export function scrollToSelection() {
-    pre?.querySelector('.selected')?.scrollIntoView();
+    pre?.querySelector('.selected')?.scrollIntoView({block: 'center'});
   }
 
   /** waits for rendering and then scrolls the first selected line into view */

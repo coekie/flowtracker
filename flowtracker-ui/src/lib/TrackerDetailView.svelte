@@ -190,7 +190,7 @@
   }
 
   export function scrollToSelectionInPre() {
-    pre?.querySelector('.selected')?.scrollIntoView();
+    pre?.querySelector('.selected')?.scrollIntoView({block: 'center'});
   }
 
   /** waits for rendering and then scrolls the first selected region into view */
