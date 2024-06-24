@@ -18,6 +18,7 @@ package com.coekie.flowtracker.web;
 
 import static java.util.Objects.requireNonNull;
 
+import com.coekie.flowtracker.hook.SystemHook;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerTree;
@@ -105,8 +106,9 @@ public class Snapshot {
 
   private void writeTrackers(ZipOutputStream zos, TrackerTree.Node node, boolean minimizedNode)
       throws IOException {
-    // only apply minimizing to files and classes
-    if (node == TrackerTree.FILES || node == TrackerTree.CLASS) {
+    // only apply minimizing to files, classes, and system.
+    // applying it to network connections would be confusing, seeing only half of the conversation.
+    if (node == TrackerTree.FILES || node == TrackerTree.CLASS || node == SystemHook.SYSTEM) {
       minimizedNode = minimized;
     }
     for (Tracker tracker : node.trackers()) {

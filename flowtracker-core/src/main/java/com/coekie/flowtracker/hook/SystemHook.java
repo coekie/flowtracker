@@ -21,6 +21,7 @@ import static com.coekie.flowtracker.tracker.Context.context;
 import com.coekie.flowtracker.tracker.CharOriginTracker;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
+import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
 import com.coekie.flowtracker.util.Config;
 import java.io.FileDescriptor;
@@ -37,6 +38,8 @@ import java.util.Properties;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class SystemHook {
+  public static final Node SYSTEM = TrackerTree.node("System");
+
   @SuppressWarnings("SuspiciousSystemArraycopy")
   public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
     System.arraycopy(src, srcPos, dest, destPos, length);
@@ -59,8 +62,7 @@ public class SystemHook {
           OutputStream.class);
       FileOutputStream fileOut = (FileOutputStream) outHandle.invoke(outHandle.invoke(printStream));
       FileDescriptor fd = fileOut.getFD();
-      FileDescriptorTrackerRepository.createTracker(fd, false, true,
-          TrackerTree.node("System").node(name));
+      FileDescriptorTrackerRepository.createTracker(fd, false, true, SYSTEM.node(name));
 
       // track on the OutputStreamWriter level
       if (OutputStreamWriterHook.enabled(config)) {
@@ -79,7 +81,7 @@ public class SystemHook {
     // a tracker that has as content a dump of all environment variables in "key=value\n" format.
     // we pretend that the environment variables were read from that content.
     CharOriginTracker tracker = new CharOriginTracker();
-    tracker.addTo(TrackerTree.node("System").node("env"));
+    tracker.addTo(SYSTEM.node("env"));
     StringBuilder sb = new StringBuilder();
     for (Entry<String, String> entry : System.getenv().entrySet()) {
       appendAndSetSource(tracker, entry.getKey());
@@ -117,7 +119,7 @@ public class SystemHook {
     // a tracker that has as content a dump of all system properties in "key=value\n" format.
     // we pretend that the properties were read from that content.
     CharOriginTracker tracker = new CharOriginTracker();
-    tracker.addTo(TrackerTree.node("System").node("properties"));
+    tracker.addTo(SYSTEM.node("properties"));
 
     Properties props = System.getProperties();
     synchronized (props) {
