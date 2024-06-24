@@ -16,15 +16,14 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
-import java.util.Collections;
+import com.coekie.flowtracker.util.ConcurrentWeakIdentityHashMap;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Map;
 
 /** Keeps track of the source of values of fields */
 public class FieldRepository {
   private static final Map<Object, Map<String, TrackerPoint>> objectToFieldMap =
-      Collections.synchronizedMap(new IdentityHashMap<>());
+      new ConcurrentWeakIdentityHashMap<>();
 
   public static TrackerPoint getPoint(Object target, String fieldId) {
     Map<String, TrackerPoint> fieldMap = objectToFieldMap.get(target);

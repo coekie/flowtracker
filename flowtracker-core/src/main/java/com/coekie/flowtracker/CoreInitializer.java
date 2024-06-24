@@ -23,12 +23,14 @@ import com.coekie.flowtracker.hook.ZipFileHook;
 import com.coekie.flowtracker.tracker.ByteOriginTracker;
 import com.coekie.flowtracker.tracker.DefaultTracker;
 import com.coekie.flowtracker.tracker.Tracker;
+import com.coekie.flowtracker.util.ConcurrentWeakIdentityHashMap;
 import com.coekie.flowtracker.util.Config;
 import com.coekie.flowtracker.util.Logger;
 import com.coekie.flowtracker.util.RecursionChecker;
 import com.coekie.flowtracker.util.ShutdownSuspender;
 import java.lang.management.ManagementFactory;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 
@@ -60,7 +62,7 @@ public class CoreInitializer {
 
   // call stuff to make sure JDK internals needed for it are initialized, before we enable tracking
   // e.g. java.util.concurrent.ConcurrentSkipListMap
-  @SuppressWarnings("ResultOfMethodCallIgnored")
+  @SuppressWarnings({"ResultOfMethodCallIgnored", "MismatchedQueryAndUpdateOfCollection"})
   private static void ensureInitialized(Config config) {
     DefaultTracker tracker1 = new DefaultTracker();
     tracker1.setSource(0, 1, new ByteOriginTracker(), 7);
@@ -69,6 +71,11 @@ public class CoreInitializer {
       String.format("%s", "a");
     }
     StringHook.ensureInitialized();
+
+    Map<Object, Object> map = new ConcurrentWeakIdentityHashMap<>();
+    Object o = "";
+    map.put(o, o);
+    map.get(o);
   }
 
   /**

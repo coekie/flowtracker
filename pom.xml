@@ -151,6 +151,7 @@
               </includes>
               <excludes>
                 <exclude>**/demo/**</exclude>
+                <exclude>**/ConcurrentWeakIdentityHashMap.java</exclude>
               </excludes>
             </licenseSet>
           </licenseSets>

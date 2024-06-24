@@ -20,9 +20,8 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.Channel;
-import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Associates {@link FileDescriptor}s to Trackers.
@@ -33,8 +32,7 @@ public class FileDescriptorTrackerRepository {
   public static final String READ = "Read";
   public static final String WRITE = "Write";
 
-  private static final Map<FileDescriptor, TrackerPair> map =
-      Collections.synchronizedMap(new IdentityHashMap<>());
+  private static final Map<FileDescriptor, TrackerPair> map = new ConcurrentHashMap<>();
 
   public static ByteOriginTracker getReadTracker(Context context, FileDescriptor fd) {
     if (!context.isActive()) return null;

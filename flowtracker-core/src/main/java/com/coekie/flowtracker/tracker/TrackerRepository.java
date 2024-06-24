@@ -18,14 +18,11 @@ package com.coekie.flowtracker.tracker;
 
 import static com.coekie.flowtracker.tracker.Context.context;
 
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Map;
+import com.coekie.flowtracker.util.ConcurrentWeakIdentityHashMap;
 
 public class TrackerRepository {
-  // TODO concurrent weak identity hash map? Use Guava's MapMaker (without pollution classpath)?
-  private static final Map<Object, Tracker> objectToTracker =
-      Collections.synchronizedMap(new IdentityHashMap<>());
+  private static final ConcurrentWeakIdentityHashMap<Object, Tracker> objectToTracker =
+      new ConcurrentWeakIdentityHashMap<>();
 
   public static Tracker getTracker(Context context, Object obj) {
     if (!context.isActive()) return null;
@@ -86,7 +83,9 @@ public class TrackerRepository {
   // same objects are often queried repeatedly in the same thread.
   // It's a very small cache, just to avoid querying {@link #objectToTracker}.
   private static Tracker forceGetTracker(Context context, Object obj) {
-    if (context.cachedObj0 == obj) {
+    if (obj == null) {
+      return null;
+    } else if (context.cachedObj0 == obj) {
       return context.cachedTracker0;
     } else if (context.cachedObj1 == obj) {
       return context.cachedTracker1;
