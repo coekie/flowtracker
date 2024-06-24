@@ -30,7 +30,7 @@ public class AsmCodeGeneratorTest {
         + "    LDC \"line 9\"\n"
         + "    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V\n");
     assertThat(line9.parts).hasSize(1);
-    assertThat(line9.parts.get(0).tracker.id).isEqualTo(tracker.getTrackerId());
+    assertThat(line9.parts.get(0).trackerId).isEqualTo(tracker.getTrackerId());
     assertThat(tracker.getContent().subSequence(
         line9.parts.get(0).offset,
             line9.parts.get(0).offset + line9.parts.get(0).length).toString())

@@ -13,7 +13,7 @@ export interface Tracker {
 
 // in java: TrackerResource.TrackerPartResponse
 export interface TrackerPart {
-  tracker: Tracker;
+  trackerId: number;
   offset: number;
   length: number;
 }
@@ -28,6 +28,7 @@ export interface Region {
 
 // in java: TrackerResource.TrackerDetailResponse
 export interface TrackerDetail {
+  linkedTrackers: {[key: number]: Tracker};
   path: string[] | null;
   creationStackTrace: string | null;
   regions: Region[];

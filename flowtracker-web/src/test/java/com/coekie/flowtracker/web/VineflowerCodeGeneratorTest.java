@@ -29,7 +29,7 @@ public class VineflowerCodeGeneratorTest {
     Line line9 = findLine(response, 9);
     assertThat(line9.content).isEqualTo("      System.out.println(\"line 9\");\n");
     assertThat(line9.parts).hasSize(1);
-    assertThat(line9.parts.get(0).tracker.id).isEqualTo(tracker.getTrackerId());
+    assertThat(line9.parts.get(0).trackerId).isEqualTo(tracker.getTrackerId());
     assertThat(tracker.getContent().subSequence(
         line9.parts.get(0).offset,
         line9.parts.get(0).offset + line9.parts.get(0).length).toString())

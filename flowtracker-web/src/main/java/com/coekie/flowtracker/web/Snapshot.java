@@ -132,10 +132,10 @@ public class Snapshot {
       Set<Long> toWritten = new HashSet<>(); // for which trackers we wrote x_to_y already
       for (Region region : trackerDetail.regions) {
         for (TrackerPartResponse part : region.parts) {
-          writeTracker(zos, part.tracker.id);
-          if (toWritten.add(part.tracker.id)) {
-            writeJson(zos, "tracker/" + part.tracker.id + "_to_" + trackerId,
-                trackerResource.reverse(part.tracker.id, trackerId));
+          writeTracker(zos, part.trackerId);
+          if (toWritten.add(part.trackerId)) {
+            writeJson(zos, "tracker/" + part.trackerId + "_to_" + trackerId,
+                trackerResource.reverse(part.trackerId, trackerId));
           }
         }
       }

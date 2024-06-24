@@ -18,6 +18,7 @@ package com.coekie.flowtracker.web;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.tracker.ByteContentTracker;
 import com.coekie.flowtracker.tracker.ByteSinkTracker;
@@ -41,7 +42,9 @@ import jakarta.ws.rs.core.MediaType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 @Path("/tracker")
@@ -56,14 +59,14 @@ public class TrackerResource {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("{id}")
   public TrackerDetailResponse get(@PathParam("id") long id) {
-    Tracker tracker = InterestRepository.getContentTracker(id);
+    Tracker tracker = requireNonNull(InterestRepository.getContentTracker(id));
     List<Region> regions = new ArrayList<>();
+    TrackerPartResponseBuilder partBuilder = new TrackerPartResponseBuilder();
     if (tracker instanceof DefaultTracker) {
       Simplifier.simplifySourceTo(tracker, (index, length, sourceTracker, sourceIndex, growth) -> {
         if (sourceTracker != null) {
           regions.add(new Region(tracker, index, length, singletonList(
-              new TrackerPartResponse(sourceTracker, sourceIndex,
-                  growth.targetToSource(length)))));
+              partBuilder.part(sourceTracker, sourceIndex, growth.targetToSource(length)))));
         } else {
           regions.add(new Region(tracker, index, length, emptyList()));
         }
@@ -73,7 +76,7 @@ public class TrackerResource {
           new Region(tracker, 0, getContentLength(tracker), emptyList()));
     }
     boolean hasSource = false; // line mapping not implemented yet (only in `reverse`)
-    return new TrackerDetailResponse(tracker, regions, hasSource);
+    return new TrackerDetailResponse(tracker, regions, partBuilder, hasSource);
   }
 
   /**
@@ -94,6 +97,7 @@ public class TrackerResource {
     Tracker target = InterestRepository.getContentTracker(targetId);
 
     List<Region> regions = new ArrayList<>();
+    TrackerPartResponseBuilder partBuilder = new TrackerPartResponseBuilder();
 
     List<TrackerPartResponse> activeParts = new ArrayList<>();
 
@@ -110,7 +114,7 @@ public class TrackerResource {
           Growth growth) {
         int sourceLength = growth.targetToSource(length);
         if (sourceTracker == tracker) {
-          TrackerPartResponse part = new TrackerPartResponse(target, index, length);
+          TrackerPartResponse part = partBuilder.part(target, index, length);
           changePoints.computeIfAbsent(sourceIndex, i -> new ArrayList<>())
               .add(() -> activeParts.add(part));
           changePoints.computeIfAbsent(sourceIndex + sourceLength, i -> new ArrayList<>())
@@ -154,7 +158,8 @@ public class TrackerResource {
           activeLineNumber[0]));
     }
 
-    return new TrackerDetailResponse(tracker, regions, tracker instanceof ClassOriginTracker);
+    return new TrackerDetailResponse(tracker, regions, partBuilder,
+        tracker instanceof ClassOriginTracker);
   }
 
   /**
@@ -168,15 +173,25 @@ public class TrackerResource {
     public final List<Region> regions;
 
     /**
+     * Info about each tracker that is referenced in any {@link TrackerPartResponse#trackerId} in
+     * {@link Region#parts} in {@link #regions}.
+     * Collected separately in a map here (instead of inline in {@link TrackerPartResponse}) to
+     * minimize the size of the response; as the same tracker is often referenced many times.
+     */
+    public final Map<Long, TrackerResponse> linkedTrackers;
+
+    /**
      * For {@link ClassOriginTracker}, indicates if there is associated source code.
      * @see Region#line
      */
     public final boolean hasSource;
 
-    private TrackerDetailResponse(Tracker tracker, List<Region> regions, boolean hasSource) {
+    private TrackerDetailResponse(Tracker tracker, List<Region> regions,
+        TrackerPartResponseBuilder partBuilder, boolean hasSource) {
       this.path = path(tracker);
       this.creationStackTrace = creationStackTraceToString(tracker);
       this.regions = regions;
+      this.linkedTrackers = partBuilder.linkedTrackers;
       this.hasSource = hasSource;
     }
   }
@@ -213,7 +228,7 @@ public class TrackerResource {
 
     Region(Tracker tracker, int offset, int length, List<TrackerPartResponse> parts, int line) {
       this.offset = offset;
-      this.length =length;
+      this.length = length;
       this.content = getContentAsString(tracker, offset, offset + length);
       this.parts = parts;
       this.line = line == -1 ? null : line;
@@ -223,14 +238,29 @@ public class TrackerResource {
   /** Relation between a {@link Region} of one tracker to a region in another tracker */
   @SuppressWarnings("UnusedDeclaration") // json
   public static class TrackerPartResponse {
-    public final TrackerResponse tracker;
+    public final long trackerId;
     public final int offset;
     public final int length;
 
     public TrackerPartResponse(Tracker tracker, int offset, int length) {
-      this.tracker = new TrackerResponse(tracker);
+      this.trackerId = tracker.getTrackerId();
       this.offset = offset;
       this.length = length;
+    }
+  }
+
+  /**
+   * Builds a {@link TrackerPartResponse}, making sure every linked tracker is in the
+   * {@link #linkedTrackers} map
+   */
+  static class TrackerPartResponseBuilder {
+    private final Map<Long, TrackerResponse> linkedTrackers = new HashMap<>();
+
+    public TrackerPartResponse part(Tracker tracker, int offset, int length) {
+      if (!linkedTrackers.containsKey(tracker.getTrackerId())) {
+        linkedTrackers.put(tracker.getTrackerId(), new TrackerResponse(tracker));
+      }
+      return new TrackerPartResponse(tracker, offset, length);
     }
   }
 

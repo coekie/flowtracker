@@ -1,4 +1,5 @@
 import {http, HttpHandler, HttpResponse} from 'msw';
+import type {Tracker} from '../javatypes';
 
 export const simpleOriginTracker = {
   id: 101,
@@ -66,8 +67,11 @@ export const handlers: HttpHandler[] = [
     });
   }),
   http.get('/tracker/' + simpleSinkTracker.id, () => {
+    const linkedTrackers: {[key: number]: Tracker} = {};
+    linkedTrackers[simpleOriginTracker.id] = simpleOriginTracker;
     return HttpResponse.json({
       path: simpleSinkTracker.path,
+      linkedTrackers: linkedTrackers,
       regions: [
         {
           offset: 0,
@@ -81,7 +85,7 @@ export const handlers: HttpHandler[] = [
           content: 'foo',
           parts: [
             {
-              tracker: simpleOriginTracker,
+              trackerId: simpleOriginTracker.id,
               offset: 10,
               length: 3,
             },
@@ -99,7 +103,7 @@ export const handlers: HttpHandler[] = [
           content: 'bar',
           parts: [
             {
-              tracker: simpleOriginTracker,
+              trackerId: simpleOriginTracker.id,
               offset: 20,
               length: 3,
             },
@@ -127,7 +131,7 @@ export const handlers: HttpHandler[] = [
             parts: [
               // included in the response, but currently unused
               // {
-              //     "tracker": simpleSinkTracker,
+              //     "trackerId": simpleSinkTracker.id,
               //     "offset": 12,
               //     "length": 3
               // }
@@ -146,7 +150,7 @@ export const handlers: HttpHandler[] = [
             parts: [
               // included in the response, but currently unused
               // {
-              //     "tracker": simpleSinkTracker,
+              //     "trackerId": simpleSinkTracker.id,
               //     "offset": 16,
               //     "length": 3
               // }
@@ -162,6 +166,7 @@ export const handlers: HttpHandler[] = [
       return HttpResponse.json({
         path: classOriginTracker.path,
         hasSource: true,
+        linkedTrackers: {},
         regions: [
           {
             offset: 0,

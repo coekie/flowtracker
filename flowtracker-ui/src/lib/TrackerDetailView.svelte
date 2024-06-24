@@ -85,12 +85,15 @@
 
   // convertion a region (of viewTracker) to a RangeSelection.
   // That is in terms of the source tracker, see `selection`.
-  function toSelection(region: Region): RangeSelection | null {
+  function toSelection(
+    region: Region,
+    trackerDetail: TrackerDetail
+  ): RangeSelection | null {
     if (targetTracker) {
       return new RangeSelection(viewTracker!, region.offset, region.length);
     } else if (region.parts.length == 1) {
       return new RangeSelection(
-        region.parts[0].tracker,
+        trackerDetail.linkedTrackers[region.parts[0].trackerId],
         region.parts[0].offset,
         region.parts[0].length
       );
@@ -99,20 +102,24 @@
     }
   }
 
-  function mousedown(region: Region) {
-    selection = selectionStart = toSelection(region);
+  function mousedown(region: Region, trackerDetail: TrackerDetail) {
+    selection = selectionStart = toSelection(region, trackerDetail);
     updateSecondaryTracker();
   }
 
   // handle selecting multiple regions, by dragging
-  function mousemove(e: MouseEvent, region: Region) {
+  function mousemove(
+    e: MouseEvent,
+    region: Region,
+    trackerDetail: TrackerDetail
+  ) {
     // if the button isn't pressed anymore, stop the selection
     if (e.buttons != 1) {
       selectionStart = null;
       return;
     }
 
-    let selectionEnd = toSelection(region);
+    let selectionEnd = toSelection(region, trackerDetail);
     // a valid selection must have a start and end with the same tracker
     if (
       !selectionStart ||
@@ -136,7 +143,11 @@
     selectionStart = null;
   }
 
-  function isSelected(region: Region, selection: ASelection | null): boolean {
+  function isSelected(
+    region: Region,
+    selection: ASelection | null,
+    trackerDetail: TrackerDetail
+  ): boolean {
     if (selection == null || viewTracker == null) {
       return false;
     } else if (selection instanceof RangeSelection) {
@@ -152,7 +163,7 @@
       } else {
         var part = region.parts[0];
         return (
-          part.tracker.id == selection.tracker.id &&
+          part.trackerId == selection.tracker.id &&
           part.offset >= selection.offset &&
           part.offset < selection.offset + selection.length
         );
@@ -160,7 +171,10 @@
     } else {
       // selection is a PathSelection
       return region.parts.some(part =>
-        pathStartsWith(part.tracker.path, selection.path)
+        pathStartsWith(
+          trackerDetail.linkedTrackers[part.trackerId].path,
+          selection.path
+        )
       );
     }
   }
@@ -171,8 +185,12 @@
     }
   }
 
-  function backgroundColor(region: Region, coloring: Coloring): string {
-    return coloring.backgroundColor(s => isSelected(region, s));
+  function backgroundColor(
+    region: Region,
+    coloring: Coloring,
+    trackerDetail: TrackerDetail
+  ): string {
+    return coloring.backgroundColor(s => isSelected(region, s, trackerDetail));
   }
 
   // event for main view so that double-click in one TrackerDetailView causes scrollToSelection in the other
@@ -226,13 +244,17 @@
                 on:mouseout={() => focusOut()}
                 on:focus={() => focusIn(region)}
                 on:blur={() => focusOut()}
-                on:mousedown={() => mousedown(region)}
-                on:mousemove={e => mousemove(e, region)}
+                on:mousedown={() => mousedown(region, trackerDetail)}
+                on:mousemove={e => mousemove(e, region, trackerDetail)}
                 on:mouseup={mouseup}
                 on:dblclick={dblclick}
                 draggable="false"
-                style="background-color: {backgroundColor(region, coloring)}"
-                class:selected={isSelected(region, selection)}
+                style="background-color: {backgroundColor(
+                  region,
+                  coloring,
+                  trackerDetail
+                )}"
+                class:selected={isSelected(region, selection, trackerDetail)}
                 class:withSource={region.parts.length > 0}
                 class:focus={focusRegion === region}>{region.content}</a
               >{/each}</pre>

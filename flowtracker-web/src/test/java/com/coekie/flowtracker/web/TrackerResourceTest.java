@@ -175,11 +175,11 @@ public class TrackerResourceTest {
     Region region = response.regions.get(2);
     assertThat(region.content).isEqualTo("c");
     assertThat(region.parts).hasSize(2);
-    assertThat(region.parts.get(0).tracker.id).isEqualTo(target.getTrackerId());
+    assertThat(region.parts.get(0).trackerId).isEqualTo(target.getTrackerId());
     // note that this points to the *beginning* of the part (index 2), which does not correspond to
     // the beginning of this region.
     assertThat(region.parts.get(0).offset).isEqualTo(2);
-    assertThat(region.parts.get(1).tracker.id).isEqualTo(target.getTrackerId());
+    assertThat(region.parts.get(1).trackerId).isEqualTo(target.getTrackerId());
     assertThat(region.parts.get(1).offset).isEqualTo(6);
 
     assertRegionOnePart(response.regions.get(3), "de", target, 6, 3);
@@ -301,7 +301,7 @@ public class TrackerResourceTest {
       int expectedOffset, int length) {
     assertThat(region.content).isEqualTo(expectedContent);
     assertThat(region.parts).hasSize(1);
-    assertThat(region.parts.get(0).tracker.id).isEqualTo(expectedTracker.getTrackerId());
+    assertThat(region.parts.get(0).trackerId).isEqualTo(expectedTracker.getTrackerId());
     assertThat(region.parts.get(0).offset).isEqualTo(expectedOffset);
     assertThat(region.parts.get(0).length).isEqualTo(length);
   }
