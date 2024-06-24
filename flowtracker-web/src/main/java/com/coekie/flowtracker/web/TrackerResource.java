@@ -297,7 +297,7 @@ public class TrackerResource {
     }
   }
 
-  private static int getContentLength(Tracker tracker) {
+  static int getContentLength(Tracker tracker) {
     if (tracker instanceof CharContentTracker) {
       CharContentTracker charTracker = (CharContentTracker) tracker;
       return charTracker.getContent().length();

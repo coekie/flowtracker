@@ -112,12 +112,16 @@ public class Snapshot {
       minimizedNode = minimized;
     }
     for (Tracker tracker : node.trackers()) {
-      // if condition: when minimized then don't include origin trackers just because they are in
+      // when minimized then don't include origin trackers or empty just because they are in
       // the tree. So they are only included if they are referenced from a sink.
-      if (!(minimizedNode && TrackerResource.isOrigin(tracker))) {
-        InterestRepository.register(tracker);
-        writeTracker(zos, tracker.getTrackerId());
+      if (minimizedNode
+          && (TrackerResource.isOrigin(tracker)
+          || TrackerResource.getContentLength(tracker) == 0)) {
+        continue;
       }
+
+      InterestRepository.register(tracker);
+      writeTracker(zos, tracker.getTrackerId());
     }
     for (Node child : node.children()) {
       writeTrackers(zos, child, minimizedNode);
