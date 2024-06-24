@@ -79,6 +79,15 @@ public class TrackerResource {
     return new TrackerDetailResponse(tracker, regions, partBuilder, hasSource);
   }
 
+  /** @see #reverse(long, long, boolean)  */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("{id}_to_{target}")
+  public TrackerDetailResponse reverse(@PathParam("id") long id,
+      @PathParam("target") long targetId) {
+    return reverse(id, targetId, false);
+  }
+
   /**
    * Returns contents of tracker `id`, indicating which regions in it ended up in `target`.
    * This indicates where the data in this tracker went.
@@ -87,12 +96,12 @@ public class TrackerResource {
    * <p>
    * One region here can contain multiple parts (if a part of the content of `id` is copied into
    * `target` multiple times).
+   * <p>
+   * If `includeParts` is false, the parts are not returned (because currently the UI doesn't
+   * actually use them). But the regions are still split up in a way where when the parts that
+   * reference the tracker change it creates a new region.
    */
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("{id}_to_{target}")
-  public TrackerDetailResponse reverse(@PathParam("id") long id,
-      @PathParam("target") long targetId) {
+  public TrackerDetailResponse reverse(long id, long targetId, boolean includeParts) {
     Tracker tracker = InterestRepository.getContentTracker(id);
     Tracker target = InterestRepository.getContentTracker(targetId);
 
@@ -154,7 +163,8 @@ public class TrackerResource {
         break;
       }
 
-      regions.add(new Region(tracker, i, endIndex - i, new ArrayList<>(activeParts),
+      regions.add(new Region(tracker, i, endIndex - i,
+          includeParts ? new ArrayList<>(activeParts) : List.of(),
           activeLineNumber[0]));
     }
 

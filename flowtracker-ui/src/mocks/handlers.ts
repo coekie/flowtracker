@@ -129,7 +129,7 @@ export const handlers: HttpHandler[] = [
             length: 3,
             content: 'foo',
             parts: [
-              // included in the response, but currently unused
+              // could be included in the response, but currently unused
               // {
               //     "trackerId": simpleSinkTracker.id,
               //     "offset": 12,
@@ -148,7 +148,7 @@ export const handlers: HttpHandler[] = [
             length: 3,
             content: 'bar',
             parts: [
-              // included in the response, but currently unused
+              // could be included in the response, but currently unused
               // {
               //     "trackerId": simpleSinkTracker.id,
               //     "offset": 16,

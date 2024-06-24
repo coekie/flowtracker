@@ -165,7 +165,7 @@ public class TrackerResourceTest {
     target.setSource(6, 3, source, 3);
 
     TrackerDetailResponse response = trackerResource.reverse(source.getTrackerId(),
-        target.getTrackerId());
+        target.getTrackerId(), true);
     assertThat(response.regions).hasSize(5);
 
     assertRegionNoPart(response.regions.get(0), "x");
@@ -197,7 +197,7 @@ public class TrackerResourceTest {
     target.setSource(5, 2, source, 1, Growth.of(2, 3));
 
     TrackerDetailResponse response = trackerResource.reverse(source.getTrackerId(),
-        target.getTrackerId());
+        target.getTrackerId(), true);
     assertThat(response.regions).hasSize(3);
 
     assertRegionNoPart(response.regions.get(0), "x");
@@ -219,7 +219,7 @@ public class TrackerResourceTest {
     target.setSource(1, 2, source, 0);
 
     TrackerDetailResponse response = trackerResource.reverse(source.getTrackerId(),
-        target.getTrackerId());
+        target.getTrackerId(), true);
     assertThat(response.regions).hasSize(1);
     assertRegionOnePart(response.regions.get(0), "bc", target, 1);
   }
