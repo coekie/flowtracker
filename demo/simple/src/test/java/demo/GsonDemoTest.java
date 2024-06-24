@@ -18,8 +18,7 @@ public class GsonDemoTest {
     out.assertThatPart("myField").comesFromConstantInClass(GsonDemo.Pojo.class);
 
     out.assertThatPart(":").comesFromConstantInClass(JsonWriter.class);
-    // haven't looked into why this isn't tracked yet
-    out.assertThatPart("{").isNotTracked();
+    out.assertThatPart("{").comesFromConstantInClass(JsonWriter.class);
 
     out.assertThatPart("toJson").comesFromConstantInClass(GsonDemo.class);
   }

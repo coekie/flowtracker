@@ -104,6 +104,9 @@ class AsmTransformer implements ClassFileTransformer {
     Invocation suspended = Invocation.suspend();
     Context context = context();
     context.suspend();
+    if (context.transformListener != null) {
+      context.transformListener.accept(className);
+    }
     try {
       Transformer adapterFactory = getAdapterFactory(loader, className);
       if (adapterFactory == null) {

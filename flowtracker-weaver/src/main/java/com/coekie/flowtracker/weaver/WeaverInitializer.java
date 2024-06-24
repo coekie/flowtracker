@@ -16,12 +16,18 @@ package com.coekie.flowtracker.weaver;
  * limitations under the License.
  */
 
+import static com.coekie.flowtracker.tracker.Context.context;
+
 import com.coekie.flowtracker.hook.ArrayLoadHook;
+import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.util.Config;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import org.objectweb.asm.Type;
 
 @SuppressWarnings("UnusedDeclaration") // called with reflection from FlowTrackerAgent
 public class WeaverInitializer {
@@ -34,6 +40,11 @@ public class WeaverInitializer {
     AsmTransformer transformer = new AsmTransformer(config);
     inst.addTransformer(transformer, true);
 
+    // keep track of classes that are getting transformed while we are initializing
+    Context context = context();
+    Set<String> transformed = new HashSet<>();
+    context.transformListener = transformed::add;
+
     // retransform classes that have already been loaded
     List<Class<?>> toTransform = new ArrayList<>();
     for (Class<?> loadedClass : inst.getAllLoadedClasses()) {
@@ -41,6 +52,23 @@ public class WeaverInitializer {
         toTransform.add(loadedClass);
       }
     }
+    doRetransform(inst, toTransform);
+
+    // second round of retransformations, to retransforms classes that were loaded while handling
+    // the first round, but didn't get transformed yet.
+    context.transformListener = null;
+    toTransform.clear();
+    for (Class<?> loadedClass : inst.getAllLoadedClasses()) {
+      if (!transformed.contains(Type.getInternalName(loadedClass)) &&
+          transformer.shouldRetransformOnStartup(loadedClass, inst)) {
+        toTransform.add(loadedClass);
+      }
+    }
+    doRetransform(inst, toTransform);
+  }
+
+  private static void doRetransform(Instrumentation inst, List<Class<?>> toTransform)
+      throws Exception {
     try {
       inst.retransformClasses(toTransform.toArray(new Class<?>[0]));
     } catch (Throwable t) {

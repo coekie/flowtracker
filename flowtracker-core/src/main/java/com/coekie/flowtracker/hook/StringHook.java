@@ -18,6 +18,7 @@ package com.coekie.flowtracker.hook;
 
 import static com.coekie.flowtracker.tracker.Context.context;
 
+import com.coekie.flowtracker.tracker.CharOriginTracker;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.DefaultTracker;
@@ -151,5 +152,25 @@ public class StringHook {
   public static void ensureInitialized() {
     getValueArray("");
     StringHook.isLatin1("");
+  }
+
+  /**
+   * Tests if String/StringUTF16 was correctly instrumented.
+   * <p>
+   * The goal here is to catch situations where instrumentation silently failed for some reason.
+   * This is kinda a regression test for a problem that only happened when running with the real
+   * (not dev) agent, so could not be tested in a usual unit test; where StringUTF16 wasn't getting
+   * instrumented, which was fixed by adding a second round of instrumentation in WeaverInitializer.
+   */
+  public static void selfTest() {
+    Context context = context();
+    char[] chars = new char[10];
+    CharOriginTracker tracker = new CharOriginTracker();
+    tracker.append("          ");
+    TrackerRepository.setTracker(context, chars, tracker);
+    String str = new String(chars, 1, 5);
+    if (StringHook.getStringTracker(context, str) == null) {
+      throw new Error("FlowTracker self-test failed. Failed to instrument String classes?");
+    }
   }
 }

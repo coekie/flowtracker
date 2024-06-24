@@ -79,6 +79,7 @@ public class CoreInitializer {
   public static void postInitialize(Config config) {
     ShutdownSuspender.initShutdownHook(config.getBoolean("suspendShutdown", false));
     verifyJvmArgs(config);
+    StringHook.selfTest();
   }
 
   /**
