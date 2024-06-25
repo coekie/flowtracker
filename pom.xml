@@ -177,5 +177,22 @@
         <skip-ui>true</skip-ui>
       </properties>
     </profile>
+    <profile>
+      <!-- Experimental profile uses newer JDK and snapshot ASM version -->
+      <id>experimental</id>
+      <properties>
+        <asm.version>9.8-SNAPSHOT</asm.version>
+      </properties>
+      <modules>
+        <module>flowtracker-test-jdk23</module>
+      </modules>
+      <repositories>
+        <repository>
+          <id>ow2-snapshots</id>
+          <name>ow2-snapshots</name>
+          <url>https://repository.ow2.org/nexus/content/repositories/snapshots</url>
+        </repository>
+      </repositories>
+    </profile>
   </profiles>
 </project>

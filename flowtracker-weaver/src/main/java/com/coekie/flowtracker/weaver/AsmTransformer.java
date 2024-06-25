@@ -67,13 +67,15 @@ class AsmTransformer implements ClassFileTransformer {
       + "+java.lang.ClassLoader,"
       + "-jdk.internal.misc.Unsafe,"
       + "-java.lang.CharacterData*," // seems to break the debugger sometimes?
-      // causes ClassCircularityError when running with -Xverify:all, because it is used indirectly
-      // by Modules.transformedByAgent
-      + "-java.lang.WeakPairMap*";
+      // WeakPairMap and Module$ReflectionData cause ClassCircularityError when running with
+      // -Xverify:all, because it is used indirectly by Modules.transformedByAgent
+      + "-java.lang.WeakPairMap,"
+      + "-java.lang.Module";
   // equivalent to `%base,+*` but simpler
   private static final String DEFAULT_FILTER = "-java.lang.CharacterData*,"
       + "-jdk.internal.misc.Unsafe,"
-      + "-java.lang.WeakPairMap*,"
+      + "-java.lang.WeakPairMap,"
+      + "-java.lang.Module,"
       + "+*";
 
   private final ClassFilter toInstrumentFilter;

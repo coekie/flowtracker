@@ -32,6 +32,9 @@ public class FileChannelImplHook {
   // for JDK>=21
   @Hook(target = "sun.nio.ch.FileChannelImpl",
       method = "void <init>(java.io.FileDescriptor,java.lang.String,boolean,boolean,boolean,java.io.Closeable)")
+  // for JDK>=23
+  @Hook(target = "sun.nio.ch.FileChannelImpl",
+      method = "void <init>(java.io.FileDescriptor,java.lang.String,boolean,boolean,boolean,boolean,java.io.Closeable)")
   public static void afterInit(@Arg("FileChannelImpl_fd") FileDescriptor fd,
       @Arg("ARG1") String path, @Arg("ARG2") boolean readable, @Arg("ARG3") boolean writeable) {
     if (context().isActive()) {

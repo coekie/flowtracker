@@ -80,6 +80,7 @@
   </build>
 
   <properties>
+    <java.version>21</java.version>
     <demo.agent.jar>../../flowtracker-all/target/flowtracker-all-${project.version}.jar</demo.agent.jar>
     <demo.skip>false</demo.skip>
   </properties>
@@ -101,6 +102,12 @@
       <id>skip-demo</id>
       <properties>
         <demo.skip>true</demo.skip>
+      </properties>
+    </profile>
+    <profile>
+      <id>experimental</id>
+      <properties>
+        <java.version>23</java.version>
       </properties>
     </profile>
   </profiles>
