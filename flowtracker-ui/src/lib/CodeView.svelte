@@ -63,8 +63,11 @@ Shows source code of a class.
 
 <style>
   pre {
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     height: 100%;
+    white-space: break-spaces;
+    word-wrap: break-word;
   }
 
   .selected {

@@ -301,12 +301,15 @@
     border-bottom: 1px solid #ccc;
   }
   .content {
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     height: 100%;
     margin: 0;
   }
   pre {
     margin: 0 0 0 0;
+    white-space: break-spaces;
+    word-wrap: break-word;
   }
   .region {
     /* draw a vertical line after each part, without influencing size */

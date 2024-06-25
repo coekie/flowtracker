@@ -24,13 +24,13 @@ body {
 }
 .my-theme.splitpanes--vertical > .splitpanes__splitter,
 .my-theme .splitpanes--vertical > .splitpanes__splitter {
-  width: 3px; /* default: 7px */
+  width: 5px; /* default: 7px */
   border-left: 1px solid #ccc; /* default: 1px solid #eee */
   cursor: col-resize;
 }
 .my-theme.splitpanes--horizontal > .splitpanes__splitter,
 .my-theme .splitpanes--horizontal > .splitpanes__splitter {
-  height: 3px; /* default: 7px */
+  height: 5px; /* default: 7px */
   border-top: 1px solid #ccc; /* default: 1px solid #eee */
   cursor: row-resize;
 }
