@@ -34,8 +34,10 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
+import org.glassfish.jersey.CommonProperties;
 import org.glassfish.jersey.gson.JsonGsonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.glassfish.jersey.servlet.ServletProperties;
 
@@ -56,6 +58,16 @@ public class WebModule {
   }
 
   private static Server startServer(Config config) throws Exception {
+    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+    Thread.currentThread().setContextClassLoader(WebModule.class.getClassLoader());
+    try {
+      return doStartServer(config);
+    } finally {
+      Thread.currentThread().setContextClassLoader(ccl);
+    }
+  }
+
+  private static Server doStartServer(Config config) throws Exception {
     // Setup server
     Server server = new Server(new TrackerSuspendingThreadPool());
 
@@ -77,6 +89,9 @@ public class WebModule {
         new ResourceConfig(TrackerResource.class, TreeResource.class, SettingsResource.class,
             SnapshotResource.class, CodeResource.class)
             .property(ServletProperties.FILTER_FORWARD_ON_404, true)
+            .property(ServerProperties.WADL_FEATURE_DISABLE, true)
+            .property(ServerProperties.BV_FEATURE_DISABLE, true)
+            .property(CommonProperties.PROVIDER_DEFAULT_DISABLE, "ALL")
             .register(JsonGsonFeature.class);
     ServletContainer servletContainer = new ServletContainer(resourceConfig);
     context.addFilter(new FilterHolder(servletContainer), "/*", EnumSet.of(DispatcherType.REQUEST));
