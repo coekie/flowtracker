@@ -16,8 +16,6 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
-import java.util.function.Consumer;
-
 /**
  * Keeps the state of flowtracker for a particular thread.
  * <p>
@@ -54,9 +52,6 @@ public class Context implements Runnable {
   Object cachedObj2;
   Tracker cachedTracker2;
   int nextCache;
-
-  /** When non-null this gets called for every class that is being transformed by our agent */
-  public Consumer<String> transformListener;
 
   /** Checks if tracking is currently active on this thread */
   public boolean isActive() {

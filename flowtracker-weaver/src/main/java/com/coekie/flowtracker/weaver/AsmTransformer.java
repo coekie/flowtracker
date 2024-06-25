@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
+import java.util.function.Consumer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -66,16 +67,10 @@ class AsmTransformer implements ClassFileTransformer {
       + "+java.net.Socket,"
       + "+java.lang.ClassLoader,"
       + "-jdk.internal.misc.Unsafe,"
-      + "-java.lang.CharacterData*," // seems to break the debugger sometimes?
-      // WeakPairMap and Module$ReflectionData cause ClassCircularityError when running with
-      // -Xverify:all, because it is used indirectly by Modules.transformedByAgent
-      + "-java.lang.WeakPairMap,"
-      + "-java.lang.Module";
+      + "-java.lang.CharacterData*"; // seems to break the debugger sometimes?
   // equivalent to `%base,+*` but simpler
   private static final String DEFAULT_FILTER = "-java.lang.CharacterData*,"
       + "-jdk.internal.misc.Unsafe,"
-      + "-java.lang.WeakPairMap,"
-      + "-java.lang.Module,"
       + "+*";
 
   private final ClassFilter toInstrumentFilter;
@@ -85,6 +80,10 @@ class AsmTransformer implements ClassFileTransformer {
   private final Config config;
   private final HookSpecTransformer hookSpecTransformer;
   private final FlowTransformer flowTransformer;
+
+  public boolean firstRoundDone = false;
+  /** When non-null this gets called for every class that is being transformed by our agent */
+  public Consumer<String> transformListener;
 
   public AsmTransformer(Config config) {
     toInstrumentFilter = new ClassFilter(config.get("filter", DEFAULT_FILTER), BASE_FILTER);
@@ -106,10 +105,18 @@ class AsmTransformer implements ClassFileTransformer {
     Invocation suspended = Invocation.suspend();
     Context context = context();
     context.suspend();
-    if (context.transformListener != null) {
-      context.transformListener.accept(className);
-    }
     try {
+      // instrumenting these classes can cause ClassCircularityError when running with -Xverify:all,
+      // because they are used indirectly by Modules.transformedByAgent.
+      // so we don't instrument them in the first round of instrumentation (see WeaverInitializer).
+      if (!firstRoundDone && (className.startsWith("java/lang/WeakPairMap")
+          || className.startsWith("java/lang/Module"))) {
+        return null;
+      }
+      if (transformListener != null) {
+        transformListener.accept(className);
+      }
+
       Transformer adapterFactory = getAdapterFactory(loader, className);
       if (adapterFactory == null) {
         return null;

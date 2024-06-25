@@ -16,10 +16,7 @@ package com.coekie.flowtracker.weaver;
  * limitations under the License.
  */
 
-import static com.coekie.flowtracker.tracker.Context.context;
-
 import com.coekie.flowtracker.hook.ArrayLoadHook;
-import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.util.Config;
 import java.lang.instrument.Instrumentation;
@@ -41,9 +38,8 @@ public class WeaverInitializer {
     inst.addTransformer(transformer, true);
 
     // keep track of classes that are getting transformed while we are initializing
-    Context context = context();
     Set<String> transformed = new HashSet<>();
-    context.transformListener = transformed::add;
+    transformer.transformListener = transformed::add;
 
     // retransform classes that have already been loaded
     List<Class<?>> toTransform = new ArrayList<>();
@@ -53,10 +49,11 @@ public class WeaverInitializer {
       }
     }
     doRetransform(inst, toTransform);
+    transformer.firstRoundDone = true;
 
     // second round of retransformations, to retransforms classes that were loaded while handling
     // the first round, but didn't get transformed yet.
-    context.transformListener = null;
+    transformer.transformListener = null;
     toTransform.clear();
     for (Class<?> loadedClass : inst.getAllLoadedClasses()) {
       if (!transformed.contains(Type.getInternalName(loadedClass)) &&
