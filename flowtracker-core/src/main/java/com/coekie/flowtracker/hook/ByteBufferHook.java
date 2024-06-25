@@ -125,11 +125,11 @@ public class ByteBufferHook {
         Invocation.getArgPoint(invocation, 1));
   }
 
-  static byte[] hb(ByteBuffer o) {
+  public static byte[] hb(ByteBuffer o) {
     return (byte[]) hbHandle.get(o);
   }
 
-  static int offset(ByteBuffer o) {
+  public static int offset(ByteBuffer o) {
     return (int) offsetHandle.get(o);
   }
 }

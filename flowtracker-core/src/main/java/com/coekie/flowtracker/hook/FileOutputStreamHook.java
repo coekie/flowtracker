@@ -24,10 +24,9 @@ import com.coekie.flowtracker.tracker.ByteSinkTracker;
 import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Invocation;
-import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
-import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
+import com.coekie.flowtracker.tracker.TrackerUpdater;
 import java.io.File;
 import java.io.FileDescriptor;
 
@@ -72,11 +71,7 @@ public class FileOutputStreamHook {
     Context context = context();
     ByteSinkTracker tracker = FileDescriptorTrackerRepository.getWriteTracker(context, fd);
     if (tracker != null) {
-      Tracker sourceTracker = TrackerRepository.getTracker(context, buf);
-      if (sourceTracker != null) {
-        tracker.setSource(tracker.getLength(), len, sourceTracker, off);
-      }
-      tracker.append(buf, off, len);
+      TrackerUpdater.appendBytes(context, tracker, buf, off, len);
     }
   }
 }

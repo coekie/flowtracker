@@ -24,8 +24,6 @@ import com.coekie.flowtracker.tracker.ByteOriginTracker;
 import com.coekie.flowtracker.tracker.ByteSinkTracker;
 import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
-import com.coekie.flowtracker.tracker.Tracker;
-import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
 import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
@@ -64,14 +62,8 @@ public class IOUtilHook {
     // TODO do something with position (seeking)
     Context context = context();
     ByteSinkTracker fdTracker = FileDescriptorTrackerRepository.getWriteTracker(context, fd);
-    if (fdTracker != null && result > 0 && !src.isDirect()) {
-      byte[] hb = ByteBufferHook.hb(src);
-      Tracker srcTracker = TrackerRepository.getTracker(context, hb);
-      int startIndex = ByteBufferHook.offset(src) + src.position() - result;
-      if (srcTracker != null) {
-        fdTracker.setSource(fdTracker.getLength(), result, srcTracker, startIndex);
-      }
-      fdTracker.append(hb, startIndex, result);
+    if (fdTracker != null && result > 0) {
+      TrackerUpdater.appendByteBuffer(context, fdTracker, src, src.position() - result, result);
     }
   }
 
@@ -94,16 +86,7 @@ public class IOUtilHook {
       while (remaining > 0) {
         ByteBuffer src = srcs[i];
         int length = src.position() - startPositions[i];
-        if (!src.isDirect()) { // direct buffers are not supported yet
-          byte[] hb = ByteBufferHook.hb(src);
-          int startIndex = ByteBufferHook.offset(src) + startPositions[i];
-          Tracker srcTracker = TrackerRepository.getTracker(context, hb);
-          if (srcTracker != null) {
-            fdTracker.setSource(fdTracker.getLength(), length,
-                srcTracker, startIndex);
-          }
-          fdTracker.append(hb, startIndex, length);
-        }
+        TrackerUpdater.appendByteBuffer(context, fdTracker, src, startPositions[i], length);
         remaining -= length;
         i++;
       }

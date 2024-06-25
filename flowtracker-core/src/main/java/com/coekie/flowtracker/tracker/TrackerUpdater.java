@@ -16,6 +16,9 @@ package com.coekie.flowtracker.tracker;
  * limitations under the License.
  */
 
+import com.coekie.flowtracker.hook.ByteBufferHook;
+import java.nio.ByteBuffer;
+
 /**
  * Helper methods for hooks to update trackers
  */
@@ -55,5 +58,25 @@ public class TrackerUpdater {
       setSourceTracker(context, target, targetIndex, length, sourcePoint.tracker, sourcePoint.index,
           Growth.of(length, sourcePoint.length));
     }
+  }
+
+  public static void appendBytes(Context context, ByteSinkTracker tracker, byte[] src, int offset,
+      int length) {
+    Tracker sourceTracker = TrackerRepository.getTracker(context, src);
+    if (sourceTracker != null) {
+      tracker.setSource(tracker.getLength(), length, sourceTracker, offset);
+    }
+    tracker.append(src, offset, length);
+  }
+
+  public static void appendByteBuffer(Context context, ByteSinkTracker tracker, ByteBuffer src,
+      int position, int length) {
+    if (src.isDirect()) {
+      return; // direct buffers are not supported yet
+    }
+
+    byte[] hb = ByteBufferHook.hb(src);
+    int startOffset = ByteBufferHook.offset(src) + position;
+    appendBytes(context, tracker, hb, startOffset, length);
   }
 }
