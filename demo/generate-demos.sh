@@ -50,7 +50,7 @@ run_simple() {
   cd -
 }
 
-publish() {
+prepare_git() {
   if [ ! -e pages ]; then
     git clone --branch pages git@github.com:coekie/flowtracker-demo.git pages
   fi
@@ -70,6 +70,11 @@ publish() {
   fi
   git add .
   git commit -m 'Generated'
+  cd ..
+}
+
+publish_live() {
+  cd pages
   git push -f
   cd ..
 }
@@ -78,4 +83,8 @@ build_flowtracker
 set_env
 run_petclinic
 run_simple
-publish
+prepare_git
+
+if [ "${1:-}" == "live" ]; then
+  publish_live
+fi
