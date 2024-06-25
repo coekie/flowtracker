@@ -61,6 +61,12 @@
   let pre: HTMLPreElement;
   let codeView: CodeView;
 
+  /**
+   * Position of the split between content and code. Binding to a variable here so that when selecting another
+   * tracker (which destroys and recreates the view) that position is maintained.
+   */
+  let splitPosition: number = 30;
+
   const fetchTrackerDetail = async (
     viewTrackerId: number | undefined,
     targetTrackerId: number | undefined
@@ -230,7 +236,10 @@
       {/if}
     </div>
     <div class="split">
-      <TrackerDetailSplit showSplit={trackerDetail.hasSource}>
+      <TrackerDetailSplit
+        showSplit={trackerDetail.hasSource}
+        bind:splitPosition
+      >
         <div class="content" slot="one">
           {#if showCreation && trackerDetail.creationStackTrace}
             <pre class="creation">{trackerDetail.creationStackTrace}</pre>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {Pane, Splitpanes} from 'svelte-splitpanes';
   export let showSplit: boolean;
+  export let splitPosition: number;
 </script>
 
 <!-- @component
@@ -17,7 +18,7 @@ Also makes the split pane optional based on `showSplit`, so that we do not creat
   <slot name="two" />
 {:else}
   <Splitpanes theme="my-theme">
-    <Pane size={30}>
+    <Pane bind:size={splitPosition} snapSize={10}>
       <slot name="one" />
     </Pane>
     <Pane>
