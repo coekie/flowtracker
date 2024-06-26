@@ -83,7 +83,12 @@
     const response = !targetTrackerId
       ? await fetch('tracker/' + viewTrackerId)
       : await fetch('tracker/' + viewTrackerId + '_to_' + targetTrackerId);
-    if (!response.ok) throw new Error(response.statusText);
+    if (!response.ok) {
+      if (response.status == 404) {
+        alert('Tracker data not found. Application may have restarted while you were browsing. Please refresh.');
+      }
+      throw new Error(response.statusText);
+    }
     return response.json();
   };
 

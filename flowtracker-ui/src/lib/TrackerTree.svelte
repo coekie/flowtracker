@@ -38,7 +38,7 @@
         path: [],
       };
     }
-    const response = await fetch('tree' + url);
+    const response = await fetch('tree' + url, {cache: 'no-cache'});
     if (!response.ok) return Promise.reject(response);
     return response.json().then(r => {
       const enriched = enrich(r, null);
