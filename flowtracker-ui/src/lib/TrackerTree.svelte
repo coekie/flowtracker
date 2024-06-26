@@ -64,9 +64,14 @@
       var remaining = hash.substring(1).split('/').map(decodeURIComponent);
 
       while (remaining.length > 0) {
-        const next = node.children.find(child =>
+        let next = node.children.find(child =>
           pathStartsWith(remaining, child.names)
         );
+        if (!next) {
+          next = node.children.find(child =>
+            looselyStartsWith(remaining, child.names)
+          );
+        }
         if (!next) {
           return;
         }
@@ -77,6 +82,22 @@
         onTrackerSelected(node.tracker);
       }
     }
+  }
+
+  // like pathStartsWith, but handles wildcard (*) at the end of each element.
+  // this is so that we can make links into a demo to a node that contains semi-random
+  // elements like port numbers.
+  function looselyStartsWith(a: string[], b: string[]): boolean {
+    return (
+      a &&
+      b &&
+      a.length >= b.length &&
+      b.every((n, i) =>
+        a[i].endsWith('*')
+          ? n.startsWith(a[i].substring(n.length - 1))
+          : a[i] == n
+      )
+    );
   }
 </script>
 
