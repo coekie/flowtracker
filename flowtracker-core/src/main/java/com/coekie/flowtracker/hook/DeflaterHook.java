@@ -68,8 +68,7 @@ public class DeflaterHook {
 
   @Hook(
       target = "java/util/zip/Deflater",
-      method = "int deflate(byte[], int, int, int)",
-      location = HookLocation.ON_RETURN)
+      method = "int deflate(byte[], int, int, int)")
   public static void afterDeflateBytes(@Arg("RETURN") int written, @Arg("THIS") Deflater deflater,
       @Arg("ARG0") byte[] output, @Arg("ARG1") int outputOffset) {
     DeflaterState state = stateMap.get(deflater);
@@ -80,8 +79,7 @@ public class DeflaterHook {
 
   @Hook(
       target = "java/util/zip/Deflater",
-      method = "int deflate(java.nio.ByteBuffer, int)",
-      location = HookLocation.ON_RETURN)
+      method = "int deflate(java.nio.ByteBuffer, int)")
   public static void afterDeflateBuffer(@Arg("RETURN") int written, @Arg("THIS") Deflater deflater,
       @Arg("ARG0") ByteBuffer outputBuffer) {
     DeflaterState state = stateMap.get(deflater);
@@ -92,6 +90,18 @@ public class DeflaterHook {
       byte[] output = ByteBufferHook.hb(outputBuffer);
       int outputOffset = ByteBufferHook.offset(outputBuffer) + outputBuffer.position() - written;
       updateOriginAfterDeflate(context, state, output, outputOffset, written);
+    }
+  }
+
+  @Hook(
+      target = "java/util/zip/Deflater",
+      method = "void reset()")
+  public static void afterReset(@Arg("THIS") Deflater deflater) {
+    DeflaterState state = stateMap.get(deflater);
+    if (state != null) {
+      // use a new tracker for the next input and output.
+      state.originTracker = null;
+      state.sinkTracker = null;
     }
   }
 

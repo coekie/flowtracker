@@ -46,6 +46,18 @@ public class DeflaterTest {
     testDeflateToArray(InputType.BYTE_BUFFER, OutputType.BYTE_BUFFER);
   }
 
+  @Test public void testReset() {
+    deflater = new Deflater();
+    byte[] out = new byte[64];
+    deflater.setInput(abc);
+    deflater.deflate(out, 0, 64, Deflater.FULL_FLUSH);
+    assertThat(DeflaterHook.getSinkTracker(deflater)).isNotNull();
+    assertThat(DeflaterHook.getOriginTracker(deflater)).isNotNull();
+    deflater.reset();
+    assertThat(DeflaterHook.getSinkTracker(deflater)).isNull();
+    assertThat(DeflaterHook.getOriginTracker(deflater)).isNull();
+  }
+
   private void testDeflateToArray(InputType inputType, OutputType outputType) {
     deflater = new Deflater();
     byte[] out = new byte[64];
