@@ -33,6 +33,7 @@ export interface TrackerDetail {
   creationStackTrace: string | null;
   regions: Region[];
   hasSource: boolean;
+  twin: Tracker | null;
 }
 
 // in java: TreeResource.NodeDetailResponse

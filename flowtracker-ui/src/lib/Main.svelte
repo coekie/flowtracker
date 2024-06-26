@@ -39,17 +39,21 @@
   }
 
   function onTrackerSelectedInTree(tracker: Tracker) {
-    // reset secondaryTracker, to prevent ever having a secondaryTracker
-    // that is unrelated to the mainTracker
-    secondaryTracker = null;
-
-    mainTracker = tracker;
+    onMainTrackerSelected(tracker);
 
     // if we selected a tracker when all that's visible is the tree (usually because the screen
     // isn't wide enough) then hide the tree, so we can see the TrackerDetailView.
     if (treePaneSize == 100) {
       treePaneSize = 0;
     }
+  }
+
+  function onMainTrackerSelected(tracker: Tracker) {
+    // reset secondaryTracker, to prevent ever having a secondaryTracker
+    // that is unrelated to the mainTracker
+    secondaryTracker = null;
+
+    mainTracker = tracker;
 
     window.location.hash = tracker.path.map(encodeURIComponent).join('/');
   }
@@ -75,6 +79,7 @@
               bind:coloring
               bind:secondaryTracker
               ondblclick={() => originView?.scrollToSelection()}
+              {onMainTrackerSelected}
             />
           </Pane>
           <Pane>
@@ -85,6 +90,7 @@
               bind:coloring
               targetTracker={mainTracker}
               ondblclick={() => sinkView?.scrollToSelection()}
+              {onMainTrackerSelected}
             />
           </Pane>
         </Splitpanes>

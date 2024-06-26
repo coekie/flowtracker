@@ -196,6 +196,9 @@ public class TrackerResource {
      */
     public final boolean hasSource;
 
+    /** @see Tracker#twin */
+    public final TrackerResponse twin;
+
     private TrackerDetailResponse(Tracker tracker, List<Region> regions,
         TrackerPartResponseBuilder partBuilder, boolean hasSource) {
       this.path = path(tracker);
@@ -203,6 +206,7 @@ public class TrackerResource {
       this.regions = regions;
       this.linkedTrackers = partBuilder.linkedTrackers;
       this.hasSource = hasSource;
+      this.twin = tracker.twin == null ? null : new TrackerResponse(tracker.twin);
     }
   }
 

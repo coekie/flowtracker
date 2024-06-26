@@ -2,7 +2,12 @@
   import {tick} from 'svelte';
   import type {Tracker, TrackerDetail, Region} from '../javatypes';
   import PathView from './PathView.svelte';
-  import {type ASelection, pathStartsWith, RangeSelection} from './selection';
+  import {
+    type ASelection,
+    type OnTrackerSelected,
+    pathStartsWith,
+    RangeSelection,
+  } from './selection';
   import type {Coloring} from './coloring';
   import CodeView from './CodeView.svelte';
   import TrackerDetailSplit from './TrackerDetailSplit.svelte';
@@ -39,6 +44,7 @@
   export let secondaryTracker: Tracker | null = null;
 
   export let ondblclick: (() => void) | null = null;
+  export let onMainTrackerSelected: OnTrackerSelected | null = null;
 
   // pull out the ids, to prevent unnecessary re-fetching when tracker is changed to other instance
   // with same id
@@ -227,13 +233,25 @@
   <div class="trackerDetail">
     <div class="path">
       <PathView path={trackerDetail.path} bind:selection {coloring} />
-      {#if trackerDetail.creationStackTrace}
-        <button
-          class="toggle-creation"
-          on:click={() => (showCreation = !showCreation)}
-          title="Toggle creation stacktrace"
-        />
-      {/if}
+      <span class="header-buttons">
+        {#if trackerDetail.twin}
+          <button
+            class="goto-twin"
+            on:click={() =>
+              onMainTrackerSelected &&
+              trackerDetail.twin &&
+              onMainTrackerSelected(trackerDetail.twin)}
+            title="Go to twin (switch between input and output)"
+          />
+        {/if}
+        {#if trackerDetail.creationStackTrace}
+          <button
+            class="toggle-creation"
+            on:click={() => (showCreation = !showCreation)}
+            title="Toggle creation stacktrace"
+          />
+        {/if}
+      </span>
     </div>
     <div class="split">
       <TrackerDetailSplit
@@ -291,11 +309,21 @@
   .path {
     border-bottom: 1px solid #ccc;
   }
+  .header-buttons {
+    float: right;
+    margin-right: 0.5em;
+  }
+  .goto-twin {
+    border: none;
+    background: none;
+    width: 1.2em;
+    height: 1.2em;
+    background-image: url(/swap_horiz.svg);
+    background-size: contain;
+  }
   .toggle-creation {
     border: none;
     background: none;
-    float: right;
-    margin-right: 0.5em;
     width: 1.2em;
     height: 1.2em;
     background-image: url(/stacks.svg);

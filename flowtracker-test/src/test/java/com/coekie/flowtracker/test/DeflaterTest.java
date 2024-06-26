@@ -4,6 +4,7 @@ import static com.coekie.flowtracker.tracker.TrackerSnapshot.assertThatTracker;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
+import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.hook.DeflaterHook;
 import com.coekie.flowtracker.tracker.ByteOriginTracker;
@@ -56,6 +57,17 @@ public class DeflaterTest {
     deflater.reset();
     assertThat(DeflaterHook.getSinkTracker(deflater)).isNull();
     assertThat(DeflaterHook.getOriginTracker(deflater)).isNull();
+  }
+
+  @Test public void testTwins() {
+    deflater = new Deflater();
+    byte[] out = new byte[64];
+    deflater.setInput(abc);
+    deflater.deflate(out, 0, 64, Deflater.FULL_FLUSH);
+    ByteSinkTracker sinkTracker = requireNonNull(DeflaterHook.getSinkTracker(deflater));
+    ByteOriginTracker originTracker = requireNonNull(DeflaterHook.getOriginTracker(deflater));
+    assertThat(sinkTracker.twin).isEqualTo(originTracker);
+    assertThat(originTracker.twin).isEqualTo(sinkTracker);
   }
 
   private void testDeflateToArray(InputType inputType, OutputType outputType) {

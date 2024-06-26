@@ -23,11 +23,17 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class Tracker implements WritableTracker {
 
   private static final AtomicLong idGenerator = new AtomicLong();
-  private final long trackerId = nextId();
   public static boolean trackCreation = false;
 
+  private final long trackerId = nextId();
   private TrackerTree.Node node;
   private StackTraceElement[] creationStackTrace;
+
+  /**
+   * Other tracker that is closely associated to this one, e.g. linking the input and output on a
+   * socket.
+   */
+  public Tracker twin;
 
   Tracker() {
   }
