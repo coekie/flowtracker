@@ -18,7 +18,6 @@ package com.coekie.flowtracker.web;
 
 import static java.util.Objects.requireNonNull;
 
-import com.coekie.flowtracker.hook.SystemHook;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerTree;
@@ -86,7 +85,7 @@ public class Snapshot {
 
       // the order here matters because: Snapshot.includedTrackers is mutable: it is populated by
       // writeTrackers and depended on by writeTree and writeCode.
-      writeTrackers(zos, TrackerTree.ROOT, false);
+      writeTrackers(zos, TrackerTree.ROOT);
       writeTree(zos);
       writeCode(zos);
     }
@@ -104,17 +103,12 @@ public class Snapshot {
     writeJson(zos, "tree/sinks", tree.tree(NodeRequestParams.SINKS.and(filter)));
   }
 
-  private void writeTrackers(ZipOutputStream zos, TrackerTree.Node node, boolean minimizedNode)
+  private void writeTrackers(ZipOutputStream zos, TrackerTree.Node node)
       throws IOException {
-    // only apply minimizing to files, classes, and system.
-    // applying it to network connections would be confusing, seeing only half of the conversation.
-    if (node == TrackerTree.FILES || node == TrackerTree.CLASS || node == SystemHook.SYSTEM) {
-      minimizedNode = minimized;
-    }
     for (Tracker tracker : node.trackers()) {
       // when minimized then don't include origin trackers or empty just because they are in
       // the tree. So they are only included if they are referenced from a sink.
-      if (minimizedNode
+      if (minimized
           && (TrackerResource.isOrigin(tracker)
           || TrackerResource.getContentLength(tracker) == 0)) {
         continue;
@@ -124,7 +118,7 @@ public class Snapshot {
       writeTracker(zos, tracker.getTrackerId());
     }
     for (Node child : node.children()) {
-      writeTrackers(zos, child, minimizedNode);
+      writeTrackers(zos, child);
     }
   }
 
@@ -133,6 +127,9 @@ public class Snapshot {
     if (includedTrackers.add(trackerId)) {
       TrackerDetailResponse trackerDetail = trackerResource.get(trackerId);
       writeJson(zos, "tracker/" + trackerId, trackerDetail);
+      if (trackerDetail.twin != null) {
+        writeTracker(zos, trackerDetail.twin.id);
+      }
       Set<Long> toWritten = new HashSet<>(); // for which trackers we wrote x_to_y already
       for (Region region : trackerDetail.regions) {
         for (TrackerPartResponse part : region.parts) {

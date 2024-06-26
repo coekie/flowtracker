@@ -38,7 +38,7 @@ import java.util.Properties;
 
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class SystemHook {
-  public static final Node SYSTEM = TrackerTree.node("System");
+  private static final Node SYSTEM = TrackerTree.node("System");
 
   @SuppressWarnings("SuspiciousSystemArraycopy")
   public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
