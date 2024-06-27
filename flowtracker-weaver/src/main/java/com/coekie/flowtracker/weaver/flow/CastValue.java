@@ -49,6 +49,16 @@ class CastValue extends FlowValue {
   }
 
   @Override
+  boolean initCreationFrame(FlowAnalyzer analyzer) {
+    if (super.initCreationFrame(analyzer)) {
+      target.initCreationFrame(analyzer);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
   void ensureTracked() {
     target.ensureTracked();
   }

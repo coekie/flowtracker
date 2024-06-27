@@ -147,7 +147,8 @@ class InvocationArgStore extends Store {
         // - java.nio.ByteBuffer
         // - jdk.internal.util.ByteArray (used in ByteArrayHook)
         // - org.objectweb.asm.ByteVector (AsmDemo)
-        || owner.contains("Byte");
+        || owner.contains("Byte")
+        || owner.contains("Writer");
 
     for (int i = 0; i < args.length; i++) {
       Type arg = args[i];

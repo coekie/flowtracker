@@ -193,9 +193,13 @@ class FlowInterpreter extends Interpreter<FlowValue> {
           return value2;
         }
       }
+      case Opcodes.ISHL:
+      case Opcodes.LSHL:
+      case Opcodes.ISHR:
+      case Opcodes.LSHR:
       case Opcodes.IUSHR:
       case Opcodes.LUSHR: {
-        // treat `x >>> constant` as having the same source as x.
+        // treat `x >>> constant` and other shifting as having the same source as x.
         // for e.g. DataOutputStream.writeShort/writeChar, Bits.putShort/putInt (in older jdks)
         if (value2 instanceof ConstantValue) {
           return value1;

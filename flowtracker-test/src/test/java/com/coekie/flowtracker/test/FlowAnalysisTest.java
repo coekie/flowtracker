@@ -166,6 +166,7 @@ public class FlowAnalysisTest {
     ft.assertIsTheTrackedValue((byte) (i >>> 0));
     ft.assertIsTheTrackedValue((byte) ((i >>> 8) & 0xFF));
     ft.assertIsTheTrackedValue((byte) ((i >>> 0) & 0xFF));
+    ft.assertIsTheTrackedValue((byte) ((i >> 8) & 0xFF));
   }
 
   @Test public void shiftLong() {
