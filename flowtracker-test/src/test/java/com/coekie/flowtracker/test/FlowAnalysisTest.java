@@ -5,7 +5,13 @@ import static com.coekie.flowtracker.test.FlowTester.untrackedChar;
 import static com.coekie.flowtracker.test.TrackTestHelper.assertIsFallbackIn;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedByteArray;
+import static com.coekie.flowtracker.tracker.Context.context;
+import static com.coekie.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf;
+import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
+import static com.google.common.truth.Truth.assertThat;
 
+import com.coekie.flowtracker.tracker.Growth;
+import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import org.junit.Test;
 
@@ -43,22 +49,60 @@ public class FlowAnalysisTest {
     array[0] = secondLast;
     array[1] = last;
 
-   TrackerSnapshot.assertThatTrackerOf(array).matches(TrackerSnapshot.snapshot()
+   assertThatTrackerOf(array).matches(TrackerSnapshot.snapshot()
       .trackString(2, abc, 0));
   }
 
   // Test that we track a value through "x & 255". (Analyzed code may use that to convert a signed
   // byte into an unsigned value.)
-  @Test public void binaryAnd() {
+  @Test public void binaryAndConstant() {
     byte b = ft.createSourceByte((byte) 'a');
     ft.assertIsTheTrackedValue((char) (b & 255));
     ft.assertIsTheTrackedValue((char) (255 & b));
   }
 
-  @Test public void binaryAndLong() {
+  @Test public void binaryAndConstantLong() {
     long i = ft.createSourceLong('a');
     ft.assertIsTheTrackedValue((char) (i & 255));
     ft.assertIsTheTrackedValue((char) (255 & i));
+  }
+
+  @Test public void binaryOrConstant() {
+    // not sure if this matters. the value is a combination of two, so we pick the non-constant one
+    // as the one that's presumably the most interesting one. For consistency with '&'
+    byte b = ft.createSourceByte((byte) 'a');
+    ft.assertIsTheTrackedValue((char) (b | 128));
+    ft.assertIsTheTrackedValue((char) (128 | b));
+  }
+
+  @Test public void binaryOrConstantLong() {
+    long i = ft.createSourceLong('a');
+    ft.assertIsTheTrackedValue((char) (i | 128));
+    ft.assertIsTheTrackedValue((char) (128 | i));
+  }
+
+  @Test public void binaryOrCombine() {
+    byte[] bytes = trackedByteArray("abcdef");
+    char[] chars = new char[2];
+    chars[0] = (char) ((bytes[0] << 8) | bytes[1]);
+    chars[1] = (char) (bytes[3] | (bytes[2] << 8)); // other order
+    assertThatTrackerOf(chars).matches(snapshot()
+        .part(2, TrackerRepository.getTracker(context(), bytes), 0, Growth.HALF));
+
+    // test handling of points that already have length > 1:
+    // combining two points with length two gives one of length 4
+    int[] ints = new int[1];
+    ints[0] = (chars[0] << 16) | chars[1];
+    assertThatTrackerOf(ints).matches(snapshot()
+        .part(1, TrackerRepository.getTracker(context(), bytes), 0, Growth.of(1, 4)));
+  }
+
+  @Test public void binaryOrCombineMismatch() {
+    byte[] bytes1 = trackedByteArray("abc");
+    byte[] bytes2 = trackedByteArray("xyz");
+    char[] chars = new char[2];
+    chars[0] = (char) ((bytes1[0] << 8) | bytes2[1]);
+    assertThat(getCharSourcePoint(chars[0])).isNull();
   }
 
   // Test that we track a value through ">>>" (IUSHR).
@@ -94,7 +138,7 @@ public class FlowAnalysisTest {
       dst[i] = (char)(src[i + 1] & 255);
     }
 
-    TrackerSnapshot.assertThatTrackerOf(dst).matches(TrackerSnapshot.snapshot().track(3, src, 1));
+    assertThatTrackerOf(dst).matches(TrackerSnapshot.snapshot().track(3, src, 1));
   }
 
   /** Test handling of a jump; mostly if frames are correctly updated by the LocalVariablesSorter */

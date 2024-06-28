@@ -207,6 +207,11 @@ public class TrackerSnapshot {
       return part(length, TrackerRepository.getTracker(context(), source), sourceIndex);
     }
 
+    public Builder track(int length, Object source, int sourceIndex, Growth growth) {
+      if (source instanceof Tracker) throw new IllegalArgumentException("wrong method");
+      return part(length, TrackerRepository.getTracker(context(), source), sourceIndex, growth);
+    }
+
     public Builder trackString(String source) {
       return part(StringHook.getStringTracker(context(), source));
     }

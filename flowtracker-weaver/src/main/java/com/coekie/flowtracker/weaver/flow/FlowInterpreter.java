@@ -193,6 +193,26 @@ class FlowInterpreter extends Interpreter<FlowValue> {
           return value2;
         }
       }
+      case Opcodes.IOR:
+      case Opcodes.LOR: {
+        if (value2 instanceof ConstantValue) {
+          // treat `x | constant` as having the same source as x.
+          // not sure if this matters. the value is a combination of two, so we pick the
+          // non-constant one as the one that's presumably the most interesting one.
+          // For consistency with '&'.
+          return value1;
+        } else if (value1 instanceof ConstantValue) {
+          return value2;
+        } else if (!value2.isTrackable()) {
+          // not sure if this matters, but seems reasonable to take the part that we have tracked,
+          // and ignore the part we haven't. better than nothing.
+          return value1;
+        } else if (!value1.isTrackable()) {
+          return value2;
+        } else {
+          return new OrValue(method, value1.getType(), aInsn, value1, value2);
+        }
+      }
       case Opcodes.ISHL:
       case Opcodes.LSHL:
       case Opcodes.ISHR:
