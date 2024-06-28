@@ -1,6 +1,7 @@
 package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.test.TrackTestHelper.stringTracker;
+import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
@@ -88,5 +89,34 @@ public class StringBuilderTest {
     TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
         TrackerSnapshot.snapshot()
         .trackString(1, abcd, 0).trackString(1, x, 0).trackString(3, abcd, 3));
+  }
+
+  @Test public void stringBuilderAppendChar() {
+    String abc = trackCopy("abc");
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < abc.length(); i++) {
+      sb.append(abc.charAt(i));
+    }
+    String result = sb.toString();
+
+    assertThat(result).isEqualTo("abc");
+
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
+        TrackerSnapshot.snapshot().trackString(3, abc, 0));
+  }
+
+  @SuppressWarnings("StringBufferMayBeStringBuilder")
+  @Test public void stringBufferAppendChar() {
+    String abc = trackCopy("abc");
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < abc.length(); i++) {
+      sb.append(abc.charAt(i));
+    }
+    String result = sb.toString();
+
+    assertThat(result).isEqualTo("abc");
+
+    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
+        TrackerSnapshot.snapshot().trackString(3, abc, 0));
   }
 }

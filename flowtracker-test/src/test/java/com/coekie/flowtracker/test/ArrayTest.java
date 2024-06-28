@@ -8,6 +8,7 @@ import static com.coekie.flowtracker.tracker.TrackerSnapshot.assertThatTrackerOf
 import static com.coekie.flowtracker.tracker.TrackerSnapshot.snapshot;
 import static com.google.common.truth.Truth.assertThat;
 
+import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import org.junit.Test;
 
 /**
@@ -96,5 +97,31 @@ public class ArrayTest {
 
     assertThatTrackerOf(array).matches(
         snapshot().track(1, abc, 1).track(1, abc, 0).track(1, abc, 2));
+  }
+
+  /**
+   * Regression test that tests that when we get a value out of an array, we find out where it came
+   * from at that point; and not at the moment use that value because by then the value in the array
+   * might have already changed.
+   */
+  @Test public void arrayLoadMutatedBeforeUse() {
+    FlowTester ft2 = new FlowTester();
+
+    char[] array1 = new char[1];
+    array1[0] = ft.createSourceChar('a');
+
+    // testing that we track where gotA and gotB come from based on the time they were read; not
+    // the time they were used
+    char gotA = array1[0];
+    array1[0] = ft2.createSourceChar('b');
+    char gotB = array1[0];
+
+    char[] target = new char[2];
+    target[0] = gotA;
+    target[1] = gotB;
+
+    TrackerSnapshot.assertThatTrackerOf(target).matches(TrackerSnapshot.snapshot()
+        .part(ft.point())
+        .part(ft2.point()));
   }
 }

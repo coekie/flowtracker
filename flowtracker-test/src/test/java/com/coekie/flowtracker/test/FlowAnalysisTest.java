@@ -3,46 +3,20 @@ package com.coekie.flowtracker.test;
 import static com.coekie.flowtracker.test.FlowTester.getCharSourcePoint;
 import static com.coekie.flowtracker.test.FlowTester.untrackedChar;
 import static com.coekie.flowtracker.test.TrackTestHelper.assertIsFallbackIn;
-import static com.coekie.flowtracker.test.TrackTestHelper.stringTracker;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackCopy;
 import static com.coekie.flowtracker.test.TrackTestHelper.trackedByteArray;
-import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import org.junit.Test;
 
-/** Test FlowTransformer and friends */
-@SuppressWarnings("StringBufferMayBeStringBuilder")
+/**
+ * Test FlowTransformer, FlowInterpreter and friends. This is a mix of mostly tests that don't have
+ * a good home in another test class, either because they're not worth splitting out (e.g. tests for
+ * how some particular ops are handled in the interpreter), or testing a generic mechanism (not for
+ * a specific type of FlowValue or Store).
+ */
 public class FlowAnalysisTest {
   private final FlowTester ft = new FlowTester();
-
-  @Test public void stringBuilderAppendChar() {
-    String abc = trackCopy("abc");
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < abc.length(); i++) {
-      sb.append(abc.charAt(i));
-    }
-    String result = sb.toString();
-
-    assertThat(result).isEqualTo("abc");
-
-    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
-        TrackerSnapshot.snapshot().trackString(3, abc, 0));
-  }
-
-  @Test public void stringBufferAppendChar() {
-    String abc = trackCopy("abc");
-    StringBuffer sb = new StringBuffer();
-    for (int i = 0; i < abc.length(); i++) {
-      sb.append(abc.charAt(i));
-    }
-    String result = sb.toString();
-
-    assertThat(result).isEqualTo("abc");
-
-    TrackerSnapshot.assertThatTracker(stringTracker(result)).matches(
-        TrackerSnapshot.snapshot().trackString(3, abc, 0));
-  }
 
   @Test public void fallback() {
     char[] array = new char[2];
@@ -71,76 +45,6 @@ public class FlowAnalysisTest {
 
    TrackerSnapshot.assertThatTrackerOf(array).matches(TrackerSnapshot.snapshot()
       .trackString(2, abc, 0));
-  }
-
-  char[] chars = new char[]{FlowTester.untrackedChar('.')};
-
-  /**
-   * Test for handling MergedValue coming from InvocationArgValue. A bit special because
-   * InvocationArgValues don't really have a _real_ FlowValue.creationInsn; they don't get created
-   * in a specific instruction, so we (FlowInterpreter.newParameterValue) pick the first one of the
-   * method.
-   */
-  @Test public void mergeWithParamIf() {
-    doMergeWithParamIf(ft.createSourceChar('a'), false);
-    ft.assertIsTheTrackedValue(chars[0]);
-  }
-
-  @SuppressWarnings("all")
-  void doMergeWithParamIf(char c, boolean b) {
-    if (b) {
-      c = 'x';
-    }
-    chars[0] = c;
-  }
-
-  /**
-   * Like {@link #mergeWithParamIf}, but with a switch. For some reason if statements and switch
-   * statements end up with different set of merges, which in tests (before this was properly
-   * handled) made them behave differently, with different results; so we're testing both.
-   */
-  @Test public void mergeWithParamSwitch() {
-    doMergeWithParamSwitch(ft.createSourceChar('a'), 1);
-    ft.assertIsTheTrackedValue(chars[0]);
-  }
-
-  @SuppressWarnings("all")
-  void doMergeWithParamSwitch(char c, int i) {
-    switch (i) {
-      case 2:
-        c = 'x';
-    }
-    chars[0] = c;
-  }
-
-  @Test public void cast() {
-    int i = ft.createSourceByte((byte) 'a');
-    ft.assertIsTheTrackedValue((byte) i);
-    ft.assertIsTheTrackedValue((char) i);
-    ft.assertIsTheTrackedValue((byte) (int) (byte) i);
-    ft.assertIsTheTrackedValue((char) (int) (char) i);
-    ft.assertIsTheTrackedValue((char) (short) (char) i);
-  }
-
-  // casts with long are special because long takes two slots. see CastValue
-  @Test public void castFromLong() {
-    long i = ft.createSourceLong('a');
-    ft.assertIsTheTrackedValue((int) i);
-    ft.assertIsTheTrackedValue((byte) i);
-    ft.assertIsTheTrackedValue((char) i);
-    ft.assertIsTheTrackedValue((byte) (int) (byte) i);
-    ft.assertIsTheTrackedValue((char) (int) (char) i);
-    ft.assertIsTheTrackedValue((char) (short) (char) i);
-  }
-
-  // casts with long are special because long takes two slots. see CastValue
-  @SuppressWarnings("RedundantCast")
-  @Test public void castToLong() {
-    int i = ft.createSourceByte((byte) 'a');
-    ft.assertIsTheTrackedValue((long) i);
-    ft.assertIsTheTrackedValue((long) (char) i);
-    ft.assertIsTheTrackedValue((long) (byte) i);
-    ft.assertIsTheTrackedValue((long) (short) i);
   }
 
   // Test that we track a value through "x & 255". (Analyzed code may use that to convert a signed
@@ -210,31 +114,5 @@ public class FlowAnalysisTest {
       ch = ft.createSourceChar('a');
     } while (false);
     ft.assertIsTheTrackedValue(ch);
-  }
-
-  /**
-   * Regression test that tests that when we get a value out of an array, we find out where it came
-   * from at that point; and not at the moment use that value because by then the value in the array
-   * might have already changed.
-   */
-  @Test public void arrayLoadMutatedBeforeUse() {
-    FlowTester ft2 = new FlowTester();
-
-    char[] array1 = new char[1];
-    array1[0] = ft.createSourceChar('a');
-
-    // testing that we track where gotA and gotB come from based on the time they were read; not
-    // the time they were used
-    char gotA = array1[0];
-    array1[0] = ft2.createSourceChar('b');
-    char gotB = array1[0];
-
-    char[] target = new char[2];
-    target[0] = gotA;
-    target[1] = gotB;
-
-    TrackerSnapshot.assertThatTrackerOf(target).matches(TrackerSnapshot.snapshot()
-        .part(ft.point())
-        .part(ft2.point()));
   }
 }

@@ -169,6 +169,48 @@ public class InvocationInstrumentationTest {
     assertThat(sink.called).isTrue();
   }
 
+  char[] chars = new char[]{FlowTester.untrackedChar('.')};
+
+  /**
+   * Test for handling MergedValue coming from InvocationArgValue. A bit special because
+   * InvocationArgValues don't really have a _real_ FlowValue.creationInsn; they don't get created
+   * in a specific instruction, so we (FlowInterpreter.newParameterValue) pick the first one of the
+   * method.
+   */
+  @Test public void mergeWithParamIf() {
+    FlowTester ft = new FlowTester();
+    doMergeWithParamIf(ft.createSourceChar('a'), false);
+    ft.assertIsTheTrackedValue(chars[0]);
+  }
+
+  @SuppressWarnings("all")
+  void doMergeWithParamIf(char c, boolean b) {
+    if (b) {
+      c = 'x';
+    }
+    chars[0] = c;
+  }
+
+  /**
+   * Like {@link #mergeWithParamIf}, but with a switch. For some reason if statements and switch
+   * statements end up with different set of merges, which in tests (before this was properly
+   * handled) made them behave differently, with different results; so we're testing both.
+   */
+  @Test public void mergeWithParamSwitch() {
+    FlowTester ft = new FlowTester();
+    doMergeWithParamSwitch(ft.createSourceChar('a'), 1);
+    ft.assertIsTheTrackedValue(chars[0]);
+  }
+
+  @SuppressWarnings("all")
+  void doMergeWithParamSwitch(char c, int i) {
+    switch (i) {
+      case 2:
+        c = 'x';
+    }
+    chars[0] = c;
+  }
+
   static boolean staticSinkInitialized = false;
   static class StaticSink {
     static boolean called;
