@@ -39,6 +39,19 @@ run_petclinic() {
   cd ..
 }
 
+run_javac() {
+  echo Demo: javac
+  echo 'class HelloWorld {
+    public static void main(String[] args) {
+      System.out.println("Hello, World!");
+    }
+  }' > HelloWorld.java
+  # eagerly instrumenting com.sun.tools.javac.jvm.* improves results.
+  # to pass JVM arguments to javac, they are prefixed with -J
+  FT_JAVAC_OPTS="-J-javaagent:$FT_JAR=webserver=false;snapshotOnExit=javac-snapshot.zip;eager=+com.sun.tools.javac.jvm.* "$(for s in $FT_JVMOPTS; do echo -n "-J$s "; done)
+  javac $FT_JAVAC_OPTS HelloWorld.java
+}
+
 run_simple() {
   OUT=$(pwd)
   cd "$(dirname $0)"
@@ -82,6 +95,7 @@ publish_live() {
 build_flowtracker
 set_env
 run_petclinic
+run_javac
 run_simple
 prepare_git
 
