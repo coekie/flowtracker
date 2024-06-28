@@ -88,6 +88,10 @@ class InvocationReturnValue extends TrackableValue {
         return true;
       }
 
+      if (InvocationArgStore.eagerFilter != null && InvocationArgStore.eagerFilter.include(owner)) {
+        return true;
+      }
+
       // e.g. Character.codePointAt.
       // but not [String|Character].offsetByCodePoints because that's useless and seen in profiler
       // as significant overhead (as used by CheckMethodAdapter).

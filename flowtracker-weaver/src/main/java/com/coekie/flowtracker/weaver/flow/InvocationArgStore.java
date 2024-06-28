@@ -19,6 +19,8 @@ package com.coekie.flowtracker.weaver.flow;
 import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.tracker.Invocation;
+import com.coekie.flowtracker.util.Config;
+import com.coekie.flowtracker.weaver.ClassFilter;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
 import java.util.List;
 import org.objectweb.asm.Opcodes;
@@ -31,12 +33,15 @@ import org.objectweb.asm.tree.analysis.Frame;
  * The passing of a value as argument into the invocation of another method that may be instrumented
  * with {@link Invocation}.
  */
-class InvocationArgStore extends Store {
+public class InvocationArgStore extends Store {
   // Two reasons we don't want to instrument arguments beyond this:
   // - the ICONST_0 + i doesn't work for higher ones (we could fix that by using LdcInsNode)
   // - in Invocation we have getArg0Tracker/getArg0Index methods up to arg 5
   // - methods with more arguments than that are probably not as likely to be worth instrumenting
   static final int MAX_ARG_NUM_TO_INSTRUMENT = 5;
+
+  /** Classes where we're more eager to track primitive values */
+  static ClassFilter eagerFilter;
 
   // for now, we only support calls with one argument
   private final FlowValue[] args;
@@ -148,7 +153,8 @@ class InvocationArgStore extends Store {
         // - jdk.internal.util.ByteArray (used in ByteArrayHook)
         // - org.objectweb.asm.ByteVector (AsmDemo)
         || owner.contains("Byte")
-        || owner.contains("Writer");
+        || owner.contains("Writer")
+        || (eagerFilter != null && eagerFilter.include(owner));
 
     for (int i = 0; i < args.length; i++) {
       Type arg = args[i];
@@ -171,6 +177,13 @@ class InvocationArgStore extends Store {
       toInstrument.add(new InvocationArgStore(mInsn, frame,
           // next frame, might contain the return value of the call
           insnIndex + 1 < frames.length ? (FlowFrame) frames[insnIndex + 1] : null));
+    }
+  }
+
+  public static void initialize(Config config) {
+    String eagerConfig = config.get("eager");
+    if (eagerConfig != null) {
+      eagerFilter = new ClassFilter(eagerConfig, "");
     }
   }
 }

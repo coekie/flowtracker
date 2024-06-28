@@ -30,11 +30,18 @@ Supported configuration options:
 * `filter`: Specifies which classes to instrument. Comma-separated list of inclusions (starting with +) or exclusions (starting with -).
   There's a recommended base of classes to instrument or not (of the JDK itself) that can (and is highly recommended to) be referred to using %base.
   Mostly useful to exclude classes that break when instrumented. e.g. `%base,-exclude.this.package.*,+*` (Default: `%base,+*`)
-* `breakStringInterning`: Similar to `filter`, instrumented classes where it is ok to break String interning.
+* `breakStringInterning`: Instrumented classes where it is ok to break String interning.
+  Same syntax as `filter`.
   To track Strings that appear as String literals in the code, FlowTrackers undoes the interning of Strings that the JVM does.
   That can cause some libraries that depend on the interning to break.
   Those can be excluded with this option.
   (Default: `%base,+*`)
+* `eager`: Classes where we are more eager to track primitive values.
+  Same syntax as `filter`.
+  This makes the heuristics for which method arguments and return values to track, track all `int` values.
+  If you see that tracking of an interesting part is getting lost in a method call taking or returning an int, adding it here may improve results.
+  This comes at the cost of some performance.
+  (Default: none)
 * `hideInternals`: Disable tracking for some uninteresting internal operations that add noise, such as reading of .class files by ClassLoaders (Default: true)
 
 These options are meant for FlowTracker development/debugging only:

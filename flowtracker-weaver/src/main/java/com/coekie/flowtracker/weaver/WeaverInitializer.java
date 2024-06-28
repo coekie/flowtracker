@@ -19,6 +19,7 @@ package com.coekie.flowtracker.weaver;
 import com.coekie.flowtracker.hook.ArrayLoadHook;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.util.Config;
+import com.coekie.flowtracker.weaver.flow.InvocationArgStore;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,6 +34,8 @@ public class WeaverInitializer {
     // transforming
     ArrayLoadHook.class.getName();
     TrackerRepository.class.getName();
+
+    InvocationArgStore.initialize(config);
 
     AsmTransformer transformer = new AsmTransformer(config);
     inst.addTransformer(transformer, true);

@@ -81,11 +81,11 @@ class AsmTransformer implements ClassFileTransformer {
   private final HookSpecTransformer hookSpecTransformer;
   private final FlowTransformer flowTransformer;
 
-  public boolean firstRoundDone = false;
+  boolean firstRoundDone = false;
   /** When non-null this gets called for every class that is being transformed by our agent */
-  public Consumer<String> transformListener;
+  Consumer<String> transformListener;
 
-  public AsmTransformer(Config config) {
+  AsmTransformer(Config config) {
     toInstrumentFilter = new ClassFilter(config.get("filter", DEFAULT_FILTER), BASE_FILTER);
     dumpByteCodePath = config.containsKey("dumpByteCode")
         ? new File(config.get("dumpByteCode"))
