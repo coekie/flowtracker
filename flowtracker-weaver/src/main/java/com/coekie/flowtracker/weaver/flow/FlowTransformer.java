@@ -55,6 +55,7 @@ public class FlowTransformer implements Transformer {
   private final Commentator commentator;
   private final AnalysisListener listener;
   private final ClassFilter breakStringInterningFilter;
+  private final boolean dynamicFallback;
 
   public FlowTransformer(Config config) {
     this(config,
@@ -84,6 +85,7 @@ public class FlowTransformer implements Transformer {
         // depend on interning to work. we don't do that for other libraries, so this probably
         // breaks some libraries.
         "+java.net.*,+java.io.*,-java.*,+sun.net.*,-sun.*,+jdk.internal.net.*,-jdk.*");
+    this.dynamicFallback = config.getBoolean("dynamicFallback", false);
   }
 
   private class FlowClassAdapter extends ClassVisitor {
@@ -333,6 +335,11 @@ public class FlowTransformer implements Transformer {
           && !owner.startsWith("jdk/internal/org/objectweb/asm")
           // for testing
           && !owner.equals("com/coekie/flowtracker/test/StringTest$NoCondy");
+    }
+
+    /** @see Store#loadSourcePointOrFallback(FlowValue, InsnList) */
+    boolean useDynamicFallback() {
+      return dynamicFallback && canUseConstantDynamic() && !owner.startsWith("java/lang");
     }
   }
 

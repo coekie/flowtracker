@@ -86,7 +86,7 @@ class InvocationArgStore extends Store {
       // if we know where the value passed in as argument came from
       if (arg != null && shouldTrack(arg)) {
         arg.ensureTracked();
-        arg.loadSourcePoint(toInsert, this);
+        loadSourcePointOrFallback(arg, toInsert);
         toInsert.add(
             new MethodInsnNode(Opcodes.INVOKEVIRTUAL,
                 "com/coekie/flowtracker/tracker/Invocation",

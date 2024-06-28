@@ -17,8 +17,12 @@ package com.coekie.flowtracker.weaver.flow;
  */
 
 import com.coekie.flowtracker.tracker.ClassOriginTracker.ClassEntry;
+import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.weaver.flow.FlowTransformer.FlowMethod;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 
 /** Represents an instruction that stores a (possibly tracked) value in an object. */
 abstract class Store extends Instrumentable implements FlowValue.FallbackSource {
@@ -47,6 +51,29 @@ abstract class Store extends Instrumentable implements FlowValue.FallbackSource 
     FlowMethod method = frame.getMethod();
     ClassEntry fallback = method.constantsTransformation.fallback(method, line);
     ConstantsTransformation.loadClassConstantPoint(toInsert, method, fallback);
+  }
+
+  /**
+   * Add instructions to `toInsert` to load the source {@link TrackerPoint}.
+   * <p>
+   * If it's enabled in the config, then when the loaded PointTracker is null, replace it with
+   * the fallback (pointing to this Store in the code).
+   * we don't do this by default because it's also causing some weird behaviour. But it's useful
+   * at least for debugging where we lost track of some value
+   */
+  void loadSourcePointOrFallback(FlowValue storedValue, InsnList toInsert) {
+    storedValue.loadSourcePoint(toInsert, this);
+
+    FlowMethod method = frame.getMethod();
+    if (method.useDynamicFallback()
+        // don't do it for UntrackableValue, because that is already using the fallback
+        && !(storedValue instanceof UntrackableValue)) {
+      loadSourcePointFallback(toInsert);
+      toInsert.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "java/util/Objects",
+          "requireNonNullElse", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"));
+      toInsert.add(new TypeInsnNode(Opcodes.CHECKCAST,
+          "com/coekie/flowtracker/tracker/TrackerPoint"));
+    }
   }
 
   boolean shouldTrack(FlowValue v) {

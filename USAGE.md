@@ -35,7 +35,7 @@ Supported configuration options:
   That can cause some libraries that depend on the interning to break.
   Those can be excluded with this option.
   (Default: `%base,+*`)
-* hideInternals: Disable tracking for some uninteresting internal operations that add noise, such as reading of .class files by ClassLoaders (Default: true)
+* `hideInternals`: Disable tracking for some uninteresting internal operations that add noise, such as reading of .class files by ClassLoaders (Default: true)
 
 These options are meant for FlowTracker development/debugging only:
 * `webmodule`: Can be used to disable the web module, including support for snapshots. Intended for testing only, use `webserver` instead (Default: true)
@@ -45,3 +45,5 @@ These options are meant for FlowTracker development/debugging only:
 * `dumpByteCode`: Dump instrumented class files to this path (Default: none)
 * `dumpText`: Dump instrumented classes in text form to this path, including comments for instructions added by FlowTracker (Default: none)
 * `dumpTextPrefix`: When `dumpText` is enabled, only dump classes whose name starts with this prefix (Default: none)
+* `dynamicFallback`: When a `PointerTracker` for a stored value is null, fall back to pointing to the code location of the store.
+   This can be helpful in debugging why a value wasn't tracked.
