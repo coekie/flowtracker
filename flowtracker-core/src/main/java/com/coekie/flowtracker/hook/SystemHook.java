@@ -25,12 +25,6 @@ import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
 import com.coekie.flowtracker.util.Config;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.FilterOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -48,33 +42,21 @@ public class SystemHook {
   }
 
   public static void initialize(Config config) {
-    // we have to add trackers to the existing streams, because they were created before flowtracker
-    // was initialized.
-    addSystemOutErrTracker(System.out, "System.out", config);
-    addSystemOutErrTracker(System.err, "System.err", config);
+    addSystemInOutErrTrackers();
     addEnvTracking();
     addPropertiesTracking();
   }
 
-  private static void addSystemOutErrTracker(PrintStream printStream, String name, Config config) {
-    try {
-      // track on the OutputStream level
-      MethodHandle outHandle = Reflection.getter(FilterOutputStream.class, "out",
-          OutputStream.class);
-      FileOutputStream fileOut = (FileOutputStream) outHandle.invoke(outHandle.invoke(printStream));
-      FileDescriptor fd = fileOut.getFD();
-      FileDescriptorTrackerRepository.createTracker(fd, false, true, SYSTEM.node(name));
-
-      // track on the OutputStreamWriter level
-      if (OutputStreamWriterHook.enabled(config)) {
-        OutputStreamWriter writer =
-            Reflection.getSlow(PrintStream.class, "charOut", OutputStreamWriter.class, printStream);
-        OutputStreamWriterHook.createOutputStreamWriterTracker(context(), writer, fileOut);
-      }
-    } catch (Throwable t) {
-      System.err.println("Cannot hook System.out/err:");
-      t.printStackTrace(System.err);
-    }
+  /** Add trackers for {@link System#in}, {@link System#out} and {@link System#err} */
+  private static void addSystemInOutErrTrackers() {
+    // we have to add trackers to the existing Input&OutputStreams (through the FileDescriptors),
+    // because they were created before flowtracker was initialized.
+    FileDescriptorTrackerRepository.createTracker(
+        FileDescriptor.in, true, false, SYSTEM.node("System.in"));
+    FileDescriptorTrackerRepository.createTracker(
+        FileDescriptor.out, false, true, SYSTEM.node("System.out"));
+    FileDescriptorTrackerRepository.createTracker(
+        FileDescriptor.err, false, true, SYSTEM.node("System.err"));
   }
 
   /** Track environment variables */

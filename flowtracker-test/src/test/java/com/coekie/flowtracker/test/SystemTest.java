@@ -8,7 +8,6 @@ import static com.google.common.truth.Truth.assertThat;
 import com.coekie.flowtracker.tracker.CharOriginTracker;
 import com.coekie.flowtracker.tracker.TrackerSnapshot;
 import com.coekie.flowtracker.tracker.TrackerTree;
-import com.google.common.truth.Truth;
 import java.util.Map;
 import org.junit.Test;
 
@@ -55,18 +54,13 @@ public class SystemTest {
 	}
 
 	@Test
-	public void outAndErr() {
+	public void inOutAndErr() {
 		// IntelliJ and maven/surefire replace System.out and System.err with their own implementations,
 		// and we haven't implemented anything yet to handle those, so we don't test anything tied to
 		// the _current_ value of System.out and System.err.
-		Truth.assertThat(TrackerTree.node("System").node("System.out").trackers())
-				.isNotEmpty();
-		assertThat(TrackerTree.node("System").node("System.out").node("Writer").trackers())
-				.isNotEmpty();
-		assertThat(TrackerTree.node("System").node("System.err").trackers())
-				.isNotEmpty();
-		assertThat(TrackerTree.node("System").node("System.err").node("Writer").trackers())
-				.isNotEmpty();
+		assertThat(TrackerTree.node("System").node("System.in").trackers()).isNotEmpty();
+		assertThat(TrackerTree.node("System").node("System.out").trackers()).isNotEmpty();
+		assertThat(TrackerTree.node("System").node("System.err").trackers()).isNotEmpty();
 	}
 
 	@Test
