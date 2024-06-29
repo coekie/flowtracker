@@ -30,7 +30,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
  * This partially undoes the bad effects of {@link StringLdc} breaking String interning.
  * This is far from perfect; it e.g. doesn't "fix" comparisons between two Object references that in
  * practice contain Strings, doesn't fix identityHashCode,....
- * And it also causes false positives" it makes all Strings with equal contents "==" each other.
+ * And it also causes false positives: it makes all Strings with equal contents "==" each other.
  */
 class StringComparison extends Instrumentable {
   private final JumpInsnNode insn;

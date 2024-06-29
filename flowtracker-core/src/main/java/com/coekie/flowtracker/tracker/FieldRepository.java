@@ -22,6 +22,10 @@ import java.util.Map;
 
 /** Keeps track of the source of values of fields */
 public class FieldRepository {
+  /**
+   * Maps objects (that have fields we want to track) to a map of their field values.
+   * e.g. for `Foo {byte b;}` that could contain `{fooInstance: {"Foo b": trackerPoint}}`.
+   */
   private static final Map<Object, Map<String, TrackerPoint>> objectToFieldMap =
       new ConcurrentWeakIdentityHashMap<>();
 
@@ -39,6 +43,7 @@ public class FieldRepository {
     }
   }
 
+  /** String identifier that we use for a field in {@link #objectToFieldMap} */
   public static String fieldId(String owner, String fieldName) {
     return owner + " " + fieldName;
   }

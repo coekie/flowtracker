@@ -20,6 +20,7 @@ import com.coekie.flowtracker.tracker.ClassOriginTracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import java.lang.invoke.MethodHandles;
 
+/** Hook methods for tracking constant primitive values */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class ConstantHook {
   // first three arguments are here because this is invoked using ConstantDynamic

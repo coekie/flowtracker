@@ -25,11 +25,20 @@ import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.TrackerPoint;
+import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 
+/**
+ * Hook methods for `java.io.FileInputStream`.
+ * <p>
+ * Trackers are stored in {@link FileDescriptorTrackerRepository} (not {@link TrackerRepository}),
+ * so that it is compatible with tracking for Channels. That was operations done on the Channel
+ * returned by {@link FileInputStream#getChannel()} get tracked in the same trackers.
+ */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class FileInputStreamHook {
 

@@ -60,6 +60,8 @@ import org.objectweb.asm.tree.LineNumberNode;
  * local variable), instead of with places where values merge, so that we don't need to care about
  * merges at all. But that doesn't handle the case when values on the stack get merged, e.g. with
  * the ternary operator (`b = condition ? value1 : value2`).
+ *
+ * @see MergeSlot
  */
 class MergedValue extends FlowValue {
   /**
@@ -202,6 +204,12 @@ class MergedValue extends FlowValue {
       // TODO we're skipping handling merges of merges for now, because this triggers some bugs
       //  (VerifyErrors). Note that we _do_ handle e.g. merges of CopyValues of merges, so we do
       //  handle some complex control flows, but not all of them.
+      // My suspicion is those bugs are related to where exactly we would insert our code that sets
+      // the value of the pointTrackerLocal. Most other instrumentation targets its code injection
+      // before or after a particular operation; but merges can happen at various different kinds of
+      // places, and for some of them we may have to tweak exactly where we insert our code.
+      // We already have some of that tweaking for FrameNode and LineNumberNode, but we might need
+      // more like that.
       if ((value1 instanceof MergedValue && !isThisMerge(slot, value1))
         || (value2 instanceof MergedValue && !isThisMerge(slot, value2))) {
         return null;

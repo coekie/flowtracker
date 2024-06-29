@@ -1,5 +1,6 @@
 package com.coekie.flowtracker.test;
 
+import static com.coekie.flowtracker.hook.Reflection.clazz;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.coekie.flowtracker.hook.Reflection;
@@ -84,7 +85,7 @@ public class FileChannelTest extends AbstractChannelTest<FileChannel> {
 
   @Override
   FileDescriptor getFd(FileChannel channel) {
-    return Reflection.getSlow(Reflection.clazz("sun.nio.ch.FileChannelImpl"), "fd",
+    return Reflection.getSlow(clazz("sun.nio.ch.FileChannelImpl"), "fd",
         FileDescriptor.class, channel);
   }
 }

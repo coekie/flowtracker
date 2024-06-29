@@ -123,7 +123,7 @@ public class VineflowerCodeGenerator {
     }
   }
 
-  /** Provider Fernflower with the class that needs to be decompiled */
+  /** Provides Fernflower with the class that needs to be decompiled */
   private static class SourceContextSource implements IContextSource {
     private final ClassLoader classLoader;
     private final List<ClassOriginTracker> trackers;
@@ -144,7 +144,8 @@ public class VineflowerCodeGenerator {
     @Override
     public Entries getEntries() {
       // TODO do we also need to include nested classes here?
-      //   "WARN:  Nested class [...] missing!"
+      //   "WARN:  Nested class [...] missing!".
+      //  This is not a problem for snapshots though, because there we decompile everything together
       return new Entries(
           trackers.stream()
               .map(tracker -> Entry.atBase(tracker.className))

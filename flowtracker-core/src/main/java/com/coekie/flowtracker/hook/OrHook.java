@@ -27,6 +27,7 @@ public class OrHook {
     } else if (point2 == null) {
       return point1;
     } else if (point1.tracker != point2.tracker) {
+      // if two points don't come from the same tracker, then we cannot represent them as one point
       return null;
     } else if (point1.index + point1.length == point2.index) {
       // if the points are for values right next to each other,

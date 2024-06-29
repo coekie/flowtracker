@@ -27,10 +27,10 @@ import java.util.Arrays;
 public class Invocation {
   private final String signature;
 
-  // source of the returned primitive value
+ /** Source of the returned primitive value */
   public TrackerPoint returnPoint;
 
-  // tracks source for some primitive values in arguments. null for untracked arguments.
+  /** Tracks source for some primitive values in arguments. null for untracked arguments. */
   private TrackerPoint[] args;
 
   Invocation(String signature) {
@@ -126,6 +126,11 @@ public class Invocation {
     Invocation invocation = context.pendingInvocation;
     if (invocation != null) {
       context.pendingInvocation = null;
+      // compare signatures to avoid getting different invocations mixed up.
+      // e.g. there may be an instrumented caller A calling a non-instrumented method B,
+      // that then calls another instrumented method C.
+      // without this check we might incorrectly interpret that as A calling C.
+      // (That could still happen if signatures match by coincidence, but the chance is much lower)
       if (signature.equals(invocation.signature)) {
         return invocation;
       }

@@ -60,6 +60,8 @@ public class ZipFileHook {
       if (ClassLoaderHook.shouldHideFileReading(zipEntry.getName())) {
         return;
       }
+      // the tracker that was created by InflaterInputStream doesn't have a node/path yet, because
+      // that was not known at that layer, so we fix that here.
       if (tracker.getNode() == null) {
         tracker.addTo(TrackerTree.fileNode(target.getName()).pathNode(zipEntry.getName()));
       }

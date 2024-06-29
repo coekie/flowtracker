@@ -25,11 +25,20 @@ import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.TrackerPoint;
+import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerUpdater;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 
+/**
+ * Hook methods for `java.io.FileOutputStream`.
+ * <p>
+ * Trackers are stored in {@link FileDescriptorTrackerRepository} (not {@link TrackerRepository}),
+ * so that it is compatible with tracking for Channels. That was operations done on the Channel
+ * returned by {@link FileOutputStream#getChannel()} get tracked in the same trackers.
+ */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class FileOutputStreamHook {
 
@@ -42,6 +51,11 @@ public class FileOutputStreamHook {
           TrackerTree.fileNode(file.getAbsolutePath()));
     }
   }
+
+  // note: there is no hook for the constructor that takes a FileDescriptor.
+  // for tracking to work the FileDescriptor must have already been associated to a tracker before
+  // using a FileOutputStream constructed that way. In practice that is mostly used with
+  // FileDescriptor.out/err, which we already associate to a tracker in SystemHook.
 
   @Hook(target = "java.io.FileOutputStream",
       method = "void write(int)")

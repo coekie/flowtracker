@@ -25,6 +25,7 @@ import com.coekie.flowtracker.tracker.TrackerUpdater;
 import java.lang.invoke.VarHandle;
 import java.nio.ByteBuffer;
 
+/** Hook methods for `java.nio.ByteBuffer` */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class ByteBufferHook {
   private static final VarHandle hbHandle =

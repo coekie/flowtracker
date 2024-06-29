@@ -21,6 +21,7 @@ import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.annotation.HookLocation;
 import com.coekie.flowtracker.util.Config;
 
+/** Hooks for methods in `java.lang.ClassLoader` subclasses */
 public class ClassLoaderHook {
   /** Keeps track of which class is currently being loaded */
   private static final ThreadLocal<String> loadingClass = new ThreadLocal<>();

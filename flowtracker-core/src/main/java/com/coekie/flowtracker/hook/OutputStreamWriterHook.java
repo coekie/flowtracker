@@ -40,6 +40,10 @@ import java.lang.invoke.VarHandle;
  * Hook methods called by instrumented code for OutputStreamWriter.
  *
  * <p>This is partially redundant with tracking the content of FileOutputStream.
+ * This is not enabled by default. This comes from a time before we had tracking on
+ * FileOutputStream, before that could be tracked automatically through OutputStreamWriter.
+ * In theory, we could still use this to track writing to other OutputStreams for which we don't
+ * have tracking. In practice, I haven't seen it be useful, and should probably be removed.
  */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class OutputStreamWriterHook {

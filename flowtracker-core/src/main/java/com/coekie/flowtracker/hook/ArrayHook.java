@@ -25,42 +25,42 @@ import com.coekie.flowtracker.tracker.TrackerUpdater;
 /** Hook methods for operations on arrays */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class ArrayHook {
-  /** Store a value in a char[] */
+  /** Store a value in a char[]. Used by `ArrayStore`. */
   public static void setChar(char[] array, int arrayIndex, char value, TrackerPoint source,
       Context context) {
     array[arrayIndex] = value;
     TrackerUpdater.setSourceTrackerPoint(context, array, arrayIndex, 1, source);
   }
 
-  /** Store a value in a byte[] */
+  /** Store a value in a byte[]. Used by `ArrayStore`. */
   public static void setByte(byte[] array, int arrayIndex, byte value, TrackerPoint source,
       Context context) {
     array[arrayIndex] = value;
     TrackerUpdater.setSourceTrackerPoint(context, array, arrayIndex, 1, source);
   }
 
-  /** Store a value in an int[] */
+  /** Store a value in an int[]. Used by `ArrayStore`. */
   public static void setInt(int[] array, int arrayIndex, int value, TrackerPoint source,
       Context context) {
     array[arrayIndex] = value;
     TrackerUpdater.setSourceTrackerPoint(context, array, arrayIndex, 1, source);
   }
 
-  /** Hook for calling clone() on a char[] */
+  /** Hook for calling clone() on a char[]. Used by `ArrayCloneCall`. */
   public static char[] clone(char[] array) {
     char[] result = array.clone();
     TrackerUpdater.setSource(context(), result, 0, array.length, array, 0);
     return result;
   }
 
-  /** Hook for calling clone() on a byte[] */
+  /** Hook for calling clone() on a byte[]. Used by `ArrayCloneCall`. */
   public static byte[] clone(byte[] array) {
     byte[] result = array.clone();
     TrackerUpdater.setSource(context(), result, 0, array.length, array, 0);
     return result;
   }
 
-  /** Hook for calling clone() on an int[] */
+  /** Hook for calling clone() on an int[]. Used by `ArrayCloneCall`. */
   public static int[] clone(int[] array) {
     int[] result = array.clone();
     TrackerUpdater.setSource(context(), result, 0, array.length, array, 0);

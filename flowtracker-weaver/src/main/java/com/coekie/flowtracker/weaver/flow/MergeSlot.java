@@ -21,9 +21,13 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A reference to a slot containing a FlowValue in a FlowFrame (in other words, a value on the stack
- * or in a local variable, at a specific instruction), where a merge is happening. Note that as
- * analysis proceeds, the FlowValue that this points to can still change.
+ * A reference to a slot containing a FlowValue in a FlowFrame, where a merge is happening.
+ * In other words, a value on the stack or in a local variable, at a specific instruction, when that
+ * value might have come from different places, from different code paths.
+ * <p>
+ * Note that as analysis proceeds, the FlowValue that this points to (the value stored in
+ * {@link #frame} at {@link #index}) can still change. So a MergeSlot represents the address of
+ * (=~ a constant pointer to) a mutable pointer to a (~immutable) FlowValue.
  */
 class MergeSlot {
   private final FlowFrame frame;

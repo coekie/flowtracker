@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+/** Hooks for methods and field in the {@link System} class */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class SystemHook {
   private static final Node SYSTEM = TrackerTree.node("System");

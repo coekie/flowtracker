@@ -21,6 +21,7 @@ import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.Invocation;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 
+/** Hooks for methods in the `java.lang.Character` class */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class CharacterHook {
   @Hook(target = "java.lang.Character",
