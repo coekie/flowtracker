@@ -13,6 +13,23 @@ java -javaagent:$FT_JAR $FT_JVMOPTS
 By default, FlowTracker starts a webserver on port 8011. Open http://localhost:8011/ in your browser.
 
 FlowTracker can be configured using `-javaagent:$FT_JAR=option1=value1;option2=value2`.
+For enabling boolean options, the `=value` part can be omitted.
+For a complete list of configuration options, see below.
+
+As an example for using it with maven, this command was used to generate the PetClinic demo:
+```
+./mvnw integration-test -Dtest=PetClinicIntegrationTests -DargLine="-javaagent:$FT_JAR=webserver=false;trackCreation;snapshotOnExit=spring-petclinic-snapshot.zip $FT_JVMOPTS"
+```
+
+## Source Code
+
+FlowTracker doesn't require the source code of the application you are observing, but the results will look a bit prettier if the source code is available.
+If you're using maven, you can download the sources of your dependencies using `mvn dependency:sources`.
+FlowTracker looks for the sources of a dependency `foo.jar` in a file `foo-sources.jar`, which is the convention that maven follows.
+If FlowTracker can't find the source code, it will display the code decompiled with the Vineflower decompiler.
+
+## Configuration
+
 Supported configuration options:
 * `port`: Port to run the webserver on (Default: 8011)
 * `webserver`: Run the webserver (Default: true)
@@ -54,3 +71,8 @@ These options are meant for FlowTracker development/debugging only:
 * `dumpTextPrefix`: When `dumpText` is enabled, only dump classes whose name starts with this prefix (Default: none)
 * `dynamicFallback`: When a `PointerTracker` for a stored value is null, fall back to pointing to the code location of the store.
    This can be helpful in debugging why a value wasn't tracked.
+
+## Compatibility
+
+FlowTracker should work on Oracle or other OpenJDK based JDKs.
+It has been tested on JDK 11, 17, 21 and 22.
