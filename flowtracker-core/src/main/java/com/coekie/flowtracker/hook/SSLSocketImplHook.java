@@ -25,6 +25,7 @@ import com.coekie.flowtracker.tracker.ByteSinkTracker;
 import com.coekie.flowtracker.tracker.Context;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerRepository;
+import com.coekie.flowtracker.tracker.TrackerUpdater;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,6 +76,31 @@ public class SSLSocketImplHook {
 
       readTracker.twin = writeTracker;
       writeTracker.twin = readTracker;
+    }
+  }
+
+  @Hook(target = "sun.security.ssl.SSLSocketImpl$AppInputStream",
+      method = "int read(byte[], int, int)")
+  public static void afterRead(@Arg("RETURN") int read, @Arg("THIS") InputStream is,
+      @Arg("ARG0") byte[] buf, @Arg("ARG1") int offset) {
+    if (read > 0) {
+      Context context = context();
+      ByteOriginTracker tracker = (ByteOriginTracker) TrackerRepository.getTracker(context, is);
+      if (tracker != null) {
+        TrackerUpdater.setSourceTracker(context, buf, offset, read, tracker, tracker.getLength());
+        tracker.append(buf, offset, read);
+      }
+    }
+  }
+
+  @Hook(target = "sun.security.ssl.SSLSocketImpl$AppOutputStream",
+      method = "void write(byte[], int, int)")
+  public static void afterWrite(@Arg("THIS") OutputStream os,
+      @Arg("ARG0") byte[] buf, @Arg("ARG1") int off, @Arg("ARG2") int len) {
+    Context context = context();
+    ByteSinkTracker tracker = (ByteSinkTracker) TrackerRepository.getTracker(context, os);
+    if (tracker != null) {
+      TrackerUpdater.appendBytes(context, tracker, buf, off, len);
     }
   }
 

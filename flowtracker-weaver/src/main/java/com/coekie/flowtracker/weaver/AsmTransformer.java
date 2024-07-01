@@ -62,6 +62,7 @@ class AsmTransformer implements ClassFileTransformer {
       + "+sun.nio.cs.StreamDecoder,"
       + "+sun.nio.cs.StreamEncoder,"
       + "+sun.nio.ch.NioSocketImpl,"
+      + "+sun.security.ssl.SSLSocketImpl,"
       + "+java.net.SocketInputStream," // JDK 11
       + "+java.net.SocketOutputStream," // JDK 11
       + "+java.net.Socket,"
