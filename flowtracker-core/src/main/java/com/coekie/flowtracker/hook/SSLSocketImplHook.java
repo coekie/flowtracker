@@ -29,11 +29,17 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.invoke.MethodHandle;
+import java.net.Socket;
 import javax.net.ssl.SSLSocket;
 
 public class SSLSocketImplHook {
   /** Last part of path for trackers on SSL sockets */
   public static final String SSL = "SSL";
+
+  private static final MethodHandle baseSSLSocketImplSelf =
+      Reflection.getter(Reflection.clazz("sun.security.ssl.BaseSSLSocketImpl"), "self",
+          Socket.class);
 
   @Hook(target = "sun.security.ssl.SSLSocketImpl",
       method = "void doneConnect()")
@@ -49,21 +55,19 @@ public class SSLSocketImplHook {
         return;
       }
 
-      // TODO we may have to look for sslSocket's BaseSSLSocketImpl.self here, to handle SSLSockets
-      //  layered over a preexisting socket
-      FileDescriptor fd = SocketImplHook.getSocketFd(sslSocket);
+      FileDescriptor fd = SocketImplHook.getSocketFd(self(sslSocket));
 
       ByteOriginTracker readTracker = new ByteOriginTracker();
-      ByteOriginTracker delegateReadTracker =
-          FileDescriptorTrackerRepository.getReadTracker(context, fd);
+      ByteOriginTracker delegateReadTracker = fd == null ? null
+          : FileDescriptorTrackerRepository.getReadTracker(context, fd);
       if (delegateReadTracker != null) {
         readTracker.addTo(delegateReadTracker.getNode().node("SSL"));
       }
       TrackerRepository.setTracker(context, in, readTracker);
 
       ByteSinkTracker writeTracker = new ByteSinkTracker();
-      ByteSinkTracker delegateWriteTracker =
-          FileDescriptorTrackerRepository.getWriteTracker(context, fd);
+      ByteSinkTracker delegateWriteTracker = fd == null ? null
+          : FileDescriptorTrackerRepository.getWriteTracker(context, fd);
       if (delegateWriteTracker != null) {
         writeTracker.addTo(delegateWriteTracker.getNode().node("SSL"));
       }
@@ -71,6 +75,15 @@ public class SSLSocketImplHook {
 
       readTracker.twin = writeTracker;
       writeTracker.twin = readTracker;
+    }
+  }
+
+  /** Get the BaseSSLSocketImpl.self; for SSL sockets layered over a preexisting socket */
+  private static Socket self(SSLSocket sslSocket) {
+    try {
+      return (Socket) baseSSLSocketImplSelf.invoke(sslSocket);
+    } catch (Throwable t) {
+      throw new Error(t);
     }
   }
 }

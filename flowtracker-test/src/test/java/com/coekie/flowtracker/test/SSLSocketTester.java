@@ -25,7 +25,7 @@ class SSLSocketTester implements Closeable {
     this.client = client;
   }
 
-  static SSLSocketTester createConnected() {
+  static SSLSocketTester createDirect() {
     try {
       try (ServerSocket listenSocket = serverSSLContext().getServerSocketFactory()
           .createServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
@@ -41,11 +41,38 @@ class SSLSocketTester implements Closeable {
         serverHandshake.get();
 
         return new SSLSocketTester(server, client);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
       }
-
     } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Create an SSLSocket "layered" on top of a plain Socket connection.
+   * Unlike in {@link #createDirect()}, here we have `BaseSSLSocketImpl.self` not equal to
+   * itself; the underlying socket and the SSL socket are two different objects.
+   */
+  static SSLSocketTester createLayered() {
+    SocketTester plainSocketTester = SocketTester.createConnected();
+    try {
+      SSLSocket client = (SSLSocket) clientSSLContext().getSocketFactory()
+          .createSocket(plainSocketTester.client, "localhost", plainSocketTester.client.getPort(),
+              true);
+      SSLSocket server = (SSLSocket) serverSSLContext().getSocketFactory()
+          .createSocket(plainSocketTester.server, null, false);
+
+      Future<?> clientHandshake = handshake(client);
+      Future<?> serverHandshake = handshake(server);
+
+      clientHandshake.get();
+      serverHandshake.get();
+
+      return new SSLSocketTester(server, client);
+    } catch (Exception e) {
+      try {
+        plainSocketTester.close();
+      } catch (IOException ignore) {
+      }
       throw new RuntimeException(e);
     }
   }
