@@ -1,18 +1,15 @@
 package com.coekie.flowtracker.test;
 
-import static com.coekie.flowtracker.hook.Reflection.clazz;
 import static com.coekie.flowtracker.tracker.Context.context;
 
-import com.coekie.flowtracker.hook.Reflection;
+import com.coekie.flowtracker.hook.SocketImplHook;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Tracker;
 import java.io.Closeable;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketImpl;
 
 /** Helper class for testing sockets. Contains a connected server & client socket pair. */
 class SocketTester implements Closeable {
@@ -35,31 +32,13 @@ class SocketTester implements Closeable {
   }
 
   static Tracker getReadTracker(Socket socket) {
-    return FileDescriptorTrackerRepository.getReadTracker(context(), getFd(socket));
+    return FileDescriptorTrackerRepository.getReadTracker(context(),
+        SocketImplHook.getSocketFd(socket));
   }
 
   static Tracker getWriteTracker(Socket socket) {
-    return FileDescriptorTrackerRepository.getWriteTracker(context(), getFd(socket));
-  }
-
-  private static FileDescriptor getFd(Socket socket) {
-    SocketImpl impl = Reflection.getSlow(Socket.class, "impl", SocketImpl.class, socket);
-
-    // find the fd either in the SocketImpl, or in one that it (SocksSocketImpl) delegates to.
-    // if there's a delegation going on depends both on if it's a client or server socket, and the
-    // JDK version
-    while (true) {
-      FileDescriptor fd = Reflection.getSlow(SocketImpl.class, "fd", FileDescriptor.class, impl);
-      if (fd != null) {
-        return fd;
-      }
-      if (impl.getClass().getSimpleName().equals("SocksSocketImpl")) {
-        impl = Reflection.getSlow(clazz("java.net.SocksSocketImpl"), "delegate",
-            SocketImpl.class, impl);
-      } else {
-        throw new RuntimeException("Cannot find fd");
-      }
-    }
+    return FileDescriptorTrackerRepository.getWriteTracker(context(),
+        SocketImplHook.getSocketFd(socket));
   }
 
   @Override

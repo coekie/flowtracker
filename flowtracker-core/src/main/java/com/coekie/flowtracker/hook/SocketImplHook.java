@@ -24,15 +24,17 @@ import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import java.io.FileDescriptor;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.VarHandle;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketImpl;
 
 /**
  * Hooks for AbstractPlainSocketImpl (jdk 11) and NioSocketImpl (jdk 17+)
- * */
+ */
 @SuppressWarnings("UnusedDeclaration") // used by instrumented code
 public class SocketImplHook {
   private static final VarHandle fdHandle =
@@ -41,6 +43,13 @@ public class SocketImplHook {
       Reflection.varHandle(SocketImpl.class, "address", InetAddress.class);
   private static final VarHandle portHandle =
       Reflection.varHandle(SocketImpl.class, "port", int.class);
+
+  private static final VarHandle socketImplHandle =
+      Reflection.varHandle(Socket.class, "impl", SocketImpl.class);
+  private static final Class<?> delegatingSocketImplClass = delegatingSocketImplClass();
+  private static final MethodHandle delegateGetter = delegatingSocketImplClass == null
+      ? null
+      : Reflection.getter(delegatingSocketImplClass, "delegate", SocketImpl.class);
 
   @Hook(target = "sun.nio.ch.NioSocketImpl",
       condition = "version >= 17",
@@ -109,16 +118,51 @@ public class SocketImplHook {
     return TrackerTree.node("Client socket").node(remote);
   }
 
-  private static FileDescriptor fd(SocketImpl channel) {
-    return (FileDescriptor) fdHandle.get(channel);
-
+  private static FileDescriptor fd(SocketImpl socketImpl) {
+    return (FileDescriptor) fdHandle.get(socketImpl);
   }
 
-  private static InetAddress address(SocketImpl channel) {
-    return (InetAddress) addressHandle.get(channel);
+  private static InetAddress address(SocketImpl socketImpl) {
+    return (InetAddress) addressHandle.get(socketImpl);
   }
 
-  private static int port(SocketImpl channel) {
-    return (int) portHandle.get(channel);
+  private static int port(SocketImpl socketImpl) {
+    return (int) portHandle.get(socketImpl);
+  }
+
+  /**
+   * Find the {@link java.io.FileDescriptor} backing a Socket, poking through some layers of
+   * indirection.
+   */
+  public static FileDescriptor getSocketFd(Socket socket) {
+    SocketImpl impl = (SocketImpl) socketImplHandle.get(socket);
+
+    // find the fd either in the SocketImpl, or in one that it (SocksSocketImpl /
+    // DelegatingSocketImpl) delegates to.
+    // if there's a delegation going on depends both on if it's a client or server socket, and the
+    // JDK version
+    while (true) {
+      FileDescriptor fd = fd(impl);
+      if (fd != null) {
+        return fd;
+      }
+      if (delegatingSocketImplClass != null && delegatingSocketImplClass.isInstance(impl)) {
+        try {
+          impl = (SocketImpl) delegateGetter.invoke(impl);
+        } catch (Throwable e) {
+          throw new Error(e);
+        }
+      } else {
+        return null;
+      }
+    }
+  }
+
+  private static Class<?> delegatingSocketImplClass() {
+    try {
+      return Class.forName("java.net.DelegatingSocketImpl", false, null);
+    } catch (ClassNotFoundException e) {
+      return null;
+    }
   }
 }
