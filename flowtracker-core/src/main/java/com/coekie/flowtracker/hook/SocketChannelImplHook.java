@@ -21,6 +21,7 @@ import static com.coekie.flowtracker.tracker.Context.context;
 import com.coekie.flowtracker.annotation.Arg;
 import com.coekie.flowtracker.annotation.Hook;
 import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
+import com.coekie.flowtracker.tracker.TrackerTree;
 import java.io.FileDescriptor;
 import java.lang.invoke.VarHandle;
 import java.net.InetSocketAddress;
@@ -45,8 +46,11 @@ public class SocketChannelImplHook {
     if (context().isActive()) {
       SocketAddress remoteAddress = remoteAddress(channel);
       SocketAddress localAddress = localAddress(channel);
-      FileDescriptorTrackerRepository.createTracker(fd, true, true,
-          SocketImplHook.clientSocketNode(remoteAddress));
+      TrackerTree.Node node = localAddress instanceof InetSocketAddress
+          ? SocketImplHook.clientSocketNode(remoteAddress,
+          ((InetSocketAddress) localAddress).getPort())
+          : SocketImplHook.clientSocketNodeWithoutPort(remoteAddress);
+      FileDescriptorTrackerRepository.createTracker(fd, true, true, node);
     }
   }
 

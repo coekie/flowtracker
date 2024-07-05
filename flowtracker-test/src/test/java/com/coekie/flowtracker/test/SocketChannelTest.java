@@ -45,12 +45,12 @@ public class SocketChannelTest extends AbstractChannelTest<SocketChannel> {
     ByteOriginTracker readTracker = getReadTracker(client);
     assertThatTrackerNode(readTracker)
         .hasPathMatching(n -> n.get(0).equals("Client socket")
-            && n.get(2).equals(FileDescriptorTrackerRepository.READ));
+            && n.get(3).equals(FileDescriptorTrackerRepository.READ));
 
     ByteSinkTracker writeTracker = getWriteTracker(client);
     assertThatTrackerNode(writeTracker)
         .hasPathMatching(n -> n.get(0).equals("Client socket")
-            && n.get(2).equals(FileDescriptorTrackerRepository.WRITE));
+            && n.get(3).equals(FileDescriptorTrackerRepository.WRITE));
   }
 
   @Test

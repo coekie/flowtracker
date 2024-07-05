@@ -22,11 +22,13 @@ public class SocketTest {
       assertThatTrackerNode(readTracker)
           .hasPathStartingWith("Client socket")
           .hasPathEndingWith(tester.client.getRemoteSocketAddress().toString(),
+              "From " + tester.client.getLocalPort(),
               FileDescriptorTrackerRepository.READ);
       Tracker writeTracker = SocketTester.getWriteTracker(tester.client);
       assertThatTrackerNode(writeTracker)
           .hasPathStartingWith("Client socket")
           .hasPathEndingWith(tester.client.getRemoteSocketAddress().toString(),
+              "From " + tester.client.getLocalPort(),
               FileDescriptorTrackerRepository.WRITE);
       assertThat(readTracker.twin).isEqualTo(writeTracker);
       assertThat(writeTracker.twin).isEqualTo(readTracker);

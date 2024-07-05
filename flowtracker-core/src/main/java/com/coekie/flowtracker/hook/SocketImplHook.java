@@ -60,7 +60,8 @@ public class SocketImplHook {
   public static void afterConnect(@Arg("SocketImpl_fd") FileDescriptor fd,
       @Arg("ARG0") SocketAddress remote, @Arg("SocketImpl_localport") int localport) {
     if (context().isActive()) {
-      FileDescriptorTrackerRepository.createTracker(fd, true, true, clientSocketNode(remote));
+      FileDescriptorTrackerRepository.createTracker(fd, true, true,
+          clientSocketNode(remote, localport));
     }
   }
 
@@ -110,12 +111,13 @@ public class SocketImplHook {
     return TrackerTree.node("Server socket").optionalNode(localPort).node(remote);
   }
 
-  static TrackerTree.Node clientSocketNode(SocketAddress remote) {
-    return clientSocketNode(remote.toString());
+  static TrackerTree.Node clientSocketNode(SocketAddress remote, int localPort) {
+    return clientSocketNodeWithoutPort(remote)
+        .optionalNode("From " + localPort);
   }
 
-  static TrackerTree.Node clientSocketNode(String remote) {
-    return TrackerTree.node("Client socket").node(remote);
+  static TrackerTree.Node clientSocketNodeWithoutPort(SocketAddress remote) {
+    return TrackerTree.node("Client socket").node(remote.toString());
   }
 
   private static FileDescriptor fd(SocketImpl socketImpl) {
