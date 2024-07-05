@@ -85,7 +85,9 @@
       : await fetch('tracker/' + viewTrackerId + '_to_' + targetTrackerId);
     if (!response.ok) {
       if (response.status == 404) {
-        alert('Tracker data not found. Application may have restarted while you were browsing. Please refresh.');
+        alert(
+          'Tracker data not found. Application may have restarted while you were browsing. Please refresh.'
+        );
       }
       throw new Error(response.statusText);
     }

@@ -7,6 +7,7 @@
     type OnTrackerSelected,
   } from './selection';
   import type {Coloring} from './coloring';
+  import {onMount} from 'svelte';
 
   export let onTrackerSelected: OnTrackerSelected | null;
   export let selection: ASelection | null;
@@ -17,6 +18,7 @@
 
   let rootPromise: Promise<NodeDetail>;
   $: rootPromise = fetchTree(showSinks, showOrigins);
+  let root: NodeDetail;
 
   async function fetchTree(
     showSinks: boolean,
@@ -42,6 +44,7 @@
     if (!response.ok) return Promise.reject(response);
     return response.json().then(r => {
       const enriched = enrich(r, null);
+      root = enriched;
       applyUrlHash(enriched);
       return enriched;
     });
@@ -99,6 +102,16 @@
       )
     );
   }
+
+  onMount(() => {
+    const listener = () => {
+      if (root) {
+        applyUrlHash(root);
+      }
+    };
+    window.addEventListener('popstate', listener);
+    return () => window.removeEventListener('popstate', listener);
+  });
 </script>
 
 <div class="tree">
