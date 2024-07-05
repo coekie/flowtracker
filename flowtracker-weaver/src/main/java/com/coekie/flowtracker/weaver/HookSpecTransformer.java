@@ -41,28 +41,9 @@ class HookSpecTransformer implements Transformer {
         args);
   }
 
-  private ClassHookSpec getSpec(String className) {
-    if (className.endsWith("URLConnection")) {
-      return urlConnectionHook(className);
-    }
-    return specs.get(className);
-  }
-
-  // untested
-  private ClassHookSpec urlConnectionHook(String urlConnectionSubclass) {
-    ClassHookSpec spec = new ClassHookSpec(
-        Type.getObjectType(urlConnectionSubclass.replace('.', '/')));
-    spec.addMethodHookSpec(new Method("getInputStream", "()Ljava.io.InputStream;"),
-        Type.getObjectType("com/coekie/flowtracker/hook/URLConnectionHook"),
-        new Method("afterGetInputStream", "(Ljava/io/InputStream;Ljava/net/URLConnection;)V"),
-        HookLocation.ON_RETURN,
-        HookSpec.RETURN, HookSpec.THIS);
-    return spec;
-  }
-
   @Override
   public ClassVisitor transform(ClassLoader classLoader, String className, ClassVisitor cv) {
-    ClassHookSpec spec = getSpec(className);
+    ClassHookSpec spec = specs.get(className);
     return spec == null ? cv : spec.transform(classLoader, className, cv);
   }
 

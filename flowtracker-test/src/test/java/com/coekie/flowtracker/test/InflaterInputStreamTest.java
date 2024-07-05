@@ -2,7 +2,7 @@ package com.coekie.flowtracker.test;
 
 import static com.coekie.flowtracker.tracker.Context.context;
 
-import com.coekie.flowtracker.tracker.TagTracker;
+import com.coekie.flowtracker.tracker.ByteOriginTracker;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
@@ -41,7 +41,8 @@ public class InflaterInputStreamTest extends AbstractInputStreamTest {
   @Test
   public void node() throws IOException {
     ByteArrayInputStream src = new ByteArrayInputStream(deflated);
-    TrackerRepository.setTracker(context(), src, new TagTracker().addTo(TrackerTree.node("src")));
+    TrackerRepository.setTracker(context(), src,
+        new ByteOriginTracker().addTo(TrackerTree.node("src")));
 
     try (InputStream is = new InflaterInputStream(src)) {
       TrackTestHelper.assertThatTrackerNode(is)
