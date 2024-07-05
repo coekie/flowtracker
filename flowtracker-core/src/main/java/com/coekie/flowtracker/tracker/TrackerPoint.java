@@ -78,7 +78,7 @@ public class TrackerPoint {
       // perhaps we should add method in reader to read a single value directly?
       // instead of reading it, we let it push it to us
       Gimme gimme = new Gimme();
-      tracker.pushSourceTo(index, length, gimme, 0, Growth.NONE);
+      tracker.pushSourceTo(index, gimme, 0, length, Growth.NONE);
       return new TrackerPoint(gimme.sourceTracker, gimme.sourceIndex, gimme.sourceLength);
     }
   }
@@ -111,7 +111,7 @@ public class TrackerPoint {
           this.sourceIndex = sourceIndex;
           this.sourceLength = growth.targetToSource(length);
         } else {
-          sourceTracker.pushSourceTo(sourceIndex, length, this, index, growth);
+          sourceTracker.pushSourceTo(sourceIndex, this, index, length, growth);
         }
       }
     }

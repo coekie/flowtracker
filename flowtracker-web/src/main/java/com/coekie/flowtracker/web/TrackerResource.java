@@ -130,7 +130,7 @@ public class TrackerResource {
               .add(() -> activeParts.remove(part));
         } else if (sourceTracker != null && sourceTracker.getEntryCount() > 0) {
           // recurse to the source of the source
-          sourceTracker.pushSourceTo(sourceIndex, sourceLength, this, index, growth);
+          sourceTracker.pushSourceTo(sourceIndex, this, index, sourceLength, growth);
         }
       }
     });

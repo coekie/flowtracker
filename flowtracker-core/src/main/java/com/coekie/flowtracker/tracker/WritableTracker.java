@@ -18,7 +18,7 @@ package com.coekie.flowtracker.tracker;
 
 /**
  * Object that can accept writes from
- * {@link Tracker#pushSourceTo(int, int, WritableTracker, int)}.
+ * {@link Tracker#pushSourceTo(int, WritableTracker, int, int, Growth)}.
  */
 public interface WritableTracker {
   /**

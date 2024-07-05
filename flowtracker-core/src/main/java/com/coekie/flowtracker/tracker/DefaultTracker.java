@@ -24,6 +24,11 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+/**
+ * Main implementation of {@link Tracker}. Maintains a mapping of ranges in this tracker to
+ * {@link PartTracker}s that indicate from which tracker and where in those trackers the data came
+ * from.
+ */
 public class DefaultTracker extends Tracker {
   private final NavigableMap<Integer, PartTracker> map = new TreeMap<>();
   private final TrackerDepth depth;
@@ -51,13 +56,14 @@ public class DefaultTracker extends Tracker {
         doSetSource(index, length, sourceTracker, sourceIndex, growth);
       }
     } else {
-      sourceTracker.pushSourceTo(sourceIndex, length, this, index, growth);
+      sourceTracker.pushSourceTo(sourceIndex, this, index, length, growth);
     }
   }
 
   @Override
-  public synchronized void pushSourceTo(int index, int targetLength, WritableTracker targetTracker,
-      int targetIndex, Growth growth) {
+  public synchronized void pushSourceTo(int index, WritableTracker targetTracker, int targetIndex,
+      int targetLength,
+      Growth growth) {
     // we start at the part that contains index
     // or, if there's no such part, at what comes after
     Entry<Integer, PartTracker> startEntry = getEntryAt(index);
@@ -105,7 +111,7 @@ public class DefaultTracker extends Tracker {
           growth.sourceToTarget(part.getLength() - pushingPartOffset));
 
       // push it!
-      part.pushSourceTo(pushingPartOffset, pushLength, targetTracker, pushTargetIndex, growth);
+      part.pushSourceTo(pushingPartOffset, targetTracker, pushTargetIndex, pushLength, growth);
 
       targetPos = targetStartPos + pushLength;
     }

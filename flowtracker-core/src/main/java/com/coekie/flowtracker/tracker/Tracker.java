@@ -72,33 +72,21 @@ public abstract class Tracker implements WritableTracker {
   public abstract int getLength();
 
   /**
-   * Put a range of the source of this tracker into the given target tracker, with
-   * {@link Growth#NONE}.
+   * Put a range of the source of this tracker into the given target tracker. This should be
+   * implemented by calling {@link WritableTracker#setSource} on the target, possibly multiple
+   * times. Note that it is not <em>this</em> tracker that should be pushed, but the source of
+   * this.
    *
-   * @see #pushSourceTo(int, int, WritableTracker, int, Growth)
-   */
-  public void pushSourceTo(int index, int length, WritableTracker targetTracker,
-      int targetIndex) {
-    pushSourceTo(index, length, targetTracker, targetIndex, Growth.NONE);
-  }
-
-  /**
-   * Put a range of the source of this tracker into the given target tracker.
-   * This should be implemented by calling {@link WritableTracker#setSource} on the target,
-   * possibly multiple times.
-   * Note that it is not <em>this</em> tracker that should be pushed, but the source of this.
-   *
-   * @param index Index in this tracker of where the range starts.
-   * @param targetLength Size of the range
+   * @param index         Index in this tracker of where the range starts.
    * @param targetTracker Tracker of which we're setting the source to this one
-   * @param targetIndex Offset in <tt>targetTracker</tt> of where the range starts.
-   * @param growth the correspondence between our and target range. This also determines the
-   *   length of the relevant range in this tracker. `targetLength` should be a multiple of this
-   *   {@link Growth#targetBlock}.
+   * @param targetIndex   Offset in <tt>targetTracker</tt> of where the range starts.
+   * @param targetLength  Size of the range
+   * @param growth        the correspondence between our and target range. This also determines the
+   *                      length of the relevant range in this tracker. `targetLength` should be a
+   *                      multiple of this {@link Growth#targetBlock}.
    */
-  // TODO[growth] now that length is targetLength, the parameter order does not make sense anymore
-  public void pushSourceTo(int index, int targetLength, WritableTracker targetTracker,
-      int targetIndex, Growth growth) {
+  public void pushSourceTo(int index, WritableTracker targetTracker, int targetIndex,
+      int targetLength, Growth growth) {
     throw new UnsupportedOperationException();
   }
 

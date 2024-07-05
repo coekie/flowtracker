@@ -48,7 +48,7 @@ public class TrackerSnapshot {
   /** Create a snapshot of a part of the current content of {@code tracker} */
   public static TrackerSnapshot of(Tracker tracker, int index, int length) {
     Collector collector = new Collector();
-    tracker.pushSourceTo(index, length, collector, 0);
+    tracker.pushSourceTo(index, collector, 0, length, Growth.NONE);
     return new TrackerSnapshot(collector.parts);
   }
 

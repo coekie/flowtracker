@@ -22,6 +22,7 @@ import com.coekie.flowtracker.hook.SystemHook;
 import com.coekie.flowtracker.hook.ZipFileHook;
 import com.coekie.flowtracker.tracker.ByteOriginTracker;
 import com.coekie.flowtracker.tracker.DefaultTracker;
+import com.coekie.flowtracker.tracker.Growth;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.util.ConcurrentWeakIdentityHashMap;
 import com.coekie.flowtracker.util.Config;
@@ -66,7 +67,7 @@ public class CoreInitializer {
   private static void ensureInitialized(Config config) {
     DefaultTracker tracker1 = new DefaultTracker();
     tracker1.setSource(0, 1, new ByteOriginTracker(), 7);
-    tracker1.pushSourceTo(0, 1, new DefaultTracker(), 10);
+    tracker1.pushSourceTo(0, new DefaultTracker(), 10, 1, Growth.NONE);
     if (config.containsKey("dumpText")) {
       String.format("%s", "a");
     }

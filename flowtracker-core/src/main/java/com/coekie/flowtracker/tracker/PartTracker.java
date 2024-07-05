@@ -65,8 +65,8 @@ public class PartTracker extends Tracker {
   }
 
   @Override
-  public void pushSourceTo(int partIndex, int targetLength, WritableTracker targetTracker,
-      int targetIndex, Growth growth) {
+  public void pushSourceTo(int partIndex, WritableTracker targetTracker, int targetIndex, int targetLength,
+      Growth growth) {
     Growth combinedGrowth = this.growth.combine(growth);
 
     // clarification:

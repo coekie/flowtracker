@@ -93,7 +93,7 @@ public class Simplifier implements WritableTracker {
    */
   public static void simplifySourceTo(Tracker source, WritableTracker target) {
     Simplifier simplifier = new Simplifier(target);
-    source.pushSourceTo(0, source.getLength(), simplifier, 0);
+    source.pushSourceTo(0, simplifier, 0, source.getLength(), Growth.NONE);
     simplifier.flush();
   }
 }
