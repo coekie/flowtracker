@@ -36,7 +36,8 @@ import javax.net.ssl.SSLSocket;
 
 public class SSLSocketImplHook {
   /** Last part of path for trackers on SSL sockets */
-  public static final String SSL = "SSL";
+  public static final String READ_SSL = "Read SSL";
+  public static final String WRITE_SSL = "Write SSL";
 
   private static final MethodHandle baseSSLSocketImplSelf =
       Reflection.getter(Reflection.clazz("sun.security.ssl.BaseSSLSocketImpl"), "self",
@@ -62,7 +63,7 @@ public class SSLSocketImplHook {
       ByteOriginTracker delegateReadTracker = fd == null ? null
           : FileDescriptorTrackerRepository.getReadTracker(context, fd);
       if (delegateReadTracker != null) {
-        readTracker.addTo(delegateReadTracker.getNode().node("SSL"));
+        readTracker.addTo(delegateReadTracker.getNode().parent.node(READ_SSL));
       }
       TrackerRepository.setTracker(context, in, readTracker);
 
@@ -70,7 +71,7 @@ public class SSLSocketImplHook {
       ByteSinkTracker delegateWriteTracker = fd == null ? null
           : FileDescriptorTrackerRepository.getWriteTracker(context, fd);
       if (delegateWriteTracker != null) {
-        writeTracker.addTo(delegateWriteTracker.getNode().node("SSL"));
+        writeTracker.addTo(delegateWriteTracker.getNode().parent.node(WRITE_SSL));
       }
       TrackerRepository.setTracker(context, out, writeTracker);
 

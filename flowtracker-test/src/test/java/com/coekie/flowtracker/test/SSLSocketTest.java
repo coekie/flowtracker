@@ -3,9 +3,9 @@ package com.coekie.flowtracker.test;
 import static com.coekie.flowtracker.test.TrackTestHelper.assertThatTrackerNode;
 import static com.coekie.flowtracker.tracker.Context.context;
 import static com.google.common.truth.Truth.assertThat;
+import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.hook.SSLSocketImplHook;
-import com.coekie.flowtracker.tracker.FileDescriptorTrackerRepository;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import java.io.IOException;
@@ -40,37 +40,39 @@ public class SSLSocketTest {
   }
 
   private void testClient(SSLSocketTester tester) throws IOException {
-    Tracker readTracker = TrackerRepository.getTracker(context(), tester.client.getInputStream());
+    Tracker readTracker = requireNonNull(
+        TrackerRepository.getTracker(context(), tester.client.getInputStream()));
     assertThatTrackerNode(readTracker)
         .hasPathStartingWith("Client socket")
         .hasPathEndingWith(tester.client.getRemoteSocketAddress().toString(),
             "From " + tester.client.getLocalPort(),
-            FileDescriptorTrackerRepository.READ, SSLSocketImplHook.SSL);
-    Tracker writeTracker = TrackerRepository.getTracker(context(),
-        tester.client.getOutputStream());
+            SSLSocketImplHook.READ_SSL);
+    Tracker writeTracker = requireNonNull(
+        TrackerRepository.getTracker(context(), tester.client.getOutputStream()));
     assertThatTrackerNode(writeTracker)
         .hasPathStartingWith("Client socket")
         .hasPathEndingWith(tester.client.getRemoteSocketAddress().toString(),
             "From " + tester.client.getLocalPort(),
-            FileDescriptorTrackerRepository.WRITE, SSLSocketImplHook.SSL);
+            SSLSocketImplHook.WRITE_SSL);
     assertThat(readTracker.twin).isEqualTo(writeTracker);
     assertThat(writeTracker.twin).isEqualTo(readTracker);
   }
 
   private void testServer(SSLSocketTester tester) throws IOException {
-    Tracker readTracker = TrackerRepository.getTracker(context(), tester.server.getInputStream());
+    Tracker readTracker = requireNonNull(
+        TrackerRepository.getTracker(context(), tester.server.getInputStream()));
     assertThatTrackerNode(readTracker)
         .hasPathStartingWith("Server socket")
         .hasPathEndingWith(Integer.toString(tester.server.getLocalPort()),
             tester.server.getRemoteSocketAddress().toString(),
-            FileDescriptorTrackerRepository.READ, SSLSocketImplHook.SSL);
-    Tracker writeTracker = TrackerRepository.getTracker(context(),
-        tester.server.getOutputStream());
+            SSLSocketImplHook.READ_SSL);
+    Tracker writeTracker = requireNonNull(
+        TrackerRepository.getTracker(context(), tester.server.getOutputStream()));
     assertThatTrackerNode(writeTracker)
         .hasPathStartingWith("Server socket")
         .hasPathEndingWith(Integer.toString(tester.server.getLocalPort()),
             tester.server.getRemoteSocketAddress().toString(),
-            FileDescriptorTrackerRepository.WRITE, SSLSocketImplHook.SSL);
+            SSLSocketImplHook.WRITE_SSL);
     assertThat(readTracker.twin).isEqualTo(writeTracker);
     assertThat(writeTracker.twin).isEqualTo(readTracker);
   }
