@@ -33,9 +33,12 @@ run_petclinic() {
   # stick to a specific sha to keep the demos reproducible
   git checkout a35189a9c56eb1d813890fe33be2e67c9ff43636
   ./mvnw dependency:sources
-  ./mvnw integration-test -Dtest=PetClinicIntegrationTests -DargLine="-javaagent:$FT_JAR=webserver=false;trackCreation;snapshotOnExit=../spring-petclinic-snapshot.zip $FT_JVMOPTS"
+  # demo with in-memory database
+  ./mvnw integration-test -Dtest=PetClinicIntegrationTests#testOwnerDetails -DargLine="-javaagent:$FT_JAR=webserver=false;trackCreation;snapshotOnExit=../petclinic-snapshot.zip $FT_JVMOPTS"
   # sanity check that the link to the template worked
   unzip -p ../spring-petclinic-snapshot.zip | grep -q '"target","classes","templates","fragments","layout.html"' || error spring-petclinic tracking of template failed
+  # demo with mysql
+  ./mvnw integration-test -Dspring-boot.run.profiles=mysql -Dtest=MySqlIntegrationTests#testOwnerDetails -DargLine="-javaagent:$FT_JAR=webserver=false;trackCreation;snapshotOnExit=../petclinic-mysql-snapshot.zip $FT_JVMOPTS"
   cd ..
 }
 
