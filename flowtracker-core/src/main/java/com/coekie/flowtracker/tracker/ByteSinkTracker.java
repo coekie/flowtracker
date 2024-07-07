@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
  */
 public class ByteSinkTracker extends DefaultTracker implements ByteContentTracker {
   private final ByteSequence content = new ByteSequence();
+  private TwinSynchronization twinSync;
 
   @Override
   public int getLength() {
@@ -34,10 +35,12 @@ public class ByteSinkTracker extends DefaultTracker implements ByteContentTracke
   }
 
   public void append(byte b) {
+    beforeAppend();
     content.write(b);
   }
 
   public void append(byte[] cbuf, int offset, int len) {
+    beforeAppend();
     content.write(cbuf, offset, len);
   }
 
@@ -48,5 +51,19 @@ public class ByteSinkTracker extends DefaultTracker implements ByteContentTracke
   @Override
   public ByteSequence getContent() {
     return content;
+  }
+
+  @Override
+  public void initTwin(Tracker twin) {
+    super.initTwin(twin);
+    if (twin instanceof OriginTracker) {
+      twinSync = ((OriginTracker) twin).twinSync();
+    }
+  }
+
+  private void beforeAppend() {
+    if (twinSync != null) {
+      twinSync.beforeAppend(this);
+    }
   }
 }

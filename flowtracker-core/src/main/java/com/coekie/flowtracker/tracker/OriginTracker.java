@@ -18,6 +18,7 @@ package com.coekie.flowtracker.tracker;
 
 /** Tracker without a source. Its content cannot change, but it can possibly grow. */
 public abstract class OriginTracker extends Tracker {
+  private TwinSynchronization twinSync;
 
   @Override
   public int getEntryCount() {
@@ -27,5 +28,21 @@ public abstract class OriginTracker extends Tracker {
   @Override
   public boolean isContentMutable() {
     return false;
+  }
+
+  @Override
+  public void initTwin(Tracker twin) {
+    twinSync = new TwinSynchronization(this, twin);
+    super.initTwin(twin);
+  }
+
+  void beforeAppend() {
+    if (twinSync != null) {
+      twinSync.beforeAppend(this);
+    }
+  }
+
+  public TwinSynchronization twinSync() {
+    return twinSync;
   }
 }

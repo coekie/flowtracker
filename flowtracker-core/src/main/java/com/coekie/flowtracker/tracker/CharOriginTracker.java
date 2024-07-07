@@ -27,14 +27,17 @@ public class CharOriginTracker extends OriginTracker implements CharContentTrack
   private final StringBuilder content = new StringBuilder();
 
   public void append(char c) {
+    beforeAppend();
     content.append(c);
   }
 
   public void append(char[] cbuf, int offset, int len) {
+    beforeAppend();
     content.append(cbuf, offset, len);
   }
 
   public void append(CharSequence charSequence) {
+    beforeAppend();
     content.append(charSequence);
   }
 

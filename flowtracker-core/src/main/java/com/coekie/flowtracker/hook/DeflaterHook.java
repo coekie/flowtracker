@@ -133,8 +133,7 @@ public class DeflaterHook {
       int outputOffset, int written) {
     if (state.originTracker == null) {
       state.originTracker = new ByteOriginTracker();
-      state.originTracker.twin = state.sinkTracker;
-      state.sinkTracker.twin = state.originTracker;
+      state.originTracker.initTwin(state.sinkTracker);
     }
     int originTrackerIndex = state.originTracker.getLength();
     state.originTracker.append(output, outputOffset, written);

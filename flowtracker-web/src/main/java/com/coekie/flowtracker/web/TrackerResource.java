@@ -150,7 +150,7 @@ public class TrackerResource {
      */
     public final boolean hasSource;
 
-    /** @see Tracker#twin */
+    /** @see Tracker#twin() */
     public final TrackerResponse twin;
 
     private TrackerDetailResponse(ResponseBuilder builder) {
@@ -159,7 +159,8 @@ public class TrackerResource {
       this.regions = builder.buildRegions();
       this.linkedTrackers = builder.linkedTrackers;
       this.hasSource = builder.hasSource;
-      this.twin = builder.tracker.twin == null ? null : new TrackerResponse(builder.tracker.twin);
+      this.twin = builder.tracker.twin() == null ? null : new TrackerResponse(
+          builder.tracker.twin());
     }
   }
 

@@ -30,8 +30,8 @@ public class SocketTest {
           .hasPathEndingWith(tester.client.getRemoteSocketAddress().toString(),
               "From " + tester.client.getLocalPort(),
               FileDescriptorTrackerRepository.WRITE);
-      assertThat(readTracker.twin).isEqualTo(writeTracker);
-      assertThat(writeTracker.twin).isEqualTo(readTracker);
+      assertThat(readTracker.twin()).isEqualTo(writeTracker);
+      assertThat(writeTracker.twin()).isEqualTo(readTracker);
     }
   }
 
@@ -49,8 +49,8 @@ public class SocketTest {
           .hasPathEndingWith(Integer.toString(tester.server.getLocalPort()),
               tester.server.getRemoteSocketAddress().toString(),
               FileDescriptorTrackerRepository.WRITE);
-      assertThat(readTracker.twin).isEqualTo(writeTracker);
-      assertThat(writeTracker.twin).isEqualTo(readTracker);
+      assertThat(readTracker.twin()).isEqualTo(writeTracker);
+      assertThat(writeTracker.twin()).isEqualTo(readTracker);
     }
   }
 }

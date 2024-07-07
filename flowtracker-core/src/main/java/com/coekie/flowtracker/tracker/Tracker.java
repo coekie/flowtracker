@@ -29,11 +29,7 @@ public abstract class Tracker implements WritableTracker {
   private TrackerTree.Node node;
   private StackTraceElement[] creationStackTrace;
 
-  /**
-   * Other tracker that is closely associated to this one, e.g. linking the input and output on a
-   * socket.
-   */
-  public Tracker twin;
+  private Tracker twin;
 
   Tracker() {
   }
@@ -120,5 +116,23 @@ public abstract class Tracker implements WritableTracker {
 
   public static long nextId() {
     return idGenerator.getAndIncrement();
+  }
+
+  /**
+   * Other tracker that is closely associated to this one, e.g. linking the input and output on a
+   * socket.
+   */
+  public Tracker twin() {
+    return twin;
+  }
+
+  /**
+   * Initialize the {@link #twin()}, also linking in the other direction when that is not done yet.
+   */
+  public void initTwin(Tracker twin) {
+    this.twin = twin;
+    if (twin.twin != this) {
+      twin.initTwin(this);
+    }
   }
 }

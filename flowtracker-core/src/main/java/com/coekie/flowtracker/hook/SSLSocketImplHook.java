@@ -75,8 +75,7 @@ public class SSLSocketImplHook {
       }
       TrackerRepository.setTracker(context, out, writeTracker);
 
-      readTracker.twin = writeTracker;
-      writeTracker.twin = readTracker;
+      readTracker.initTwin(writeTracker);
     }
   }
 

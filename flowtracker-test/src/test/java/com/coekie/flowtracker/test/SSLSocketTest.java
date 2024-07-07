@@ -54,8 +54,8 @@ public class SSLSocketTest {
         .hasPathEndingWith(tester.client.getRemoteSocketAddress().toString(),
             "From " + tester.client.getLocalPort(),
             SSLSocketImplHook.WRITE_SSL);
-    assertThat(readTracker.twin).isEqualTo(writeTracker);
-    assertThat(writeTracker.twin).isEqualTo(readTracker);
+    assertThat(readTracker.twin()).isEqualTo(writeTracker);
+    assertThat(writeTracker.twin()).isEqualTo(readTracker);
   }
 
   private void testServer(SSLSocketTester tester) throws IOException {
@@ -73,7 +73,7 @@ public class SSLSocketTest {
         .hasPathEndingWith(Integer.toString(tester.server.getLocalPort()),
             tester.server.getRemoteSocketAddress().toString(),
             SSLSocketImplHook.WRITE_SSL);
-    assertThat(readTracker.twin).isEqualTo(writeTracker);
-    assertThat(writeTracker.twin).isEqualTo(readTracker);
+    assertThat(readTracker.twin()).isEqualTo(writeTracker);
+    assertThat(writeTracker.twin()).isEqualTo(readTracker);
   }
 }

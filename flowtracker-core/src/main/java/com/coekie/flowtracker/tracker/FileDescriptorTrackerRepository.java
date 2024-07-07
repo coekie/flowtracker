@@ -83,8 +83,7 @@ public class FileDescriptorTrackerRepository {
     map.put(fd, pair);
 
     if (twoNodes) {
-      readTracker.twin = writeTracker;
-      writeTracker.twin = readTracker;
+      readTracker.initTwin(writeTracker);
     }
   }
 

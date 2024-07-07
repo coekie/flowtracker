@@ -66,8 +66,8 @@ public class DeflaterTest {
     deflater.deflate(out, 0, 64, Deflater.FULL_FLUSH);
     ByteSinkTracker sinkTracker = requireNonNull(DeflaterHook.getSinkTracker(deflater));
     ByteOriginTracker originTracker = requireNonNull(DeflaterHook.getOriginTracker(deflater));
-    assertThat(sinkTracker.twin).isEqualTo(originTracker);
-    assertThat(originTracker.twin).isEqualTo(sinkTracker);
+    assertThat(sinkTracker.twin()).isEqualTo(originTracker);
+    assertThat(originTracker.twin()).isEqualTo(sinkTracker);
   }
 
   private void testDeflateToArray(InputType inputType, OutputType outputType) {

@@ -29,10 +29,12 @@ public class ByteOriginTracker extends OriginTracker implements ByteContentTrack
   private final ByteSequence content = new ByteSequence();
 
   public void append(byte b) {
+    beforeAppend();
     content.write(b);
   }
 
   public void append(byte[] cbuf, int offset, int len) {
+    beforeAppend();
     content.write(cbuf, offset, len);
   }
 

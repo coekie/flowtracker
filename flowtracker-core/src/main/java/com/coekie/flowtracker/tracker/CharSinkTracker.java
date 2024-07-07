@@ -24,6 +24,7 @@ package com.coekie.flowtracker.tracker;
  */
 public class CharSinkTracker extends DefaultTracker implements CharContentTracker {
   private final StringBuilder content = new StringBuilder();
+  private TwinSynchronization twinSync;
 
   @Override public CharSequence getContent() {
     return content;
@@ -34,14 +35,31 @@ public class CharSinkTracker extends DefaultTracker implements CharContentTracke
   }
 
   public void append(char c) {
+    beforeAppend();
     content.append(c);
   }
 
   public void append(char[] cbuf, int off, int len) {
+    beforeAppend();
     content.append(cbuf, off, len);
   }
 
   public void append(String str, int off, int len) {
+    beforeAppend();
     content.append(str, off, off + len);
+  }
+
+  @Override
+  public void initTwin(Tracker twin) {
+    super.initTwin(twin);
+    if (twin instanceof OriginTracker) {
+      twinSync = ((OriginTracker) twin).twinSync();
+    }
+  }
+
+  private void beforeAppend() {
+    if (twinSync != null) {
+      twinSync.beforeAppend(this);
+    }
   }
 }
