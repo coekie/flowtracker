@@ -53,9 +53,20 @@
   let targetTrackerId: number | undefined;
   $: targetTrackerId = targetTracker?.id;
 
+  /**
+   * Are we looking at a tracker as an origin. In that case, selection corresponds to regions in viewTracker itself.
+   * If false we're looking at it as a sink. In that case, selection corresponds to the source trackers (trackers
+   * referred to in parts).
+   */
+  let viewAsOrigin: boolean;
+  $: viewAsOrigin =
+    targetTracker != null || (viewTracker != null && viewTracker.origin);
+
+  /** Loaded detailed info (content, tracking) of viewTracker */
   let trackerDetailPromise: Promise<TrackerDetail>;
   $: trackerDetailPromise = fetchTrackerDetail(viewTrackerId, targetTrackerId);
 
+  /** The region that currently has focus; that the mouse is hoovering over */
   let focusRegion: Region | null;
 
   /** For an ongoing selection (while the mouse button is down), the selection where we started (where the mouse went down) */
@@ -64,6 +75,7 @@
   /** Show creation stacktrace (when available). Toggled with button in upper right corner. */
   let showCreation: boolean = false;
 
+  // references to some specific child tags/components
   let pre: HTMLPreElement;
   let codeView: CodeView;
 
@@ -108,7 +120,7 @@
     region: Region,
     trackerDetail: TrackerDetail
   ): RangeSelection | null {
-    if (targetTracker) {
+    if (viewAsOrigin) {
       return new RangeSelection(viewTracker!, region.offset, region.length);
     } else if (region.parts.length == 1) {
       return new RangeSelection(
@@ -170,13 +182,13 @@
     if (selection == null || viewTracker == null) {
       return false;
     } else if (selection instanceof RangeSelection) {
-      if (targetTracker) {
+      if (viewAsOrigin) {
         return (
           selection.tracker.id == viewTracker.id &&
           region.offset >= selection.offset &&
           region.offset < selection.offset + selection.length
         );
-        // else, we're looking at a sink (!targetTracker), so each region has at most one part
+        // else, we're looking at a sink (!viewAsOrigin), so each region has at most one part
       } else if (region.parts.length == 0) {
         return false;
       } else {
