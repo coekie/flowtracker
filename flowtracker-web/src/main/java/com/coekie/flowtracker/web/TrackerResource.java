@@ -23,7 +23,6 @@ import com.coekie.flowtracker.tracker.ByteSinkTracker;
 import com.coekie.flowtracker.tracker.CharContentTracker;
 import com.coekie.flowtracker.tracker.CharSinkTracker;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
-import com.coekie.flowtracker.tracker.ClassOriginTracker.LineNumberConsumer;
 import com.coekie.flowtracker.tracker.DefaultTracker;
 import com.coekie.flowtracker.tracker.FakeOriginTracker;
 import com.coekie.flowtracker.tracker.Growth;
@@ -69,8 +68,7 @@ public class TrackerResource {
         }
       });
     }
-    boolean hasSource = false; // line mapping not implemented yet (only in `reverse`)
-    return new TrackerDetailResponse(builder, hasSource);
+    return new TrackerDetailResponse(builder);
   }
 
   /** @see #reverse(long, long, boolean)  */
@@ -125,12 +123,7 @@ public class TrackerResource {
       }
     });
 
-    // similarly, for ClassOriginTracker, track line number changes
-    if (tracker instanceof ClassOriginTracker) {
-      ((ClassOriginTracker) tracker).pushLineNumbers(builder);
-    }
-
-    return new TrackerDetailResponse(builder, tracker instanceof ClassOriginTracker);
+    return new TrackerDetailResponse(builder);
   }
 
   /**
@@ -160,12 +153,12 @@ public class TrackerResource {
     /** @see Tracker#twin */
     public final TrackerResponse twin;
 
-    private TrackerDetailResponse(ResponseBuilder builder, boolean hasSource) {
+    private TrackerDetailResponse(ResponseBuilder builder) {
       this.path = path(builder.tracker);
       this.creationStackTrace = creationStackTraceToString(builder.tracker);
       this.regions = builder.buildRegions();
       this.linkedTrackers = builder.linkedTrackers;
-      this.hasSource = hasSource;
+      this.hasSource = builder.hasSource;
       this.twin = builder.tracker.twin == null ? null : new TrackerResponse(builder.tracker.twin);
     }
   }
@@ -228,7 +221,7 @@ public class TrackerResource {
    * Makes sure every tracker referenced from a {@link TrackerPartResponse} is in the
    * {@link #linkedTrackers} map
    */
-  static class ResponseBuilder implements LineNumberConsumer {
+  static class ResponseBuilder {
     private final Tracker tracker;
 
     private final Map<Long, TrackerResponse> linkedTrackers = new HashMap<>();
@@ -242,13 +235,16 @@ public class TrackerResource {
      */
     private final TreeMap<Integer, List<Consumer<State>>> changePoints = new TreeMap<>();
 
-    public ResponseBuilder(Tracker tracker) {
+    private boolean hasSource;
+
+    ResponseBuilder(Tracker tracker) {
       this.tracker = tracker;
       changePoints.put(0, new ArrayList<>());
+      addSourceAndLineNumbers();
     }
 
     /** Create a TrackerPartResponse, and make sure it's included in {@link #linkedTrackers} */
-    public TrackerPartResponse part(Tracker tracker, int offset, int length) {
+    TrackerPartResponse part(Tracker tracker, int offset, int length) {
       if (!linkedTrackers.containsKey(tracker.getTrackerId())) {
         linkedTrackers.put(tracker.getTrackerId(), new TrackerResponse(tracker));
       }
@@ -259,7 +255,7 @@ public class TrackerResource {
      * Mark a range in the response to link to the given part. This will cause the response to be
      * split into more {@link Region}s if necessary.
      */
-    public void addPart(int begin, int end, TrackerPartResponse part) {
+    void addPart(int begin, int end, TrackerPartResponse part) {
       addChange(begin, state -> state.parts.add(part));
       addChange(end, state -> state.parts.remove(part));
     }
@@ -268,14 +264,20 @@ public class TrackerResource {
      * Register a change in the {@link State} to happen at the given index. The Consumer will be
      * executed (so it can update the state) when building the final response.
      */
-    private void addChange(int index, Consumer<State> change) {
+    void addChange(int index, Consumer<State> change) {
       changePoints.computeIfAbsent(index, i -> new ArrayList<>()).add(change);
     }
 
-    @Override
-    public void line(int start, int end, int line) {
-      addChange(start, state -> state.lineNumber = line);
-      addChange(end, state -> state.lineNumber = -1);
+    void addSourceAndLineNumbers() {
+      // for ClassOriginTracker, mark it has having source code,
+      // and mark positions where the line number changes
+      if (tracker instanceof ClassOriginTracker) {
+        hasSource = true;
+        ((ClassOriginTracker) tracker).pushLineNumbers((start, end, line) -> {
+          addChange(start, state -> state.lineNumber = line);
+          addChange(end, state -> state.lineNumber = -1);
+        });
+      }
     }
 
     List<Region> buildRegions() {

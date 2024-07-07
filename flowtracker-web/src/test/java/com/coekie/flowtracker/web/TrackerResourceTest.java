@@ -14,6 +14,7 @@ import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import com.coekie.flowtracker.web.TrackerResource.Region;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -224,7 +225,7 @@ public class TrackerResourceTest {
     assertRegionOnePart(response.regions.get(0), "bc", target, 1);
   }
 
-  @Test public void reverseClassOriginTrackerSource() {
+  @Test public void sourceAndLineNumbers() {
     CharSinkTracker target = new CharSinkTracker();
     ClassOriginTracker source = ClassOriginTracker.registerClass(null, "myClass", null);
     InterestRepository.register(target);
@@ -233,19 +234,25 @@ public class TrackerResourceTest {
     source.startMethod("testing");
     source.registerConstantString("hello", 7);
 
-    TrackerDetailResponse response = trackerResource.reverse(source.getTrackerId(),
+    // test both `get` and `reverse`
+    TrackerDetailResponse forwardResponse = trackerResource.get(source.getTrackerId());
+    TrackerDetailResponse reverseResponse = trackerResource.reverse(source.getTrackerId(),
         target.getTrackerId());
-    assertThat(response.regions).hasSize(3);
 
-    assertRegionNoPart(response.regions.get(0), "class myClass\n"
-        + "testing:\n"
-        + "  (line 7) ");
-    assertRegionNoPart(response.regions.get(1), "hello");
-    assertRegionNoPart(response.regions.get(2), "\n");
+    for (TrackerDetailResponse response : List.of(forwardResponse, reverseResponse)) {
+      assertThat(response.hasSource).isTrue();
+      assertThat(response.regions).hasSize(3);
 
-    assertThat(response.regions.get(0).line).isNull();
-    assertThat(response.regions.get(1).line).isEqualTo(7);
-    assertThat(response.regions.get(2).line).isNull();
+      assertRegionNoPart(response.regions.get(0), "class myClass\n"
+          + "testing:\n"
+          + "  (line 7) ");
+      assertRegionNoPart(response.regions.get(1), "hello");
+      assertRegionNoPart(response.regions.get(2), "\n");
+
+      assertThat(response.regions.get(0).line).isNull();
+      assertThat(response.regions.get(1).line).isEqualTo(7);
+      assertThat(response.regions.get(2).line).isNull();
+    }
   }
 
   @Test public void path() {
