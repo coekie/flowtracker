@@ -16,8 +16,6 @@ package com.coekie.flowtracker.web;
  * limitations under the License.
  */
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 import com.coekie.flowtracker.tracker.ByteContentTracker;
@@ -25,6 +23,7 @@ import com.coekie.flowtracker.tracker.ByteSinkTracker;
 import com.coekie.flowtracker.tracker.CharContentTracker;
 import com.coekie.flowtracker.tracker.CharSinkTracker;
 import com.coekie.flowtracker.tracker.ClassOriginTracker;
+import com.coekie.flowtracker.tracker.ClassOriginTracker.LineNumberConsumer;
 import com.coekie.flowtracker.tracker.DefaultTracker;
 import com.coekie.flowtracker.tracker.FakeOriginTracker;
 import com.coekie.flowtracker.tracker.Growth;
@@ -46,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 @Path("/tracker")
 public class TrackerResource {
@@ -60,23 +60,17 @@ public class TrackerResource {
   @Path("{id}")
   public TrackerDetailResponse get(@PathParam("id") long id) {
     Tracker tracker = requireNonNull(InterestRepository.getContentTracker(id));
-    List<Region> regions = new ArrayList<>();
-    TrackerPartResponseBuilder partBuilder = new TrackerPartResponseBuilder();
+    ResponseBuilder builder = new ResponseBuilder(tracker);
     if (tracker instanceof DefaultTracker) {
       Simplifier.simplifySourceTo(tracker, (index, length, sourceTracker, sourceIndex, growth) -> {
         if (sourceTracker != null) {
-          regions.add(new Region(tracker, index, length, singletonList(
-              partBuilder.part(sourceTracker, sourceIndex, growth.targetToSource(length)))));
-        } else {
-          regions.add(new Region(tracker, index, length, emptyList()));
+          builder.addPart(index, index + length,
+              builder.part(sourceTracker, sourceIndex, growth.targetToSource(length)));
         }
       });
-    } else {
-      regions.add(
-          new Region(tracker, 0, getContentLength(tracker), emptyList()));
     }
     boolean hasSource = false; // line mapping not implemented yet (only in `reverse`)
-    return new TrackerDetailResponse(tracker, regions, partBuilder, hasSource);
+    return new TrackerDetailResponse(builder, hasSource);
   }
 
   /** @see #reverse(long, long, boolean)  */
@@ -105,29 +99,25 @@ public class TrackerResource {
     Tracker tracker = InterestRepository.getContentTracker(id);
     Tracker target = InterestRepository.getContentTracker(targetId);
 
-    List<Region> regions = new ArrayList<>();
-    TrackerPartResponseBuilder partBuilder = new TrackerPartResponseBuilder();
-
-    List<TrackerPartResponse> activeParts = new ArrayList<>();
+    ResponseBuilder builder = new ResponseBuilder(tracker);
 
     // record at which indexes in tracker that changes happen to which parts correspond to it.
-    // a change means the start or end of an associated part.
-    // the Runnable in this map mutates activeParts with the relevant change.
-    // in other words, this iterates over the content of `target`, and builds an ~index of how that
+    // in other words, this iterates over the content of `target`, and builds an index of how that
     // maps to indexes in the content of `tracker`
-    TreeMap<Integer, List<Runnable>> changePoints = new TreeMap<>();
-    changePoints.put(0, new ArrayList<>());
     Simplifier.simplifySourceTo(target, new WritableTracker() {
       @Override
       public void setSource(int index, int length, Tracker sourceTracker, int sourceIndex,
           Growth growth) {
         int sourceLength = growth.targetToSource(length);
         if (sourceTracker == tracker) {
-          TrackerPartResponse part = partBuilder.part(target, index, length);
-          changePoints.computeIfAbsent(sourceIndex, i -> new ArrayList<>())
-              .add(() -> activeParts.add(part));
-          changePoints.computeIfAbsent(sourceIndex + sourceLength, i -> new ArrayList<>())
-              .add(() -> activeParts.remove(part));
+          TrackerPartResponse part = builder.part(target, index, length);
+          if (includeParts) {
+            builder.addPart(sourceIndex, sourceIndex + sourceLength, part);
+          } else {
+            // split up in regions so there's a region boundary at start and end of each part
+            builder.addChange(sourceIndex, state -> {});
+            builder.addChange(sourceIndex + sourceLength, state -> {});
+          }
         } else if (sourceTracker != null && sourceTracker.getEntryCount() > 0) {
           // recurse to the source of the source
           sourceTracker.pushSourceTo(sourceIndex, this, index, sourceLength, growth);
@@ -136,40 +126,11 @@ public class TrackerResource {
     });
 
     // similarly, for ClassOriginTracker, track line number changes
-    int[] activeLineNumber = {-1}; // using array as a mutable int.
     if (tracker instanceof ClassOriginTracker) {
-      ((ClassOriginTracker) tracker).pushLineNumbers((start, end, line) -> {
-        changePoints.computeIfAbsent(start, i -> new ArrayList<>())
-            .add(() -> activeLineNumber[0] = line);
-        changePoints.computeIfAbsent(end, i -> new ArrayList<>())
-            .add(() -> activeLineNumber[0] = -1);
-      });
+      ((ClassOriginTracker) tracker).pushLineNumbers(builder);
     }
 
-    // iterate of the content of `tracker`, building up regions.
-    for (int i : changePoints.keySet()) {
-      // update activeParts to match the parts active at i
-      for (Runnable change : changePoints.get(i)) {
-        change.run();
-      }
-
-      // the end of this region is where the next one begins,
-      // or else (for the last region) the end of `tracker`.
-      Integer ceil = changePoints.ceilingKey(i + 1);
-      int endIndex = ceil == null ? getContentLength(tracker) : ceil;
-
-      // if-condition: don't write out empty region that can otherwise appear at the end
-      if (endIndex <= i) {
-        break;
-      }
-
-      regions.add(new Region(tracker, i, endIndex - i,
-          includeParts ? new ArrayList<>(activeParts) : List.of(),
-          activeLineNumber[0]));
-    }
-
-    return new TrackerDetailResponse(tracker, regions, partBuilder,
-        tracker instanceof ClassOriginTracker);
+    return new TrackerDetailResponse(builder, tracker instanceof ClassOriginTracker);
   }
 
   /**
@@ -199,14 +160,13 @@ public class TrackerResource {
     /** @see Tracker#twin */
     public final TrackerResponse twin;
 
-    private TrackerDetailResponse(Tracker tracker, List<Region> regions,
-        TrackerPartResponseBuilder partBuilder, boolean hasSource) {
-      this.path = path(tracker);
-      this.creationStackTrace = creationStackTraceToString(tracker);
-      this.regions = regions;
-      this.linkedTrackers = partBuilder.linkedTrackers;
+    private TrackerDetailResponse(ResponseBuilder builder, boolean hasSource) {
+      this.path = path(builder.tracker);
+      this.creationStackTrace = creationStackTraceToString(builder.tracker);
+      this.regions = builder.buildRegions();
+      this.linkedTrackers = builder.linkedTrackers;
       this.hasSource = hasSource;
-      this.twin = tracker.twin == null ? null : new TrackerResponse(tracker.twin);
+      this.twin = builder.tracker.twin == null ? null : new TrackerResponse(builder.tracker.twin);
     }
   }
 
@@ -264,17 +224,94 @@ public class TrackerResource {
   }
 
   /**
-   * Builds a {@link TrackerPartResponse}, making sure every linked tracker is in the
+   * Builds a {@link TrackerDetailResponse}.
+   * Makes sure every tracker referenced from a {@link TrackerPartResponse} is in the
    * {@link #linkedTrackers} map
    */
-  static class TrackerPartResponseBuilder {
+  static class ResponseBuilder implements LineNumberConsumer {
+    private final Tracker tracker;
+
     private final Map<Long, TrackerResponse> linkedTrackers = new HashMap<>();
 
+    /**
+     * Records at which indexes in tracker that changes happen to {@link State}, e.g. which parts
+     * correspond to it. A change means the start or end of an associated part.
+     * The Consumer in this map mutates {@link State} with the relevant change.
+     * This allows building an ~index of where the region boundaries are out of order, and then
+     * going over it in order to build the regions.
+     */
+    private final TreeMap<Integer, List<Consumer<State>>> changePoints = new TreeMap<>();
+
+    public ResponseBuilder(Tracker tracker) {
+      this.tracker = tracker;
+      changePoints.put(0, new ArrayList<>());
+    }
+
+    /** Create a TrackerPartResponse, and make sure it's included in {@link #linkedTrackers} */
     public TrackerPartResponse part(Tracker tracker, int offset, int length) {
       if (!linkedTrackers.containsKey(tracker.getTrackerId())) {
         linkedTrackers.put(tracker.getTrackerId(), new TrackerResponse(tracker));
       }
       return new TrackerPartResponse(tracker, offset, length);
+    }
+
+    /**
+     * Mark a range in the response to link to the given part. This will cause the response to be
+     * split into more {@link Region}s if necessary.
+     */
+    public void addPart(int begin, int end, TrackerPartResponse part) {
+      addChange(begin, state -> state.parts.add(part));
+      addChange(end, state -> state.parts.remove(part));
+    }
+
+    /**
+     * Register a change in the {@link State} to happen at the given index. The Consumer will be
+     * executed (so it can update the state) when building the final response.
+     */
+    private void addChange(int index, Consumer<State> change) {
+      changePoints.computeIfAbsent(index, i -> new ArrayList<>()).add(change);
+    }
+
+    @Override
+    public void line(int start, int end, int line) {
+      addChange(start, state -> state.lineNumber = line);
+      addChange(end, state -> state.lineNumber = -1);
+    }
+
+    List<Region> buildRegions() {
+      State state = new State();
+      List<Region> regions = new ArrayList<>();
+      // iterate of the content of `tracker`, building up regions.
+      for (int i : changePoints.keySet()) {
+        // update activeParts to match the parts active at i
+        for (Consumer<State> change : changePoints.get(i)) {
+          change.accept(state);
+        }
+
+        // the end of this region is where the next one begins,
+        // or else (for the last region) the end of `tracker`.
+        Integer ceil = changePoints.ceilingKey(i + 1);
+        int endIndex = ceil == null ? getContentLength(tracker) : ceil;
+
+        // if-condition: don't write out empty region that can otherwise appear at the end
+        if (endIndex <= i) {
+          break;
+        }
+
+        regions.add(new Region(tracker, i, endIndex - i,
+            new ArrayList<>(state.parts),
+            state.lineNumber));
+      }
+      return regions;
+    }
+
+    /** State that is updated while we're iterating over the content when building the response */
+    private static class State {
+      /** Parts that the current region should link to */
+      List<TrackerPartResponse> parts = new ArrayList<>();
+
+      /** Current line number */
+      int lineNumber = -1;
     }
   }
 
