@@ -44,7 +44,7 @@ public class TwinSynchronization {
   }
 
   /** The other tracker; assuming tracker is one of {@link #tracker1} or {@link #tracker2} */
-  private Tracker other(Tracker tracker) {
+  public Tracker other(Tracker tracker) {
     return tracker1 == tracker ? tracker2 : tracker1;
   }
 
@@ -52,7 +52,7 @@ public class TwinSynchronization {
    * Marks the position at which the conversation switched sides; that is when content got added to
    * a different tracker than before.
    */
-  public static class TwinMarker {
+  public class TwinMarker {
     /** The tracker which started getting content at this point */
     public final Tracker to;
 
@@ -66,6 +66,11 @@ public class TwinSynchronization {
       this.to = to;
       this.toIndex = toIndex;
       this.fromIndex = fromIndex;
+    }
+
+    /** The other tracker */
+    public Tracker from() {
+      return other(to);
     }
   }
 }

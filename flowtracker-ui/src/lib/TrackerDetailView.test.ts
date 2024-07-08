@@ -11,6 +11,7 @@ import {
   classOriginTracker,
   simpleOriginTracker,
   simpleSinkTracker,
+  twinSinkTracker,
 } from '../mocks/handlers';
 import {PathSelection, RangeSelection} from './selection';
 
@@ -41,6 +42,14 @@ function renderOriginTrackerWithSourceCode(): TrackerDetailView {
   return render(TrackerDetailView, {
     viewTracker: classOriginTracker,
     targetTracker: simpleSinkTracker,
+    selection: null,
+    coloring: new Coloring(),
+  }).component;
+}
+
+function renderTwinSinkTracker(): TrackerDetailView {
+  return render(TrackerDetailView, {
+    viewTracker: twinSinkTracker,
     selection: null,
     coloring: new Coloring(),
   }).component;
@@ -212,4 +221,9 @@ describe('source code', () => {
       'background-color': coloring.assignments[0].color,
     });
   });
+});
+
+test('render twin content', async () => {
+  renderTwinSinkTracker();
+  await screen.findByText('Content from twin');
 });

@@ -22,6 +22,20 @@ export const classOriginTracker = {
   sink: false,
 };
 
+export const twinOriginTracker = {
+  id: 104,
+  path: ['Twin', 'origin'],
+  origin: true,
+  sink: false,
+};
+
+export const twinSinkTracker = {
+  id: 105,
+  path: ['Twin', 'sink'],
+  origin: false,
+  sink: true,
+};
+
 export const handlers: HttpHandler[] = [
   http.get('/tree/all', () => {
     return HttpResponse.json({
@@ -199,6 +213,22 @@ export const handlers: HttpHandler[] = [
               length: 10,
             },
           ],
+        },
+      ],
+    });
+  }),
+  http.get('/tracker/' + twinSinkTracker.id, () => {
+    return HttpResponse.json({
+      path: twinSinkTracker.path,
+      linkedTrackers: {},
+      twin: twinOriginTracker,
+      regions: [
+        {
+          offset: 0,
+          length: 12,
+          content: 'Region with twin content\n',
+          parts: [],
+          twinContent: 'Content from twin\n',
         },
       ],
     });

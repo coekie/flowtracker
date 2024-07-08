@@ -255,6 +255,27 @@ public class TrackerResourceTest {
     }
   }
 
+  @Test public void twinContent() {
+    CharOriginTracker origin = new CharOriginTracker();
+    CharSinkTracker sink = new CharSinkTracker();
+    sink.initTwin(origin);
+    InterestRepository.register(sink);
+    origin.append("o1");
+    sink.append("s1", 0, 2);
+    origin.append("o2");
+    sink.append("s2", 0, 2);
+    origin.append("o3");
+
+    TrackerDetailResponse response = trackerResource.get(sink.getTrackerId());
+    assertThat(response.regions).hasSize(3);
+    assertThat(response.regions.get(0).twinContent).isEqualTo("o1");
+    assertThat(response.regions.get(0).content).isEqualTo("s1");
+    assertThat(response.regions.get(1).twinContent).isEqualTo("o2");
+    assertThat(response.regions.get(1).content).isEqualTo("s2");
+    assertThat(response.regions.get(2).twinContent).isEqualTo("o3");
+    assertThat(response.regions.get(2).content).isEqualTo("");
+  }
+
   @Test public void path() {
     Node root = TrackerTree.node("TrackerResourceTest.test");
     Node one = root.node("a");

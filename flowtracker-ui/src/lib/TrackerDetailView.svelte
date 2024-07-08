@@ -283,7 +283,9 @@
           {/if}
           <pre
             bind:this={pre}
-            use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}<a
+            use:scrollToSelectionOnFirstRender>{#each trackerDetail.regions as region}{#if region.twinContent != null}<span
+                  class="twin-content">{region.twinContent}</span
+                >{/if}<a
                 class="region"
                 href={region.parts.length > 0 ? 'javascript:;' : undefined}
                 on:mouseover={() => focusIn(region)}
@@ -390,5 +392,8 @@
   }
   .selected {
     border: 1px solid gray;
+  }
+  .twin-content {
+    color: lightgray;
   }
 </style>

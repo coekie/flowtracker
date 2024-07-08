@@ -24,6 +24,7 @@ export interface Region {
   length: number;
   content: string;
   parts: TrackerPart[];
+  twinContent: string | null;
 }
 
 // in java: TrackerResource.TrackerDetailResponse

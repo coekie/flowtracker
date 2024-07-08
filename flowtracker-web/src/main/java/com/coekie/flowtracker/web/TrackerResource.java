@@ -31,6 +31,8 @@ import com.coekie.flowtracker.tracker.Simplifier;
 import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerTree;
 import com.coekie.flowtracker.tracker.TrackerTree.Node;
+import com.coekie.flowtracker.tracker.TwinSynchronization;
+import com.coekie.flowtracker.tracker.TwinSynchronization.TwinMarker;
 import com.coekie.flowtracker.tracker.WritableTracker;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -186,20 +188,21 @@ public class TrackerResource {
     /** For {@link ClassOriginTracker}, indicates the line number in the source code */
     public final Integer line;
 
-    Region(Tracker tracker, int offset, int length, List<TrackerPartResponse> parts) {
-      this.offset = offset;
-      this.length = length;
-      this.content = getContentAsString(tracker, offset, offset + length);
-      this.parts = parts;
-      this.line = null;
-    }
+    /**
+     * Content from the twin ({@link Tracker#twin()}) that appeared just before this region.
+     * For example, if this region contains an HTTP response, then the twinContent could be the HTTP
+     * request that caused it.
+     */
+    public final String twinContent;
 
-    Region(Tracker tracker, int offset, int length, List<TrackerPartResponse> parts, int line) {
+    Region(Tracker tracker, int offset, int length, List<TrackerPartResponse> parts, int line,
+        String twinContent) {
       this.offset = offset;
       this.length = length;
       this.content = getContentAsString(tracker, offset, offset + length);
       this.parts = parts;
       this.line = line == -1 ? null : line;
+      this.twinContent = twinContent;
     }
   }
 
@@ -236,12 +239,15 @@ public class TrackerResource {
      */
     private final TreeMap<Integer, List<Consumer<State>>> changePoints = new TreeMap<>();
 
+    private final TwinSynchronization twinSync;
     private boolean hasSource;
 
     ResponseBuilder(Tracker tracker) {
       this.tracker = tracker;
       changePoints.put(0, new ArrayList<>());
+      twinSync = getTwinSync(tracker);
       addSourceAndLineNumbers();
+      addTwinContent();
     }
 
     /** Create a TrackerPartResponse, and make sure it's included in {@link #linkedTrackers} */
@@ -269,15 +275,45 @@ public class TrackerResource {
       changePoints.computeIfAbsent(index, i -> new ArrayList<>()).add(change);
     }
 
+    /**
+     * For ClassOriginTracker, mark it has having source code, and mark positions where the line
+     * number changes
+     */
     void addSourceAndLineNumbers() {
-      // for ClassOriginTracker, mark it has having source code,
-      // and mark positions where the line number changes
       if (tracker instanceof ClassOriginTracker) {
         hasSource = true;
         ((ClassOriginTracker) tracker).pushLineNumbers((start, end, line) -> {
           addChange(start, state -> state.lineNumber = line);
           addChange(end, state -> state.lineNumber = -1);
         });
+      }
+    }
+
+    private static TwinSynchronization getTwinSync(Tracker tracker) {
+      if (tracker instanceof OriginTracker) {
+        return ((OriginTracker) tracker).twinSync();
+      } else if (tracker.twin() instanceof OriginTracker) {
+        return ((OriginTracker) tracker.twin()).twinSync();
+      } else {
+        return null;
+      }
+    }
+
+    /**
+     * Add changePoints for setting {@link State#pendingTwinContent}.
+     */
+    void addTwinContent() {
+      if (twinSync == null) {
+        return;
+      }
+      for (TwinMarker marker : twinSync.markers) {
+        if (marker.to == tracker) {
+          addChange(marker.toIndex, state -> {
+            state.pendingTwinContent =
+                getContentAsString(marker.from(), state.prevTwinIndex, marker.fromIndex);
+            state.prevTwinIndex = marker.fromIndex;
+          });
+        }
       }
     }
 
@@ -303,8 +339,20 @@ public class TrackerResource {
 
         regions.add(new Region(tracker, i, endIndex - i,
             new ArrayList<>(state.parts),
-            state.lineNumber));
+            state.lineNumber, state.pendingTwinContent));
+        state.pendingTwinContent = null;
       }
+
+      // if there's still content from the twin after our last region, then add an extra empty
+      // region at the end
+      if (twinSync != null) {
+        Tracker other = twinSync.other(tracker);
+        if (other.getLength() > state.prevTwinIndex) {
+          regions.add(new Region(tracker, getContentLength(tracker), 0, List.of(), -1,
+              getContentAsString(other, state.prevTwinIndex, other.getLength())));
+        }
+      }
+
       return regions;
     }
 
@@ -315,6 +363,12 @@ public class TrackerResource {
 
       /** Current line number */
       int lineNumber = -1;
+
+      /** Content from the twin that still needs to be included in {@link Region#twinContent} */
+      String pendingTwinContent;
+
+      /** Index up to where we've already written {@link #pendingTwinContent} */
+      int prevTwinIndex;
     }
   }
 
