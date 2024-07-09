@@ -100,4 +100,25 @@ class InvocationReturnValue extends TrackableValue {
     }
     return false;
   }
+
+  /**
+   * Returns true if when invoking the given method, we consider the return value the same as the
+   * first argument, skipping invocation instrumentation.
+   */
+  static boolean passThroughInvocation(String owner, String methodName) {
+    switch (owner) {
+      case "java/lang/Byte":
+        if ("toUnsignedInt".equals(methodName)) {
+          return true;
+        }
+        break;
+      case "java/lang/Character":
+        if ("toUpperCase".equals(methodName) || "toLowerCase".equals(methodName)
+            || "toTitleCase".equals(methodName)) {
+          return true;
+        }
+        break;
+    }
+    return false;
+  }
 }

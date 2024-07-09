@@ -58,4 +58,15 @@ public class CharacterTest {
     assertThat(FlowTester.getIntSourcePoint(b))
         .isEqualTo(TrackerPoint.of(getTracker(context(), abc), 1, 2));
   }
+
+  @Test
+  public void toUpperLowerCase() {
+    FlowTester ft = new FlowTester();
+    ft.assertIsTheTrackedValue(Character.toUpperCase(ft.createSourceChar('a')));
+    ft.assertIsTheTrackedValue(Character.toUpperCase(ft.createSourceInt('a')));
+    ft.assertIsTheTrackedValue(Character.toLowerCase(ft.createSourceChar('a')));
+    ft.assertIsTheTrackedValue(Character.toLowerCase(ft.createSourceInt('a')));
+    ft.assertIsTheTrackedValue(Character.toTitleCase(ft.createSourceChar('a')));
+    ft.assertIsTheTrackedValue(Character.toTitleCase(ft.createSourceInt('a')));
+  }
 }

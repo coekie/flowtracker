@@ -69,7 +69,9 @@ public class InvocationArgStore extends Store {
       FlowValue value = nextFrame.getStack(nextFrame.getStackSize() - 1);
       if (value instanceof InvocationReturnValue) {
         InvocationReturnValue invocationReturnValue = ((InvocationReturnValue) value);
-        return invocationReturnValue.transformation;
+        if (invocationReturnValue.getCreationInsn() == mInsn) {
+          return invocationReturnValue.transformation;
+        }
       }
     }
     return new InvocationOutgoingTransformation(mInsn, frame.getMethod());
@@ -145,6 +147,10 @@ public class InvocationArgStore extends Store {
           return null;
         }
         break;
+    }
+
+    if (InvocationReturnValue.passThroughInvocation(owner, name)) {
+      return null;
     }
 
     boolean eager = name.contains("write") || name.contains("Write") || name.contains("print")

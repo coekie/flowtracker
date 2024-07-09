@@ -240,22 +240,45 @@ class FlowInterpreter extends Interpreter<FlowValue> {
       throws AnalyzerException {
     if (insn instanceof MethodInsnNode) {
       MethodInsnNode mInsn = (MethodInsnNode) insn;
-      if ("com/coekie/flowtracker/test/FlowTester".equals(mInsn.owner)) {
-        if ("createSourceChar".equals(mInsn.name)
-            || "createSourceShort".equals(mInsn.name)
-            || "createSourceByte".equals(mInsn.name)
-            || "createSourceInt".equals(mInsn.name)) {
-          return new TesterValue(method, mInsn, false);
-        } else if ("createSourceLong".equals(mInsn.name)) {
-          return new TesterValue(method, mInsn, true);
-        }
-      } else if ("java/lang/Byte".equals(mInsn.owner) && "toUnsignedInt".equals(mInsn.name)) {
+      switch (mInsn.owner) {
+        case "com/coekie/flowtracker/test/FlowTester":
+          if ("createSourceChar".equals(mInsn.name)
+              || "createSourceShort".equals(mInsn.name)
+              || "createSourceByte".equals(mInsn.name)
+              || "createSourceInt".equals(mInsn.name)) {
+            return new TesterValue(method, mInsn, false);
+          } else if ("createSourceLong".equals(mInsn.name)) {
+            return new TesterValue(method, mInsn, true);
+          } else {
+            // don't track other FlowTester invocations
+            return toFlowValue(basicInterpreter.naryOperation(insn, values));
+          }
+        case "java/lang/Byte":
+          if ("toUnsignedInt".equals(mInsn.name)) {
+            return values.get(0);
+          }
+          break;
+        case "java/lang/Character":
+          if ("toUpperCase".equals(mInsn.name) || "toLowerCase".equals(mInsn.name)
+              || "toTitleCase".equals(mInsn.name)) {
+            return values.get(0);
+          }
+          break;
+        case "java/lang/String":
+          if ("charAt".equals(mInsn.name)) {
+            return new CharAtValue(method, mInsn, false);
+          }
+          break;
+        case "java/lang/CharSequence":
+          if ("charAt".equals(mInsn.name)) {
+            return new CharAtValue(method, mInsn, true);
+          }
+          break;
+      }
+      if (InvocationReturnValue.passThroughInvocation(mInsn.owner, mInsn.name)) {
         return values.get(0);
-      } else if ("java/lang/String".equals(mInsn.owner) && "charAt".equals(mInsn.name)) {
-        return new CharAtValue(method, mInsn, false);
-      } else if ("java/lang/CharSequence".equals(mInsn.owner) && "charAt".equals(mInsn.name)) {
-        return new CharAtValue(method, mInsn, true);
-      } else if (InvocationReturnValue.shouldInstrumentInvocation(mInsn.owner, mInsn.name, mInsn.desc)) {
+      }
+      if (InvocationReturnValue.shouldInstrumentInvocation(mInsn.owner, mInsn.name, mInsn.desc)) {
         return new InvocationReturnValue(method, mInsn);
       }
     }
