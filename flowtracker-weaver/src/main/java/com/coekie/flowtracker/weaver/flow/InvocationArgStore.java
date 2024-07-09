@@ -153,7 +153,8 @@ public class InvocationArgStore extends Store {
       return null;
     }
 
-    boolean eager = name.contains("write") || name.contains("Write") || name.contains("print")
+    boolean eager = name.contains("write") || name.contains("Write") || name.startsWith("print")
+        || name.startsWith("encode") || name.startsWith("decode")
         // classes with Byte in the name are likely to be worth tracking. e.g.
         // - java.nio.ByteBuffer
         // - jdk.internal.util.ByteArray (used in ByteArrayHook)

@@ -81,10 +81,14 @@ class InvocationReturnValue extends TrackableValue {
       // heuristic guessing which methods are worth tracking the return value of, because that
       // probably is a char or byte read from somewhere
       // (but avoiding ConcurrentHashMap.spread because of circularity)
-      if (((name.contains("read") && !name.contains("spread")) || name.contains("Read"))
+      if ((name.startsWith("read") || name.contains("Read"))
           // don't instrument methods where the output is going through a buffer passed into it as
           // parameter. for those, the returned value is probably the length
           && !desc.contains("[") && !desc.contains("Buffer")) {
+        return true;
+      }
+
+      if (name.startsWith("encode") || name.startsWith("decode")) {
         return true;
       }
 
