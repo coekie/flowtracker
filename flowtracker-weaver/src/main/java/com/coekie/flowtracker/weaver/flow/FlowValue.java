@@ -164,6 +164,7 @@ abstract class FlowValue extends BasicValue {
     void loadSourcePointFallback(InsnList toInsert);
   }
 
+  /** FallbackSource that produces `null` PointTrackers. In other words, no fallback. */
   enum NullFallbackSource implements FallbackSource {
     INSTANCE;
 

@@ -19,6 +19,11 @@ package com.coekie.flowtracker.tracker;
 /**
  * Object that can accept writes from
  * {@link Tracker#pushSourceTo(int, WritableTracker, int, int, Growth)}.
+ * <p>
+ * The most commonly used implementation is {@link Tracker}, where tracked is usually pushed in to
+ * match the way the data it refers to moved in memory. But this is also used to push the tracking
+ * data into other representations e.g. for mapping it to json, or filtering through the
+ * {@link Simplifier}.
  */
 public interface WritableTracker {
   /**

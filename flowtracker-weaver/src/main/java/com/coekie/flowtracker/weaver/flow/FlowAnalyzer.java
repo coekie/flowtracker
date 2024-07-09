@@ -27,12 +27,12 @@ import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 
-/** Extension of {@link Analyzer}, used for flow analysis */
+/** Extension of ASM's {@link Analyzer}, used for flow analysis */
 class FlowAnalyzer extends Analyzer<FlowValue> {
   final FlowMethod method;
 
-  FlowAnalyzer(FlowInterpreter interpreter, FlowMethod method) {
-    super(interpreter);
+  FlowAnalyzer(FlowMethod method) {
+    super(new FlowInterpreter(method));
     this.method = method;
   }
 
@@ -51,6 +51,7 @@ class FlowAnalyzer extends Analyzer<FlowValue> {
     Frame<FlowValue>[] frames = super.analyze(owner, method);
 
     for (int i = 0; i < frames.length; i++) {
+      // make frames aware of which instruction they correspond to.
       // note: if we need this to be initialized earlier, we could also override
       // newControlFlowEdge & newControlFlowExceptionEdge and initialize it at that point
       FlowFrame frame = (FlowFrame) frames[i];

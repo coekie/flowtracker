@@ -73,7 +73,7 @@ class InvocationOutgoingTransformation {
         "calling",
         "(Lcom/coekie/flowtracker/tracker/Context;)Lcom/coekie/flowtracker/tracker/Invocation;"));
 
-    // initially we assume we're not going to need the Invocation anymore.
+    // initially we assume we're not going to need the Invocation anymore. Pop it away.
     endInsn = new InsnNode(Opcodes.POP);
     toInsert.add(endInsn);
 
@@ -82,8 +82,9 @@ class InvocationOutgoingTransformation {
   }
 
   /**
-   * Insert instructions that operate on the Invocation, before the actual method invocation. At
-   * this point the {@link Invocation} is on top of the stack, and at the end of the inserted
+   * Insert instructions that operate on the Invocation, before the actual method invocation.
+   * Concretely, this is used for adding `Invocation.setArg*` calls.
+   * At this point the {@link Invocation} is on top of the stack, and at the end of the inserted
    * instructions it should still be there.
    */
   void insertInvocationPreparation(InsnList toInsert) {
@@ -91,7 +92,7 @@ class InvocationOutgoingTransformation {
   }
 
   /**
-   * Instead for POP'ing the {@link Invocation} at the end, store it in the given local var.
+   * Instead of popping the {@link Invocation} at the end, store it in the given local var.
    */
   void storeInvocation(TrackLocal invocationLocal) {
     if (endInsn == null || endInsn.getOpcode() != Opcodes.POP) {

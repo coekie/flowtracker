@@ -21,8 +21,11 @@ import static com.coekie.flowtracker.tracker.Context.context;
 import java.util.Arrays;
 
 /**
- * Represents a method call, to both the caller and callee.
+ * Represents a method call, that is a particular invocation at runtime, to both the caller and
+ * callee.
  * Facilitates tracking of primitive values through calls, for return values and parameters.
+ * The `Invocation` is stored in a `ThreadLocal` just before a method invocation, and retrieved at
+ * the start of the implementation of the method.
  */
 public class Invocation {
   private final String signature;

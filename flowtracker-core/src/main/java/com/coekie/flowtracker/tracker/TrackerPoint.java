@@ -19,9 +19,10 @@ package com.coekie.flowtracker.tracker;
 import java.util.Objects;
 
 /**
- * A position in a tracker, representing a single value being tracked, e.g. one byte or one char.
+ * Pointer to a position in a tracker, representing a single value being tracked, e.g. one byte or
+ * one char.
  * <p>
- * A point does have a length, because e.g. a `char` value obtained from a byte[] could come from
+ * A point does have a length, because e.g. a `char` value decoded from a byte[] could come from
  * two bytes.
  */
 public class TrackerPoint {
@@ -75,7 +76,7 @@ public class TrackerPoint {
     if (depth.isAcceptableContent(tracker)) {
       return new TrackerPoint(tracker, index, length);
     } else {
-      // perhaps we should add method in reader to read a single value directly?
+      // possible future optimization: add method in Tracker to read a single value directly.
       // instead of reading it, we let it push it to us
       Gimme gimme = new Gimme();
       tracker.pushSourceTo(index, gimme, 0, length, Growth.NONE);

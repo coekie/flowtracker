@@ -47,15 +47,6 @@ public class TrackerTree {
     return c == '/' || c == '\\';
   }
 
-  public static Node nodeOrUnknown(Tracker tracker) {
-    Node node;
-    if (tracker == null || (node = tracker.getNode()) == null) {
-      return node("Unknown");
-    } else {
-      return node;
-    }
-  }
-
   public static class Node {
     public final Node parent;
     public final String name;
@@ -105,7 +96,7 @@ public class TrackerTree {
       return node;
     }
 
-    /** Get or create a new optional child node */
+    /** Get or create a new {@link #optional} child node */
     public synchronized Node optionalNode(String name) {
       return children.computeIfAbsent(name, this::createOptionalChild);
     }
@@ -121,7 +112,6 @@ public class TrackerTree {
     /** Should only be used by {@link Tracker#addTo(Node)} */
     synchronized void internalAddTracker(Tracker tracker) {
       trackers.add(tracker);
-      tracker.initNode(this);
     }
 
     public synchronized List<Node> children() {

@@ -20,6 +20,20 @@ import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import com.coekie.flowtracker.util.Config;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Holds information about a tracked object, mainly its content and source.
+ * <ul>
+ *   <li>content: the data that passed through the tracked object. e.g. all bytes passed through an
+ *   `InputStream` or `OutputStream`. The API for that is in the {@link ByteContentTracker} and
+ *   {@link CharContentTracker} interfaces, that trackers optionally implement.
+ *   <li>source: associate ranges of its content to their source ranges in other trackers.
+ *   For example, for the bytes of a `String` that could be pointing to the range of the tracker
+ *   of the `FileInputStream` that the `String` was read from; telling us from which file and where
+ *   exactly in that file it came from.
+ *   This tracking data can be accessed using
+ *   {@link #pushSourceTo(int, WritableTracker, int, int, Growth)}.
+ * </ul>
+ */
 public abstract class Tracker implements WritableTracker {
 
   private static final AtomicLong idGenerator = new AtomicLong();
@@ -34,6 +48,7 @@ public abstract class Tracker implements WritableTracker {
   Tracker() {
   }
 
+  /** Identifier used for this tracker. Mainly used for the API/UI. */
   public long getTrackerId() {
     return trackerId;
   }
@@ -70,8 +85,10 @@ public abstract class Tracker implements WritableTracker {
   /**
    * Put a range of the source of this tracker into the given target tracker. This should be
    * implemented by calling {@link WritableTracker#setSource} on the target, possibly multiple
-   * times. Note that it is not <em>this</em> tracker that should be pushed, but the source of
-   * this.
+   * times. Note that it is not <em>this</em> tracker that should be pushed, but the source of it.
+   * <p>
+   * This is the main way to access tracking data: Trackers only have this visitor-alike style API.
+   * To look at a Tracker with a more "getters" style API, there is {@link TrackerSnapshot}.
    *
    * @param index         Index in this tracker of where the range starts.
    * @param targetTracker Tracker of which we're setting the source to this one
@@ -89,6 +106,7 @@ public abstract class Tracker implements WritableTracker {
   /** Registers this tracker in the tree, at the given node */
   public Tracker addTo(Node node) {
     node.internalAddTracker(this);
+    this.node = node;
     if (trackCreation) {
       // we set the stacktrace in this method, because we only want to track stacktraces of Trackers
       // that have a node. (doing it for every Tracker would be useless, add too much overhead, and
@@ -98,22 +116,23 @@ public abstract class Tracker implements WritableTracker {
     return this;
   }
 
+  /**
+   * The node in the {@link TrackerTree} where this tracker should be shown.
+   */
   public TrackerTree.Node getNode() {
     return node;
   }
 
+  /** Stacktrace that was collected when a tracker was created, if `trackCreation` is enabled. */
   public StackTraceElement[] getCreationStackTrace() {
     return creationStackTrace;
-  }
-
-  void initNode(Node node) {
-    this.node = node;
   }
 
   public static void initialize(Config config) {
     trackCreation = config.getBoolean("trackCreation", false);
   }
 
+  /** Generates a unique tracker id ({@link Tracker#getTrackerId()}) */
   public static long nextId() {
     return idGenerator.getAndIncrement();
   }

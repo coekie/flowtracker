@@ -28,6 +28,7 @@ import com.coekie.flowtracker.tracker.Tracker;
 import com.coekie.flowtracker.tracker.TrackerPoint;
 import com.coekie.flowtracker.tracker.TrackerRepository;
 import com.coekie.flowtracker.tracker.TrackerTree;
+import com.coekie.flowtracker.tracker.TrackerTree.Node;
 import com.coekie.flowtracker.util.Config;
 import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
@@ -82,8 +83,17 @@ public class OutputStreamWriterHook {
       OutputStream stream) {
     Tracker streamTracker = getOutputStreamTracker(stream);
     CharSinkTracker tracker = new CharSinkTracker();
-    tracker.addTo(TrackerTree.nodeOrUnknown(streamTracker).node("Writer"));
+    tracker.addTo(nodeOrUnknown(streamTracker).node("Writer"));
     TrackerRepository.setTracker(context, target, tracker);
+  }
+
+  private static Node nodeOrUnknown(Tracker tracker) {
+    Node node;
+    if (tracker == null || (node = tracker.getNode()) == null) {
+      return TrackerTree.node("Unknown");
+    } else {
+      return node;
+    }
   }
 
   @Hook(target = "java.io.OutputStreamWriter",

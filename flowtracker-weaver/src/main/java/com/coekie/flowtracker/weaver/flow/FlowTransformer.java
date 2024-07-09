@@ -45,9 +45,47 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
-/** Our main bytecode {@link Transformer}, that runs dataflow analysis on code (using
+/**
+ * Our main bytecode {@link Transformer}, that runs dataflow analysis on code (using
  * {@link FlowAnalyzer} and {@link FlowInterpreter}), finds relevant places to instrument
  * ({@link Instrumentable}s), and instruments them.
+ *
+ * <h2>Walkthrough</h2>
+ *
+ * Walking through it with a concrete example (copied from the README) of how we modify this code:
+ * <pre>{@code
+ * byte[] x; byte[] y;
+ * // ...
+ * byte b = x[1];
+ * // ...
+ * y[2] = b;
+ * }</pre>
+ * into:
+ * <pre>{@code
+ * byte b = x[1];
+ * TrackerPoint bTracker = ArrayHook.getElementTracker(x, 1);
+ * // ...
+ * y[2] = b;
+ * ArrayHook.setElementTracker(y, 2, bTracker);
+ * }</pre>
+ * The {@link FlowTransformer} makes the {@link FlowAnalyzer} analyze the code. The
+ * {@link FlowAnalyzer} asks the {@link FlowInterpreter} what the value of `x[1]` is, giving an
+ * {@link ArrayLoadValue}. The {@link FlowAnalyzer} also figures out where else in the method that
+ * value ends up. That is which local variables and where on the stack; stored in the
+ * {@link FlowFrame}s.
+ * <p>
+ * After that analysis, the {@link FlowTransformer} scans over the code again, looking for where
+ * values are being stored, creating an {@link ArrayStore} for the `y[2] =` part of the code. (More
+ * generally, creating {@link Instrumentable}s). The {@link ArrayStore} looks at the
+ * {@link FlowFrame}s and sees that the value being stored is (a {@link CopyValue copy} of) the
+ * {@link ArrayLoadValue}.
+ * <p>
+ * Finally, all the {@link Store}s/{@link Instrumentable}s do their instrumentation. The
+ * {@link ArrayStore}, like most stores, does two things. One, it tells the {@link ArrayLoadValue}
+ * to remember where it came from, so {@link ArrayLoadValue} adds the `bTracker` local variable and
+ * inserts the `ArrayHook.getElementTracker` call. Two, the {@link ArrayStore} inserts the code
+ * that updates trackers to match the effect of that store, that is the
+ * `ArrayHook.setElementTracker` call.
  */
 public class FlowTransformer implements Transformer {
   private static final Logger logger = new Logger("FlowTransformer");
@@ -181,8 +219,7 @@ public class FlowTransformer implements Transformer {
 
     private void doVisitEnd() {
       super.visitEnd();
-      FlowInterpreter interpreter = new FlowInterpreter(this);
-      FlowAnalyzer analyzer = new FlowAnalyzer(interpreter, this);
+      FlowAnalyzer analyzer = new FlowAnalyzer(this);
       Frame<FlowValue>[] frames;
       List<Instrumentable> toInstrument = new ArrayList<>();
 
@@ -195,8 +232,8 @@ public class FlowTransformer implements Transformer {
         // up to this point we haven't made any changes yet, so we can handle failures somewhat
         // gracefully by just outputting what we have now. that way at least the other methods in
         // the same class can still get transformed.
-        // tip: to debug, using dumpAsm() here can be useful. (but not outputting that automatically
-        // because it's very verbose).
+        // tip: to debug, using dumpAsm() here can be useful. (but we are not outputting that
+        // automatically because it's very verbose).
         logger.error(e, "Exception analyzing " + owner + " " + name + " " + desc);
         listener.error(e);
         this.accept(TransparentLocalVariablesSorter.bypass(varSorter));
@@ -276,9 +313,10 @@ public class FlowTransformer implements Transformer {
      * <p>
      * We get an index for these variables at the beginning of the method (from the
      * {@link #varSorter}), and ensure they are initialized. That way they can be accessed by any of
-     * our added code without worrying about where they have definitely been set. Also, adding new
-     * variables anywhere else with {@link LocalVariablesSorter} in a method that has frames (jumps)
-     * is practically impossible because it does not properly update frames (see
+     * our added code without worrying about where they have definitely been set. Another reason
+     * that has to happen at the beginning, is that adding new variables anywhere else with
+     * {@link LocalVariablesSorter} in a method that has frames (jumps) is practically impossible
+     * because it does not properly update frames (see
      * <a href="https://gitlab.ow2.org/asm/asm/-/issues/316352">asm#316352</a>).
      */
     TrackLocal newLocal(Type type, List<AbstractInsnNode> initialValue, int maxStack,

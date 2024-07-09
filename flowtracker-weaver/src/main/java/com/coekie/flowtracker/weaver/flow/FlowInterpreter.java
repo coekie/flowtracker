@@ -34,6 +34,14 @@ import org.objectweb.asm.tree.analysis.BasicInterpreter;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Interpreter;
 
+/**
+ * Extension of ASM's {@link Interpreter}, creates {@link FlowValue}s.
+ * {@link FlowAnalyzer} uses this to _interpret_ specific instructions, that is to determine
+ * how those instructions create and manipulate values.
+ * <p>
+ * This provides, in the form of {@link FlowValue}s, the information of where values came from (and
+ * the means to load their source), that is then later used by {@link Store}s.
+ */
 class FlowInterpreter extends Interpreter<FlowValue> {
   /** A BasicInterpreter that we delegate to, to figure out types */
   private final BasicInterpreter basicInterpreter = new BasicInterpreter(Opcodes.ASM9) {

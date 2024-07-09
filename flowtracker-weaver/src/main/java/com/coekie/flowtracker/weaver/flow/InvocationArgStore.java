@@ -34,7 +34,7 @@ import org.objectweb.asm.tree.analysis.Frame;
  * with {@link Invocation}.
  */
 public class InvocationArgStore extends Store {
-  // Two reasons we don't want to instrument arguments beyond this:
+  // Reasons we don't want to instrument arguments beyond this:
   // - the ICONST_0 + i doesn't work for higher ones (we could fix that by using LdcInsNode)
   // - in Invocation we have getArg0Tracker/getArg0Index methods up to arg 5
   // - methods with more arguments than that are probably not as likely to be worth instrumenting
@@ -43,7 +43,6 @@ public class InvocationArgStore extends Store {
   /** Classes where we're more eager to track primitive values */
   static ClassFilter eagerFilter;
 
-  // for now, we only support calls with one argument
   private final FlowValue[] args;
   private final InvocationOutgoingTransformation transformation;
 
@@ -124,7 +123,10 @@ public class InvocationArgStore extends Store {
     return argsToInstrument(owner, name, desc) != null;
   }
 
-  /** Determines which arguments should be instrumented. null if none of them should be. */
+  /**
+   * Determines which arguments should be instrumented. null if none of them should be.
+   * Mostly based on some heuristics of what seems worth it.
+   */
   static boolean[] argsToInstrument(String owner, String name, String desc) {
     Type[] args = Type.getArgumentTypes(desc);
     if (args.length > MAX_ARG_NUM_TO_INSTRUMENT + 1 || name.equals("<init>")) {

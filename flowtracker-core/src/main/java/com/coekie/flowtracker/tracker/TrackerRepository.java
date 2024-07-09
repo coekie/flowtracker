@@ -20,21 +20,22 @@ import static com.coekie.flowtracker.tracker.Context.context;
 
 import com.coekie.flowtracker.util.ConcurrentWeakIdentityHashMap;
 
+/**
+ * Holds the mapping from objects to their {@link Tracker}s.
+ */
 public class TrackerRepository {
   private static final ConcurrentWeakIdentityHashMap<Object, Tracker> objectToTracker =
       new ConcurrentWeakIdentityHashMap<>();
 
+  /** Get the tracker for `obj`, or null if it doesn't have one or tracking is disabled. */
   public static Tracker getTracker(Context context, Object obj) {
     if (!context.isActive()) return null;
     return forceGetTracker(context, obj);
   }
 
-  public static Tracker createFakeOriginTracker(Object obj, int length) {
-    Tracker tracker = new FakeOriginTracker(length);
-    forceSetTracker(obj, tracker);
-    return tracker;
-  }
-
+  /**
+   * Return the tracker for `obj`, or create a {@link DefaultTracker} if it doesn't have one yet.
+   */
   public static Tracker getOrCreateTracker(Context context, Object obj) {
     if (!context.isActive()) return null;
     Tracker existingTracker = forceGetTracker(context, obj);
@@ -50,6 +51,7 @@ public class TrackerRepository {
     return newTracker;
   }
 
+  /** Sets the tracker for `obj`. Should only be called once; throws if it already has a tracker */
   public static void setTracker(Context context, Object obj, Tracker tracker) {
     if (obj == null) {
       throw new NullPointerException("Can't track null");
@@ -63,6 +65,10 @@ public class TrackerRepository {
     }
   }
 
+  /**
+   * Overwrites the tracker for `obj`.
+   * We don't usually change the tracker associated to an object; this should be used rarely.
+   */
   public static void forceSetTracker(Object obj, Tracker tracker) {
     if (obj == null) {
       throw new NullPointerException("Can't track null");
@@ -75,6 +81,13 @@ public class TrackerRepository {
   public static void removeTracker(Object obj) {
     objectToTracker.remove(obj);
     overwriteCachedTracker(context(), obj, null);
+  }
+
+  /** Set a {@link FakeOriginTracker} for `obj`, for testing */
+  public static Tracker createFakeOriginTracker(Object obj, int length) {
+    Tracker tracker = new FakeOriginTracker(length);
+    forceSetTracker(obj, tracker);
+    return tracker;
   }
 
   /**
