@@ -83,7 +83,7 @@
 
   <build>
     <plugins>
-      <!-- Run npm to build ../flowtracker-ui/dist  -->
+      <!-- Run npm to build ../ui/dist  -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -97,7 +97,7 @@
             <phase>process-sources</phase>
             <configuration>
               <skip>${skip-ui}</skip>
-              <workingDirectory>${project.basedir}/../flowtracker-ui</workingDirectory>
+              <workingDirectory>${project.basedir}/../ui</workingDirectory>
               <executable>npm</executable>
               <arguments>
                 <argument>run</argument>
@@ -113,7 +113,7 @@
             <phase>verify</phase>
             <configuration>
               <skip>${skip-ui}</skip>
-              <workingDirectory>${project.basedir}/../flowtracker-ui</workingDirectory>
+              <workingDirectory>${project.basedir}/../ui</workingDirectory>
               <executable>npm</executable>
               <arguments>
                 <argument>run</argument>
@@ -137,7 +137,7 @@
             <configuration>
               <resources>
                 <resource>
-                  <directory>${project.basedir}/../flowtracker-ui/dist</directory>
+                  <directory>${project.basedir}/../ui/dist</directory>
                 </resource>
               </resources>
             </configuration>

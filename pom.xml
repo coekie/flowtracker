@@ -32,16 +32,16 @@
     <module>agent</module>
     <module>agent/agent-dev</module>
     <module>core</module>
-    <module>weaver</module>
-    <module>weaver/weaver-generator</module>
-    <module>web</module>
+    <module>demo</module>
+    <module>flowtracker</module>
     <module>test</module>
+    <module>test/test-full</module>
     <module>test/test-jdk17</module>
     <module>test/test-jdk21</module>
     <module>test/test-jdk22</module>
-    <module>test/test-full</module>
-    <module>flowtracker</module>
-    <module>demo</module>
+    <module>weaver</module>
+    <module>weaver/weaver-generator</module>
+    <module>web</module>
   </modules>
 
   <licenses>
