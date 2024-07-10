@@ -115,7 +115,7 @@
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
               <Boot-Class-Path>
                 ../../target/classes
-                ../../../flowtracker-core/target/classes
+                ../../../core/target/classes
               </Boot-Class-Path>
             </manifestEntries>
           </archive>

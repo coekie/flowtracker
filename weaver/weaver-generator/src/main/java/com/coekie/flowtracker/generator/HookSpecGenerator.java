@@ -79,7 +79,7 @@ public class HookSpecGenerator {
         + "    int version = Runtime.version().feature();\n"
         + "    HookSpecTransformer t = new HookSpecTransformer();\n");
 
-    Path sourceRoot = Path.of(root + "flowtracker-core/src/main/java");
+    Path sourceRoot = Path.of(root + "core/src/main/java");
     try (var list = Files.list(sourceRoot.resolve("com/coekie/flowtracker/hook"))) {
       list.sorted().forEach(path -> {
         try {

@@ -18,7 +18,7 @@
   <dependencies>
     <dependency>
       <groupId>com.coekie.flowtracker</groupId>
-      <artifactId>flowtracker-core</artifactId>
+      <artifactId>core</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -50,7 +50,7 @@
             ${flowtracker.jvmArgs}
           </argLine>
           <classpathDependencyExcludes>
-            <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-core</classpathDependencyExclude>
+            <classpathDependencyExclude>com.coekie.flowtracker:core</classpathDependencyExclude>
           </classpathDependencyExcludes>
         </configuration>
       </plugin>

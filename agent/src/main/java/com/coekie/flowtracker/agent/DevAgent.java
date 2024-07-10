@@ -30,7 +30,7 @@ import java.util.jar.JarFile;
 public class DevAgent {
   public static void premain(String agentArgs, Instrumentation inst) {
     try {
-      // for DevAgent the manifest already puts flowtracker-core on the bootstrap classpath,
+      // for DevAgent the manifest already puts core on the bootstrap classpath,
       // so unlike FlowTrackerAgent, we don't need to do appendToBootstrapClassLoaderSearch here.
       JarFile agentJar = FlowTrackerAgent.getAgentJar();
       new Phase2().premain2(agentArgs, inst, agentJar);

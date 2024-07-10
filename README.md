@@ -114,9 +114,9 @@ We have our own instrumentation micro-framework for that, driven by annotations,
 That way we add hooks to a number of classes in the JDK responsible for input and output, such as `java.io.FileInputStream`, `java.io.FileOutputStream`, and internal classes like `sun.nio.ch.FileChannelImpl`, `sun.nio.ch.IOUtil`, `sun.nio.ch.NioSocketImpl` and more.
 
 Implementation:
-[SystemHook](https://github.com/coekie/flowtracker/blob/master/flowtracker-core/src/main/java/com/coekie/flowtracker/hook/SystemHook.java),
-[FileInputStreamHook](https://github.com/coekie/flowtracker/blob/master/flowtracker-core/src/main/java/com/coekie/flowtracker/hook/FileInputStreamHook.java),
-and other classes in the [hook package](https://github.com/coekie/flowtracker/tree/master/flowtracker-core/src/main/java/com/coekie/flowtracker/hook).
+[SystemHook](https://github.com/coekie/flowtracker/blob/master/core/src/main/java/com/coekie/flowtracker/hook/SystemHook.java),
+[FileInputStreamHook](https://github.com/coekie/flowtracker/blob/master/core/src/main/java/com/coekie/flowtracker/hook/FileInputStreamHook.java),
+and other classes in the [hook package](https://github.com/coekie/flowtracker/tree/master/core/src/main/java/com/coekie/flowtracker/hook).
 
 ## Primitive values, dataflow analysis
 
@@ -208,7 +208,7 @@ class MyOutputStream {
 ```
 
 Implementation:
-[Invocation](https://github.com/coekie/flowtracker/blob/master/flowtracker-core/src/main/java/com/coekie/flowtracker/tracker/Invocation.java),
+[Invocation](https://github.com/coekie/flowtracker/blob/master/core/src/main/java/com/coekie/flowtracker/tracker/Invocation.java),
 [InvocationArgStore](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationArgStore.java),
 [InvocationArgValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationArgValue.java),
 [InvocationReturnStore](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationReturnStore.java),
@@ -259,7 +259,7 @@ class MyClass {
 For performance reasons, we actually use ConstantDynamic ([JEP 309](https://openjdk.org/jeps/309)) to ensure that the `constantPoint` methods are only invoked once instead of every time `myMethod` executes.
 
 Implementation:
-[ClassOriginTracker](https://github.com/coekie/flowtracker/blob/master/flowtracker-core/src/main/java/com/coekie/flowtracker/tracker/ClassOriginTracker.java),
+[ClassOriginTracker](https://github.com/coekie/flowtracker/blob/master/core/src/main/java/com/coekie/flowtracker/tracker/ClassOriginTracker.java),
 [ConstantValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ConstantValue.java),
 [ConstantsTransformation](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ConstantsTransformation.java)
 

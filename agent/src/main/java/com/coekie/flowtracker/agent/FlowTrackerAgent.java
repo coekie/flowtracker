@@ -31,8 +31,7 @@ public class FlowTrackerAgent {
   public static void premain(String agentArgs, Instrumentation inst) {
     try {
       JarFile agentJar = getAgentJar();
-      // Put flowtracker-core on the bootstrap classpath, to make instrumented JDK classes find the
-      // hook classes.
+      // Put core on the bootstrap classpath, to make instrumented JDK classes find the hook classes
       inst.appendToBootstrapClassLoaderSearch(agentJar);
       new Phase2().premain2(agentArgs, inst, agentJar);
     } catch (Throwable e) {
@@ -56,7 +55,7 @@ public class FlowTrackerAgent {
 
   /**
    * Second phase of starting of the agent. This is in a separate class, so that FlowTrackerAgent
-   * itself doesn't have references to classes from flowtracker-core that need to be put on the
+   * itself doesn't have references to classes from core that need to be put on the
    * bootstrap classpath _before_ they get loaded.
    */
   public static class Phase2 {

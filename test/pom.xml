@@ -16,7 +16,7 @@
   <dependencies>
     <dependency>
       <groupId>com.coekie.flowtracker</groupId>
-      <artifactId>flowtracker-core</artifactId>
+      <artifactId>core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <!--
@@ -61,7 +61,7 @@
           <!-- These should not be on the app classpath; the agent should take care of getting this on the classpath (bootstrap classpath and for spider classloader) -->
           <!-- See also EnvironmentTest -->
           <classpathDependencyExcludes>
-            <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-core</classpathDependencyExclude>
+            <classpathDependencyExclude>com.coekie.flowtracker:core</classpathDependencyExclude>
             <classpathDependencyExclude>com.coekie.flowtracker:weaver</classpathDependencyExclude>
           </classpathDependencyExcludes>
         </configuration>
