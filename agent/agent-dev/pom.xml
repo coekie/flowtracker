@@ -15,16 +15,16 @@
 
   <dependencies>
     <!--
-      We include the dependencies of flowtracker-weaver and flowtracker-web in the agent jar.
+      We include the dependencies of weaver and web in the agent jar.
       that way DevAgent can load them the same way as the real agent, and doesn't need to figure out
       what dependencies to load.
       That means their dependencies get duplicated and have to be kept in sync.
-      An alternative would have been to depend on flowtracker-weaver and web here and
+      An alternative would have been to depend on weaver and web here and
       then exclude everything that's not a dependency; but having agent-dev not depend
       on any other flowtracker modules is nicer, avoiding circular dependencies.
     -->
 
-    <!-- flowtracker-weaver dependencies -->
+    <!-- weaver dependencies -->
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>

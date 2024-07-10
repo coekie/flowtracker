@@ -26,7 +26,7 @@
     -->
     <dependency>
       <groupId>com.coekie.flowtracker</groupId>
-      <artifactId>flowtracker-weaver</artifactId>
+      <artifactId>weaver</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
       <exclusions>
@@ -62,7 +62,7 @@
           <!-- See also EnvironmentTest -->
           <classpathDependencyExcludes>
             <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-core</classpathDependencyExclude>
-            <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-weaver</classpathDependencyExclude>
+            <classpathDependencyExclude>com.coekie.flowtracker:weaver</classpathDependencyExclude>
           </classpathDependencyExcludes>
         </configuration>
       </plugin>

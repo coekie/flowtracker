@@ -50,8 +50,8 @@ public class DevAgent {
 
       List<URL> spiderClasspath = new ArrayList<>();
       String[] modules = config.getBoolean("webmodule", true)
-          ? new String[]{"flowtracker-weaver", "web"}
-          : new String[]{"flowtracker-weaver"};
+          ? new String[]{"weaver", "web"}
+          : new String[]{"weaver"};
       for (String module : modules) {
         File classesPath = new File(root, module + "/target/classes");
         if (!classesPath.exists()) {

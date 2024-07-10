@@ -151,11 +151,11 @@ We build upon ASM's analysis support to analyze the code (_symbolic interpretati
 That way we construct a model of where values in local variables and on the stack come from at every point in the method, and where they end up.
 
 This is implemented in
-* [FlowValue](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/FlowValue.java) and its subclasses (e.g. [ArrayLoadValue](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ArrayLoadValue.java)) that model where values come from, and can generate the instructions that create the TrackerPoints that point to that source.
-  A particularly interesting one is [MergedValue](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/MergedValue.java), which handles situations where because of control flow (e.g. if-statements, loops) a value can come from multiple possible places.
-* [FlowInterpreter](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/FlowInterpreter.java): extension of ASM's `Interpreter`, _interprets_ bytecode instructions, creates the appropriate `FlowValue`s.
-* [Store](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/Store.java) and its subclasses (e.g. [ArrayStore](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ArrayStore.java)) that represent places that FlowValues go to, that consume the TrackerPoints.
-* [FlowTransformer](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/FlowTransformer.java): drives the whole analysis and instrumentation process. See its docs for a more detailed walkthrough of how this all fits together.
+* [FlowValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/FlowValue.java) and its subclasses (e.g. [ArrayLoadValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ArrayLoadValue.java)) that model where values come from, and can generate the instructions that create the TrackerPoints that point to that source.
+  A particularly interesting one is [MergedValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/MergedValue.java), which handles situations where because of control flow (e.g. if-statements, loops) a value can come from multiple possible places.
+* [FlowInterpreter](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/FlowInterpreter.java): extension of ASM's `Interpreter`, _interprets_ bytecode instructions, creates the appropriate `FlowValue`s.
+* [Store](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/Store.java) and its subclasses (e.g. [ArrayStore](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ArrayStore.java)) that represent places that FlowValues go to, that consume the TrackerPoints.
+* [FlowTransformer](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/FlowTransformer.java): drives the whole analysis and instrumentation process. See its docs for a more detailed walkthrough of how this all fits together.
 
 We don't track the source of _all_ primitive values.
 The focus is on `byte` and `char` values, and to a lesser extent `int`s and `long`s.
@@ -209,12 +209,12 @@ class MyOutputStream {
 
 Implementation:
 [Invocation](https://github.com/coekie/flowtracker/blob/master/flowtracker-core/src/main/java/com/coekie/flowtracker/tracker/Invocation.java),
-[InvocationArgStore](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationArgStore.java),
-[InvocationArgValue](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationArgValue.java),
-[InvocationReturnStore](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationReturnStore.java),
-[InvocationReturnValue](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationReturnValue.java),
-[InvocationOutgoingTransformation](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationOutgoingTransformation.java),
-[InvocationIncomingTransformation](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationIncomingTransformation.java)
+[InvocationArgStore](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationArgStore.java),
+[InvocationArgValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationArgValue.java),
+[InvocationReturnStore](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationReturnStore.java),
+[InvocationReturnValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationReturnValue.java),
+[InvocationOutgoingTransformation](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationOutgoingTransformation.java),
+[InvocationIncomingTransformation](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/InvocationIncomingTransformation.java)
 
 ## Code as origin
 
@@ -260,8 +260,8 @@ For performance reasons, we actually use ConstantDynamic ([JEP 309](https://open
 
 Implementation:
 [ClassOriginTracker](https://github.com/coekie/flowtracker/blob/master/flowtracker-core/src/main/java/com/coekie/flowtracker/tracker/ClassOriginTracker.java),
-[ConstantValue](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ConstantValue.java),
-[ConstantsTransformation](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ConstantsTransformation.java)
+[ConstantValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ConstantValue.java),
+[ConstantsTransformation](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ConstantsTransformation.java)
 
 ## String literals
 
@@ -275,9 +275,9 @@ We avoid most of the issues that could cause because:
 * We disable tracking of String literals in some packages (such as `java.lang.*`). This is configurable (see `breakStringInterning` in [USAGE.md](USAGE.md)).
 
 Implementation:
-[StringLdc](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/StringLdc.java),
-[ConstantsTransformation](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ConstantsTransformation.java)
-[StringComparison](https://github.com/coekie/flowtracker/blob/master/flowtracker-weaver/src/main/java/com/coekie/flowtracker/weaver/flow/StringComparison.java)
+[StringLdc](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/StringLdc.java),
+[ConstantsTransformation](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/ConstantsTransformation.java)
+[StringComparison](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/StringComparison.java)
 
 ## Fallback for untracked values
 

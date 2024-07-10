@@ -19,7 +19,7 @@
     </dependency>
     <dependency>
       <groupId>com.coekie.flowtracker</groupId>
-      <artifactId>flowtracker-weaver</artifactId>
+      <artifactId>weaver</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
