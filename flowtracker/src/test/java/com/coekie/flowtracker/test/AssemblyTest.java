@@ -11,17 +11,19 @@ import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 
 /**
- * Test for the assembly, and for {@link FlowTrackerAgent}'s
- * handling of it
+ * Test for the assembly, and for {@link FlowTrackerAgent}'s handling of it
  */
 public class AssemblyTest {
 
   @Test public void setupSanity() {
     // The point of this test class is to ensure the assembly works.
-    // To properly test that, we must not have anything else than flowtracker-all and junit on the
-    // classpath.
+    // To properly test that, we must not have anything else than flowtracker.jar and test
+    // dependencies on the classpath.
     for (String classpathPart : System.getProperty("java.class.path").split(":")) {
-      if (!classpathPart.contains("flowtracker-all") && !classpathPart.contains("junit")
+      if (!classpathPart.contains("flowtracker.jar")
+          && !classpathPart.contains("flowtracker/flowtracker/target/classes")
+          && !classpathPart.contains("flowtracker/flowtracker/target/test-classes")
+          && !classpathPart.contains("junit")
           && !classpathPart.contains("hamcrest-core")) {
         fail("Unexpected classpath in test: " + classpathPart);
       }
