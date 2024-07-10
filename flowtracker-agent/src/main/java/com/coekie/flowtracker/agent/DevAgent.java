@@ -49,7 +49,7 @@ public class DevAgent {
 
       List<URL> spiderClasspath = new ArrayList<>();
       String[] modules = config.getBoolean("webmodule", true)
-          ? new String[]{"flowtracker-weaver", "flowtracker-web"}
+          ? new String[]{"flowtracker-weaver", "web"}
           : new String[]{"flowtracker-weaver"};
       for (String module : modules) {
         File classesPath = new File(root, module + "/target/classes");
