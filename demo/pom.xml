@@ -9,10 +9,9 @@
   <packaging>pom</packaging>
 
   <name>${project.artifactId}</name>
-  <url>http://wouter.coekaerts.be/</url>
 
   <parent>
-    <artifactId>flowtracker</artifactId>
+    <artifactId>flowtracker-parent</artifactId>
     <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>

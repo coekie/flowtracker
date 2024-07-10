@@ -5,12 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.coekie.flowtracker</groupId>
-  <artifactId>flowtracker</artifactId>
+  <artifactId>flowtracker-parent</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>flowtracker</name>
-  <url>http://wouter.coekaerts.be/</url>
+  <name>flowtracker-parent</name>
+  <url>https://github.com/coekie/flowtracker</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,12 +21,6 @@
 
     <!-- make tests fail if any error is being logged -->
     <flowtracker.extraAgentArgs>verify;exitOnError</flowtracker.extraAgentArgs>
-    <!--
-      other values that can help debug failing tests:
-        logging=true
-        dumpByteCode=/tmp/bytecode
-        debugRecursion=true
-    -->
     <!-- keep this in sync with CoreInitializer.java -->
     <flowtracker.jvmArgs.standard>-XX:-UseStringDeduplication -XX:+UnlockDiagnosticVMOptions -XX:DisableIntrinsic=_copyOf -XX:DisableIntrinsic=_copyOfRange -XX:DisableIntrinsic=_String_String -XX:DisableIntrinsic=_StringBuilder_String -XX:DisableIntrinsic=_StringBuilder_append_char -XX:DisableIntrinsic=_StringBuilder_append_String -XX:DisableIntrinsic=_StringBuilder_toString -XX:DisableIntrinsic=_inflateStringC -XX:DisableIntrinsic=_inflateStringB -XX:DisableIntrinsic=_toBytesStringU -XX:DisableIntrinsic=_getCharsStringU -XX:DisableIntrinsic=_getCharStringU -XX:DisableIntrinsic=_putCharStringU -XX:DisableIntrinsic=_compressStringC -XX:DisableIntrinsic=_compressStringB -XX:DisableIntrinsic=_encodeByteISOArray</flowtracker.jvmArgs.standard>
     <flowtracker.jvmArgs>-Xverify:all -Dfile.encoding=UTF-8 ${flowtracker.jvmArgs.standard}</flowtracker.jvmArgs>
@@ -63,7 +57,7 @@
     <developer>
       <id>coekie</id>
       <name>Wouter Coekaerts</name>
-      <url>https://wouter.coekaerts</url>
+      <url>https://wouter.coekaerts.be/</url>
       <roles>
         <role>developer</role>
       </roles>
