@@ -122,13 +122,6 @@
             </configuration>
           </execution>
         </executions>
-        <dependencies>
-          <dependency>
-            <groupId>com.coekie.flowtracker</groupId>
-            <artifactId>flowtracker-generator</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

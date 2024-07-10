@@ -7,8 +7,9 @@
     <artifactId>flowtracker-parent</artifactId>
     <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
-  <artifactId>flowtracker-generator</artifactId>
+  <artifactId>weaver-generator</artifactId>
   <name>${project.artifactId}</name>
   <dependencies>
     <dependency>

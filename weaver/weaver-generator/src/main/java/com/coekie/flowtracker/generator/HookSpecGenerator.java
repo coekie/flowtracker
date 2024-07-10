@@ -44,8 +44,8 @@ import java.util.stream.Stream;
  */
 public class HookSpecGenerator {
   private static final String root =
-      Paths.get("").toAbsolutePath().getFileName().toString().equals("flowtracker-generator")
-          ? "../" : "";
+      Paths.get("").toAbsolutePath().getFileName().toString().equals("weaver-generator")
+          ? "../../" : "";
   static final Path OUTPUT_FILE =  Path.of(root +
       "weaver/target/generated-sources/hook-specs/com/coekie/flowtracker/"
       + "weaver/GeneratedHookSpecs.java");

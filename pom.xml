@@ -32,8 +32,8 @@
     <module>agent</module>
     <module>agent/agent-dev</module>
     <module>flowtracker-core</module>
-    <module>flowtracker-generator</module>
     <module>weaver</module>
+    <module>weaver/weaver-generator</module>
     <module>web</module>
     <module>test</module>
     <module>test/test-jdk17</module>
