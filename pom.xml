@@ -35,11 +35,11 @@
     <module>flowtracker-generator</module>
     <module>flowtracker-weaver</module>
     <module>flowtracker-web</module>
-    <module>flowtracker-test</module>
-    <module>flowtracker-test-jdk17</module>
-    <module>flowtracker-test-jdk21</module>
-    <module>flowtracker-test-jdk22</module>
-    <module>flowtracker-test-full</module>
+    <module>test</module>
+    <module>test/test-jdk17</module>
+    <module>test/test-jdk21</module>
+    <module>test/test-jdk22</module>
+    <module>test/test-full</module>
     <module>flowtracker</module>
     <module>demo</module>
   </modules>
@@ -178,7 +178,7 @@
         <asm.version>9.8-SNAPSHOT</asm.version>
       </properties>
       <modules>
-        <module>flowtracker-test-jdk23</module>
+        <module>test/test-jdk23</module>
       </modules>
       <repositories>
         <repository>

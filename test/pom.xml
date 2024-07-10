@@ -8,10 +8,10 @@
     <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>flowtracker-test-jdk22</artifactId>
+  <artifactId>test</artifactId>
   <name>${project.artifactId}</name>
   <properties>
-    <java.version>22</java.version>
+    <java.version>11</java.version>
   </properties>
   <dependencies>
     <dependency>
@@ -19,6 +19,11 @@
       <artifactId>flowtracker-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!--
+      this "runtime" dependency is only added to make maven build it before this one.
+      we remove it from the runtime classpath below.
+      the agent uses it in a separate classloader.
+    -->
     <dependency>
       <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-weaver</artifactId>
@@ -31,6 +36,7 @@
         </exclusion>
       </exclusions>
     </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -43,24 +49,17 @@
     </dependency>
   </dependencies>
   <build>
-    <testSourceDirectory>../flowtracker-test/src/test/java</testSourceDirectory>
-    <testResources>
-      <testResource>
-        <directory>../flowtracker-test/src/test/resources</directory>
-      </testResource>
-    </testResources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!-- For cleaner debugging environment, but slower: -->
-          <!--<reuseForks>false</reuseForks>-->
           <argLine>
             -javaagent:../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=webmodule=false;filter=%base,+com.coekie.flowtracker.test.*;trackOutputStreamWriter=true;${flowtracker.extraAgentArgs}
             ${flowtracker.jvmArgs}
           </argLine>
           <!-- These should not be on the app classpath; the agent should take care of getting this on the classpath (bootstrap classpath and for spider classloader) -->
+          <!-- See also EnvironmentTest -->
           <classpathDependencyExcludes>
             <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-core</classpathDependencyExclude>
             <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-weaver</classpathDependencyExclude>

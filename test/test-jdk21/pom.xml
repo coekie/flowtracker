@@ -7,10 +7,10 @@
     <artifactId>flowtracker-parent</artifactId>
     <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
-  <artifactId>flowtracker-test-full</artifactId>
+  <artifactId>test-jdk21</artifactId>
   <name>${project.artifactId}</name>
-  <description>Test with instrumenting all classes (the default)</description>
   <properties>
     <java.version>21</java.version>
   </properties>
@@ -19,7 +19,18 @@
       <groupId>com.coekie.flowtracker</groupId>
       <artifactId>flowtracker-core</artifactId>
       <version>${project.version}</version>
-      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.coekie.flowtracker</groupId>
+      <artifactId>flowtracker-weaver</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -33,10 +44,10 @@
     </dependency>
   </dependencies>
   <build>
-    <testSourceDirectory>../flowtracker-test/src/test/java</testSourceDirectory>
+    <testSourceDirectory>../src/test/java</testSourceDirectory>
     <testResources>
       <testResource>
-        <directory>../flowtracker-test/src/test/resources</directory>
+        <directory>../src/test/resources</directory>
       </testResource>
     </testResources>
     <plugins>
@@ -45,11 +56,13 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <argLine>
-            -javaagent:../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=webmodule=false;trackOutputStreamWriter=true;${flowtracker.extraAgentArgs}
+            -javaagent:../../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=webmodule=false;filter=%base,+com.coekie.flowtracker.test.*;trackOutputStreamWriter=true;${flowtracker.extraAgentArgs}
             ${flowtracker.jvmArgs}
           </argLine>
+          <!-- These should not be on the app classpath; the agent should take care of getting this on the classpath (bootstrap classpath and for spider classloader) -->
           <classpathDependencyExcludes>
             <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-core</classpathDependencyExclude>
+            <classpathDependencyExclude>com.coekie.flowtracker:flowtracker-weaver</classpathDependencyExclude>
           </classpathDependencyExcludes>
         </configuration>
       </plugin>
@@ -76,12 +89,4 @@
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>experimental</id>
-      <properties>
-        <java.version>23</java.version>
-      </properties>
-    </profile>
-  </profiles>
 </project>
