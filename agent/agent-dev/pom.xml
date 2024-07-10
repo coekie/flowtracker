@@ -7,8 +7,9 @@
     <artifactId>flowtracker-parent</artifactId>
     <groupId>com.coekie.flowtracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
-  <artifactId>flowtracker-agent-dev</artifactId>
+  <artifactId>agent-dev</artifactId>
   <name>${project.artifactId}</name>
   <description>Agent jar to be used for development</description>
 
@@ -18,8 +19,8 @@
       that way DevAgent can load them the same way as the real agent, and doesn't need to figure out
       what dependencies to load.
       That means their dependencies get duplicated and have to be kept in sync.
-      An alternative would have been to depend on flowtracker-weaver and flowtracker-web here and
-      then exclude everything that's not a dependency; but having flowtracker-agent-dev not depend
+      An alternative would have been to depend on flowtracker-weaver and web here and
+      then exclude everything that's not a dependency; but having agent-dev not depend
       on any other flowtracker modules is nicer, avoiding circular dependencies.
     -->
 
@@ -113,8 +114,8 @@
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
               <Boot-Class-Path>
-                ../../flowtracker-agent/target/classes
-                ../../flowtracker-core/target/classes
+                ../../target/classes
+                ../../../flowtracker-core/target/classes
               </Boot-Class-Path>
             </manifestEntries>
           </archive>

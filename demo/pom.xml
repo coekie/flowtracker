@@ -94,7 +94,7 @@
     <profile>
       <id>demo-dev-agent</id>
       <properties>
-        <demo.agent.jar>../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar</demo.agent.jar>
+        <demo.agent.jar>../agent/agent-dev/target/agent-dev-${project.version}.jar</demo.agent.jar>
       </properties>
     </profile>
     <!-- Profile for skipping tests for demos (for faster builds) -->

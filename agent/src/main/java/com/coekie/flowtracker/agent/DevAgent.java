@@ -44,8 +44,9 @@ public class DevAgent {
     @Override
     public ClassLoader createSpiderClassLoader(Instrumentation inst, JarFile agentJar,
         Config config) throws IOException {
-      // agentJar is flowtracker-agent-dev/target/flowtracker-agent-dev-*-SNAPSHOT.jar
-      File root = new File(agentJar.getName()).getParentFile().getParentFile().getParentFile();
+      // agentJar is agent/agent-dev/target/agent-dev-*-SNAPSHOT.jar
+      File root = new File(agentJar.getName()).getParentFile().getParentFile().getParentFile()
+          .getParentFile();
 
       List<URL> spiderClasspath = new ArrayList<>();
       String[] modules = config.getBoolean("webmodule", true)

@@ -29,8 +29,8 @@
     <skip-ui>false</skip-ui>
   </properties>
   <modules>
-    <module>flowtracker-agent</module>
-    <module>flowtracker-agent-dev</module>
+    <module>agent</module>
+    <module>agent/agent-dev</module>
     <module>flowtracker-core</module>
     <module>flowtracker-generator</module>
     <module>flowtracker-weaver</module>

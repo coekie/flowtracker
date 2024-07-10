@@ -46,7 +46,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <argLine>
-            -javaagent:../../flowtracker-agent-dev/target/flowtracker-agent-dev-${project.version}.jar=webmodule=false;trackOutputStreamWriter=true;${flowtracker.extraAgentArgs}
+            -javaagent:../../agent/agent-dev/target/agent-dev-${project.version}.jar=webmodule=false;trackOutputStreamWriter=true;${flowtracker.extraAgentArgs}
             ${flowtracker.jvmArgs}
           </argLine>
           <classpathDependencyExcludes>

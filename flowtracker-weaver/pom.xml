@@ -18,7 +18,7 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- NOTE: when updating dependencies here, also update flowtracker-agent-dev/pom.xml -->
+    <!-- NOTE: when updating dependencies here, also update agent/agent-dev/pom.xml -->
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>

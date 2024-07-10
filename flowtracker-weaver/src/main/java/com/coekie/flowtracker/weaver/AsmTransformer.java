@@ -188,7 +188,7 @@ class AsmTransformer implements ClassFileTransformer {
       return null;
     }
     // exclude the classloader that loaded flowtracker classes, or that loaded our dependencies.
-    // (when using flowtracker-agent-dev those are two different classloaders; when running from
+    // (when using agent-dev those are two different classloaders; when running from
     // real jar, those are the same.)
     if (classLoader == AsmTransformer.class.getClassLoader()
         || classLoader == Opcodes.class.getClassLoader()) {

@@ -29,7 +29,7 @@
     </dependency>
     <dependency>
       <groupId>com.coekie.flowtracker</groupId>
-      <artifactId>flowtracker-agent</artifactId>
+      <artifactId>agent</artifactId>
       <version>${project.version}</version>
     </dependency>
 
