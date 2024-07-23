@@ -78,7 +78,7 @@
               bind:selection
               bind:coloring
               bind:secondaryTracker
-              ondblclick={() => originView?.scrollToSelection()}
+              onRangeSelected={() => originView?.scrollToSelection()}
               {onMainTrackerSelected}
             />
           </Pane>
@@ -89,7 +89,7 @@
               bind:selection
               bind:coloring
               targetTracker={mainTracker}
-              ondblclick={() => sinkView?.scrollToSelection()}
+              onRangeSelected={() => sinkView?.scrollToSelection()}
               {onMainTrackerSelected}
             />
           </Pane>

@@ -2,7 +2,11 @@
   import {tick} from 'svelte';
   import type {Line, Code} from '../javatypes';
   import type {Coloring} from './coloring';
-  import {type ASelection, RangeSelection} from './selection';
+  import {
+    type ASelection,
+    RangeSelection,
+    scrollSelectedIntoView,
+  } from './selection';
 
   export let trackerId: number;
   /** See TrackerDetailView.selection */
@@ -38,7 +42,9 @@
 
   /** scroll the first selected line into view */
   export function scrollToSelection() {
-    pre?.querySelector('.selected')?.scrollIntoView({block: 'center'});
+    if (pre) {
+      scrollSelectedIntoView(pre);
+    }
   }
 
   /** waits for rendering and then scrolls the first selected line into view */

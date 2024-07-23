@@ -7,6 +7,7 @@
     type OnTrackerSelected,
     pathStartsWith,
     RangeSelection,
+    scrollSelectedIntoView,
   } from './selection';
   import type {Coloring} from './coloring';
   import CodeView from './CodeView.svelte';
@@ -43,7 +44,7 @@
    */
   export let secondaryTracker: Tracker | null = null;
 
-  export let ondblclick: (() => void) | null = null;
+  export let onRangeSelected: (() => void) | null = null;
   export let onMainTrackerSelected: OnTrackerSelected | null = null;
 
   // pull out the ids, to prevent unnecessary re-fetching when tracker is changed to other instance
@@ -136,6 +137,7 @@
   function mousedown(region: Region, trackerDetail: TrackerDetail) {
     selection = selectionStart = toSelection(region, trackerDetail);
     updateSecondaryTracker();
+    rangeSelected();
   }
 
   // handle selecting multiple regions, by dragging
@@ -168,6 +170,7 @@
     );
     selection = new RangeSelection(selectionStart.tracker, start, end - start);
     updateSecondaryTracker();
+    rangeSelected();
   }
 
   function mouseup() {
@@ -224,12 +227,15 @@
     return coloring.backgroundColor(s => isSelected(region, s, trackerDetail));
   }
 
-  // event for main view so that double-click in one TrackerDetailView causes scrollToSelection in the other
-  function dblclick() {
-    if (ondblclick) {
-      ondblclick();
-    }
-    codeView?.scrollToSelection();
+  // event for main view so that clicking in one TrackerDetailView causes scrollToSelection in the other
+  function rangeSelected() {
+    // tick: wait for 'selected' style to be updated, so that we scroll to the right element
+    tick().then(() => {
+      if (onRangeSelected) {
+        onRangeSelected();
+      }
+      codeView?.scrollToSelection();
+    });
   }
 
   /** scroll the first selected region into view */
@@ -239,7 +245,9 @@
   }
 
   export function scrollToSelectionInPre() {
-    pre?.querySelector('.selected')?.scrollIntoView({block: 'center'});
+    if (pre && pre.parentElement) {
+      scrollSelectedIntoView(pre.parentElement);
+    }
   }
 
   /** waits for rendering and then scrolls the first selected region into view */
@@ -295,7 +303,6 @@
                 on:mousedown={() => mousedown(region, trackerDetail)}
                 on:mousemove={e => mousemove(e, region, trackerDetail)}
                 on:mouseup={mouseup}
-                on:dblclick={dblclick}
                 draggable="false"
                 style="background-color: {backgroundColor(
                   region,

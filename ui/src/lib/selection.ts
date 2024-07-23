@@ -64,3 +64,27 @@ export function pathStartsWith(a: string[], b: string[]): boolean {
 }
 
 export type OnTrackerSelected = (_: Tracker) => void;
+
+/** Check if any child with class 'selected' is in the view, if not then scroll it into view */
+export function scrollSelectedIntoView(container: HTMLElement): void {
+  const selected = container.querySelectorAll('.selected');
+  if (selected.length == 0) {
+    return; // nothing to scroll to
+  }
+  for (let i = 0; i < selected.length; i++) {
+    const s = selected[i];
+    // if one of the selected regions is visible, then we don't need to scroll
+    if (
+      s.getBoundingClientRect().top <
+        container.getBoundingClientRect().bottom &&
+      s.getBoundingClientRect().bottom > container.getBoundingClientRect().top
+    ) {
+      return;
+    }
+  }
+  // don't try to scroll in test env where it's not supported
+  if (typeof selected[0].scrollIntoView == 'function') {
+    // scroll to the first one
+    selected[0].scrollIntoView({block: 'center'});
+  }
+}
