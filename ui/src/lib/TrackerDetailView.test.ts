@@ -80,7 +80,9 @@ describe('select region', () => {
   });
 
   test('in origin tracker', async () => {
-    await testIt(renderSimpleOriginTracker());
+    const view: TrackerDetailView = renderSimpleOriginTracker();
+    await testIt(view);
+    expect(view.secondaryTracker).toBeNull();
   });
 });
 

@@ -211,7 +211,7 @@
   }
 
   function updateSecondaryTracker(): void {
-    if (selection instanceof RangeSelection) {
+    if (selection instanceof RangeSelection && !viewAsOrigin) {
       secondaryTracker = selection.tracker;
     }
   }
