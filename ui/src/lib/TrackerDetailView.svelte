@@ -86,6 +86,9 @@
    */
   let splitPosition: number = 30;
 
+  /** Position to scroll to after loading */
+  let scrollPositionToRestore: number | undefined;
+
   const fetchTrackerDetail = async (
     viewTrackerId: number | undefined,
     targetTrackerId: number | undefined
@@ -244,15 +247,34 @@
     codeView?.scrollToSelection();
   }
 
+  /** The element wrapping pre that has the scroll bars */
+  function preScrollParent(): HTMLElement | null {
+    return pre?.parentElement;
+  }
+
   export function scrollToSelectionInPre() {
-    if (pre && pre.parentElement) {
-      scrollSelectedIntoView(pre.parentElement);
+    let scrollParent = preScrollParent();
+    if (scrollParent) {
+      scrollSelectedIntoView(scrollParent);
     }
   }
 
   /** waits for rendering and then scrolls the first selected region into view */
   function scrollToSelectionOnFirstRender(_: HTMLPreElement) {
-    tick().then(scrollToSelectionInPre);
+    tick().then(() => {
+      if (scrollPositionToRestore) {
+        preScrollParent()?.scroll({top: scrollPositionToRestore});
+      } else {
+        scrollToSelectionInPre();
+      }
+    });
+  }
+
+  function gotoTwin(trackerDetail: TrackerDetail): void {
+    if (onMainTrackerSelected && trackerDetail.twin) {
+      scrollPositionToRestore = preScrollParent()?.scrollTop;
+      onMainTrackerSelected(trackerDetail.twin);
+    }
   }
 </script>
 
@@ -264,10 +286,7 @@
         {#if trackerDetail.twin}
           <button
             class="goto-twin"
-            on:click={() =>
-              onMainTrackerSelected &&
-              trackerDetail.twin &&
-              onMainTrackerSelected(trackerDetail.twin)}
+            on:click={() => gotoTwin(trackerDetail)}
             title="Go to twin (switch between input and output)"
           />
         {/if}
