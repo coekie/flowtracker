@@ -45,7 +45,7 @@
   export let secondaryTracker: Tracker | null = null;
 
   export let onRangeSelected: (() => void) | null = null;
-  export let onMainTrackerSelected: OnTrackerSelected | null = null;
+  export let onTwinSelected: OnTrackerSelected | null = null;
 
   // pull out the ids, to prevent unnecessary re-fetching when tracker is changed to other instance
   // with same id
@@ -271,10 +271,19 @@
   }
 
   function gotoTwin(trackerDetail: TrackerDetail): void {
-    if (onMainTrackerSelected && trackerDetail.twin) {
-      scrollPositionToRestore = preScrollParent()?.scrollTop;
-      onMainTrackerSelected(trackerDetail.twin);
+    if (onTwinSelected && trackerDetail.twin) {
+      onTwinSelected(trackerDetail.twin);
     }
+  }
+
+  /** Current scroll position */
+  export function scrollPosition(): number | undefined {
+    return preScrollParent()?.scrollTop;
+  }
+
+  /** Restore scroll position after loading of next detail (gotten from `scrollPosition()`) */
+  export function restoreScrollPosition(scrollPosition: number | undefined) {
+    scrollPositionToRestore = scrollPosition;
   }
 </script>
 

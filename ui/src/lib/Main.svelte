@@ -48,6 +48,11 @@
     }
   }
 
+  function onTwinSelected(tracker: Tracker, view: TrackerDetailView) {
+    sinkView.restoreScrollPosition(view.scrollPosition());
+    onMainTrackerSelected(tracker);
+  }
+
   function onMainTrackerSelected(tracker: Tracker) {
     // reset secondaryTracker, to prevent ever having a secondaryTracker
     // that is unrelated to the mainTracker
@@ -79,7 +84,7 @@
               bind:coloring
               bind:secondaryTracker
               onRangeSelected={() => originView?.scrollToSelection()}
-              {onMainTrackerSelected}
+              onTwinSelected={tracker => onTwinSelected(tracker, sinkView)}
             />
           </Pane>
           <Pane>
@@ -90,7 +95,7 @@
               bind:coloring
               targetTracker={mainTracker}
               onRangeSelected={() => sinkView?.scrollToSelection()}
-              {onMainTrackerSelected}
+              onTwinSelected={tracker => onTwinSelected(tracker, originView)}
             />
           </Pane>
         </Splitpanes>
