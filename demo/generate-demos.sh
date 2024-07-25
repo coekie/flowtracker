@@ -4,6 +4,11 @@ set -euo pipefail
 # This script generates the demos website at https://flowtracker-demo.coekie.com/
 # This should be ran from the directory where the output should be written; e.g. an empty dir.
 
+# clean up environment variables, because they end up in the output
+if [ "${DISPLAY:-}" != "" ]; then
+  env -i HOME="$HOME" LANG="$LANG" PATH="$PATH" TERM="$TERM" USER="$USER" $0 "$@"
+fi
+
 error() {
   printf '\e[1;31mERROR\e[0m %s\n' "$*"
   exit 1
