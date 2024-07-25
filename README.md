@@ -33,10 +33,16 @@ Exploring this HTTP response, we navigate through multiple layers of the softwar
   Clicking on `George` does not only show that that value comes from the database.
   It goes further: it traced it all the way back to the SQL script that inserted that value in the database in first place.
   That works because this is using an in-memory database; the database content never left the JVM.
-  Alternatively, when we run the same demo with a mysql database, then we see those values coming from a database connection, the SQL query sent before it, and details of how the mysql jdbc drivers talks to the database.
-  See [FlowTracker PetClinic mysql demo](https://flowtracker-demo.coekie.com/petclinic-mysql/#Server%20socket/*/%2F127.0.0.1%3A*/Write).
 
-Note that this Spring PetClinic demo is just an example. 
+[PetClinic demo](https://github.com/user-attachments/assets/af1af08e-0a7c-4d10-b105-c60d4222e13c)
+
+<video src="https://flowtracker-demo.coekie.com/petclinic.mp4"></video>
+
+When we run the same demo with a mysql database, then we see those values coming from a database connection, the SQL query sent before it, and details of how the mysql jdbc drivers talks to the database.
+See [FlowTracker PetClinic mysql demo](https://flowtracker-demo.coekie.com/petclinic-mysql/#Server%20socket/*/%2F127.0.0.1%3A*/Write).
+Notice that FlowTracker intercepts the decrypted contents sent over the SSL connection to the database.
+
+Note that this Spring PetClinic demo is just an example.
 FlowTracker does not depend on your application using any particular framework or library.
 
 ~TODO more demos. Focus on one binary one, e.g. serialization?
