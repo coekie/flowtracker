@@ -26,6 +26,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -96,7 +98,28 @@ public class CodeResource {
     if (loader == null) { // class from the bootstrap classloader
       return String.class.getResourceAsStream('/' + path);
     } else {
-      return loader.getResourceAsStream(path);
+      InputStream result = loader.getResourceAsStream(path);
+      if (result != null) {
+        return result;
+      }
+      // fallback: if the classes classloader can't find the .class file the normal way, and it's a
+      // URLClassLoader, then see if we can find it ourselves in its URLs.
+      // This is a hacky workaround for maven's "ClassRealm" classloader surprising behaviour.
+      // This is not covered by tests.
+      if (loader instanceof URLClassLoader) {
+        for (URL url : ((URLClassLoader) loader).getURLs()) {
+          if (url.getProtocol().equals("file") && url.getFile().endsWith(".jar")) {
+            try {
+              InputStream r = new URL("jar:file:" + url.getFile() + "!/" + path).openStream();
+              if (r != null) {
+                return r;
+              }
+            } catch (IOException ignore) {
+            }
+          }
+        }
+      }
+      return null;
     }
   }
 

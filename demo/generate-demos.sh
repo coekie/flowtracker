@@ -6,7 +6,7 @@ set -euo pipefail
 
 # clean up environment variables, because they end up in the output
 if [ "${DISPLAY:-}" != "" ]; then
-  env -i HOME="$HOME" LANG="$LANG" PATH="$PATH" TERM="$TERM" USER="$USER" $0 "$@"
+  exec env -i HOME="$HOME" LANG="$LANG" PATH="$PATH" TERM="$TERM" USER="$USER" $0 "$@"
 fi
 
 error() {
@@ -55,10 +55,10 @@ run_petclinic() {
 run_javac() {
   echo Demo: javac
   echo 'class HelloWorld {
-    public static void main(String[] args) {
-      System.out.println("Hello, World!");
-    }
-  }' > HelloWorld.java
+  public static void main(String[] args) {
+    System.out.println("Hello, World!");
+  }
+}' > HelloWorld.java
   # eagerly instrumenting com.sun.tools.javac.jvm.* improves results.
   # to pass JVM arguments to javac, they are prefixed with -J
   FT_JAVAC_OPTS="-J-javaagent:$FT_JAR=webserver=false;snapshotOnExit=javac-snapshot.zip;eager=+com.sun.tools.javac.jvm.* "$(for s in $FT_JVMOPTS; do echo -n "-J$s "; done)
@@ -73,6 +73,20 @@ run_simple() {
     echo Demo: $demo
     java -cp $CP "-javaagent:$FT_JAR=webserver=false;trackCreation;snapshotOnExit=$OUT/$demo-snapshot.zip" $FT_JVMOPTS demo.$demo > /dev/null
   done
+  cd -
+}
+
+run_mvn() {
+  OUT=$(pwd)
+  cd "$(dirname $0)"/../weaver
+
+  # do it once without tracing, so that it already downloads everything it needs, because we don't want to include that in our tracing.
+  # this helps make the result more consistent (not dependent on what was already downloaded)
+  mvn help:effective-pom > /dev/null
+
+  export MAVEN_OPTS="-javaagent:$FT_JAR=webserver=false;trackCreation;snapshotOnExit=$OUT/mvn-pom-snapshot.zip $FT_JVMOPTS"
+  mvn help:effective-pom
+  unset MAVEN_OPTS
   cd -
 }
 
@@ -110,6 +124,7 @@ set_env
 run_petclinic
 run_javac
 run_simple
+run_mvn
 prepare_git
 
 if [ "${1:-}" == "live" ]; then
