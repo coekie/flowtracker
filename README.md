@@ -1,21 +1,22 @@
 # FlowTracker
 
-_Track how data flows through your Java programs, gain new understanding at a glimpse._
+_Track data flowing through Java programs, gain new understanding at a glimpse._
 
 FlowTracker is a Java/JVM agent that watches how a program reads, manipulates, and writes data.
-It displays an overview of file and network I/O, connecting its input and outputs,
-showing you where the output came from.
+It displays an overview of file and network I/O, connecting its input and outputs.
 
-This is a proof-of-concept to explore what insights we get by looking at program behaviour from this perspective. 
+This answers the question: _What did this application write, and where did it get that from?_
+
+This proof-of-concept explores what insights we get by looking at program behaviour from this perspective. 
 
 # Demo
 
 Spring PetClinic is a demo application for the Spring framework.
 To demonstrate FlowTracker's abilities, we let it observe PetClinic handling an HTTP request and generating an HTML page based on a template and data from a database.
-This demo can be used in your browser, you do not need to install anything.
+You can view this demo in your browser, without installing anything.
 
-Open the [FlowTracker PetClinic demo](https://flowtracker-demo.coekie.com/petclinic/#Server%20socket/*/%2F127.0.0.1%3A*/Write).
-You see the content of the HTTP response that FlowTracker saw PetClinic send over the network.
+Open the [FlowTracker PetClinic demo](https://flowtracker-demo.coekie.com/petclinic/#Server%20socket/*/%2F127.0.0.1%3A*/Write), or watch the video below.
+You see the HTTP response that FlowTracker saw PetClinic send over the network.
 Click on a part of the contents of the HTTP response to see in the bottom view where that part came from.
 You can select another tracked origin/input or sink/output in the tree on the left (or bottom left button on mobile).
 
@@ -26,8 +27,7 @@ Exploring this HTTP response, we navigate through multiple layers of the softwar
   Click on an HTML tag name, like "html" or "head". You see the `layout.html` file, where this part of the HTML page comes from.
   If you click on `layout.html`, and then on the colorful `+` button at the bottom, then everything coming from that file will be marked in the same color.
   Scrolling down you'll then notice part of the response comes from a different file, `ownerDetails.html`.
-  Side quest: Click on a `<` or `>` to see that those characters were written by the Thymeleaf templating library.
-  Assigning colors to different pieces of code in thymeleaf, we stumble into making a syntax highlighter that with a few clicks can highlight any output that your program produces, while looking absolutely horrible. 
+  Click on a `<` or `>` to see that those characters were written by the Thymeleaf templating library. 
 * **Database**
   The HTML page contains a table with information that comes from the database.
   Clicking on `George` does not only show that that value comes from the database.
@@ -42,10 +42,12 @@ When we run the same demo with a mysql database, then we see those values coming
 See [FlowTracker PetClinic mysql demo](https://flowtracker-demo.coekie.com/petclinic-mysql/#Server%20socket/*/%2F127.0.0.1%3A*/Write).
 Notice that FlowTracker intercepts the decrypted contents sent over the SSL connection to the database.
 
-Note that this Spring PetClinic demo is just an example.
+This Spring PetClinic demo is just an example.
 FlowTracker does not depend on your application using any particular framework or library.
 
-~TODO more demos. Focus on one binary one, e.g. serialization?
+Other demos:
+* [javac demo](https://flowtracker-demo.coekie.com/javac/#Files/home/coekie/flowtracker-demo/HelloWorld.class), [video](https://github.com/user-attachments/assets/5884c8fd-342b-471e-b13d-a2fe7219e8e6)
+* TODO more demos
 
 # Usage
 
