@@ -32,7 +32,17 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-/** Classloader for weaver + web, that loads classes from the "flowtracker-spider" dir in the jar */
+/**
+ * Classloader for weaver + web, that loads classes from the "flowtracker-spider" directory in the
+ * flowtracker jar.
+ * <p>
+ * The flowtracker jar contains the classes of the agent and core module (added to the bootstrap
+ * classpath) directly, but to isolate the application from our dependencies, the weaver and web
+ * modules are loaded by this classloader.
+ * This is similar to what would more traditionally be done with shading or nested jars, but
+ * avoiding some of the downsides of those approaches (like having garbled class names that make
+ * debugging harder).
+ */
 class SpiderClassLoader extends ClassLoader {
   private final JarFile jar;
   private final boolean hideInternals;

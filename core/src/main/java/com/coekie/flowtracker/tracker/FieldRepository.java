@@ -24,7 +24,7 @@ import java.util.Map;
 public class FieldRepository {
   /**
    * Maps objects (that have fields we want to track) to a map of their field values.
-   * e.g. for `Foo {byte b;}` that could contain `{fooInstance: {"Foo b": trackerPoint}}`.
+   * e.g. for `class Foo {byte b;}` that could contain `{fooInstance: {"Foo b": trackerPoint}}`.
    */
   private static final Map<Object, Map<String, TrackerPoint>> objectToFieldMap =
       new ConcurrentWeakIdentityHashMap<>();

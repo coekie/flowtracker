@@ -26,7 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarFile;
 
-/** Agent using by unit tests and for development */
+/**
+ * Agent used by unit tests and for development. Loads classes from the target directory (where
+ * maven writes to), so that we don't have to rebuild our agent's jar every time.
+ * <p>
+ * Note that avoiding having to package in jars is a bit harder for an agent, because the JVM
+ * insists on agents being jars. So even this DevAgent is still packaged inside the jar, but the
+ * jar doesn't actually contain FlowTracker's code, except for the agent main class itself.
+ */
 public class DevAgent {
   public static void premain(String agentArgs, Instrumentation inst) {
     try {
@@ -44,7 +51,9 @@ public class DevAgent {
     @Override
     public ClassLoader createSpiderClassLoader(Instrumentation inst, JarFile agentJar,
         Config config) throws IOException {
-      // agentJar is agent/agent-dev/target/agent-dev-*-SNAPSHOT.jar
+      // we assume agentJar is used directly from where it was built, that is:
+      // agent/agent-dev/target/agent-dev-*-SNAPSHOT.jar.
+      // so from the agent jar to the root of the flowtracker repo is four levels up.
       File root = new File(agentJar.getName()).getParentFile().getParentFile().getParentFile()
           .getParentFile();
 

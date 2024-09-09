@@ -27,7 +27,9 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.jar.JarFile;
 
+/** FlowTracker's main class, the entry-point referenced in the flowtracker.jar manifest */
 public class FlowTrackerAgent {
+  // invoked by the JVM to load this agent
   public static void premain(String agentArgs, Instrumentation inst) {
     try {
       JarFile agentJar = getAgentJar();

@@ -36,7 +36,10 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceClassVisitor;
 
-/** Use ASM to dump bytecode to text form, with mapping of source code line numbers */
+/**
+ * Use ASM to dump bytecode to text form, with mapping of source code line numbers. This is used
+ * as a fallback if we can't find the source code and fail to decompile.
+ */
 public class AsmCodeGenerator {
 
   /** Use ASM to dump the bytecode */

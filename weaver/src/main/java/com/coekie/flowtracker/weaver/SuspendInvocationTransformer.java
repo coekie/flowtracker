@@ -25,6 +25,9 @@ import org.objectweb.asm.commons.Method;
 
 /**
  * Suspends a pending {@link Invocation} on class loading and initialization.
+ * This adds a call to {@link Invocation#suspend()} at the start and
+ * {@link Invocation#unsuspend(Invocation)} at the end of every static initializer (clinit), and the
+ * ClassLoader.loadClass method.
  *
  * @see Invocation#suspend()
  */

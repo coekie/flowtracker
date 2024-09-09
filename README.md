@@ -111,7 +111,7 @@ SystemHook.arraycopy(abc, 1, abcbc, 3, 2);
 
 After executing this, the tracker for abcbc would look like: `{[0-2]: {tracker: abcTracker, sourceIndex: 0, length: 3}, [3-4]: {tracker: abcTracker, sourceIndex: 1, length: 2}}`
 
-That was an example of a hook one the caller side.
+That was an example of a hook on the caller side.
 But most calls to _hook_ methods are added on the callee side, inside the methods in the JDK.
 For example take `FileInputStream.read(byte[])`, which reads data from a File and stores the result in the provided `byte[]`.
 We add the call to our hook method (`FileInputStreamHook.afterReadByteArray`) at the end of the `FileInputStream.read(byte[])` method.
@@ -297,14 +297,27 @@ In practice, the result of that is when you look at some output, particularly if
 ## More
 
 More topics about the implementation that could be talked about, but didn't make the cut. Most of this is documented in the code, if you really want to learn more:
-* Details of `MergedValue`: the hardest part of dataflow analysis, how to instrument code to keep track of values through branches and loops.
-* How we hook String concatenation through its indification ([JEP 280](https://openjdk.org/jeps/280)) by adding hooks to the MethodHandles returned by StringConcatFactory in `StringConcatenation` and `StringConcatFactoryHook`.
+* Details of [MergedValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/MergedValue.java): the hardest part of dataflow analysis, how to instrument code to keep track of values through branches and loops.
+* How we hook String concatenation through its indification ([JEP 280](https://openjdk.org/jeps/280)) by adding hooks to the MethodHandles returned by StringConcatFactory in [StringConcatenation](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/StringConcatenation.java) and [StringConcatFactoryHook](https://github.com/coekie/flowtracker/blob/master/core/src/main/java/com/coekie/flowtracker/hook/StringConcatFactoryHook.java).
 * Finding the source code, decompiling with Vineflower, associating bytecode with source code lines.
+  See [SourceCodeGenerator](https://github.com/coekie/flowtracker/blob/master/web/src/main/java/com/coekie/flowtracker/web/SourceCodeGenerator.java),
+  [VineflowerCodeGenerator](https://github.com/coekie/flowtracker/blob/master/web/src/main/java/com/coekie/flowtracker/web/VineflowerCodeGenerator.java),
+  [AsmCodeGenerator](https://github.com/coekie/flowtracker/blob/master/web/src/main/java/com/coekie/flowtracker/web/AsmCodeGenerator.java).
 * The ClassLoader setup. How we avoid dependencies on the bootclasspath colliding with the app, without shading (because that makes debugging annoying) and without nested jars.
   Development setup that allows changing an agent without repackaging it, to ensure fast development cycles.
-* How class loading can intervene with tracking of method invocations, and how we work around that. _Interesting problem, simple solution kinda obvious in retrospect._
-* Tracking of primitive values stored in fields (`FieldStore`, `FieldValue`, `FieldRepository`). _Just more of the same, nothing surprising._
-* How we add comments into instrumented code to help understand and debug instrumentation. _Bytecode doesn't support comments, but that won't stop me!_
+  See [FlowTrackerAgent](https://github.com/coekie/flowtracker/blob/master/agent/src/main/java/com/coekie/flowtracker/agent/FlowTrackerAgent.java), 
+  [DevAgent](https://github.com/coekie/flowtracker/blob/master/agent/src/main/java/com/coekie/flowtracker/agent/DevAgent.java),
+  [SpiderClassLoader](https://github.com/coekie/flowtracker/blob/master/agent/src/main/java/com/coekie/flowtracker/agent/SpiderClassLoader.java).
+* How class loading can intervene with tracking of method invocations, and how we work around that.
+  See [SuspendInvocationTransformer](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/SuspendInvocationTransformer.java),
+  [Invocation#suspend](https://github.com/coekie/flowtracker/blob/72ab61da96cbbb236a7395f9226f1797fa851892/core/src/main/java/com/coekie/flowtracker/tracker/Invocation.java#L163-L189).
+  _Interesting problem, simple solution kinda obvious in retrospect._
+* Tracking of primitive values stored in fields:
+  [FieldRepository](https://github.com/coekie/flowtracker/blob/master/core/src/main/java/com/coekie/flowtracker/tracker/FieldRepository.java),
+  [FieldStore](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/FieldStore.java),
+  [FieldValue](https://github.com/coekie/flowtracker/blob/master/weaver/src/main/java/com/coekie/flowtracker/weaver/flow/FieldValue.java).
+  _Just more of the same, nothing surprising._
+* How we add comments into instrumented code to help understand and debug instrumentation. _ASM/Bytecode doesn't support comments, but that won't stop me!_
 * Avoiding circularity problems when instrumenting core JDK classes. _I eat `ClassCircularityError`s and `StackOverFlowError`s for breakfast_.
 * Front-end: Web server with jetty, JAX-RS. Web UI built with Svelte. _Beautiful UI design by... nobody._
 * Our optimized ThreadLocal abomination in `ContextSupplier`. _On second thought, never mind, you don't want to know._
