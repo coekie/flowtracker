@@ -21,8 +21,8 @@ public class AssemblyTest {
     // dependencies on the classpath.
     for (String classpathPart : System.getProperty("java.class.path").split(":")) {
       if (!classpathPart.contains("flowtracker.jar")
-          && !classpathPart.contains("flowtracker/flowtracker/target/classes")
-          && !classpathPart.contains("flowtracker/flowtracker/target/test-classes")
+          && !classpathPart.contains("flowtracker/target/classes")
+          && !classpathPart.contains("flowtracker/target/test-classes")
           && !classpathPart.contains("junit")
           && !classpathPart.contains("hamcrest-core")) {
         fail("Unexpected classpath in test: " + classpathPart);
