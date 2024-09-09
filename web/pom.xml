@@ -90,6 +90,21 @@
         <version>3.1.1</version>
         <executions>
           <execution>
+            <id>pre-generate-ui</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <skip>${skip-ui}</skip>
+              <workingDirectory>${project.basedir}/../ui</workingDirectory>
+              <executable>npm</executable>
+              <arguments>
+                <argument>install</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
             <id>generate-ui</id>
             <goals>
               <goal>exec</goal>
