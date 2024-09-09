@@ -33,6 +33,23 @@
       <version>2.2</version>
     </dependency>
 
+    <!--
+      this "runtime" dependency is only added to make maven build it before this one.
+      we remove it from the runtime classpath below.
+    -->
+    <dependency>
+      <groupId>com.coekie.flowtracker</groupId>
+      <artifactId>flowtracker</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <dependency>
       <groupId>com.coekie.flowtracker</groupId>
       <artifactId>core</artifactId>
@@ -61,6 +78,9 @@
           <skip>true</skip>
           <!-- activate the agent, excluding the webserver -->
           <argLine>-javaagent:${demo.agent.jar}=webserver=false;${flowtracker.extraAgentArgs} ${flowtracker.jvmArgs}</argLine>
+          <classpathDependencyExcludes>
+            <classpathDependencyExclude>com.coekie.flowtracker:flowtracker</classpathDependencyExclude>
+          </classpathDependencyExcludes>
         </configuration>
         <!-- execute them at the integration-test phase -->
         <executions>
