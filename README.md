@@ -54,7 +54,7 @@ In its current state, FlowTracker is closer to a proof of concept than productio
 It has proven itself to work well on a number of example programs, but it is not going to work well for everything, your mileage may vary.
 Also be aware that it adds a lot of overhead, making programs run much slower.
 
-Download the FlowTracker agent jar at [TODO](TODO).
+Download the FlowTracker agent jar from the [Github releases pages](https://github.com/coekie/flowtracker/releases) (`flowtracker-*.jar` under "Assets").
 Add the agent to your java command line: `-javaagent:path/to/flowtracker.jar`.
 Disable some JVM optimizations that disrupt flowtracker by also adding the output of `java -jar flowtracker.jar jvmopts` to the command line.
 By default, FlowTracker starts a webserver on port 8011, so open http://localhost:8011/ in your browser.
