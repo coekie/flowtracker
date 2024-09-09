@@ -45,9 +45,7 @@ Notice that FlowTracker intercepts the decrypted contents sent over the SSL conn
 This Spring PetClinic demo is just an example.
 FlowTracker does not depend on your application using any particular framework or library.
 
-Other demos:
-* [javac demo](https://flowtracker-demo.coekie.com/javac/#Files/home/coekie/flowtracker-demo/HelloWorld.class), [video](https://github.com/user-attachments/assets/5884c8fd-342b-471e-b13d-a2fe7219e8e6)
-* TODO more demos
+Another demo, showing how FlowTracker helps you understand a binary output format: [javac demo](https://flowtracker-demo.coekie.com/javac/#Files/home/coekie/flowtracker-demo/HelloWorld.class), [video](https://github.com/user-attachments/assets/5884c8fd-342b-471e-b13d-a2fe7219e8e6).
 
 # Usage
 
