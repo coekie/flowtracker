@@ -21,7 +21,7 @@ build_flowtracker() {
 }
 
 set_env() {
-  FT_JAR=$(realpath "$(dirname $0)/../flowtracker/target/flowtracker-0.0.1-SNAPSHOT.jar")
+  FT_JAR=$(realpath "$(dirname $0)"/../flowtracker/target/flowtracker-*.jar)
   if [ ! -e $FT_JAR ]; then
     error Cannot find $FT_JAR
   fi
