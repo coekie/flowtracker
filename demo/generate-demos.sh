@@ -69,7 +69,7 @@ run_simple() {
   OUT=$(pwd)
   cd "$(dirname $0)"
   CP=$(mvn dependency:build-classpath -DincludeScope=runtime -Dmdep.outputFile=/dev/stdout -q):target/classes/ || error getting classpath: "$CP"
-  for demo in AsmDemo GsonDemo HelloWorld JdkHttpDemo ProtobufDemo SerializationDemo SnakeYamlDemo; do
+  for demo in AsmDemo EncodeDemo JdkHttpDemo; do
     echo Demo: $demo
     java -cp $CP "-javaagent:$FT_JAR=webserver=false;trackCreation;snapshotOnExit=$OUT/$demo-snapshot.zip" $FT_JVMOPTS demo.$demo > /dev/null
   done
@@ -104,7 +104,7 @@ prepare_git() {
     unzip -q $f
     mv snapshot $demo
   done
-  if [ ! -e GsonDemo ] || [ ! -e petclinic ]; then
+  if [ ! -e EncodeDemo ] || [ ! -e petclinic ]; then
     # don't publish if not all demos ran
     error Sanity check failed, missing demo
   fi
