@@ -14,11 +14,14 @@ By default, FlowTracker starts a webserver on port 8011. Open http://localhost:8
 
 FlowTracker can be configured using `-javaagent:$FT_JAR=option1=value1;option2=value2`.
 For enabling boolean options, the `=value` part can be omitted.
-For a complete list of configuration options, see below.
+See a complete list of configuration options below.
+
+FlowTracker runs inside the same JVM as the program it is watching, so also exits when the program exits.
+For programs that don't stay running, you should use the `suspendShutdown` or `snapshotOnExit` options.
 
 As an example for using it with maven, this command was used to generate the PetClinic demo:
 ```
-./mvnw integration-test -Dtest=PetClinicIntegrationTests -DargLine="-javaagent:$FT_JAR=webserver=false;trackCreation;snapshotOnExit=spring-petclinic-snapshot.zip $FT_JVMOPTS"
+./mvnw integration-test -Dtest=PetClinicIntegrationTests -DargLine="-javaagent:$FT_JAR=webserver=false;trackCreation;snapshotOnExit=petclinic-snapshot.zip $FT_JVMOPTS"
 ```
 
 ## Source Code

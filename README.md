@@ -2,10 +2,9 @@
 
 _Track data flowing through Java programs, gain new understanding at a glimpse._
 
-FlowTracker is a Java/JVM agent that watches how a program reads, manipulates, and writes data.
-It displays an overview of file and network I/O, connecting its input and outputs.
-
-This answers the question: _What did this application write, and where did it get that from?_
+FlowTracker is a Java agent that tracks how a program reads, manipulates, and writes data.
+By watching a program run, it can show what file and network I/O happened, but more importantly connecting its inputs and outputs to show where its output came from.
+This helps you understand what any Java program's output means and why it wrote it.
 
 This proof-of-concept explores what insights we get by looking at program behaviour from this perspective. 
 
@@ -13,9 +12,11 @@ This proof-of-concept explores what insights we get by looking at program behavi
 
 Spring PetClinic is a demo application for the Spring framework.
 To demonstrate FlowTracker's abilities, we let it observe PetClinic handling an HTTP request and generating an HTML page based on a template and data from a database.
-You can view this demo in your browser, without installing anything.
-
+You can use this demo in your browser, without installing anything.
 Open the [FlowTracker PetClinic demo](https://flowtracker-demo.coekie.com/petclinic/#Server%20socket/*/%2F127.0.0.1%3A*/Write), or watch the video below.
+
+[PetClinic demo](https://github.com/user-attachments/assets/af1af08e-0a7c-4d10-b105-c60d4222e13c)
+
 You see the HTTP response that FlowTracker saw PetClinic send over the network.
 Click on a part of the contents of the HTTP response to see in the bottom view where that part came from.
 You can select another tracked origin/input or sink/output in the tree on the left (or bottom left button on mobile).
@@ -30,22 +31,20 @@ Exploring this HTTP response, we navigate through multiple layers of the softwar
   Click on a `<` or `>` to see that those characters were written by the Thymeleaf templating library. 
 * **Database**
   The HTML page contains a table with information that comes from the database.
-  Clicking on `George` does not only show that that value comes from the database.
+  Clicking on `George` in that table does not only show that that value came from the database.
   It goes further: it traced it all the way back to the SQL script that inserted that value in the database in first place.
-  That works because this is using an in-memory database; the database content never left the JVM.
 
-[PetClinic demo](https://github.com/user-attachments/assets/af1af08e-0a7c-4d10-b105-c60d4222e13c)
-
-<video src="https://flowtracker-demo.coekie.com/petclinic.mp4"></video>
-
-When we run the same demo with a mysql database, then we see those values coming from a database connection, the SQL query sent before it, and details of how the mysql jdbc drivers talks to the database.
+In that demo, the tracking up to the SQL script works because it was using an in-memory database.
+The database content never left the JVM, so FlowTracker could fully keep track of it.
+When we run the same demo but with a mysql database, then we track those values up to the database connection: we see the SQL query sent before to produce them, and details of how the mysql jdbc driver talks to the database.
 See [FlowTracker PetClinic mysql demo](https://flowtracker-demo.coekie.com/petclinic-mysql/#Server%20socket/*/%2F127.0.0.1%3A*/Write).
 Notice that FlowTracker intercepts the decrypted contents sent over the SSL connection to the database.
 
 This Spring PetClinic demo is just an example.
 FlowTracker does not depend on your application using any particular framework or library.
 
-Another demo, showing how FlowTracker helps you understand a binary output format: [javac demo](https://flowtracker-demo.coekie.com/javac/#Files/home/coekie/flowtracker-demo/HelloWorld.class), [video](https://github.com/user-attachments/assets/5884c8fd-342b-471e-b13d-a2fe7219e8e6).
+Another demo, showing how by watching the java compiler, FlowTracker helps you understand the format of the generated class file and the bytecode in it:
+[javac demo](https://flowtracker-demo.coekie.com/javac/#Files/home/coekie/flowtracker-demo/HelloWorld.class), [video](https://github.com/user-attachments/assets/5884c8fd-342b-471e-b13d-a2fe7219e8e6).
 
 # Usage
 
@@ -74,7 +73,7 @@ This achieved with a combination of:
  * Replacing some calls to JDK methods with calls to FlowTracker's version of those methods.
  * Injecting code into key places in the JDK, mostly to track input and output.
  * Dataflow analysis and deeper instrumentation within methods to track local variables and values on the stack.
- * Adding code before and after method invocations, and at the start and end of invoked methods, to pass tracking data for method arguments and return values through ThreadLocals.
+ * Adding code before and after method invocations, and at the start and end of invoked methods, to track method arguments and return values using ThreadLocals.
 
 ## Data model: Trackers
 
