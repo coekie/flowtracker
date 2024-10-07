@@ -78,4 +78,4 @@ These options are meant for FlowTracker development/debugging only:
 ## Compatibility
 
 FlowTracker should work on Oracle or other OpenJDK based JDKs.
-It has been tested on JDK 11, 17, 21 and 22.
+It has been tested on JDK 11, 17, 21, 22 and 23.

@@ -13,8 +13,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <repository.url>git@github.com:coekie/flowtracker.git</repository.url>
-    <!-- cannot use asm 9.7 because of https://gitlab.ow2.org/asm/asm/-/issues/318014 -->
-    <asm.version>9.6</asm.version>
+    <asm.version>9.7.1</asm.version>
     <java.version>11</java.version>
 
     <!-- make tests fail if any error is being logged -->
@@ -37,6 +36,7 @@
     <module>test/test-jdk17</module>
     <module>test/test-jdk21</module>
     <module>test/test-jdk22</module>
+    <module>test/test-jdk23</module>
     <module>weaver</module>
     <module>weaver/weaver-generator</module>
     <module>web</module>
@@ -169,23 +169,6 @@
       <properties>
         <skip-ui>true</skip-ui>
       </properties>
-    </profile>
-    <profile>
-      <!-- Experimental profile uses newer JDK and snapshot ASM version -->
-      <id>experimental</id>
-      <properties>
-        <asm.version>9.8-SNAPSHOT</asm.version>
-      </properties>
-      <modules>
-        <module>test/test-jdk23</module>
-      </modules>
-      <repositories>
-        <repository>
-          <id>ow2-snapshots</id>
-          <name>ow2-snapshots</name>
-          <url>https://repository.ow2.org/nexus/content/repositories/snapshots</url>
-        </repository>
-      </repositories>
     </profile>
   </profiles>
 </project>
